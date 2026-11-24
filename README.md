@@ -43,7 +43,7 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 ## Graphics
 
-**Pixel size** (start screen or case): the 3D view renders at ½, ⅓ or ¼ of the screen resolution and is scaled up with hard pixel edges (×2 by default), or *Smooth* for full resolution. The UI is pixelated to match, with pixel fonts, hard bevels and hand-drawn 16×16 pixel-art icons.
+**Pixel size** (start screen or case): the 3D view renders at full resolution by default (*Smooth*), with no pixelated upscaling. Pick ×2, ×3 or ×4 for a chunky retro look, where the view is drawn at a fraction of the resolution and blown up with hard pixel edges.
 
 **8 × 8 pixels per block:** every block face shows an 8 × 8 texture (point-sampled so mortar lines and board joints stay crisp).
 
@@ -60,6 +60,8 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 **Unstuck:** a *Respawn* button is always on screen (and the ` key; = for player 2; *Unstuck* on phones). It puts you back at your respawn point with everything you're carrying, for when you glitch into something.
 
 **No overlapping UI:** the HUD is laid out (and checked by script) for desktop, laptop, split-screen, phones in portrait and landscape, and tablets, so nothing sits on top of anything else.
+
+**Small phones:** on screens smaller than a typical phone, the whole touch layout (buttons, stick, hotbar and HUD) shrinks in proportion, so no button overlaps another in portrait or landscape. This is checked on 18 phone and tablet sizes.
 
 **Rotating your phone:** the picture is resized to the new screen shape every frame and again just after a rotation, so turning between portrait and landscape never leaves the view stretched or squashed.
 
@@ -82,6 +84,8 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 - **A limited number of zombies:** each region starts with so many walkers (towns hold the most). Kill them and they're gone; the top bar shows how many are still out there. New ones only come from people who turn.
 - **Infection:** zombies bite people who can't fight back (unarmed family members). The bitten fall sick and turn within a minute or so, and anyone the dead kill gets back up. A bandage buys them time, not a cure.
 - **Zombies** are slow by day and fast at night. They notice you only within range (22 m by day, 34 m at night) and in line of sight, give up once you're well out of range, and come to investigate gunshots. They break blocks hit by hit: a window in one hit, a wooden door in about 10 s, a brick wall only with a crowd. Metal holds longest. Some wear hard hats, helmets, vests or jackets that soak up damage.
+- **Zombie looks:** rotting pixel skin with veins, mottling and open sores, torn and blood-soaked clothes, bared teeth, and sometimes a torn cheek or bare skull. Some show ribs through a hole in the shirt or a spine down the back, or have bones snapped through a forearm or shin. Some have already lost an arm, both arms, a leg or half a forearm, with a bloody stump and bone.
+- **Running zombies down:** a slow bump shoves a zombie. Hit one at speed and it's thrown through the air, limbs flailing, bounces, then flops and twitches on the ground. Impact damage grows with speed, and harder hits tear limbs off, snap them in half (the lower half flies off), take the head, or cut the zombie in two. Survivors get back up, or crawl if they lost a leg.
 - **Aiming:** hold right-click (pistol) to aim down sights, which is more accurate but slower. There's a light aim assist toward visible targets, a bit stronger on touch and gamepad.
 - **Shooting:** bullets leave holes where they hit. Shoot off arms and legs: legless zombies crawl, armless ones bite weaker, and a headshot pops the head off. Cars and tripwire bombs tear limbs off too.
 - **Loot:** crates in houses (each public building stocks its own kind of loot), basements, sewers and caves. Dead zombies drop loot bags, sometimes with the clothing they wore.

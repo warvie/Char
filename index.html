@@ -12,7 +12,7 @@
 :root{color-scheme:dark;--ink:#ebe6d8;--dim:#a9a393;--rust:#c2412d;--olive:#a3ae5e;--panel:rgba(16,15,12,.94);--line:#3a362c}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;height:100%;overflow:hidden;background:#000;color:var(--ink);font:20px/1.45 DGPixel,'Pixelify Sans',system-ui,sans-serif}
-canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:none;image-rendering:pixelated}
+canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
 .hidden{display:none!important}
 button{font:600 20px DGPixel,'Pixelify Sans',sans-serif;color:var(--ink);background:#262219;border:1px solid #4a4334;border-radius:4px;padding:12px 18px;min-height:44px;cursor:pointer}
@@ -209,6 +209,8 @@ body:not(.touch) .phud.narrow .feed{width:min(300px,46%)}body:not(.touch) .phud.
 body.touch .veh{padding:6px 8px}body.touch .veh h3{font-size:10px!important}body.touch .veh .vs{font-size:10px}
 body.touch .feed{max-height:calc(50vh - 200px);overflow:hidden;justify-content:flex-end}
 body.touch .rspb{display:none}
+/* small phones: the whole touch layout shrinks in proportion (set from script), so buttons keep their spacing instead of colliding */
+body.touch #touch,body.touch .phud{zoom:var(--tz,1)}
 body.touch .veh{top:calc(200px + env(safe-area-inset-top))}
 body.touch .prompt{top:auto;bottom:calc(50% + 22px);font-size:10px;line-height:14px;max-width:calc(100% - 224px)}
 /* portrait: two columns of small buttons on the right; the second starts below the hotbar */
@@ -880,9 +882,9 @@ const canvas=$('#c');
 const isTouch=(window.matchMedia&&matchMedia('(pointer: coarse)').matches)||('ontouchstart' in window);
 const renderer=new THREE.WebGLRenderer({canvas,antialias:!isTouch,powerPreference:'high-performance'});
 // PIX: chunky screen pixels. The canvas renders at 1/PIX of the CSS resolution and the browser blows it up with hard edges
-let PIX=2;try{const v=localStorage.getItem('deadground-pix');if(v!==null)PIX=+v||1}catch(e){}
-function applyPix(){renderer.setPixelRatio(PIX>1?1/PIX:Math.min(devicePixelRatio,isTouch?1:1.5));renderer.domElement.style.imageRendering=PIX>1?'pixelated':'auto';fitView(true)}
-renderer.setPixelRatio(PIX>1?1/PIX:Math.min(devicePixelRatio,isTouch?1:1.5));
+let PIX=1;try{const v=localStorage.getItem('deadground-pix2');if(v!==null)PIX=+v||1}catch(e){}
+function applyPix(){renderer.setPixelRatio(PIX>1?1/PIX:Math.min(devicePixelRatio,1.5));renderer.domElement.style.imageRendering=PIX>1?'pixelated':'auto';fitView(true)}
+renderer.setPixelRatio(PIX>1?1/PIX:Math.min(devicePixelRatio,1.5));canvas.style.imageRendering=PIX>1?'pixelated':'auto';
 renderer.setSize(innerWidth,innerHeight,false);
 const scene=new THREE.Scene();
 scene.fog=new THREE.Fog(0x8a8f86,18,85);scene.background=new THREE.Color(0x8a8f86);
@@ -892,7 +894,8 @@ scene.add(new THREE.AmbientLight(0x1c2230,.35));
 // keep the drawing buffer the same shape as the canvas on screen. Phones report the new size late after a rotation (and the address bar
 // changes the height), so the size is checked every frame and again after orientation changes, instead of trusting one resize event
 let VW=0,VH=0;
-function fitView(force){const c=renderer.domElement,w=Math.round(c.clientWidth||innerWidth),h=Math.round(c.clientHeight||innerHeight);
+function touchZoom(){if(!document.body)return;const w=innerWidth,h=innerHeight,land=w>h,z=Math.min(1,w/(land?700:375),h/(land?390:667));document.body.style.setProperty('--tz',z.toFixed(3))}
+function fitView(force){touchZoom();const c=renderer.domElement,w=Math.round(c.clientWidth||innerWidth),h=Math.round(c.clientHeight||innerHeight);
   if(force||w!==VW||h!==VH){VW=w;VH=h;renderer.setSize(w,h,false)}}
 addEventListener('resize',()=>fitView());addEventListener('orientationchange',()=>{for(const t of[50,250,600,1200])setTimeout(()=>fitView(true),t)});
 if(window.visualViewport)visualViewport.addEventListener('resize',()=>fitView());
@@ -1936,11 +1939,54 @@ function msg(p,t){for(const q of(p?[p]:players)){const d=document.createElement(
   while(q.hud.feed.children.length>(isTouch?3:4))q.hud.feed.firstChild.remove();setTimeout(()=>d.remove(),5600)}}
 
 // ---------------- zombies
+// ---------------- zombie looks: rotting pixel textures (16 x 16 per face) for skin, shirt and trousers, exposed bones, and missing limbs
+const zTexC={};
+function zTex(kind,col,v){const key=kind+col+'_'+v;if(zTexC[key])return zTexC[key];
+  let hs=2166136261;for(let i=0;i<key.length;i++)hs=Math.imul(hs^key.charCodeAt(i),16777619);
+  const N=16,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),r=mulberry(hs),ri=n=>Math.floor(r()*n);
+  const base=[(col>>16)&255,(col>>8)&255,col&255],px=(i,j,q)=>{x.fillStyle=`rgb(${q[0]|0},${q[1]|0},${q[2]|0})`;x.fillRect(i,j,1,1)},sh=(q,k)=>q.map(u=>Math.max(0,Math.min(255,u*k)));
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){let k=.82+r()*.3;if(kind!=='skin')k-=(j%5===0&&r()<.5)?.08:0;px(i,j,sh(base,k))}
+  if(kind==='skin'){ // grey-green mottling, dark veins, rotten patches, open sores
+    for(let n=0;n<5;n++){const cx=ri(N),cy=ri(N),rr=1+ri(3);for(let j=-rr;j<=rr;j++)for(let i=-rr;i<=rr;i++)if(i*i+j*j<=rr*rr&&r()<.8)px((cx+i+N)%N,(cy+j+N)%N,sh([base[0]*.78,base[1]*.86,base[2]*.62],.8+r()*.2))}
+    for(let n=0;n<3;n++){let i=ri(N),j=ri(N);for(let t=0;t<8;t++){px(i,j,[58,52,70]);i=(i+[-1,0,1][ri(3)]+N)%N;j=(j+1)%N}}
+    for(let n=0;n<2+ri(3);n++){const cx=ri(N),cy=ri(N);px(cx,cy,[110,14,12]);px((cx+1)%N,cy,[80,10,10]);if(r()<.6)px(cx,(cy+1)%N,[140,30,24]);if(r()<.4)px((cx+1)%N,(cy+1)%N,[210,196,170])}}
+  else{ // clothes: torn holes showing grey skin, grime, dried and fresh blood that has run downward
+    for(let n=0;n<2+ri(3);n++){const cx=ri(N),cy=ri(N);for(let t=0;t<3+ri(4);t++)px((cx+ri(3))%N,(cy+ri(2))%N,[112,124,88])}
+    for(let n=0;n<2+ri(2);n++){const cx=ri(N),cy=ri(N/2),w=1+ri(3);for(let i=0;i<w;i++){const L=2+ri(7);for(let j=0;j<L;j++)px((cx+i)%N,(cy+j)%N,j<L-1?[92+ri(30),8,8]:[60,6,6])}}
+    for(let i=0;i<N;i++)if(r()<.55)px(i,N-1-ri(2),sh(base,.55))}
+  const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;
+  return zTexC[key]=pxShadows(new THREE.MeshLambertMaterial({map:t}))}
+const BONE=0xd9cfb4,GORE=0x5c0b0b;
+function boneOut(par,x,y,z,len,ax){ // a broken bone poking out of a wound
+  const b=part(par,ax?len:.06,ax?.06:len,.06,BONE,x,y,z);part(par,.1,.05,.1,GORE,x,y+(ax?0:len/2-.02),z);part(par,.035,.035,.035,0xb8ab8a,x+(ax?len/2:0),y-(ax?0:len/2),z);return b}
+function zombieLook(zo,m,turned,skin,shirt,pants){const v=RI(0,2);
+  m.torso.material=zTex('shirt',shirt,v);m.head.material=zTex('skin',skin,v);
+  for(const k of['armL','armR'])m[k].children[0].material=zTex('skin',skin,v+1);for(const k of['legL','legR'])m[k].children[0].material=zTex('pants',pants,v);
+  // teeth bared in the torn mouth, sometimes the cheek is gone down to the jaw, sometimes bare skull shows through
+  for(let i=0;i<4;i++)part(m.head,.03,.035,.02,0xe6dcc0,-.06+i*.04,-.085,.205);
+  if(rng()<.35){part(m.head,.1,.12,.02,GORE,.12,-.06,.196);for(let i=0;i<3;i++)part(m.head,.025,.03,.02,0xe6dcc0,.09+i*.03,-.06,.205)}
+  if(rng()<.25){const sd=rng()<.5?-1:1;part(m.head,.02,.2,.22,BONE,sd*.195,.08,-.02);part(m.head,.02,.05,.08,GORE,sd*.197,-.03,.05)}
+  // ribs through a hole in the shirt, spine down the back
+  if(rng()<.4){const sx=rng()<.5?-.12:.1;part(m.g,.2,.26,.02,0x2a0505,sx,1.22,.165);for(let i=0;i<4;i++){const w=R(.12,.19);part(m.g,w,.026,.03,i%2?0xc9bd9c:BONE,sx+R(-.02,.02)+(.2-w)/2*(sx<0?-1:1),1.13+i*.062,.172)}part(m.g,.03,.24,.03,0xc9bd9c,sx+(sx<0?.09:-.09),1.22,.17)}
+  if(rng()<.2){for(let i=0;i<5;i++)part(m.g,.05,.05,.03,BONE,0,.95+i*.1,-.172);part(m.g,.12,.5,.02,GORE,0,1.15,-.166)}
+  // bones snapped through the forearm or shin
+  for(const k of['armL','armR'])if(rng()<.22)boneOut(m[k],R(-.03,.03),-.66-.07,0,.16,0);
+  for(const k of['legL','legR'])if(rng()<.1){part(m[k],.06,.16,.06,BONE,0,-.5,.12);part(m[k],.12,.12,.04,GORE,0,-.5,.125)}
+  // some have already lost limbs (not freshly turned people)
+  if(!turned){const r=rng();
+    if(r<.16)amputate(zo,rng()<.5?'armL':'armR');else if(r<.21){amputate(zo,'armL');amputate(zo,'armR')}
+    else if(r<.27)amputate(zo,rng()<.5?'legL':'legR');
+    if(rng()<.1){const k=['armL','armR'].find(q=>!zo.cut[q]);if(k)halfStump(zo,k)}}}
+function amputate(z,k){if(z.cut[k])return;const o=z[k];if(!o||!o.parent)return;o.parent.remove(o);z.cut[k]=true;const st=STUMP[k];
+  part(z.g,st[3],st[4],st[5],GORE,st[0],st[1],st[2]);boneOut(z.g,st[0],st[1]-.07,st[2],.1,0);
+  if(k[0]==='l')z.crawl=true;if(z.cut.armL&&z.cut.armR)z.noArms=true}
+function halfStump(z,k){const o=z[k],m=o.children[0];m.scale.y=.5;m.position.y=-.33*.5;part(o,.15,.04,.15,GORE,0,-.33,0);boneOut(o,0,-.4,0,.12,0);z.half=z.half||{};z.half[k]=true}
 const OUTFITS=[['hardhat',3],['helmet',1],['jacket',3],['vest',2],['riot',1],['cargo',2]];
 function spawnZ(x,y,z,turned){
   if(!turned&&!takeZ(x,z))return null;
   const night=dayLight()<.25;
-  const m=makeHuman({zombie:true,skin:[0x7d8f5a,0x8a9a6a,0x6f7d52,0x9a9a78][RI(0,3)],shirt:[0x4a3b34,0x34404a,0x5a2a26,0x3d3d3d,0x6a6250][RI(0,4)],pants:[0x2a2f3a,0x3b3328,0x262626][RI(0,2)]});
+  const zSk=[0x7d8f5a,0x8a9a6a,0x6f7d52,0x9a9a78,0x8a8c80][RI(0,4)],zSh=[0x4a3b34,0x34404a,0x5a2a26,0x3d3d3d,0x6a6250,0x6e6e64][RI(0,5)],zPa=[0x2a2f3a,0x3b3328,0x262626,0x3a3f2a][RI(0,3)];
+  const m=makeHuman({zombie:true,skin:zSk,shirt:zSh,pants:zPa});
   m.g.rotation.order='YXZ';
   let outfit=null;
   if(rng()<.32){let r=rng()*12;for(const[o,w]of OUTFITS){r-=w;if(r<=0){outfit=o;break}}outfit=outfit||'jacket';
@@ -1951,8 +1997,9 @@ function spawnZ(x,y,z,turned){
   m.g.position.set(x,y,z);scene.add(m.g);castBig(m.g,.3);
   const zo={...m,pos:m.g.position,vel:new V3(),hp:RI(55,85)+day*4,spd:R(1.3,2.2)+(night?.4:0),kx:0,kz:0,dead:0,atk:0,walk:R(0,6),gro:R(1,8),stuck:0,wT:0,wD:0,grounded:false,chasing:false,lunge:0,seeT:0,sees:false,hitT:.5,alert:null,alertT:0,
     outfit,cut:{},crawl:false,noArms:false,lhp:{head:60,armL:35,armR:35,legL:45,legR:45}};
+  zombieLook(zo,m,turned,zSk,zSh,zPa);
   m.g.traverse(o=>{if(o.isMesh){o.userData.part='torso';o.userData.zo=zo}});
-  for(const k of['legL','legR','armL','armR','head'])m[k].traverse(o=>{if(o.isMesh)o.userData.part=k});
+  for(const k of['legL','legR','armL','armR','head'])if(!zo.cut[k])m[k].traverse(o=>{if(o.isMesh)o.userData.part=k});
   zombies.push(zo);return zo;
 }
 function spawnUnder(){
@@ -2451,8 +2498,8 @@ function updateVehicle(v,dt){
   v.g.rotation.y=v.yaw;if(v.pedal)v.g.rotation.z=v.driver?v.steerA*.25:.2;
   for(const w of v.wheels){w.rotation.x+=v.speed*dt/.38;w.rotation.y=w.userData.front?v.steerA:0}
   if(v.pedal&&Math.abs(v.speed)>1)for(const z of zombies){if(z.dead)continue;if(Math.hypot(z.pos.x-v.pos.x,z.pos.z-v.pos.z)<.9&&Math.abs(z.pos.y-v.pos.y)<2){z.kx+=Math.sin(v.yaw)*v.speed*.6;z.kz+=Math.cos(v.yaw)*v.speed*.6;v.speed*=-.2;if(d){d.flash=.2;damage(d,3,true)}SND.hit();break}}
-  if(!v.pedal&&Math.abs(v.speed)>3)for(const z of zombies){if(z.dead)continue;
-    if(Math.hypot(z.pos.x-v.pos.x,z.pos.z-v.pos.z)<v.L*.5&&Math.abs(z.pos.y-v.pos.y)<2){dismember(z,RI(1,2),{x:Math.sin(v.yaw)*2,z:Math.cos(v.yaw)*2});bloody(v.g,6,120);killZombie(z,d,true);v.hp-=1.5;v.speed*=.9;if(d)d.flash=.15}}
+  if(!v.pedal&&Math.abs(v.speed)>1.5)for(const z of zombies){if(z.dead||z.tumble)continue;
+    if(Math.hypot(z.pos.x-v.pos.x,z.pos.z-v.pos.z)<v.L*.5&&Math.abs(z.pos.y-v.pos.y)<2)carHitZombie(z,v,d)}
   if(!v.pedal&&Math.abs(v.speed)>3.5)for(const p of players){if(p.vehicle||p.dead>0||(p.vhit||0)>performance.now())continue;
     const dx=p.pos.x-v.pos.x,dz=p.pos.z-v.pos.z,c=Math.cos(v.yaw),sn=Math.sin(v.yaw),lx=dx*c-dz*sn,lz=dx*sn+dz*c;
     if(Math.abs(lx)<v.Wd/2+.45&&Math.abs(lz)<v.L/2+.45&&Math.abs(p.pos.y-v.pos.y)<1.5){damage(p,Math.abs(v.speed)*2.2);p.vhit=performance.now()+700;p.vel.y=5;msg(p,'Hit by a vehicle!')}}
@@ -2487,6 +2534,7 @@ function updateVehicle(v,dt){
 // ---------------- zombie AI
 const BREAK_EASY=new Set([B.PLANK,B.DIRT,B.GRASS,B.LEAF,B.LOG,23,24,25,26,27,28,29]),BREAK_HARD=new Set([B.STONE,B.CONC,B.BRICK,B.ASPH,B.COAL,B.WALL,B.TILEF,B.ROOF]);
 function updateZombie(z,dt,night){
+  if(z.tumble){tumbleTick(z,dt);return}
   if(z.dead){z.dead+=dt;z.g.rotation.x=z.crawl?1.45:-Math.min(1,z.dead*3)*Math.PI/2;if(z.dead>7)z.pos.y-=dt*.4;if(z.dead>10){scene.remove(z.g);z.gone=true}return}
   let tgt=null,bd=1e9;
   for(const p of players){if(p.dead>0||p.creative||Math.abs(p.pos.y-z.pos.y)>4)continue;const d=Math.hypot(p.pos.x-z.pos.x,p.pos.y-z.pos.y,p.pos.z-z.pos.z);if(d<bd){bd=d;tgt=p}}
@@ -3117,6 +3165,51 @@ function sever(z,pn,dir){
 }
 function dismember(z,n,dir){const ks=['armL','armR','legL','legR','head'].filter(k=>!z.cut[k]&&(k!=='head'||rng()<.3));
   for(let i=0;i<n&&ks.length;i++)sever(z,ks.splice(RI(0,ks.length-1),1)[0],dir)}
+// ---------------- hit by a car: slow hits shove, fast hits throw the body flailing through the air, then it flops on the ground.
+// Impact damage grows with the square of the speed; harder hits tear limbs off, snap them in half, or cut the zombie in two.
+function carHitZombie(z,v,d){const s=Math.abs(v.speed),fx=Math.sin(v.yaw)*Math.sign(v.speed),fz=Math.cos(v.yaw)*Math.sign(v.speed),dir={x:fx*2,z:fz*2};
+  v.hp-=.4+s*.07;v.speed*=s>9?.93:.85;if(d)d.flash=.12+s*.006;SND.hit();bloody(v.g,Math.round(2+s*.4),120);
+  if(s<5){z.kx+=fx*s*1.2;z.kz+=fz*s*1.2;z.chasing=true;z.hp-=s*3;burst(new V3(z.pos.x,z.pos.y+1.1,z.pos.z),10,3,RED,1.2);if(z.hp<=0)killZombie(z,d);return}
+  const dmg=s*s*.6;z.hp-=dmg;
+  // limbs: torn clean off, or snapped through the middle, more often the faster the hit
+  const pOff=clamp((s-8)/16,0,.45),pHalf=clamp((s-5)/12,0,.45);
+  for(const k of['legL','legR','armL','armR']){if(z.cut[k])continue;const r=rng();if(r<pOff)sever(z,k,dir);else if(r<pOff+pHalf)halfLimb(z,k,dir)}
+  if(!z.cut.head&&s>12&&rng()<.12)sever(z,'head',dir);
+  if(s>14&&rng()<.25&&!z.halved){bisect(z,dir,d);return}
+  const c=new V3(z.pos.x,z.pos.y+1.1,z.pos.z);burst(c,20+s*2|0,4+s*.2,RED,2);burstDir(c,{x:fx,z:fz},Math.round(8+s));
+  z.tumble={t:0,rest:0,killBy:z.hp<=0?(d||true):null,vel:new V3(fx*s*R(.75,1.05)+R(-1,1),R(3,4.5)+s*.3,fz*s*R(.75,1.05)+R(-1,1)),
+    spin:new V3(R(-1,1)*(4+s*.6),R(-3,3),R(-1,1)*(4+s*.5)),ph:[0,1,2,3].map(()=>R(0,6)),bounces:0};
+  z.g.rotation.order='YXZ';z.chasing=true;sNoise(.25,500,.6)}
+// cut a limb through the middle: the lower half flies off as a gib, the upper half stays on with a bloody end
+function halfLimb(z,k,dir){const o=z[k];if(!o||!o.parent||z.cut[k])return;z.half=z.half||{};if(z.half[k]){sever(z,k,dir);return}z.half[k]=true;
+  const L=k[0]==='l'?.85:.66,yc=-L/2;z.g.updateMatrixWorld(true);const low=new THREE.Group();
+  for(const m of[...o.children]){if(!m.isMesh||!m.geometry||!m.geometry.parameters)continue;const P=m.geometry.parameters,top=m.position.y+P.height/2,bot=m.position.y-P.height/2;
+    if(bot>=yc)continue;const cl=new THREE.Mesh(box(P.width,Math.min(top,yc)-bot,P.depth),m.material);cl.position.set(m.position.x,(Math.min(top,yc)+bot)/2,m.position.z);low.add(cl);
+    if(top<=yc){m.visible=false;continue}m.scale.y=(top-yc)/P.height;m.position.y=(top+yc)/2}
+  const w=k[0]==='l'?.2:.15;part(o,w,.04,w,0x6a0808,0,yc,0);part(low,w,.04,w,0x6a0808,0,yc+.02,0);
+  low.quaternion.copy(o.getWorldQuaternion(new THREE.Quaternion()));scene.add(low);
+  for(const m of low.children)m.position.y-=yc;
+  low.position.copy(o.localToWorld(new V3(0,yc,0)));
+  gibs.push({o:low,vel:new V3((dir.x||0)*2.5+R(-1.5,1.5),R(2,4.5),(dir.z||0)*2.5+R(-1.5,1.5)),spin:new V3(R(-9,9),R(-9,9),R(-9,9)),t:0,rest:false});if(gibs.length>50){const g=gibs.shift();scene.remove(g.o)}
+  burst(low.position,22,3.5,RED,2);z.lhp[k]=Math.min(z.lhp[k],10);if(k[0]==='l')z.crawl=true}
+function tumbleTick(z,dt){const T=z.tumble,g=z.g,p=z.pos;T.t+=dt;
+  const flail=(a,ph,amp,sp)=>{if(z.cut[a])return;const o=z[a];o.rotation.x=Math.sin(T.t*sp+ph)*amp+(a[0]==='a'?-1.2:0);o.rotation.z=Math.cos(T.t*sp*.8+ph*1.7)*amp*.6};
+  if(!T.rest){T.vel.y-=18*dt;let nx=p.x+T.vel.x*dt,ny=p.y+T.vel.y*dt,nz=p.z+T.vel.z*dt;
+    if(solid(vc(nx),vc(p.y+.4),vc(nz))){T.vel.x*=-.3;T.vel.z*=-.3;wallSplat(p);nx=p.x;nz=p.z;burst(new V3(p.x,p.y+.6,p.z),10,2,RED,1)}
+    if(solid(vc(nx),vc(ny),vc(nz))&&T.vel.y<0){ny=(vc(ny)+1)*VS;T.bounces++;splat(new V3(nx,ny,nz),R(.5,1.1));burst(new V3(nx,ny+.3,nz),8,2,RED,1);SND.hit&&T.bounces<3&&SND.hit();
+      if(Math.abs(T.vel.y)<3||T.bounces>4){T.rest=1;T.vel.set(0,0,0)}else{T.vel.y*=-.32;T.vel.x*=.55;T.vel.z*=.55;T.spin.multiplyScalar(.55)}}
+    p.set(nx,ny,nz);g.rotation.x+=T.spin.x*dt;g.rotation.z+=T.spin.z*dt;g.rotation.y+=T.spin.y*dt;
+    flail('armL',T.ph[0],1.6,17);flail('armR',T.ph[1],1.6,15);flail('legL',T.ph[2],1.1,13);flail('legR',T.ph[3],1.1,16);
+    if(rng()<dt*20)burst(new V3(p.x,p.y+.8,p.z),1,.5,RED,0);if(T.t>6)T.rest=1;return}
+  // on the ground: settle flat and flop, twitching less and less
+  T.rest+=dt;const back=Math.cos(g.rotation.x)*Math.cos(g.rotation.z)<0?0:1,tx=back?-Math.PI/2:Math.PI/2;
+  let dx=tx-g.rotation.x;dx=Math.atan2(Math.sin(dx),Math.cos(dx));g.rotation.x+=dx*Math.min(1,dt*8);g.rotation.z*=Math.max(0,1-dt*8);
+  const fade=Math.max(0,1-T.rest/1.8);flail('armL',T.ph[0],1.3*fade,11);flail('armR',T.ph[1],1.3*fade,9);flail('legL',T.ph[2],.9*fade,10);flail('legR',T.ph[3],.9*fade,12);
+  if(fade>0&&rng()<dt*3)g.rotation.z+=R(-.3,.3)*fade;
+  if(T.rest<1.9)return;
+  if(T.killBy||z.hp<=0){if(!z.dead)killZombie(z,T.killBy===true?null:T.killBy,true);z.crawl=z.crawl||!back;g.rotation.z=0;z.tumble=null;return}
+  // survived: climb back up (or keep crawling if it lost a leg)
+  g.rotation.z=0;g.rotation.x=z.crawl?1.45:0;for(const a of['legL','legR'])if(!z.cut[a])z[a].rotation.z=0;for(const a of['armL','armR'])if(!z.cut[a])z[a].rotation.z=0;z.tumble=null;z.kx=z.kz=0}
 function updateGibs(dt){
   for(const g of gibs){g.t+=dt;const p=g.o.position;
     if(!g.rest){g.vel.y-=18*dt;const nx=p.x+g.vel.x*dt,ny=p.y+g.vel.y*dt,nz=p.z+g.vel.z*dt;
@@ -3868,7 +3961,7 @@ async function loadCode(code){
 for(const id of['#rdSel','#rdSel2']){const el=$(id);el.innerHTML=[4,6,8,10].map(v=>`<option value="${v}">${v} chunks (${v*CS*VS} m)</option>`).join('');el.value=String(RD);
   el.addEventListener('change',()=>{RD=Math.min(10,+el.value);$('#rdSel').value=$('#rdSel2').value=String(RD);try{localStorage.setItem('deadground-rd',String(RD))}catch(e){}})}
 for(const id of['#pixSel','#pixSel2']){const el=$(id);el.innerHTML=[[1,'Smooth'],[2,'Pixel ×2'],[3,'Pixel ×3'],[4,'Pixel ×4']].map(([v,n])=>`<option value="${v}">${n}</option>`).join('');el.value=String(PIX);
-  el.addEventListener('change',()=>{PIX=+el.value;$('#pixSel').value=$('#pixSel2').value=String(PIX);try{localStorage.setItem('deadground-pix',String(PIX))}catch(e){}for(const rt of rts)if(rt)rt.dispose();rts.length=0;applyPix()})}
+  el.addEventListener('change',()=>{PIX=+el.value;$('#pixSel').value=$('#pixSel2').value=String(PIX);try{localStorage.setItem('deadground-pix2',String(PIX))}catch(e){}for(const rt of rts)if(rt)rt.dispose();rts.length=0;applyPix()})}
 for(const id of['#gfxSel','#gfxSel2']){const el=$(id);el.innerHTML=GFXN.map((n,i)=>`<option value="${i}"${i===3&&!RTX_OK?' disabled':''}>${n}${['  (fastest)',' (pixel shadows, rays)',' (+ motion blur, reflections)',' (+ pixel ray tracing)'][i]}</option>`).join('');el.value=String(GFX);
   el.addEventListener('change',()=>{GFX=+el.value;$('#gfxSel').value=$('#gfxSel2').value=String(GFX);try{localStorage.setItem('deadground-gfx',String(GFX))}catch(e){}applyGfx()})}
 applyGfx();
