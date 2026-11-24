@@ -10,8 +10,12 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 ## The world
 
-- **320 × 320 m world** built from half-metre pixel-textured blocks, with quarter-height grass caps that smooth hills and slopes, a large central town plus several smaller towns, rolling hills and mountains, forests and caves. Every world comes from a **seed**, so the same seed always builds the same world.
-- **Chunk streaming:** only the 8 × 8 m chunks around the players are meshed; the rest load in as you move and unload behind you. Pick a render distance from 32 to 128 m. Fog and camera range follow it.
+- **An endless world** built from half-metre pixel-textured blocks, with quarter-height grass caps that smooth hills and slopes. It's split into 112 m regions, generated from the **seed** whenever you get near them, so the same seed always builds the same world and you can walk in any direction forever. A big town sits at the start; about 3 in 4 regions elsewhere have a small town (sometimes two), with rolling hills, forests and caves between.
+- **Compression, in three tiers:**
+  - The 3 × 3 regions around you (336 m square) are raw blocks in a ring buffer: what you can see and touch. Walk far enough and the window slides; nothing ever moves in memory except the region coming in.
+  - Regions you just left are compressed in memory. Every cell is compared with the bare terrain the seed would grow there (heights, layers, even ore positions, which come from a hash), so only buildings, caves, trees and your changes survive. An LZ4-style pass then squeezes that, from 3.4 MB to about 100 KB per region (about 33×), losslessly. Coming back is instant.
+  - Everything else is stored as nothing but the seed plus your edits. It is rebuilt exactly when you return.
+- **Chunk streaming:** only the 8 × 8 m chunks around the players are meshed; the rest load in as you move and unload behind you. Pick a render distance from 32 to 80 m. Fog and camera range follow it.
 - **Realistic towns:** 6 m two-lane roads, 1.5 m sidewalks, 15 m lots, and houses 11–15 m across (level with the sidewalks) with 3 m storeys (2.5 m ceilings), 1–3 storeys, painted drywall in a different colour per room with baseboards and crown moulding, switchback staircases with landings (two steps per block) and wooden or iron railings, framed windows (some smashed or boarded), front and back doors, stairs and roof access.
 - **Public buildings:** each town has some of these, under faded signs over the doors.
   - **Hospitals** (2–3 storeys): reception, waiting chairs, wards with hospital beds and IV stands, medicine cabinets and a pharmacy full of bandages.
@@ -20,6 +24,8 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
   - **Schools** (2 storeys): classrooms with chalkboards and rows of desks, lockers along the corridors and a cafeteria.
 - **Battle damage:** most buildings came through intact, with whole windows. About 3 in 10 took real damage, and those are mostly chipped rather than holed. Walls and roofs have chunks bitten out of blocks, with the broken pieces lying in rubble piles below. Only a few blocks are knocked clean through, and roofs have ragged holes with debris on the floor underneath. 
 - **Every block breaks in stages:** dirt, grass, stone, ore, concrete, brick, drywall, roof, asphalt, planks, logs, metal, tile and window frames all go through three broken stages (chipped, heavily damaged, crumbled stub) before they give way. That happens under your pickaxe, zombie claws and explosions, and the broken pieces land as rubble. A block that is already damaged breaks faster.
+- **Windows** sit in ordinary wall (brick or concrete outside, painted drywall inside) with a proper casing of trim round the opening on both faces: side and head casings, a deeper sill and an apron under it.
+- **Blood:** pixel-art splatters with flung droplets where things die, spatter on nearby walls, and old dark pools in the streets where people fell months ago. No more red-tinted blocks.
 - **Furnished rooms:** each floor is split into rooms joined by doorways and doors.
   - Living rooms: couch facing a flat-screen or an old CRT TV (rabbit ears, VCR) on a TV stand, coffee table, rug, armchair, bookcase.
   - Kitchens: fridge, counters, sink and stove, plus a table and chairs.
@@ -33,6 +39,10 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 ## Graphics
 
 **Pixel size** (start screen or case): the 3D view renders at ½, ⅓ or ¼ of the screen resolution and is scaled up with hard pixel edges (×2 by default), or *Smooth* for full resolution. The UI is pixelated to match, with pixel fonts, hard bevels and hand-drawn 16×16 pixel-art icons.
+
+**Realism:** the block textures got a pass for depth: bevelled bricks with burnt and pale ones mixed in, soot and grime, concrete pores and stains, wood grain and knots, rust running from rivets, shingle rows, leaf clusters and mottling everywhere, at the same pixel count. On High and Ultra the image gets **ambient occlusion** from the depth buffer (corners, creases and contact shadows) and a soft **glow** around bright light. Every level gets a **filmic tone curve**.
+
+**All-pixel UI:** a pixel font is built into the game (hand-drawn 5×7 glyphs turned into a real font at startup), so every label, menu, sign and button is crisp pixel type even offline. Touch buttons and the joystick are square too.
 
 Four quality levels (start screen or case). They change effects only:
 - **Ultra:** everything in High, plus **pixel ray tracing**. A 3D copy of the nearby blocks lives on the GPU, and for every texture pixel (16 per block side, the same as the textures) a ray is traced to the sun for shadow, with short rays for corner shading. Sunlight falls through windows in pixel-exact patches. Needs WebGL2, and is the default on desktop.
@@ -48,6 +58,8 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 
 ## Surviving
 
+- **A limited number of zombies:** each region starts with so many walkers (towns hold the most). Kill them and they're gone; the top bar shows how many are still out there. New ones only come from people who turn.
+- **Infection:** zombies bite people who can't fight back (unarmed family members). The bitten fall sick and turn within a minute or so, and anyone the dead kill gets back up. A bandage buys them time, not a cure.
 - **Zombies** are slow by day and fast at night. They notice you only within range (22 m by day, 34 m at night) and in line of sight, give up once you're well out of range, and come to investigate gunshots. They break blocks hit by hit: a window in one hit, a wooden door in about 10 s, a brick wall only with a crowd. Metal holds longest. Some wear hard hats, helmets, vests or jackets that soak up damage.
 - **Aiming:** hold right-click (pistol) to aim down sights, which is more accurate but slower. There's a light aim assist toward visible targets, a bit stronger on touch and gamepad.
 - **Shooting:** bullets leave holes where they hit. Shoot off arms and legs: legless zombies crawl, armless ones bite weaker, and a headshot pops the head off. Cars and tripwire bombs tear limbs off too.
@@ -61,8 +73,11 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 - **Building and digging:** place plank, stone, dirt, metal or stair blocks (stairs face the way you're looking) and dig anything except bedrock. Build walls 3 high in stone or metal.
 - **Seasons:** spring, summer, autumn and winter turn every 3 days.
   - Seasonal grass and leaves, and in winter snow on the ground, roads, roofs and trees.
-  - Rain, storms and snowfall; winter days are shorter.
+  - Rain, snowfall and **thunderstorms** (most likely in summer): pixel lightning bolts, a flash, then thunder that arrives late depending on how far away the strike was. Strikes scorch blocks, start fires and hurt anyone standing close. Get under cover.
+  - Winter days are shorter.
   - Cold drains your warmth unless you're indoors, by a fire, in a car or wearing a coat.
+- **Families:** about 1 in 4 houses shelters a family: a father, a mother and one to three kids. They're unarmed and helpless; when zombies come they run and scream for help. Most need something (food or bandages); help them and they'll give you what they can spare and remember you. Kids can't be hurt or infected by anyone.
+- **Talking to people (E / Talk):** a conversation menu. Trade with survivors, ask them to come with you (they follow and fight), wait or go home, give food or bandages, ask about the area (nearby towns, bandit camps, stocked shops), or tell a family to lock up.
 - **People:** a fixed cast of named survivors and bandits with realistic names. Nobody respawns: when someone dies, they're gone for good and drop off the leaderboard. Out of sight, they keep fighting each night, and now and then one doesn't make it (you'll hear it on the radio).
   - About half the houses still have a survivor living in them. By day they forage (raid crates, hunt, pick up carcasses) and carry food back to a stash. They board up open windows and set spike traps at the door.
   - At night they go home, open the door, close it behind them and sleep. About 1 in 4 are night owls who keep scavenging.
@@ -72,6 +87,11 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 - **Attaché case (Tab):** a grid inventory like Resident Evil 4. Every item has a size (a fuel can is 2×2, a jacket 2×3, the bat 4×1) and stacks up to a limit. Drag items to arrange them, rotate them with R or right-click while dragging, or tap *Organize*. Select an item to use, wear, rotate or drop it. If you pick up more than fits, the extra drops in a bag at your feet.
 - **Tents:** abandoned campsites dot the countryside, bandits camp in them, and you can sew your own (5 cloth + 3 wood). Sleep in one like a bed.
 - **Respawn:** when you die, choose your bed, the crossroads or a random town. The case also has a *Respawn (stuck?)* button.
+- **Bunk beds** in some bedrooms, and you can build one (12 planks + 4 cloth).
+- **Explosives:** throw **pipe bombs** (Q; craft from 2 scrap + 2 coal) or place **dynamite** (5-second fuse, a much bigger blast that tears through walls; craft from 3 coal + 1 cloth + 1 scrap). Hardware stores stock both. Blasts shake the screen.
+- **Cooking:** at a campfire, pick a recipe: grilled meat, hot beans, roast vegetables, meat stew (food, health and warmth), bone broth (warms you right up) or smoked jerky. It simmers in a pot on the flames for a few seconds, then goes in your case. Vegetables turn up in grocery stores and kitchens.
+- **Crouch (C / Ctrl / Duck):** 1 m tall and slow, enough to climb through a window once the glass is out.
+- **Creative mode** (start screen, or toggle in the case): every block type, unlimited, instant digging, free explosives, no damage, hunger or cold, and zombies leave you alone. Double-tap jump to fly.
 - **Beds:** sleep through the night (in co-op, both players lie down). A bed also sets your respawn point.
 - **Bicycles:** left by front doors and along the roads. No fuel needed, just pedalling (which makes you hungrier); about 30 km/h, quiet, and they bounce off zombies instead of running them down. One rider only.
 - **Vehicles:** sedans, pickups, vans, police cruisers, ambulances, city buses and motorcycles. They need fuel and repairs, and they collide with each other, with people and with animals (you can stand on the roofs).
@@ -83,12 +103,12 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 
 ## Saving
 
-The world is rebuilt from its seed, so a save only stores the seed plus the blocks you changed (delta + varint packed), your inventories, clothing, beds, fires, traps, cars, opened doors and looted crates, then deflated. A whole game fits in a short **save code** (about 1–2 KB). The game also autosaves in your browser every 90 seconds. Use **Continue**, or paste a code into **Load a save code**.
+The world is rebuilt from its seed, so a save only stores the seed plus, for each region you've touched, the blocks you changed (delta + varint packed), looted crates, door states, parked cars, things you built and how many zombies are left there, plus everyone's stats, then deflated. A whole game fits in a short **save code** (a few KB, even after travelling far). The game also autosaves in your browser every 90 seconds. Use **Continue**, or paste a code into **Load a save code**.
 
 ## Controls
 
-**Player 1:** WASD move · mouse look · click act · right-click place block · 1–5 / wheel tools (bat, pistol, pickaxe, build, place) · R block material or item to place · E use / doors / loot / sleep / cook / enter car · V driver or outside view · Space jump (brake in car) · Shift sprint · Tab attaché case · Z (hold) leaderboard · G eat · X bandage · T flashlight
+**Player 1:** WASD move · mouse look · click act · right-click place block · 1–5 / wheel tools (bat, pistol, pickaxe, build, place) · R block material or item to place · E use / doors / loot / sleep / cook / enter car · V driver or outside view · Space jump (brake in car) · Shift sprint · C / Ctrl crouch · Q throw pipe bomb · Space ×2 fly (creative) · Tab attaché case · Z (hold) leaderboard · G eat · X bandage · T flashlight
 
-**Player 2:** I K / J L move & turn · U / O look · H act · Y use · N jump · P sprint · B tool · M material or item · , car view · [ eat · ] bandage · \ case · or a gamepad
+**Player 2:** I K / J L move & turn · U / O look · H act · Y use · N jump · P sprint · B tool · M material or item · , car view · [ eat · ] bandage · \ case · ; crouch · . pipe bomb · or a gamepad
 
-**Touch:** drag the left side to move, drag the right side to look · Act, Jump, Use, Place buttons bottom right · Bag, Tool, Type, View, Run along the top
+**Touch:** drag the left side to move, drag the right side to look · Act, Jump, Use, Place buttons bottom right · Bag, Tool, Type, View, Run, Duck, Bomb, Talk along the side
