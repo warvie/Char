@@ -14,7 +14,7 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 - **Chunk streaming:** only the 8 × 8 m chunks around the players are meshed; the rest load in as you move and unload behind you. Pick a render distance from 32 to 128 m. Fog and camera range follow it.
 - **Realistic towns:** 6 m two-lane roads, 1.5 m sidewalks, 15 m lots, and houses 11–15 m across (level with the sidewalks) with 3.5 m floors, 1–3 storeys, framed windows (some smashed or boarded), front and back doors, stairs and roof access.
 - **Furnished rooms:** each floor is split into rooms joined by doorways and doors.
-  - Living rooms: couch facing a TV on a TV stand, coffee table, rug, armchair, bookcase.
+  - Living rooms: couch facing a flat-screen or an old CRT TV (rabbit ears, VCR) on a TV stand, coffee table, rug, armchair, bookcase.
   - Kitchens: fridge, counters, sink and stove, plus a table and chairs.
   - Bathrooms: tiled floor, bathtub, toilet, and a sink with a mirror.
   - Bedrooms: bed, nightstand, wardrobe, dresser.
@@ -25,10 +25,13 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 ## Graphics
 
-Three quality levels (start screen or backpack). They change effects only, never the resolution:
-- **High:** soft sun shadows, crepuscular rays, lens flare that hides when the sun is blocked, motion blur, edge smoothing, drifting ground fog, distance haze, vignette and color grading.
+Four quality levels (start screen or backpack). They change effects only, never the resolution:
+- **Ultra:** everything in High, plus **pixel ray tracing**. A 3D copy of the nearby blocks lives on the GPU, and for every texture pixel (16 per block side, the same as the textures) a ray is traced to the sun for shadow, with short rays for corner shading. Sunlight falls through windows in pixel-exact patches. Needs WebGL2, and is the default on desktop.
+- **High:** pixelated sun shadows, crepuscular rays, lens flare that hides when the sun is blocked, motion blur, real-time rain reflections, edge smoothing, drifting ground fog, distance haze, vignette and color grading.
 - **Medium:** lighter shadows and effects, no motion blur.
 - **Low:** fastest, the default on phones.
+
+Shadows are snapped to texture pixels on every level that has them. When it rains, everything open to the sky gets wet: it darkens, and roads, roofs and car roofs reflect the scene in real time with puddles and ripples, then dry off after the rain.
 
 Also on every level: a sky dome with sun, moon and stars; pixel textures that span 2×2 blocks so bricks, planks and tiles run continuously; swaying grass tufts; and seasonal ambience (ash and dust, fireflies, falling leaves, snow and rain that stop at roofs, embers and flies).
 
@@ -54,7 +57,9 @@ Performance: chunk streaming, typed-array meshing, merged furniture, frozen stat
 - **People:** survivors in the towns shoot zombies and trade with you. Bandits in the wilds shoot on sight.
 - **Beds:** sleep through the night (in co-op, both players lie down). A bed also sets your respawn point.
 - **Vehicles:** sedans, pickups, vans, police cruisers, ambulances, city buses and motorcycles. They need fuel and repairs, and they collide with each other, with people and with animals (you can stand on the roofs).
-  - First-person cabin with a turning steering wheel, working gauges, seats and mirror, or switch to the outside view.
+  - First-person cabin at real seat height: you see your own body at the wheel and most of the road.
+  - Turning steering wheel, working gauges and a **live rear-view mirror**; many vehicles have a **backup camera** screen with guide lines when reversing.
+  - Or switch to the outside view.
   - Run zombies over and carry a passenger.
 - Health, hunger, stamina, day/night cycle and flashlight. The light turns on by itself underground.
 
