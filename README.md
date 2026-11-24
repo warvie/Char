@@ -45,9 +45,15 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 **Pixel size** (start screen or case): the 3D view renders at full resolution by default (*Smooth*), with no pixelated upscaling. Pick ×2, ×3 or ×4 for a chunky retro look, where the view is drawn at a fraction of the resolution and blown up with hard pixel edges.
 
+**60 fps governor:** on the higher graphics settings, a governor watches frame time. If frames take longer than 16.7 ms it steps down one rung at a time: fewer sun-ray and reflection samples, then motion blur, then shorter ray-traced shadow rays and no ray-traced AO, then render scale. When there's headroom it steps back up. On 60 Hz screens it probes one rung up after a calm stretch, since those screens never show spare time.
+
+**Buried blocks are skipped:** about 89% of solid blocks are completely boxed in. The mesh builder now skips them per column, starting just below the lowest see-through cell in each column and its neighbours. It produces exactly the same meshes about 27% faster (466 → 342 ms per region in tests). I also tested not deciding hidden blocks at all during generation: ore rolls for buried cells cost about 4 ms per region, so it isn't worth complicating saves for.
+
 **8 × 8 pixels per block:** every block face shows an 8 × 8 texture (point-sampled so mortar lines and board joints stay crisp).
 
 **Ground that blends:** where grass meets bare dirt, the two fade into each other over about two blocks on each side. The fade is dithered one texture pixel at a time in clumpy noise, so there is no hard line between them and it stays pixelated.
+
+**Meadows:** grassy ground grows daisies, poppies, dandelions, bluebells, lavender and clover, mostly in patches of one kind, with stray flowers elsewhere. They dry to seed heads in autumn. Grass shifts across lush, yellow-green, blue-green, olive and pale patches, and the blades cast pixel shadows that sway with them.
 
 **Pixel shadows everywhere:** every shadow (on blocks, furniture, grass, people and cars) is looked up on the same 1/16 m texture-pixel grid, so all shadow edges are pixelated.
 
@@ -68,6 +74,10 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 **Never stuck in blocks:** waking up, respawning, teleporting and getting out of a car always put you in the nearest free spot with a floor under you. If a block ever ends up inside you (placed, loaded or fallen in), you duck if that frees you, otherwise you're moved out within a quarter second.
 
 **Emotes and dances** (J, or *Emote* on phones): Wave, Cheer, Point, Thumbs up, Facepalm, Laugh, Salute, Sit, plus looping dances (Groove, Robot, Disco, Headbang, Spin, Shuffle). Pick one with its number key or a click. The camera swings round so you can watch, and moving cancels it. Other players see your emotes.
+
+**Creative palette:** in creative mode, R (or *Pick* on phones) opens a palette with every block, all 8 vehicles, zombies, deer, rabbits, wolves, boars, survivors, bandits, friendly drifters, parents and children, traps, beds, tents, campfires, crates, all furniture, and street signs and traffic lights. Pick one, then place it with the Build tool (4). Placed furniture is saved with the world.
+
+**Main menu button:** *Main menu* sits under *Respawn* on desktop, and there's a *Menu* button on phones. Both save, then take you to the start screen.
 
 ## Online
 
@@ -101,9 +111,13 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 
 - **A limited number of zombies:** each region starts with so many walkers (towns hold the most). Kill them and they're gone; the top bar shows how many are still out there. New ones only come from people who turn.
 - **Infection:** zombies bite people who can't fight back (unarmed family members). The bitten fall sick and turn within a minute or so, and anyone the dead kill gets back up. A bandage buys them time, not a cure.
+- **Streets:** roads have double yellow centre lines, white edge lines, zebra crosswalks with stop bars, and stone curbs with red or yellow painted ends. Big towns have traffic lights on mast arms (with walk signals and street-name signs), and smaller towns have four-way stops. Speed limit, no parking, one way and yield signs line the streets.
+- **Manholes:** three in four are covered by a round lid sitting in an iron collar, so the opening is round. *Use* drags the lid aside.
 - **Zombies** are slow by day and fast at night. They notice you only within range (22 m by day, 34 m at night) and in line of sight, give up once you're well out of range, and come to investigate gunshots. They break blocks hit by hit: a window in one hit, a wooden door in about 10 s, a brick wall only with a crowd. Metal holds longest. Some wear hard hats, helmets, vests or jackets that soak up damage.
 - **Zombie looks:** rotting pixel skin with veins, mottling and open sores, torn and blood-soaked clothes, bared teeth, and sometimes a torn cheek or bare skull. Some show ribs through a hole in the shirt or a spine down the back, or have bones snapped through a forearm or shin. Some have already lost an arm, both arms, a leg or half a forearm, with a bloody stump and bone.
 - **Running zombies down:** a slow bump shoves a zombie. Hit one at speed and it's thrown through the air, limbs flailing, bounces, then flops and twitches on the ground. Impact damage grows with speed, and harder hits tear limbs off, snap them in half (the lower half flies off), take the head, or cut the zombie in two. Survivors get back up, or crawl if they lost a leg.
+- **Car parts:** hit a parked car with the pickaxe to pry off its wheels, engine, battery and radio (plus scrap), until it's a stripped shell. With a wrench (2 scrap + 1 metal plate, or from hardware stores), *Use* fits a missing part from your case, so you can swap parts between cars. A car missing wheels, its engine or its battery won't go.
+- **Car radio:** press R in a car (or tap *Radio*) to cycle the stations: an oldies station, a rock station, an emergency broadcast, and off. Stations are synthesized live, and a parked car left playing can still be heard nearby.
 - **Windshield blood:** zombies you hit splatter the windshield with drops, spatters and streaks that run down the glass, visible from the driver's seat and outside. It dries off over a minute or so, and faster in the rain.
 - **Aiming:** hold right-click (pistol) to aim down sights, which is more accurate but slower. There's a light aim assist toward visible targets, a bit stronger on touch and gamepad.
 - **Shooting:** bullets leave holes where they hit. Shoot off arms and legs: legless zombies crawl, armless ones bite weaker, and a headshot pops the head off. Cars and tripwire bombs tear limbs off too.

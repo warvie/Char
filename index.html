@@ -209,7 +209,15 @@ body:not(.touch) .phud.narrow .feed{width:min(300px,46%)}body:not(.touch) .phud.
 body.touch .veh{padding:6px 8px}body.touch .veh h3{font-size:10px!important}body.touch .veh .vs{font-size:10px}
 body.touch .feed{max-height:calc(50vh - 200px);overflow:hidden;justify-content:flex-end}
 body.touch .rspb{display:none}
+.homeb{position:absolute;left:16px;bottom:150px;pointer-events:auto;font:10px DGPixel,monospace;padding:5px 9px;min-height:0;background:rgba(30,26,20,.85);color:var(--dim)}.homeb:hover{color:var(--ink);border-color:var(--rust)}
+body.touch .homeb{display:none}.phud.narrow .homeb{display:none}
+.tb[data-b=home]{right:calc(10px + env(safe-area-inset-right));top:calc(248px + env(safe-area-inset-top));background:rgba(60,60,72,.6)}
+@media(orientation:landscape){.tb[data-b=home]{right:calc(166px + env(safe-area-inset-right))!important;top:calc(130px + env(safe-area-inset-top))!important}body.touch .feed{right:230px!important}}
 #emo{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;background:rgba(14,12,9,.92);border:2px solid rgba(235,230,216,.3);padding:10px 12px;width:min(520px,94vw);max-height:86vh;overflow:auto;font:20px DGPixel,monospace;color:var(--ink)}
+#cpal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:21;background:rgba(14,12,9,.94);border:2px solid rgba(235,230,216,.3);padding:10px 12px;width:min(760px,96vw);max-height:88vh;overflow:auto;font:20px DGPixel,monospace;color:var(--ink)}
+#cpal h3{margin:0 0 8px;font-size:20px;color:var(--rust)}#cpal small{display:block;margin-top:8px;font-size:10px;color:var(--dim)}
+#cpalT{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}#cpalT button,#cpalL button{min-height:34px;font:20px DGPixel,monospace;padding:3px 8px}#cpal button.on{outline:2px solid var(--olive)}
+#cpalL{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px}
 #emo h3{margin:0 0 8px;font-size:20px;color:var(--rust)}#emo small{display:block;margin-top:8px;font-size:10px;color:var(--dim)}
 #emoL{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}#emoL button{min-height:40px;font:20px DGPixel,monospace;text-align:left;padding:4px 8px}#emoL button i{font-style:normal;color:var(--dim);margin-right:6px}
 .tb[data-b=emote]{right:calc(62px + env(safe-area-inset-right));top:calc(308px + env(safe-area-inset-top))}
@@ -267,7 +275,7 @@ body.touch .prompt{top:auto;bottom:calc(50% + 22px);font-size:10px;line-height:1
 <div id="split" class="hidden"></div><div id="fade"></div><div id="flash"></div>
 <div id="touch" class="hidden"><div id="stick"><i></i></div>
   <button class="tb big" data-b="act"><img class="ti" alt=""><span>Swing</span></button><button class="tb jmp" data-b="jump"><img class="ti" alt=""><span>Jump</span></button><button class="tb" data-b="use"><img class="ti" alt=""><span>Use</span></button><button class="tb" data-b="alt"><img class="ti" alt=""><span>Aim</span></button>
-  <button class="tb sm" data-b="bag">Bag</button><button class="tb sm" data-b="tool">Tool</button><button class="tb sm" data-b="view">View</button><button class="tb sm" data-b="run">Run</button><button class="tb sm" data-b="duck">Duck</button><button class="tb sm" data-b="bomb">Bomb</button><button class="tb sm" data-b="talk">Talk</button><button class="tb sm" data-b="emote">Emote</button><button class="tb sm" data-b="rsp">Unstuck</button></div>
+  <button class="tb sm" data-b="bag">Bag</button><button class="tb sm" data-b="tool">Tool</button><button class="tb sm" data-b="view">View</button><button class="tb sm" data-b="run">Run</button><button class="tb sm" data-b="duck">Duck</button><button class="tb sm" data-b="bomb">Bomb</button><button class="tb sm" data-b="talk">Talk</button><button class="tb sm" data-b="emote">Emote</button><button class="tb sm" data-b="home">Menu</button><button class="tb sm" data-b="rsp">Unstuck</button></div>
 
 <div id="start" class="screen"><div class="kit">
   <h1>Dead Ground</h1>
@@ -341,6 +349,7 @@ body.touch .prompt{top:auto;bottom:calc(50% + 22px);font-size:10px;line-height:1
   <p class="note">The whole world is rebuilt from its seed, so a save only stores the seed plus what you changed, packed into a short code. The game also saves itself in this browser every 90 seconds. Split-screen co-op runs on one computer. Online play would need a game server, which this page can't host. Each run makes a new random world.</p>
 </div></div>
 
+<div id="cpal" class="hidden"><h3>Creative: place anything</h3><div id="cpalT"></div><div id="cpalL"></div><small>Pick something, then use the Build tool (4) to place it · R to close</small></div>
 <div id="emo" class="hidden"><h3>Emotes &amp; dances</h3><div id="emoL"></div><small>J or Emote to close · moving stops a dance</small></div>
 <div id="pause" class="screen hidden" style="background:rgba(0,0,0,.6)"><div class="kit" style="max-width:420px;text-align:center">
   <h2 style="font-size:40px;color:var(--rust)">Paused</h2><p class="sub" style="margin:8px auto 16px">Click to take back the mouse and keep surviving.</p>
@@ -467,9 +476,9 @@ function worsen(b,x,y,z,lvl){if(lvl>3)return 0;if(lvl<=LVL[b])return b;return ch
 const rubOf=(b,x,z)=>{let m=RUBM.indexOf(BASE_OF[b]||b);if(m<0)m=0;return RUB0+m*3+((h3(x,5,z)*3)|0)};
 const MATS=[['plank',B.PLANK],['stone',B.STONE],['dirt',B.DIRT],['metal',B.METAL],['stairs',B.STPX]];
 // creative mode: every block, unlimited
-const CMATS=[['grass',B.GRASS],['dirt',B.DIRT],['stone',B.STONE],['coal',B.COAL],['iron',B.IRON],['conc',B.CONC],['asph',B.ASPH],['plank',B.PLANK],['log',B.LOG],['leaf',B.LEAF],['brick',B.BRICK],['metal',B.METAL],['glass',B.GLASS],['wall',B.WALL],['tile',B.TILEF],['roof',B.ROOF],['stairs',B.STPX]];
+const CMATS=[['grass',B.GRASS],['dirt',B.DIRT],['stone',B.STONE],['coal',B.COAL],['iron',B.IRON],['conc',B.CONC],['asph',B.ASPH],['plank',B.PLANK],['log',B.LOG],['leaf',B.LEAF],['brick',B.BRICK],['metal',B.METAL],['glass',B.GLASS],['wall',B.WALL],['tile',B.TILEF],['roof',B.ROOF],['stairs',B.STPX],['frame',B.FRAME],['ladder',B.LADDER],['sludge',B.SLUDGE],['bedrock',B.BED],['gcap1',B.G25],['gcap2',B.G50],['gcap3',B.G75]];
 const matList=p=>p.creative?CMATS:MATS,curMat=p=>{const L=matList(p);return L[p.mat%L.length]};
-const LABEL={scrip:'Scrip',saw:'Chainsaw',grass:'Grass',conc:'Concrete',asph:'Asphalt',log:'Log',leaf:'Leaves',brick:'Brick',glass:'Glass',wall:'Drywall',tile:'Tile',roof:'Roof',veg:'Vegetables',stew:'Meat stew',broth:'Bone broth',jerky:'Jerky',roast:'Roast veg',hotbeans:'Hot beans',tnt:'Dynamite',pipebomb:'Pipe bomb',bunk:'Bunk bed',tent:'Tent',stairs:'Stairs',bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
+const LABEL={wheel:'Wheel',engine:'Engine',battery:'Car battery',carradio:'Car radio',wrench:'Wrench',frame:'Wood frame',ladder:'Ladder',sludge:'Sewer sludge',bedrock:'Bedrock',gcap1:'Grass (¼ step)',gcap2:'Grass (½ step)',gcap3:'Grass (¾ step)',scrip:'Scrip',saw:'Chainsaw',grass:'Grass',conc:'Concrete',asph:'Asphalt',log:'Log',leaf:'Leaves',brick:'Brick',glass:'Glass',wall:'Drywall',tile:'Tile',roof:'Roof',veg:'Vegetables',stew:'Meat stew',broth:'Bone broth',jerky:'Jerky',roast:'Roast veg',hotbeans:'Hot beans',tnt:'Dynamite',pipebomb:'Pipe bomb',bunk:'Bunk bed',tent:'Tent',stairs:'Stairs',bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
 // towns: a large one in the middle, smaller ones scattered through the wilds
 const towns=[];
 function townAt(x,z,m){for(const t of towns)if(x>=t.x0-m&&x<=t.x1+m&&z>=t.z0-m&&z<=t.z1+m)return t;return null}
@@ -551,7 +560,33 @@ function restOfRegion(Rg){const X0=Rg.rx*RS,Z0=Rg.rz*RS,X1=X0+RS,Z1=Z0+RS;
   // campsites: abandoned ones (a crate and a cold fire pit) and, later, bandit camps
   for(let i=0,t=0;i<2&&t<60;t++){const x=RI(X0+20,X1-21),z=RI(Z0+20,Z1-21);if(inTown(x,z)||townDist(x,z)<30)continue;const ty=topY(x,z);if(ty!==hm(x,z)||get(x,ty,z)===B.LEAF)continue;
     campSpecs.push([x,z,0,rng()<.4?1:0]);i++}
+  for(const T of mine)roadDecor(T); // last, so older saves' broken-decor indices still line up
 }
+// ---------------- streets: paint, curbs, traffic lights, stop signs and road signs (decor pieces merged into the chunk meshes)
+const STREETS=['MAIN','OAK','ELM','PINE','MAPLE','CEDAR','BIRCH','WALNUT','ASH','LAKE','HILL','PARK','MILL','CHURCH','RIVER','HIGH','1ST','2ND','3RD','4TH','5TH','6TH'];
+function roadDecor(T){const y=(G+1)*VS,ys=(G+2)*VS,n=Math.round((T.x1-T.x0-14)/P),big=T.n>=3;
+  const nmX=[],nmZ=[];const pool=shuf(STREETS.slice());for(let i=0;i<=n;i++){nmX.push(pool[i%pool.length]+' ST');nmZ.push(pool[(i+n+1)%pool.length]+' AVE')}
+  const add=sp=>furnSpecs.push(sp);
+  for(let i=0;i<=n;i++)for(let j=0;j<=n;j++){const ix=T.x0+i*P,iz=T.z0+j*P;
+    // segments leaving this intersection toward +z (on the x-road) and toward +x (on the z-road)
+    if(j<n){const cx=(ix+6)*VS,z0=(iz+12)*VS,z1=(iz+P)*VS,L=z1-z0,cz=(z0+z1)/2;
+      add(['lane',cx,y,cz,0,{L:L-5.4}]);add(['xwalk',cx,y,z0+1.2,0,{}]);add(['xwalk',cx,y,z1-1.2,Math.PI,{}]);
+      for(const sd of[-1,1]){const ex=sd<0?ix*VS:(ix+12)*VS;add(['curb',ex+sd*.09,y,cz,0,{L,paint:rng()<.45?(rng()<.5?0xd8b030:0xb02a22):0}]);
+        if(rng()<.4){const vx=sd<0?ix-2:ix+13,vz=iz+12+RI(8,P-22);add(['rsign',(vx+.5)*VS,ys,(vz+.5)*VS,sd<0?Math.PI:0,{k:pick(['speed','speed','noparking','oneway','yield'])}])}}}
+    if(i<n){const cz=(iz+6)*VS,x0=(ix+12)*VS,x1=(ix+P)*VS,L=x1-x0,cx=(x0+x1)/2;
+      add(['lane',cx,y,cz,Math.PI/2,{L:L-5.4}]);add(['xwalk',x0+1.2,y,cz,Math.PI/2,{}]);add(['xwalk',x1-1.2,y,cz,-Math.PI/2,{}]);
+      for(const sd of[-1,1]){const ez=sd<0?iz*VS:(iz+12)*VS;add(['curb',cx,y,ez+sd*.09,Math.PI/2,{L,paint:rng()<.45?(rng()<.5?0xd8b030:0xb02a22):0}]);
+        if(rng()<.4){const vz=sd<0?iz-2:iz+13,vx=ix+12+RI(8,P-22);add(['rsign',(vx+.5)*VS,ys,(vz+.5)*VS,sd<0?Math.PI/2:-Math.PI/2,{k:pick(['speed','speed','noparking','oneway','yield'])}])}}}
+    // control at the crossing: traffic lights in bigger towns, otherwise a four-way stop
+    const kind=big&&rng()<.75?'tlight':rng()<.85?'stop':null;if(!kind)continue;const lit=RI(0,2);
+    const appr=[[-1,-1,Math.PI],[1,1,0],[-1,1,-Math.PI/2],[1,-1,Math.PI/2]];let first=true;
+    for(const[sx,sz,yaw]of appr){const vx=sx<0?ix-2:ix+13,vz=sz<0?iz-2:iz+13;if(vx<T.x0||vz<T.z0||vx>T.x1||vz>T.z1)continue;
+      const along=Math.abs(Math.sin(yaw))<.5;
+      add([kind,(vx+.5)*VS,ys,(vz+.5)*VS,yaw,{lit:along?lit:2-lit,names:first?[nmX[i],nmZ[j]]:null}]);first=false}}}
+function sunTxt(F,txt,cx,cy,z,ps,col,ry=0){let w=0;const gs=[...txt].map(ch=>GLYPHS[ch]||GLYPHS[' ']||['.']);for(const g of gs)w+=Math.max(...g.map(r=>r.length))+1;w-=1;
+  let gx=-w*ps/2;const c=Math.cos(ry),s=Math.sin(ry);
+  for(const g of gs){const gw=Math.max(...g.map(r=>r.length));g.forEach((row,r)=>{let a=-1;for(let k=0;k<=row.length;k++){const on=row[k]==='#';if(on&&a<0)a=k;if(!on&&a>=0){const bx=gx+(a+(k-a)/2)*ps+cx,by=cy+(3-r)*ps;
+    F((k-a)*ps,ps,.006,col,bx*c+z*s,by,-bx*s+z*c,ry);a=-1}}});gx+=(gw+1)*ps}}
 function sewerTown(T){
   // bands of x-roads (run along z) and z-roads (run along x)
   const put=(alongZ,o,d,t,y,v)=>alongZ?setv(o+d,y,t,v):setv(t,y,o+d,v);
@@ -560,7 +595,8 @@ function sewerTown(T){
   for(const[aZ,o,a0,a1]of runs)for(let t=a0+1;t<=a1-1;t++)for(let d=1;d<5;d++){for(let y=SY+1;y<=SY+5;y++)put(aZ,o,d,t,y,0);if(d===2||d===3)put(aZ,o,d,t,SY,B.SLUDGE)}
   for(const[aZ,o,a0,a1]of runs)for(let t=a0+P/2;t+2<=a1;t+=P){
     if(rng()>=.35){const x=aZ?o+2:t,z=aZ?t:o+2;
-      for(let y=SY+1;y<=G;y++)for(let a=0;a<2;a++)for(let b=0;b<2;b++)setv(x+a,y,z+b,B.LADDER);
+      // three in four are still covered: a steel plate under the round lid (open it with Use); the rest gape open
+      const cov=h3(x,77,z)<.75;for(let y=SY+1;y<=G;y++)for(let a=0;a<2;a++)for(let b=0;b<2;b++)setv(x+a,y,z+b,y===G&&cov?B.METAL:B.LADDER);
       manholes.push({x,z,alongZ:aZ})}
     const tt=t+RI(-8,8),x=aZ?o+1:tt,z=aZ?tt:o+1;
     if(rng()<.5)crateSpots.push([(x+.5)*VS+(aZ?.15:0),(SY+1)*VS,(z+.5)*VS+(aZ?0:.15),true]);
@@ -950,7 +986,7 @@ function applyGfx(){
   if(GFX===3)vmat.defines={RTX:''};else vmat.defines={};RTW.ox=-9999;
   for(const m of chunkMeshes)if(m)m.castShadow=GFX<3;
   for(const m of[vmat,gmat,furnMat,grassMat,...Object.values(matC)])if(m)m.needsUpdate=true;
-  for(const rt of rts)if(rt)rt.dispose();rts.length=0;dynScale=1;
+  for(const rt of rts)if(rt)rt.dispose();rts.length=0;qLvl=0;qHold=1;if(typeof applyQ==='function')try{applyQ()}catch(e){}
 }
 // shadows: only bigger parts cast, static meshes skip per-frame matrix updates
 function castBig(o,minR=.3){o.traverse(c=>{const g=c.geometry;if(!c.isMesh||!g)return;if(!g.boundingSphere)g.computeBoundingSphere();const r=g.boundingSphere?g.boundingSphere.radius:1;c.castShadow=r*Math.max(c.scale.x,c.scale.y,c.scale.z)>=minR})}
@@ -969,9 +1005,9 @@ const sky=new THREE.Mesh(new THREE.SphereGeometry(1,24,14),skyMat);sky.frustumCu
 // post-processing
 const postMat=new THREE.ShaderMaterial({defines:{RAYS:24,MB:1,SSR:22,AO:1},depthTest:false,depthWrite:false,
   uniforms:{tColor:{value:null},tDepth:{value:null},sunUV:{value:new THREE.Vector2()},sunOn:{value:0},sunCol:{value:new THREE.Color()},rays:{value:0},flare:{value:0},
-    aa:{value:1},blur:{value:0},invVP:{value:new THREE.Matrix4()},prevVP:{value:new THREE.Matrix4()},aspect:{value:1},time:{value:0},px:{value:new THREE.Vector2()},haze:{value:new THREE.Color()},hazeK:{value:0},vig:{value:.35},camPos:{value:new V3()},fogCol:{value:new THREE.Color()},fogD:{value:0},fogBase:{value:(G+1)*VS},wet:{value:0},VPm:{value:new THREE.Matrix4()},tHeight:{value:null},hOrigin:{value:new V3()},hSize:{value:new V3()},rtm:{value:0}},
+    aa:{value:1},blur:{value:0},invVP:{value:new THREE.Matrix4()},prevVP:{value:new THREE.Matrix4()},aspect:{value:1},time:{value:0},px:{value:new THREE.Vector2()},haze:{value:new THREE.Color()},hazeK:{value:0},vig:{value:.35},camPos:{value:new V3()},fogCol:{value:new THREE.Color()},fogD:{value:0},fogBase:{value:(G+1)*VS},wet:{value:0},VPm:{value:new THREE.Matrix4()},tHeight:{value:null},hOrigin:{value:new V3()},hSize:{value:new V3()},rtm:{value:0},uRays:{value:24},uSsr:{value:22},uAO:{value:1},uMB:{value:1}},
   vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
-  fragmentShader:`uniform sampler2D tColor,tDepth;uniform vec2 sunUV,px;uniform float aa,rtm,sunOn,rays,flare,blur,aspect,time,hazeK,vig;uniform vec3 sunCol,haze,camPos,fogCol;uniform float fogD,fogBase,wet;uniform mat4 invVP,prevVP,VPm;uniform sampler2D tHeight;uniform vec3 hOrigin,hSize;varying vec2 vUv;
+  fragmentShader:`uniform float uRays,uSsr,uAO,uMB;uniform sampler2D tColor,tDepth;uniform vec2 sunUV,px;uniform float aa,rtm,sunOn,rays,flare,blur,aspect,time,hazeK,vig;uniform vec3 sunCol,haze,camPos,fogCol;uniform float fogD,fogBase,wet;uniform mat4 invVP,prevVP,VPm;uniform sampler2D tHeight;uniform vec3 hOrigin,hSize;varying vec2 vUv;
   vec3 recon(vec2 u,float dd){vec4 w=invVP*vec4(u*2.-1.,dd*2.-1.,1.);return w.xyz/w.w;}
   float hn(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
   float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hn(i),hn(i+vec2(1.,0.)),f.x),mix(hn(i+vec2(0.,1.)),hn(i+1.),f.x),f.y);}
@@ -983,7 +1019,7 @@ const postMat=new THREE.ShaderMaterial({defines:{RAYS:24,MB:1,SSR:22,AO:1},depth
     vec3 cn=texture2D(tColor,uv+vec2(0.,px.y)).rgb,cs=texture2D(tColor,uv-vec2(0.,px.y)).rgb,ce=texture2D(tColor,uv+vec2(px.x,0.)).rgb,cw=texture2D(tColor,uv-vec2(px.x,0.)).rgb;
     float l=lum(col),e=max(max(abs(lum(cn)-l),abs(lum(cs)-l)),max(abs(lum(ce)-l),abs(lum(cw)-l)));col=mix(col,(cn+cs+ce+cw+col*2.)/6.,smoothstep(.06,.25,e)*.7*aa);
   #if MB
-    if(blur>0.){vec4 wp=invVP*vec4(uv*2.-1.,d*2.-1.,1.);wp/=wp.w;vec4 pc=prevVP*wp;vec2 v=(uv-(pc.xy/pc.w*.5+.5))*blur;float vl=length(v);if(vl>.035)v*=.035/vl;
+    if(blur>0.&&uMB>.5){vec4 wp=invVP*vec4(uv*2.-1.,d*2.-1.,1.);wp/=wp.w;vec4 pc=prevVP*wp;vec2 v=(uv-(pc.xy/pc.w*.5+.5))*blur;float vl=length(v);if(vl>.035)v*=.035/vl;
       if(vl>.0015){vec3 acc=col;for(int i=1;i<7;i++)acc+=texture2D(tColor,uv-v*(float(i)/6.)).rgb;col=acc/7.;}}
   #endif
   #ifdef SSR
@@ -994,7 +1030,7 @@ const postMat=new THREE.ShaderMaterial({defines:{RAYS:24,MB:1,SSR:22,AO:1},depth
         float pud=smoothstep(.4,.8,vn(P.xz*.32)+.2*wet),k=wet*ex*(.3+.7*pud);
         if(k>.01){vec3 V=normalize(P-camPos),Rr=reflect(V,vec3(0.,1.,0.));Rr.xz+=(vec2(vn(floor(P.xz*16.)+floor(rtm*8.)),vn(floor(P.zx*16.)-floor(rtm*7.)))-.5)*.05*wet;Rr=normalize(Rr);
           vec3 hcol=fogCol*1.05,R0=P+vec3(0.,.02,0.);float stp=.3;
-          for(int i=0;i<SSR;i++){R0+=Rr*stp;stp*=1.17;vec4 cp=VPm*vec4(R0,1.);if(cp.w<=0.)break;vec2 su=cp.xy/cp.w*.5+.5;if(su.x<0.||su.x>1.||su.y<0.||su.y>1.)break;
+          for(int i=0;i<SSR;i++){if(float(i)>=uSsr)break;R0+=Rr*stp;stp*=1.17;vec4 cp=VPm*vec4(R0,1.);if(cp.w<=0.)break;vec2 su=cp.xy/cp.w*.5+.5;if(su.x<0.||su.x>1.||su.y<0.||su.y>1.)break;
             float sd=texture2D(tDepth,su).x;if(sd>.99999)continue;vec3 SP=recon(su,sd);if(length(SP-camPos)<length(R0-camPos)-.04&&length(SP-R0)<stp*2.){hcol=texture2D(tColor,su).rgb;break;}}
           float fr=.2+.8*pow(1.-max(-V.y,0.),5.);col=mix(col,hcol,k*fr*.85);
           float gl=step(.982,fract(sin(dot(tq,vec2(12.9898,78.233))+floor(rtm*7.))*43758.5453));col+=vec3(.55,.6,.65)*gl*k;}}}
@@ -1007,8 +1043,8 @@ const postMat=new THREE.ShaderMaterial({defines:{RAYS:24,MB:1,SSR:22,AO:1},depth
     col=mix(col,mix(vec3(lum(col)),haze,.5),hazeK*smoothstep(.985,.9995,d)*(1.-sky(uv)));
     if(sunOn>0.){
       // crepuscular rays: march toward the sun, gathering open sky
-      vec2 dl=(uv-sunUV)/float(RAYS)*.9,p=uv;float il=1.,acc=0.;for(int i=0;i<RAYS;i++){p-=dl;acc+=sky(p)*il;il*=.955;}
-      col+=sunCol*acc/float(RAYS)*rays*sunOn;
+      float nR=min(float(RAYS),uRays);vec2 dl=(uv-sunUV)/nR*.9,p=uv;float il=1.,acc=0.;for(int i=0;i<RAYS;i++){if(float(i)>=nR)break;p-=dl;acc+=sky(p)*il;il*=.955;}
+      col+=sunCol*acc/nR*rays*sunOn;
       float vis=(sky(sunUV)+sky(sunUV+vec2(.012,0.))+sky(sunUV-vec2(.012,0.))+sky(sunUV+vec2(0.,.012))+sky(sunUV-vec2(0.,.012)))/5.;
       if(flare>0.&&vis>0.){vec2 ax=vec2(.5)-sunUV;vec3 fc=vec3(0.);
         fc+=vec3(1.,.8,.5)*disc(uv-(sunUV+ax*.55),.035)*.35;fc+=vec3(.5,.8,1.)*disc(uv-(sunUV+ax*1.1),.06)*.22;fc+=vec3(.9,.5,1.)*disc(uv-(sunUV+ax*1.45),.025)*.4;
@@ -1017,7 +1053,7 @@ const postMat=new THREE.ShaderMaterial({defines:{RAYS:24,MB:1,SSR:22,AO:1},depth
         col+=fc*flare*sunOn*vis;}}
   #if AO
     // ambient occlusion from depth: creases, corners and contact under things get darker
-    if(d<.99999){vec3 P0=recon(uv,d);float dc=length(P0-camPos),occ=0.;
+    if(d<.99999&&uAO>.5){vec3 P0=recon(uv,d);float dc=length(P0-camPos),occ=0.;
       for(int i=0;i<8;i++){float a=float(i)*.7854+.39,r=mod(float(i),2.)<.5?3.:7.;vec2 o=vec2(cos(a),sin(a))*px*r;float sd=texture2D(tDepth,uv+o).x;
         if(sd<.99999){float df=dc-length(recon(uv+o,sd)-camPos);occ+=smoothstep(.06,.35,df)*(1.-smoothstep(.9,2.2,df));}}
       col*=1.-occ/8.*.55;}
@@ -1095,7 +1131,7 @@ const rtData=new Uint8Array(RTW.X*H*RTW.Z),hData=new Uint8Array(RTW.X*RTW.Z);
 const rtTex=RTX_OK?new THREE.DataTexture3D(rtData,RTW.X,H,RTW.Z):null;
 if(rtTex){rtTex.format=THREE.RedFormat;rtTex.type=THREE.UnsignedByteType;rtTex.minFilter=rtTex.magFilter=THREE.NearestFilter;rtTex.unpackAlignment=1;rtTex.generateMipmaps=false}
 const hTex=new THREE.DataTexture(hData,RTW.X,RTW.Z,RTX_OK?THREE.RedFormat:THREE.LuminanceFormat);hTex.minFilter=hTex.magFilter=THREE.NearestFilter;hTex.unpackAlignment=1;hTex.generateMipmaps=false;
-const RTU={rtVox:{value:rtTex},hTex:{value:hTex},rtOrigin:{value:new V3()},rtSize:{value:new V3(RTW.X,H,RTW.Z)},sunDirU:{value:new V3(0,1,0)},sunK:{value:1},wet:{value:0},rtime:{value:0}};
+const RTU={rtVox:{value:rtTex},hTex:{value:hTex},rtOrigin:{value:new V3()},rtSize:{value:new V3(RTW.X,H,RTW.Z)},sunDirU:{value:new V3(0,1,0)},sunK:{value:1},wet:{value:0},rtime:{value:0},rtSunN:{value:56},rtAOk:{value:1}};
 function updateRT(c){
   const ox=Math.floor(vc(c.x)/16)*16-RTW.X/2,oz=Math.floor(vc(c.z)/16)*16-RTW.Z/2,now=performance.now();
   if(ox===RTW.ox&&oz===RTW.oz&&!(rtDirty&&now-RTW.t>500))return;
@@ -1109,7 +1145,7 @@ function updateRT(c){
 const SHADOW_ORIG=THREE.ShaderChunk.shadowmask_pars_fragment;
 // shadow lookups snapped to the 1/32 m texture-pixel grid so every shadow edge is pixelated
 function pxShadows(m){if(!m||m.isMeshBasicMaterial||(m.userData&&m.userData.pxs))return m;(m.userData=m.userData||{}).pxs=1;const prev=m.onBeforeCompile;m.onBeforeCompile=(sh,r)=>{if(prev)prev.call(m,sh,r);
-  sh.vertexShader='varying vec3 vPxW,vPxN;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvPxW=(modelMatrix*vec4(transformed,1.)).xyz;vPxN=normalize(mat3(modelMatrix)*objectNormal);');
+  sh.vertexShader='varying vec3 vPxW,vPxN;\n'+sh.vertexShader.replace('#include <project_vertex>','vPxW=(modelMatrix*vec4(transformed,1.)).xyz;vPxN=normalize(mat3(modelMatrix)*objectNormal);\n#include <project_vertex>');
   sh.fragmentShader=`varying vec3 vPxW,vPxN;
 #if defined(USE_SHADOWMAP)&&NUM_DIR_LIGHT_SHADOWS>0
 uniform mat4 directionalShadowMatrix[NUM_DIR_LIGHT_SHADOWS];
@@ -1125,7 +1161,7 @@ float getShadowMask(){float s=1.;
 function installVmatShader(){vmat.onBeforeCompile=sh=>{
   Object.assign(sh.uniforms,RTU);
   sh.vertexShader='varying vec3 vRtW,vRtN;attribute vec4 aBl;attribute float aBlT;varying vec4 vBl;varying float vBlT;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvRtW=(modelMatrix*vec4(transformed,1.)).xyz;vRtN=normalize(mat3(modelMatrix)*objectNormal);vBl=aBl;vBlT=aBlT;');
-  sh.fragmentShader=`varying vec3 vRtW,vRtN;varying vec4 vBl;varying float vBlT;uniform vec3 rtOrigin,rtSize,sunDirU;uniform float sunK,wet,rtime;uniform sampler2D hTex;
+  sh.fragmentShader=`varying vec3 vRtW,vRtN;varying vec4 vBl;varying float vBlT;uniform vec3 rtOrigin,rtSize,sunDirU;uniform float sunK,wet,rtime,rtSunN,rtAOk;uniform sampler2D hTex;
 #ifdef RTX
 uniform highp sampler3D rtVox;
 #endif
@@ -1140,7 +1176,7 @@ float rtTrace(vec3 o,vec3 d,int n){vec3 p=o-rtOrigin;ivec3 c=ivec3(floor(p)),S=i
     if(tM.x<tM.y){if(tM.x<tM.z){c.x+=int(st.x);tM.x+=inv.x;}else{c.z+=int(st.z);tM.z+=inv.z;}}else{if(tM.y<tM.z){c.y+=int(st.y);tM.y+=inv.y;}else{c.z+=int(st.z);tM.z+=inv.z;}}
     if(c.y>=S.y||c.y<0||c.x<0||c.z<0||c.x>=S.x||c.z>=S.z)return 1.;if(texelFetch(rtVox,c,0).r>.5)return 0.;}
   return 1.;}
-float rtSun(){if(sunDirU.y<=0.02)return 1.;vec3 n=normalize(vRtN);return rtTrace(pxWorld()/.5+n*.06,sunDirU,56);}
+float rtSun(){if(sunDirU.y<=0.02)return 1.;vec3 n=normalize(vRtN);return rtTrace(pxWorld()/.5+n*.06,sunDirU,int(rtSunN));}
 float rtAO(){vec3 n=normalize(vRtN),t1=abs(n.y)>.5?vec3(1.,0.,0.):vec3(0.,1.,0.),t2=cross(n,t1),o=pxWorld()/.5+n*.06;float oc=0.;
   oc+=1.-rtTrace(o,normalize(n+t1*.85),3);oc+=1.-rtTrace(o,normalize(n-t1*.85),3);oc+=1.-rtTrace(o,normalize(n+t2*.85),3);oc+=1.-rtTrace(o,normalize(n-t2*.85),3);return 1.-oc*.16;}
 #endif
@@ -1168,12 +1204,22 @@ float getShadowMask(){float s=1.;
     diffuseColor.rgb*=1.-.4*wet*ex;}`)
     .replace('#include <aomap_fragment>',`#include <aomap_fragment>
 #ifdef RTX
-  reflectedLight.indirectDiffuse*=rtAO();
+  if(rtAOk>.5)reflectedLight.indirectDiffuse*=rtAO();
 #endif`);
 }};
 
-function adaptRes(dt){frameMs+=(dt*1000-frameMs)*.05;if(GFX===0)return;
-  if(frameMs>24&&dynScale>.7){dynScale=Math.max(.7,dynScale-.05);frameMs=18}else if(frameMs<14&&dynScale<1){dynScale=Math.min(1,dynScale+.05);frameMs=17}}
+// frame-time governor aiming for 60 fps (16.7 ms): steps the costliest effects down one rung at a time when frames run long,
+// and back up when there's headroom. Rungs, cheapest change first; everything is a uniform, so nothing recompiles mid-game
+const QL=[{s:1,rays:24,ssr:22,ao:1,mb:1,rt:56,rao:1},{s:1,rays:16,ssr:16,ao:1,mb:1,rt:40,rao:1},{s:.9,rays:12,ssr:12,ao:1,mb:0,rt:32,rao:1},{s:.85,rays:10,ssr:10,ao:1,mb:0,rt:28,rao:0},
+  {s:.78,rays:8,ssr:8,ao:0,mb:0,rt:24,rao:0},{s:.7,rays:6,ssr:6,ao:0,mb:0,rt:18,rao:0},{s:.62,rays:6,ssr:6,ao:0,mb:0,rt:14,rao:0}];
+let qLvl=0,qHold=0,qCalm=0,qProbe=8,qTried=-1;const TARGET_MS=16.9;
+function applyQ(){const q=QL[qLvl],U=postMat.uniforms;dynScale=q.s;U.uRays.value=q.rays;U.uSsr.value=q.ssr;U.uAO.value=q.ao;U.uMB.value=q.mb;RTU.rtSunN.value=q.rt;RTU.rtAOk.value=q.rao}
+function adaptRes(dt){const ms=Math.min(100,dt*1000);frameMs+=(ms-frameMs)*.06;if(GFX===0||PIX>1)return;qHold-=dt;if(qHold>0)return;
+  if(frameMs>TARGET_MS+1.2&&qLvl<QL.length-1){if(qTried===qLvl)qProbe=Math.min(60,qProbe*2);qTried=-1;qLvl++;applyQ();qHold=.6;qCalm=0;frameMs=TARGET_MS}
+  else if(qLvl>0&&(frameMs<TARGET_MS*.72||(qCalm+=dt)>qProbe)){qLvl--;qTried=qLvl;applyQ();qHold=2.5;qCalm=0;frameMs=TARGET_MS}
+  // a 60 Hz screen never shows spare time (frames can't beat 16.7 ms), so after a calm stretch it simply tries one rung up;
+  // if that rung can't hold 60 it drops straight back and waits twice as long before trying again
+  if(frameMs>TARGET_MS+.8)qCalm=0;else if(qTried===qLvl&&qCalm>4){qProbe=8;qTried=-1}}
 
 
 // ---------------- chunk meshing
@@ -1317,14 +1363,38 @@ function tileTex(tile,rep=1){const c=document.createElement('canvas');c.width=c.
 
 const vmat=new THREE.MeshLambertMaterial({vertexColors:true,map:atlas});installVmatShader();
 // grass tufts: crossed alpha-tested quads on top of grass blocks, swaying in the wind
-const grassC=document.createElement('canvas');grassC.width=grassC.height=32;const grassTex=new THREE.CanvasTexture(grassC);grassTex.magFilter=grassTex.minFilter=THREE.NearestFilter;grassTex.generateMipmaps=false;
-function drawGrassTex(s){const g=grassC.getContext('2d');g.clearRect(0,0,32,32);const C=[[78,124,52],[96,108,62],[150,112,54],[200,206,214]][s],r=mulberry(seed^77);
-  for(let i=0;i<11;i++){let x=2+r()*28,lean=(r()-.5)*.5;const h=14+r()*17;for(let y=0;y<h;y++){const k=.7+.5*(y/h)+(r()-.5)*.1;g.fillStyle=`rgb(${C[0]*k|0},${C[1]*k|0},${C[2]*k|0})`;g.fillRect(x|0,31-y,y<h*.6?2:1,1);x+=lean}}
+const grassC=document.createElement('canvas');grassC.width=256;grassC.height=32;const grassTex=new THREE.CanvasTexture(grassC);grassTex.magFilter=grassTex.minFilter=THREE.NearestFilter;grassTex.generateMipmaps=false;
+// 8 cut-out sprites side by side: two grasses, five wildflowers, clover. Flowers fade to seed heads in autumn
+const GSLOTS=8;
+function drawGrassTex(s){const g=grassC.getContext('2d');g.clearRect(0,0,256,32);const C=[[78,124,52],[96,108,62],[150,112,54],[200,206,214]][s],r=mulberry(seed^77);
+  const px=(x,y,c)=>{g.fillStyle=`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;g.fillRect(x|0,y|0,1,1)};
+  const blades=(ox,n,hmin,hmax,w2)=>{for(let i=0;i<n;i++){let x=ox+2+r()*28,lean=(r()-.5)*.5;const h=hmin+r()*(hmax-hmin);for(let y=0;y<h;y++){const k=.7+.5*(y/h)+(r()-.5)*.1;g.fillStyle=`rgb(${C[0]*k|0},${C[1]*k|0},${C[2]*k|0})`;g.fillRect(x|0,31-y,y<h*w2?2:1,1);x+=lean}}};
+  blades(0,11,14,31,.6);blades(32,16,20,31,.3);
+  const autumn=s===2;
+  const flower=(ox,n,petal,center,kind)=>{blades(ox,5,8,18,.5);for(let i=0;i<n;i++){const x=ox+4+r()*24,h=12+r()*14;let sx=x;for(let y=0;y<h;y++){px(sx,31-y,[C[0]*.8,C[1]*.9,C[2]*.7]);sx+=(r()-.5)*.3}const cy=31-h;
+      if(autumn){px(sx,cy,[120,96,60]);px(sx+1,cy,[100,80,50]);continue}
+      if(kind==='daisy'){for(const[a,b]of[[-2,0],[2,0],[0,-2],[0,2],[-1,-1],[1,-1],[-1,1],[1,1]])px(sx+a,cy+b,petal);px(sx,cy,center)}
+      else if(kind==='poppy'){for(const[a,b]of[[-1,0],[1,0],[0,-1],[-1,-1],[1,-1],[0,0]])px(sx+a,cy+b,petal);px(sx,cy,center)}
+      else if(kind==='dand'){for(const[a,b]of[[-1,0],[1,0],[0,-1],[0,1],[0,0],[-1,-1],[1,-1]])px(sx+a,cy+b,petal)}
+      else if(kind==='bell'){for(let k=0;k<3;k++){px(sx+1+k%2,cy+k*2,petal);px(sx+1+k%2,cy+k*2+1,center)}}
+      else if(kind==='lav'){for(let k=0;k<5;k++){px(sx,cy+k,petal);if(k%2)px(sx+1,cy+k,center)}}}};
+  flower(64,6,[236,234,224],[230,196,60],'daisy');flower(96,6,[200,34,30],[30,20,20],'poppy');flower(128,7,[236,200,50],[0,0,0],'dand');
+  flower(160,6,[90,110,210],[60,70,160],'bell');flower(192,7,[150,110,200],[120,80,170],'lav');
+  // clover patch: low round leaves with a few white heads
+  for(let i=0;i<14;i++){const x=226+r()*26,y=24+r()*7;for(const[a,b]of[[0,0],[1,0],[0,1],[1,1]])px(x+a,y+b,[C[0]*.85,C[1]*1.05,C[2]*.8])}
+  if(!autumn)for(let i=0;i<3;i++){const x=228+r()*22,y=20+r()*4;px(x,y,[240,236,232]);px(x+1,y,[220,210,220]);px(x,y+1,[230,226,224])}
   grassTex.needsUpdate=true}
+// grass colour patches: lush, yellow-green, blue-green and dry olive meadows blending over ~12 blocks
+const GPAL=[[.94,.94,.94],[1,.95,.64],[.75,.92,.94],[.98,.84,.64],[.82,1,.78]];
+function gpatch(x,z){const S=12,fx=x/S,fz=z/S,ix=Math.floor(fx),iz=Math.floor(fz),tx=fx-ix,tz=fz-iz,o=[0,0,0];
+  for(const[a,b,w]of[[0,0,(1-tx)*(1-tz)],[1,0,tx*(1-tz)],[0,1,(1-tx)*tz],[1,1,tx*tz]]){const c=GPAL[Math.floor(h3(ix+a,97,iz+b)*GPAL.length)];o[0]+=c[0]*w;o[1]+=c[1]*w;o[2]+=c[2]*w}return o}
 const grassTime={value:0};
 const grassMat=new THREE.MeshLambertMaterial({map:grassTex,alphaTest:.5,side:THREE.DoubleSide,vertexColors:true});
 grassMat.onBeforeCompile=sh=>{sh.uniforms.time=grassTime;sh.vertexShader='uniform float time;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nfloat sw=uv.y>.5?1.:0.;transformed.x+=sin(time*1.7+position.x*.6+position.z*.4)*.2*sw;transformed.z+=cos(time*1.3+position.x*.45)*.14*sw;')};
 pxShadows(grassMat);
+// grass casts shadows too: a depth material with the same cut-out and sway, so blades throw pixel shadows that move with the wind
+const grassDepth=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking,map:grassTex,alphaTest:.5,side:THREE.DoubleSide});
+grassDepth.onBeforeCompile=sh=>{sh.uniforms.time=grassTime;sh.vertexShader='uniform float time;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nfloat sw=uv.y>.5?1.:0.;transformed.x+=sin(time*1.7+position.x*.6+position.z*.4)*.2*sw;transformed.z+=cos(time*1.3+position.x*.45)*.14*sw;')};
 const gmat=new THREE.MeshLambertMaterial({map:atlas,color:0xcfe6ee,transparent:true,opacity:.8,depthWrite:false});
 const chunkMeshes=[],glassMeshes=[],grassMeshes=[];
 function mkGeo(P,N,C,I,UV){const g=new THREE.BufferGeometry();if(UV)g.setAttribute('uv',new THREE.Float32BufferAttribute(UV,2));
@@ -1367,9 +1437,15 @@ function quad(x,y,z,ox,oz,fi,bx,tile,cr,cg,cb,s,vs=0){
 const slotOf=(cx,cz)=>{let a=cx%NC,b=cz%NC;if(a<0)a+=NC;if(b<0)b+=NC;return b*NC+a};
 const chunkIn=(cx,cz)=>cx*CS>=OX&&cz*CS>=OZ&&cx*CS<OX+W&&cz*CS<OZ+W;
 const slotC=new Int32Array(NC*NC*2);
+let LAZYM=true;const GAPC=new Int16Array(18*18),LIMC=new Int16Array(16*16);
 function buildChunk(cx,cz){
   const WW=W*W,x0=cx*CS,z0=cz*CS,x1=x0+CS-1,z1=z0+CS-1,nb=[0,0,0,0,0,0];mv=0;mi=0;const GP=[],GN=[],GI=[],GUV=[],TP=[],TU=[],TC=[],TI=[],gd=GFX===0?.18:.42;
-  for(let y=0;y<H;y++)for(let z=z0;z<z0+CS;z++){let i=vi(x0,y,z);for(let x=x0;x<x0+CS;x++,i++){
+  // skip buried blocks without looking at them: per column, the lowest see-through cell (air, glass, ladder…) in it or its 4 neighbours;
+  // everything two or more below that is boxed in by opaque blocks on all six sides, so it can't show a face until something above is dug out
+  for(let zz=-1;zz<=CS;zz++)for(let xx=-1;xx<=CS;xx++){let y=1;while(y<H&&isOpq(get(x0+xx,y,z0+zz)))y++;GAPC[(zz+1)*18+xx+1]=y}
+  for(let zz=0;zz<CS;zz++)for(let xx=0;xx<CS;xx++){const c=(zz+1)*18+xx+1;LIMC[zz*CS+xx]=Math.min(GAPC[c],GAPC[c-1],GAPC[c+1],GAPC[c-18],GAPC[c+18])-1}
+  for(let y=0;y<H;y++)for(let z=z0;z<z0+CS;z++){let i=vi(x0,y,z);const lr=(z-z0)*CS-x0;for(let x=x0;x<x0+CS;x++,i++){
+    if(LAZYM&&y<LIMC[lr+x])continue;
     const b=vox[i];if(!b||b===14||b===17||b===20)continue;
     nb[0]=x<x1?vox[i+1]:get(x+1,y,z);nb[1]=x>x0?vox[i-1]:get(x-1,y,z);nb[2]=y<H-1?vox[i+WW]:0;nb[3]=y>0?vox[i-WW]:13;nb[4]=z<z1?vox[i+W]:get(x,y,z+1);nb[5]=z>z0?vox[i-W]:get(x,y,z-1);
     if(b===15){for(let fi=0;fi<6;fi++){const o=nb[fi];if(o===15||isOpq(o))continue;const f=FACES[fi],n=GP.length/3;
@@ -1377,8 +1453,12 @@ function buildChunk(cx,cz){
     const shp=SH[b],topF=shp?BTOP[b]:1;
     qBT=0;if((b===1||b===2||(b>=23&&b<=25))&&!isOpq(nb[2]))groundBlend(b,x,y,z);
     if((b===1||(b>=23&&b<=25))&&!isOpq(nb[2])&&!SH[nb[2]]&&h3(x,y+11,z)<gd){const ox=x+.5+(h3(x,1,z)-.5)*.5,oz=z+.5+(h3(z,2,x)-.5)*.5,hh=.8+h3(x,3,z)*.9,ww=.55+h3(x,4,z)*.35,a=h3(x,5,z)*3,sh=.8+h3(x,6,z)*.3,yb=y+topF;
-      for(const r of[a,a+1.5708]){const dx=Math.cos(r)*ww,dz=Math.sin(r)*ww,n=TP.length/3;TP.push(ox-dx,yb,oz-dz,ox+dx,yb,oz+dz,ox+dx,yb+hh,oz+dz,ox-dx,yb+hh,oz-dz);TU.push(0,0,1,0,1,1,0,1);for(let q=0;q<4;q++)TC.push(sh,sh,sh);TI.push(n,n+1,n+2,n,n+2,n+3)}}
-    let cr=1,cg=1,cb=1;const v=.88+.12*h3(x,y,z),tiles=TILE_OF[b];
+      // which sprite: mostly grass; flower meadows pick one kind per patch, with scattered singles elsewhere
+      const fm=h3(Math.floor(x/9),71,Math.floor(z/9)),fr=h3(x,7,z);let slot=h3(x,8,z)<.35?1:0;
+      if(fm<.35&&fr<.38)slot=2+Math.floor(h3(Math.floor(x/9),72,Math.floor(z/9))*5);else if(fr<.05)slot=2+Math.floor(h3(x,9,z)*6);
+      const gc=slot<2||slot===7?gpatch(x,z):[1,1,1],u0=slot/GSLOTS,u1=(slot+1)/GSLOTS;
+      for(const r of[a,a+1.5708]){const dx=Math.cos(r)*ww,dz=Math.sin(r)*ww,n=TP.length/3;TP.push(ox-dx,yb,oz-dz,ox+dx,yb,oz+dz,ox+dx,yb+hh,oz+dz,ox-dx,yb+hh,oz-dz);TU.push(u0,0,u1,0,u1,1,u0,1);for(let q=0;q<4;q++)TC.push(sh*gc[0],sh*gc[1],sh*gc[2]);TI.push(n,n+1,n+2,n,n+2,n+3)}}
+    let cr=1,cg=1,cb=1;const v=.88+.12*h3(x,y,z),tiles=TILE_OF[b];if(b===1||(b>=23&&b<=25)){const gc=gpatch(x,z);cr=gc[0];cg=gc[1];cb=gc[2]}
     const pr=paintRooms.length?roomsFor(cx,cz):null;
     if(winIdx.size){const we=winIdx.get(i);if(we&&!(trimOff.size&&trimOff.has(x+','+y+','+z)))winTrim(we,x,y,z,x0,z0)}
     if(!shp){for(let fi=0;fi<6;fi++){const o=nb[fi];if(isOpq(o)||(fi===2&&SH[o]&&BOTFULL[o]))continue;
@@ -1402,7 +1482,7 @@ function buildChunk(cx,cz){
   for(const arr of[chunkMeshes,glassMeshes,grassMeshes])if(arr[k]){scene.remove(arr[k]);arr[k].geometry.dispose();arr[k]=null}
   if(TP.length){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(TP,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(TU,2));g.setAttribute('color',new THREE.Float32BufferAttribute(TC,3));
     const nn=new Float32Array(TP.length);for(let i=1;i<nn.length;i+=3)nn[i]=1;g.setAttribute('normal',new THREE.BufferAttribute(nn,3));g.setIndex(TI);g.computeBoundingSphere();
-    const gm=new THREE.Mesh(g,grassMat);gm.scale.setScalar(VS);gm.receiveShadow=true;freeze(gm);scene.add(gm);grassMeshes[k]=gm}
+    const gm=new THREE.Mesh(g,grassMat);gm.scale.setScalar(VS);gm.receiveShadow=true;gm.castShadow=GFX>0;gm.customDepthMaterial=grassDepth;freeze(gm);scene.add(gm);grassMeshes[k]=gm}
   if(mv){const g=new THREE.BufferGeometry();
     g.setAttribute('position',new THREE.BufferAttribute(mP.slice(0,mv*3),3));g.setAttribute('normal',new THREE.BufferAttribute(mN.slice(0,mv*3),3,true));
     g.setAttribute('color',new THREE.BufferAttribute(mC.slice(0,mv*3),3,true));g.setAttribute('uv',new THREE.BufferAttribute(mU.slice(0,mv*2),2,true));g.setAttribute('aBl',new THREE.BufferAttribute(mB.slice(0,mv*4),4,true));g.setAttribute('aBlT',new THREE.BufferAttribute(mT.slice(0,mv),1));
@@ -1451,7 +1531,7 @@ function streamChunks(centers,budget){
   return want.length;
 }
 const viewUnits=()=>RD*CS*VS;
-function setBlock(x,y,z,v){if(!inB(x,y,z))return;setv(x,y,z,v);rebuildAt(x,z);if(NET.wr&&!NET.applying)netEdit('b',x,y,z,v)}
+function setBlock(x,y,z,v){if(!inB(x,y,z))return;setv(x,y,z,v);rebuildAt(x,z);if(y===G&&manholes.length)for(const m of manholes)if(x>=m.x&&x<=m.x+1&&z>=m.z&&z<=m.z+1)placeCover(m);if(NET.wr&&!NET.applying)netEdit('b',x,y,z,v)}
 function breakGlass(x,y,z){
   const st=[[x,y,z]],done=new Set();let n=0;
   while(st.length&&n<16){const[a,b,c]=st.pop();if(get(a,b,c)!==B.GLASS)continue;setv(a,b,c,0);n++;
@@ -1482,6 +1562,22 @@ function buildFurn(sp){
   const[type,wx,wy,wz,yaw]=sp,F=furnBuilder(wx,wy,wz,yaw),[fw,fd]=FD[type]||[1,1],W_=fw*VS,D_=fd*VS;
   const wood=pick(WOODS),fab=pick(FABRIC),dk=0x1a1814,white=0xd8d4c8;
   switch(type){
+  case'lane':{const L=sp[5].L;for(const sx of[-.09,.09])F(.1,.012,L,0xd8b030,sx,.006,0);for(const sx of[-2.75,2.75])F(.12,.012,L+5,0xdcdad2,sx,.006,0);break}
+  case'xwalk':{for(let k=0;k<7;k++)F(.42,.012,2,0xdcdad2,-2.55+k*.85,.006,0);F(2.7,.012,.3,0xdcdad2,1.45,.006,1.35);break}
+  case'curb':{const{L,paint}=sp[5];F(.2,.52,L,0xb4b0a8,0,.26,0);F(.22,.04,L,0xc4c0b8,0,.52,0);if(paint){F(.205,.53,2.6,paint,0,.265,L/2-1.3);F(.205,.53,2.6,paint,0,.265,-L/2+1.3)}break}
+  case'stop':{const red=0xb81c1c,pole=0x8a8c8e;F(.07,2.5,.07,pole,0,1.25,0);for(const r of[Math.PI/8,3*Math.PI/8])F(.68,.68,.025,red,0,2.15,.05,0,r);
+    sunTxt(F,'STOP',0,2.15,.068,.024,0xf0ece4);
+    const nm=sp[5].names;if(nm){F(1.3,.2,.03,0x1e6a3a,0,2.62,0);sunTxt(F,nm[0],0,2.62,.017,.02,0xf0f0e8);F(1.3,.2,.03,0x1e6a3a,0,2.86,0,Math.PI/2);sunTxt(F,nm[1],0,2.86,.017,.02,0xf0f0e8,Math.PI/2);F(.06,.5,.06,pole,0,2.74,0)}break}
+  case'tlight':{const dk=0x2e3032,{lit,names}=sp[5];F(.16,5,.16,dk,0,2.5,0);F(3.6,.11,.11,dk,-1.8,4.75,0);
+    for(const hx of[-2.2,-3.4]){F(.34,.95,.3,0x1a1a1a,hx,4.2,0);[[0xe8301c,0x4a1210],[0xe8b81c,0x4a3a10],[0x2ae060,0x10401c]].forEach(([on,off],k)=>{F(.22,.22,.03,k===lit?on:off,hx,4.5-k*.3,.16);F(.28,.04,.12,0x1a1a1a,hx,4.62-k*.3,.22)})}
+    F(.3,.5,.22,0x1a1a1a,0,2.7,.13);F(.2,.16,.03,lit===2?0xf0f0e8:0xe06010,0,2.8,.25);
+    if(names){F(1.4,.22,.03,0x1e6a3a,-.75,4.1,0);sunTxt(F,names[0],-.75,4.1,.017,.022,0xf0f0e8)}break}
+  case'rsign':{const k=sp[5].k,pole=0x8a8c8e;F(.07,2.4,.07,pole,0,1.2,0);
+    if(k==='speed'){F(.5,.66,.025,0xf0ece4,0,2.05,.05);F(.46,.62,.026,0x101010,0,2.05,.05);F(.42,.58,.027,0xf0ece4,0,2.05,.05);sunTxt(F,'SPEED',0,2.27,.065,.015,0x101010);sunTxt(F,'LIMIT',0,2.16,.065,.015,0x101010);sunTxt(F,pick(['25','30','35','20']),0,1.94,.065,.042,0x101010)}
+    else if(k==='noparking'){F(.46,.6,.025,0xf0ece4,0,2.05,.05);sunTxt(F,'P',0,2.05,.065,.05,0x101010);for(const r of[0,1])for(const sd of[-1,1])F(r?.05:.36,r?.36:.05,.026,0xc02020,r?sd*.16:0,2.05+(r?0:sd*.16),.06);F(.5,.05,.027,0xc02020,0,2.05,.07,0,Math.PI/4)}
+    else if(k==='oneway'){F(.95,.32,.025,0x101010,0,2.15,.05);F(.62,.12,.026,0xf0ece4,-.06,2.15,.06);for(let q=0;q<4;q++)F(.05,.24-q*.06,.026,0xf0ece4,.27+q*.05,2.15,.06);sunTxt(F,'ONE WAY',-.08,2.15,.072,.012,0x101010)}
+    else{for(let q=0;q<7;q++){const w=.78-q*.11;F(w,.07,.025,0xc02020,0,2.36-q*.07,.05);if(w>.36)F(w-.24,.07,.026,0xf0ece4,0,2.36-q*.07,.055)}sunTxt(F,'YIELD',0,2.28,.07,.014,0xc02020)}
+    break}
   case'rail':{const{run,rise,style}=sp[5],ang=Math.atan2(rise,run),len=Math.hypot(run,rise),hr=.95,metal=style==='metal',pc=metal?0x2a2c2e:0x5a3c22,rc=metal?0x3a3c3e:0x6e4a2a;
     F(len,.07,.07,rc,run/2,rise/2+hr,0,0,ang);F(.1,hr+.1,.1,pc,.05,(hr+.1)/2,0);F(.1,hr+.1,.1,pc,run-.05,rise+(hr+.1)/2,0);
     const n=metal?Math.round(run/.13):Math.round(run/.5);for(let i=1;i<n;i++){const x=i*run/n,base=Math.ceil(x/VS*2)/2*VS*(rise/run);F(metal?.025:.07,hr-.02,metal?.025:.07,pc,x,base+(hr-.02)/2,0)}
@@ -1653,7 +1749,9 @@ function updParticles(dt){for(let j=0;j<PN;j++){if(pLife[j]<=0)continue;const o=
 // blood coats surfaces: every droplet that lands leaves a pixel (1/16 m, the block texture's pixel) on the face it hit
 const PXM=VS/8,SN=9000;let stainIM=null,stainN=0;
 if(THREE.InstancedMesh){stainIM=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1),new THREE.MeshLambertMaterial({color:0xffffff,polygonOffset:true,polygonOffsetFactor:-3}),SN);
-  stainIM.count=0;stainIM.frustumCulled=false;stainIM.receiveShadow=true;scene.add(stainIM)}
+  stainIM.count=0;stainIM.frustumCulled=false;stainIM.receiveShadow=true;scene.add(stainIM);
+  // create the per-stain colour buffer before the first render, or the shader compiles without it and every stain draws white
+  if(stainIM.setColorAt){const c=new THREE.Color(.4,.01,.02);for(let i=0;i<SN;i++)stainIM.setColorAt(i,c);stainIM.material.needsUpdate=true}}
 const _so=new THREE.Group(),_sc=new THREE.Color();
 function stainPx(x,y,z,f,sz){if(!stainIM||!_so.position)return;const k=stainN%SN;stainN++;stainIM.count=Math.min(SN,stainN);
   _so.position.set(x,y,z);_so.rotation.set(f===2?-Math.PI/2:f===3?Math.PI/2:0,f===0?Math.PI/2:f===1?-Math.PI/2:f===5?Math.PI:0,0);_so.scale.set(PXM*sz,PXM*sz,1);_so.updateMatrix();
@@ -1732,6 +1830,7 @@ const RECIPES=[
   {out:'ammo',n:8,need:{scrap:1,coal:1},label:'Hand-load ammo'},
   {out:'bandage',n:1,need:{cloth:2},label:'Tie a bandage'},
   {out:'kit',n:1,need:{scrap:3,metal:1},label:'Build a repair kit'},
+  {out:'wrench',n:1,need:{scrap:2,metal:1},label:'Make a wrench (fit car parts)'},
   {out:'fuel',n:1,need:{coal:2,scrap:1},label:'Brew makeshift fuel'},
   {out:'spikes',n:1,need:{plank:6,scrap:2},label:'Hammer a spike trap'},
   {out:'beartrap',n:1,need:{metal:2,scrap:1},label:'Forge a bear trap'},
@@ -1749,7 +1848,7 @@ const RECIPES=[
 const LOOT=[['scrip',16,3,15],['veg',7,1,2],['pipebomb',2,1,1],['ammo',20,4,10],['scrap',18,1,3],['cloth',14,1,3],['food',16,1,2],['bandage',8,1,1],['fuel',10,1,1],['kit',3,1,1],['metal',4,1,2],['coal',7,1,3],['beartrap',3,1,1],['mine',2,1,1],['spikes',3,1,1],['tent',1,1,1],['hardhat',3,1,1],['jacket',3,1,1],['vest',2,1,1],['riot',2,1,1],['cargo',2,1,1],['helmet',1,1,1]];
 // shops stock what you'd expect: groceries feed you, hardware stores build and trap, hospitals patch you up, schools have a bit of everything
 const LOOTK={grocery:[['scrip',8,4,20],['veg',22,1,3],['food',46,1,3],['cloth',4,1,2],['fuel',5,1,1],['bandage',5,1,1],['scrap',6,1,2],['coal',4,1,2]],
-  hardware:[['saw',2,1,1],['tnt',3,1,1],['pipebomb',4,1,1],['scrap',22,1,4],['metal',14,1,2],['plank',12,2,5],['wood',8,1,3],['fuel',10,1,1],['kit',8,1,1],['beartrap',5,1,1],['spikes',5,1,1],['mine',2,1,1],['hardhat',6,1,1],['coal',6,1,3]],
+  hardware:[['wrench',6,1,1],['battery',3,1,1],['saw',2,1,1],['tnt',3,1,1],['pipebomb',4,1,1],['scrap',22,1,4],['metal',14,1,2],['plank',12,2,5],['wood',8,1,3],['fuel',10,1,1],['kit',8,1,1],['beartrap',5,1,1],['spikes',5,1,1],['mine',2,1,1],['hardhat',6,1,1],['coal',6,1,3]],
   hospital:[['bandage',44,1,3],['cloth',14,1,3],['food',6,1,1],['kit',3,1,1],['scrap',6,1,2],['ammo',5,2,6],['vest',2,1,1]],
   school:[['food',20,1,2],['cloth',18,1,3],['scrap',12,1,2],['bandage',9,1,1],['jacket',4,1,1],['cargo',4,1,1],['ammo',5,2,5],['plank',6,1,3]]};
 const TOOLS=['Bat','Pistol','Pickaxe','Build','Place'];
@@ -1968,10 +2067,10 @@ function makeHud(p){
   <div class="stats"><div class="bar hp"><i></i><span>HEALTH</span></div><div class="bar fd"><i></i><span>FOOD</span></div><div class="bar st"><i></i><span>STAMINA</span></div><div class="bar tp"><i></i><span>WARMTH</span></div><div class="arm"></div></div>
   <div class="hot">${TOOLS.map((t,k)=>`<div class="slot"><i class="k">${k+1}</i><img class="pi" alt="" src="${pxIcon(t)}"><b>${t}</b><span></span></div>`).join('')}</div>
   <div class="veh hidden"><h3></h3><div class="bar fd"><i></i><span>FUEL</span></div><div class="bar hp"><i></i><span>CONDITION</span></div><div class="vs" style="margin-top:6px"></div></div>
-  <button class="rspb" title="Stuck? Respawn now (&#96; key)">Respawn</button>
+  <button class="rspb" title="Stuck? Respawn now (&#96; key)">Respawn</button><button class="homeb" title="Save and go to the main menu">Main menu</button>
   <div class="dead hidden">You died<div class="rsp"></div><small></small></div>`;
   $('#huds').appendChild(el);
-  const q=s=>el.querySelector(s);el.querySelector('.rspb').addEventListener('click',e=>{e.stopPropagation();unstick(p)});
+  const q=s=>el.querySelector(s);el.querySelector('.rspb').addEventListener('click',e=>{e.stopPropagation();unstick(p)});el.querySelector('.homeb').addEventListener('click',e=>{e.stopPropagation();toMainMenu()});
   // tap (or click) a hotbar slot to switch to it; tapping the bat slot again swaps bat and chainsaw like pressing 1 twice
   el.querySelectorAll('.slot').forEach((sl,k)=>sl.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&document.pointerLockElement)return;e.preventDefault();e.stopPropagation();p.tapTool=k;sl.classList.add('tap');setTimeout(()=>sl.classList.remove('tap'),160)}));
   return{el,hurt:q('.hurt'),prompt:q('.prompt'),inv:q('.inv'),feed:q('.feed'),hp:q('.stats .hp i'),arm:q('.arm'),fd:q('.stats .fd i'),st:q('.stats .st i'),tp:q('.stats .tp i'),
@@ -2185,8 +2284,9 @@ const EMKEY=['Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Dig
 let emoOpen=false;
 function openEmo(on){emoOpen=on;$('#emo').classList.toggle('hidden',!on);if(on){$('#emoL').innerHTML=EMOTES.map(([n,d],i)=>`<button data-e="${i}"><i>${isTouch?'':EMLAB[i]}</i>${n}${d?'':' ♪'}</button>`).join('');if(!isTouch&&document.pointerLockElement)document.exitPointerLock()}
   else if(!isTouch&&running&&!document.pointerLockElement)lock()}
+$('#cpal').addEventListener('pointerdown',e=>e.stopPropagation());
 $('#emo').addEventListener('pointerdown',e=>{e.stopPropagation();const b=e.target.closest('button');if(b&&players[0]){startEmote(players[0],+b.dataset.e);openEmo(false)}});
-addEventListener('keydown',e=>{if(!running)return;if(e.code==='KeyJ'&&players.length===1&&!e.repeat){openEmo(!emoOpen);return}
+addEventListener('keydown',e=>{if(!running)return;if(cpalOpen&&e.code==='Escape'){e.preventDefault();e.stopPropagation();openCPal(false);return}if(e.code==='KeyJ'&&players.length===1&&!e.repeat){openEmo(!emoOpen);return}
   if(emoOpen){const i=EMKEY.indexOf(e.code);if(i>=0&&players[0]){e.preventDefault();e.stopPropagation();startEmote(players[0],i);openEmo(false)}else if(e.code==='Escape')openEmo(false)}},true);
 function startEmote(p,i){if(p.vehicle||p.dead>0)return;p.emote={id:i,t:0};p.body.g.traverse(o=>o.layers.set(0));p.fpBody=null}
 function stopEmote(p){if(!p.emote)return;p.emote=null;const b=p.body;b.g.rotation.order='XYZ';for(const k of['armL','armR','legL','legR'])b[k].rotation.z=0;b.head.rotation.z=0;setBodyFP(p,false)}
@@ -2210,7 +2310,7 @@ function emotePose(b,i,t){const S=Math.sin,A=b.armL.rotation,Rr=b.armR.rotation,
   return{y,spin}}
 document.addEventListener('pointerlockchange',()=>{const l=document.pointerLockElement===canvas;
   if(l){wasLocked=true;if(paused){paused=false;$('#pause').classList.add('hidden')}}
-  else if(wasLocked&&running&&players.length===1&&!menuP&&!emoOpen){paused=true;renderPause();$('#pause').classList.remove('hidden')}});
+  else if(wasLocked&&running&&players.length===1&&!menuP&&!emoOpen&&!cpalOpen){paused=true;renderPause();$('#pause').classList.remove('hidden')}});
 const k=c=>keys[c]?1:0,pr=c=>pressed.has(c);
 const gpPrev=[[],[]];
 function gpRead(slot,inp){
@@ -2231,7 +2331,7 @@ function readInput(p){
     if(wheel){inp.tool=(p.tool+(wheel>0?1:4))%5;wheel=0}
     if(players.length===1)gpRead(0,inp);
     if(T.on){inp.f+=-T.my;inp.s+=T.mx;if(T.held.act)inp.primary=true;if(T.held.jump)inp.jump=true;if(T.run)inp.sprint=true;if(T.aim)inp.aim=true;inp.pad=true;
-      const q=T.pressed;if(q.has('emote'))openEmo(!emoOpen);if(q.has('alt'))touchAlt(p,inp);if(q.has('use'))inp.interact=true;if(q.has('tool'))inp.toolNext=true;if(q.has('mat'))inp.matNext=true;if(q.has('place'))inp.place=true;if(q.has('bag'))inp.menu=true;if(q.has('view'))inp.view=true;if(q.has('bomb'))inp.throw=true;if(q.has('talk'))inp.interact=true;if(q.has('rsp'))unstick(p);if(T.duck)inp.crouch=true}
+      const q=T.pressed;if(q.has('home')){toMainMenu();return inp}if(q.has('emote'))openEmo(!emoOpen);if(q.has('alt'))touchAlt(p,inp);if(q.has('use'))inp.interact=true;if(q.has('tool'))inp.toolNext=true;if(q.has('mat'))inp.matNext=true;if(q.has('place'))inp.place=true;if(q.has('bag'))inp.menu=true;if(q.has('view'))inp.view=true;if(q.has('bomb'))inp.throw=true;if(q.has('talk'))inp.interact=true;if(q.has('rsp'))unstick(p);if(T.duck)inp.crouch=true}
   }else{
     inp.f=k('KeyI')-k('KeyK');inp.turn=k('KeyL')-k('KeyJ');inp.look=k('KeyU')-k('KeyO');
     inp.jump=!!keys.KeyN;inp.sprint=!!keys.KeyP;inp.primary=!!keys.KeyH;inp.aim=!!keys.Quote;
@@ -2316,8 +2416,9 @@ const FHP={rail:3,plant:1,rug:2,weeds:1,vine:1,sapling:2,nightstand:2,ctable:2,c
 const FMETAL=new Set(['fridge','stove','heater','locker','cabinet','cooler','aisle','checkout','toolrack','tub','hbed','sink','bsink','toilet','tvstand']),FCLOTH=new Set(['couch','armchair','rug','chairs']),FSOFT=new Set(['weeds','vine','plant']);
 function rayBox(o,d,b,max){let t0=0,t1=max;const O=[o.x,o.y,o.z],D=[d.x,d.y,d.z];for(let a=0;a<3;a++){const lo=b[a],hi=b[a+3];if(Math.abs(D[a])<1e-9){if(O[a]<lo||O[a]>hi)return -1;continue}
   let ta=(lo-O[a])/D[a],tb=(hi-O[a])/D[a];if(ta>tb){const q=ta;ta=tb;tb=q}if(ta>t0)t0=ta;if(tb<t1)t1=tb;if(t0>t1)return -1}return t0}
+const FLAT=new Set(['lane','xwalk','curb']);
 function decorRay(eye,dir,max){let best=null,bt=max;
-  for(const sp of furnSpecs){const b=sp.bb;if(sp.gone||!b)continue;if(Math.abs((b[0]+b[3])/2-eye.x)>max+3||Math.abs((b[2]+b[5])/2-eye.z)>max+3)continue;const t=rayBox(eye,dir,b,bt);if(t>=0&&t<bt){bt=t;best={sp,t}}}
+  for(const sp of furnSpecs){const b=sp.bb;if(sp.gone||!b||FLAT.has(sp[0]))continue;if(Math.abs((b[0]+b[3])/2-eye.x)>max+3||Math.abs((b[2]+b[5])/2-eye.z)>max+3)continue;const t=rayBox(eye,dir,b,bt);if(t>=0&&t<bt){bt=t;best={sp,t}}}
   for(const bd of beds){const r=1.1,top=bd.bunk?1.95:bd.tent?1.3:.8,P=bd.pos;if(Math.abs(P.x-eye.x)>max+3||Math.abs(P.z-eye.z)>max+3)continue;const t=rayBox(eye,dir,[P.x-r,P.y,P.z-r,P.x+r,P.y+top,P.z+r],bt);if(t>=0&&t<bt){bt=t;best={bed:bd,t}}}
   return best}
 function hitDecor(p,h,dmg,eye,dir){const o=h.sp||h.bed,pt=new V3(eye.x+dir.x*h.t,eye.y+dir.y*h.t,eye.z+dir.z*h.t);o.dmg=(o.dmg||0)+dmg;
@@ -2400,6 +2501,7 @@ function primary(p,eye,dir,vh,dt){
   else if(p.tool===2){
     const z=zombieRay(eye,dir,2.4)||nearestZombieInFront(p,dir,2.4)||nearestAnimalInFront(p,dir,2.4);
     if(z){if(p.cool<=0){p.cool=.6;p.swing=1;melee(p,eye,dir,2.4,26)}p.dig=null;return}
+    {const vr=vehRay(eye,dir,3);if(vr&&(!vh||vr.t<vh.t)){if(p.cool<=0){p.cool=.55;p.swing=1;stripCar(p,vr.v,new V3(eye.x+dir.x*vr.t,eye.y+dir.y*vr.t,eye.z+dir.z*vr.t))}p.dig=null;return}}
     if(p.cool<=0&&(!p.dig||!p.dig.t||p.dig.t<.05)){const nv=vh&&vh.t<=5?vh:null;if(smashDecor(p,eye,dir,nv,5,1.5)){p.cool=.35;p.swing=1;p.dig=null;return}}
     if(!vh||vh.t>5){p.dig=null;return}
     const b=get(vh.x,vh.y,vh.z);if(b===B.BED){if(!p.dig)msg(p,'Bedrock. Nothing gets through that.');p.dig={x:-1};return}
@@ -2411,7 +2513,7 @@ function primary(p,eye,dir,vh,dt){
       else{setBlock(vh.x,vh.y,vh.z,0);burst(new V3((vh.x+.5)*VS,(vh.y+.5)*VS,(vh.z+.5)*VS),12,3,BRGB[b],1);const d=DROP[b];if(d){if(p.creative){}else dropBlock(vh.x,vh.y,vh.z,b)}if(BASE_OF[b]&&!isRub(b)&&rng()<.4)dropRubble(vh.x,vh.y,vh.z,b)}
       p.dig=null}
   }
-  else if(p.tool===3){if(p.cool<=0){p.cool=.22;p.swing=.6;placeBlock(p,vh)}}
+  else if(p.tool===3){if(p.cool<=0){p.cool=.22;p.swing=.6;const ce=p.creative?creativeSel(p):null;if(ce&&ce.kind!=='block'){p.cool=.35;placeCreative(p,vh,ce)}else placeBlock(p,vh)}}
   else if(p.cool<=0){p.cool=.5;placeTrap(p,vh)}
 }
 function nearestCrate(p,r){let best=null,bd=r;for(const c of crates){if(c.looted)continue;const d=Math.hypot(c.pos.x-p.pos.x,c.pos.y+.3-(p.pos.y+.9),c.pos.z-p.pos.z);if(d<bd){bd=d;best=c}}return best}
@@ -2422,7 +2524,39 @@ function loot(p,c){
   for(let i=0;i<n;i++){let r=rng()*tot;for(const l of T){r-=l[1];if(r<=0){const q=RI(l[2],l[3]);got[l[0]]=(got[l[0]]||0)+q;p.inv[l[0]]+=q;break}}}
   SND.pick();msg(p,'Found: '+Object.entries(got).map(([a,q])=>`${q} ${LABEL[a].toLowerCase()}`).join(', '));
 }
+// ---------------- car parts: wheels, engine, battery and radio come off with the pickaxe and go back on with a wrench
+const PARTS=[['wheel','wheel'],['engine','engine'],['battery','battery'],['radio','carradio']];
+function vparts(v){if(!v.parts)v.parts={wheel:v.two?(v.pedal?2:2):4,engine:v.pedal?0:1,battery:v.pedal?0:1,radio:v.pedal||v.two?0:1};return v.parts}
+const fullParts=v=>{const P=vparts(v);return v.pedal?{wheel:2}:{wheel:v.two?2:4,engine:1,battery:1,radio:v.two?0:1}};
+function partsOk(v){const P=vparts(v),F=fullParts(v);return P.wheel>=F.wheel&&(v.pedal||(P.engine>0&&P.battery>0))}
+function showWheels(v){const P=vparts(v);v.wheels.forEach((w,i)=>w.visible=i<P.wheel);const miss=fullParts(v).wheel-P.wheel;v.g.position.y=v.pos.y;v.sag=miss>0?Math.min(.25,miss*.1):0}
+function packParts(v){const P=vparts(v);return P.wheel|(P.engine<<3)|(P.battery<<4)|(P.radio<<5)}
+function unpackParts(v,n){if(n==null)return;v.parts={wheel:n&7,engine:(n>>3)&1,battery:(n>>4)&1,radio:(n>>5)&1};showWheels(v)}
+function vehRay(eye,dir,max){let best=null,bt=max;for(const v of vehicles){if(v.driver)continue;const dx=eye.x-v.pos.x,dz=eye.z-v.pos.z;if(dx*dx+dz*dz>(max+v.L)**2)continue;
+  const c=Math.cos(v.yaw),s=Math.sin(v.yaw),o={x:dx*c-dz*s,y:eye.y-v.pos.y,z:dx*s+dz*c},d={x:dir.x*c-dir.z*s,y:dir.y,z:dir.x*s+dir.z*c};
+  const t=rayBox(o,d,[-v.Wd/2,0,-v.L/2,v.Wd/2,v.VH*.85,v.L/2],bt);if(t>=0&&t<bt){bt=t;best={v,t}}}return best}
+function stripCar(p,v,pt){v.hp=Math.max(0,v.hp-6);sNoise(.15,900,.5);burst(pt,6,2.5,[.55,.57,.6],1);
+  const P=vparts(v),have=PARTS.filter(([k])=>P[k]>0);
+  if(have.length&&rng()<.4){const[k,item]=have[RI(0,have.length-1)];P[k]--;if(k==='radio')v.radioOn=0;dropItem(pt.x,pt.y,pt.z,item,1);showWheels(v);msg(p,`Pried off: ${LABEL[item].toLowerCase()}`)}
+  else if(rng()<.35)dropItem(pt.x,pt.y,pt.z,'scrap',1);
+  if(!PARTS.some(([k])=>P[k]>0)&&v.hp<=0&&!v.broken){v.broken=true;msg(p,`The ${v.name.toLowerCase()} is stripped to the shell`)}}
+function missingPart(p,v){const P=vparts(v),F=fullParts(v);for(const[k,item]of PARTS)if((P[k]|0)<(F[k]|0)&&p.inv[item]>0)return[k,item];return null}
+function fitPart(p,v){const m=missingPart(p,v);if(!m)return false;if(!(p.inv.wrench>0)){msg(p,`You need a wrench to fit the ${LABEL[m[1]].toLowerCase()} (2 scrap + 1 metal plate)`);return true}
+  p.inv[m[1]]--;vparts(v)[m[0]]++;showWheels(v);SND.place();msg(p,`Fitted a ${LABEL[m[1]].toLowerCase()} to the ${v.name.toLowerCase()}`);return true}
+// ---------------- car radio: three stations synthesized on the fly, through a small lowpassed speaker
+const STATIONS=['Off','KDRG 88.1 — oldies','WRCK 101.7 — rock','Emergency broadcast'];let radioNext=0,radioBeat=0,radioBus=null;
+function toggleRadio(p,v){if(!vparts(v).radio){msg(p,'No radio in this one');return}v.radioOn=((v.radioOn|0)+1)%STATIONS.length;msg(p,`Radio: ${STATIONS[v.radioOn]}`);radioNext=0;sNoise(.25,2400,.12,'bandpass')}
+function radioTick(){if(!AC)return;let v=null,vol=0;for(const p of players){const q=p.vehicle;if(q&&q.radioOn&&vparts(q).radio){v=q;vol=1;break}}
+  if(!v){let bd=14;for(const q of vehicles)if(q.radioOn&&vparts(q).radio){for(const p of players){const d=p.pos.distanceTo(q.pos);if(d<bd){bd=d;v=q;vol=1-d/14}}}}
+  if(!radioBus){radioBus=AC.createGain();const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2600;const hp=AC.createBiquadFilter();hp.type='highpass';hp.frequency.value=180;radioBus.connect(hp).connect(lp).connect(master)}
+  radioBus.gain.setTargetAtTime(v?.32*vol:0,AC.currentTime,.1);if(!v)return;const st=v.radioOn,t0=AC.currentTime;if(radioNext<t0)radioNext=t0+.05;
+  const note=(f,t,d,type,g)=>{const o=AC.createOscillator(),e=AC.createGain();o.type=type;o.frequency.value=f;e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(g,t+.01);e.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(e).connect(radioBus);o.start(t);o.stop(t+d+.05)};
+  while(radioNext<t0+.4){const t=radioNext,b=radioBeat++;
+    if(st===1){const sc=[0,2,4,7,9,12],root=[220,175,196,165][Math.floor(b/16)%4],k=b%16;if(k%2===0)note(root/2,t,.35,'triangle',.5);if(rng()<.7)note(root*2**(sc[(b*7+Math.floor(b/4))%sc.length]/12),t,.22,'square',.12);radioNext+=.22}
+    else if(st===2){const root=[110,98,131,123][Math.floor(b/8)%4],k=b%8;note(root,t,.16,'sawtooth',.28);if(k%4===0){const s=AC.createBufferSource();s.buffer=nbuf;const e=AC.createGain();e.gain.setValueAtTime(.35,t);e.gain.exponentialRampToValueAtTime(.001,t+.12);s.connect(e).connect(radioBus);s.start(t,0,.15)}if(k%4===2)note(root*3,t,.12,'square',.1);radioNext+=.16}
+    else{const k=b%24;if(k<3)note(853,t,.42,'sine',.25),note(960,t,.42,'sine',.25);else if(rng()<.5){const s=AC.createBufferSource();s.buffer=nbuf;const e=AC.createGain();e.gain.setValueAtTime(.05,t);s.connect(e).connect(radioBus);s.start(t,rng(),.2)}radioNext+=.45}}}
 function useVehicle(p,v){
+  if(fitPart(p,v))return;
   if(v.broken){if(p.inv.kit>0){p.inv.kit--;v.hp=100;v.broken=false;SND.place();msg(p,`Repaired the ${v.name.toLowerCase()}`)}
     else msg(p,`The ${v.name.toLowerCase()} is wrecked — needs a repair kit (3 scrap + 1 metal plate)`);return}
   if(!v.pedal&&v.fuel<60&&p.inv.fuel>0){p.inv.fuel--;v.fuel=Math.min(100,v.fuel+40);SND.pick();msg(p,`Poured a fuel can in (${Math.round(v.fuel)}%)`);return}
@@ -2442,6 +2576,7 @@ function exitVehicle(p){
 function interact(p){
   if(p.vehicle){exitVehicle(p);return}
   const c=nearestCrate(p,2.6);if(c){loot(p,c);return}
+  {const mh=nearestManhole(p,1.4);if(mh&&manCovered(mh)){openManhole(mh);msg(p,'You drag the lid aside. A ladder drops into the dark.');return}}
   const bg=nearestBag(p,1.8);if(bg){takeBag(p,bg);return}
   const np=nearestNPC(p,2.4);if(np){if(p.i===0&&!npcHostileTo(np,p))openTalk(p,np);else talkNPC(p,np);return}
   const sh=nearestStash(p,1.8);if(sh){raidStash(p,sh);return}
@@ -2456,6 +2591,7 @@ function promptFor(p){
   if(p.vehicle)return`${K} — get out · ${p.i?',':'V'} — ${p.carView?'outside view':'driver view'}`;
   if(p.sleeping)return sleepT?'':players.length>1?`Sleeping · waiting for the other player to lie down · ${K} — get up`:`Sleeping · ${K} — get up`;
   if(nearestCrate(p,2.6))return`${K} — search supply crate`;
+  {const mh=nearestManhole(p,1.4);if(mh&&manCovered(mh))return`${K} — open manhole`}
   const bg=nearestBag(p,1.8);if(bg)return`${K} — take ${bg.label}`;
   const sh0=nearestStash(p,1.8);if(sh0&&!nearestNPC(p,2.4))return`${K} — raid ${sh0.owner?sh0.owner.name+"'s":'a'} stash (${Object.values(sh0.items).reduce((a,b)=>a+b,0)} items)`;
   const np=nearestNPC(p,2.4);if(np)return npcHostileTo(np,p)?`${np.name} (hostile)`:`${K} — talk to ${np.name} (${np.infected!=null?'bitten':np.kind==='family'?(np.role==='kid'?'child':np.role==='wife'?'mother':'father'):np.follow?'with you':np.kind==='bandit'?'drifter':'survivor'})`;
@@ -2465,7 +2601,9 @@ function promptFor(p){
   const tr=nearestTrap(p,1.3);if(tr)return`${K} — pick up ${tr.name.toLowerCase()}`;
   if(ladderAt(p))return`On a ladder · ${p.i?'I/N':'W/Space'} climb, ${p.i?'K':'S'} down`;
   const v=nearestVehicle(p,3.6);
-  if(v){if(v.broken)return`${v.name}: wrecked · ${K} — ${p.inv.kit?'repair with kit':'needs a repair kit'}`;
+  if(v){{const m=missingPart(p,v);if(m)return`${v.name} · ${K} — fit ${LABEL[m[1]].toLowerCase()}${p.inv.wrench>0?'':' (needs a wrench)'}`}
+    if(!partsOk(v)){const P=vparts(v),F=fullParts(v),miss=PARTS.filter(([k])=>(P[k]|0)<(F[k]|0)).map(([,i])=>LABEL[i].toLowerCase());if(!v.broken)return`${v.name}: missing ${miss.join(', ')}`}
+    if(v.broken)return`${v.name}: wrecked · ${K} — ${p.inv.kit?'repair with kit':'needs a repair kit'}`;
     if(v.pedal)return`${v.name} · ${K} — ride`;
     if(v.fuel<60&&p.inv.fuel>0)return`${v.name}: fuel ${Math.round(v.fuel)}% · ${K} — pour fuel can`;
     return`${v.name}: fuel ${Math.round(v.fuel)}% · ${K} — ${v.driver?'ride along':'drive'}`}
@@ -2496,11 +2634,11 @@ function updatePlayer(p,dt){
   if(p.tapTool!=null){inp.tool=p.tapTool;p.tapTool=null}
   if(inp.tool!=null){if(inp.tool===0&&p.tool===0&&p.inv.saw>0){p.useSaw=!p.useSaw;msg(p,p.useSaw?'Chainsaw':'Bat')}p.tool=inp.tool}
   if(inp.toolNext){if(p.tool===0&&p.inv.saw>0&&!p.useSaw)p.useSaw=true;else{p.tool=(p.tool+1)%5;if(p.tool===0)p.useSaw=false}}
-  if(p.inv.saw>0&&!p.sawSeen){p.sawSeen=true;p.sawFuel=p.sawFuel??60;msg(p,'Chainsaw! Press 1 again (or tap Tool) to switch between the bat and the saw')}if(inp.matNext){if(p.tool===4)p.trap=(p.trap+1)%TRAPS.length;else p.mat=(p.mat+1)%matList(p).length}
+  if(p.inv.saw>0&&!p.sawSeen){p.sawSeen=true;p.sawFuel=p.sawFuel??60;msg(p,'Chainsaw! Press 1 again (or tap Tool) to switch between the bat and the saw')}if(inp.matNext&&p.vehicle){toggleRadio(p,p.vehicle)}else if(inp.matNext){if(p.creative&&p.i===0&&p.tool!==4)openCPal(!cpalOpen,p);else if(p.tool===4)p.trap=(p.trap+1)%TRAPS.length;else{p.mat=(p.mat+1)%matList(p).length;if(p.creative)p.csel=CRE().findIndex(e=>e.kind==='block'&&e.i===p.mat%CMATS.length)}}
   if(inp.throw&&!p.vehicle)throwBomb(p);
   if(inp.eat)eat(p);if(inp.bandage)heal(p);if(inp.torch)p.torch=!p.torch;
   const night=dayLight()<.35;
-  if(p.vehicle){if(inp.interact){exitVehicle(p);return}if(inp.view){p.carView=!p.carView;p.cyaw=p.cpitch=0}
+  if(p.vehicle){if(inp.interact){exitVehicle(p);return}if(inp.matNext&&!p.vehicle.pedal&&!p.vehicle.two)toggleRadio(p,p.vehicle);if(inp.view){p.carView=!p.carView;p.cyaw=p.cpitch=0}
     p.cpitch=clamp(p.cpitch+inp.look*1.5*dt,-1,1);if(p.vehicle.driver!==p)p.cyaw=clamp(p.cyaw-inp.turn*1.8*dt,-2.4,2.4);p.light.intensity=0;return}
   p.aim=!!inp.aim&&p.tool===1;p.pad=!!inp.pad||p.i===1;
   const lk=(p.aim?.55:1)*(p.onTarget&&p.pad?.6:1);p.yaw-=inp.turn*2.4*dt*lk;p.pitch=clamp(p.pitch+inp.look*1.8*dt*lk,-1.5,1.5);
@@ -2557,7 +2695,7 @@ function groundUnder(x,z,gy){
 function updateVehicle(v,dt){
   const d=v.driver;let thr=0,steer=0,brake=false;
   if(d&&d.inp){thr=d.inp.f||0;steer=(d.inp.s||0)+(d.inp.turn||0);brake=!!d.inp.jump}
-  const canGo=!v.broken&&(v.pedal||v.fuel>0);
+  const canGo=!v.broken&&(v.pedal||v.fuel>0)&&partsOk(v);
   if(canGo&&thr)v.speed+=thr*v.acc*dt*(thr*v.speed<0?2.2:1);
   v.speed*=Math.pow(brake?.03:(thr&&canGo?.9:.5),dt);
   v.speed=clamp(v.speed,-5,v.maxS);if(Math.abs(v.speed)<.05&&!thr)v.speed=0;
@@ -2917,7 +3055,12 @@ const PXI={},PXD={
   coal:r=>{r(3,5,10,8,'#1e1e20');r(5,4,6,2,'#2a2a2c');r(6,6,2,2,'#5a5a60');r(10,9,1,1,'#4a4a50')},
   iron:r=>{r(2,6,12,7,'#7a7270');r(4,4,8,3,'#8a8280');r(4,7,2,2,'#c8804a');r(9,6,2,2,'#d8905a');r(7,10,2,2,'#b8703a')},
   metal:r=>{r(2,3,12,10,'#8a9094');r(2,3,12,1,'#c0c6ca');r(2,12,12,1,'#5a6064');for(const[x,y]of[[3,4],[12,4],[3,11],[12,11]])r(x,y,1,1,'#4a5054')},
-  kit:r=>{r(2,6,12,8,'#b0201c');r(2,6,12,1,'#d84a3a');r(6,3,4,1,'#2a2a2a');r(5,4,1,2,'#2a2a2a');r(10,4,1,2,'#2a2a2a');r(2,9,12,1,'#801410');r(7,8,2,3,'#c8c8c0')},
+  wheel:r=>{r(3,2,10,12,'#1a1a1a');r(2,4,12,8,'#1a1a1a');r(5,5,6,6,'#8a8a8a');r(7,7,2,2,'#3a3a3a')},
+engine:r=>{r(2,5,12,8,'#4a4c50');r(4,3,8,2,'#5a5c60');r(3,6,2,2,'#2a2a2a');r(7,6,2,2,'#2a2a2a');r(11,6,2,2,'#2a2a2a');r(1,9,2,3,'#3a3a3a');r(13,9,2,3,'#3a3a3a')},
+battery:r=>{r(2,5,12,8,'#2a2c30');r(3,3,2,2,'#c02020');r(11,3,2,2,'#202020');r(4,8,8,2,'#d8c040')},
+carradio:r=>{r(1,5,14,7,'#1c1c1c');r(3,7,6,3,'#5ac050');r(10,7,2,2,'#8a8a8a');r(13,7,1,3,'#8a8a8a')},
+wrench:r=>{r(3,10,8,2,'#9a9ca0');r(10,7,2,2,'#9a9ca0');r(12,6,3,4,'#9a9ca0');r(13,7,1,2,'#3a3a3a');r(1,9,3,4,'#9a9ca0');r(2,10,1,2,'#3a3a3a')},
+kit:r=>{r(2,6,12,8,'#b0201c');r(2,6,12,1,'#d84a3a');r(6,3,4,1,'#2a2a2a');r(5,4,1,2,'#2a2a2a');r(10,4,1,2,'#2a2a2a');r(2,9,12,1,'#801410');r(7,8,2,3,'#c8c8c0')},
   meat:r=>{r(3,4,9,8,'#a82a2a');r(4,5,6,5,'#c84a4a');r(5,6,3,2,'#e8a0a0');r(11,10,4,2,'#e8e4d8');r(14,9,1,4,'#e8e4d8')},
   cooked:r=>{r(3,4,9,8,'#6a3a1a');r(4,5,6,5,'#8a5028');r(5,6,3,1,'#a86a3a');r(11,10,4,2,'#d8d0c0');r(14,9,1,4,'#d8d0c0')},
   hide:r=>{r(3,3,10,10,'#a0784a');r(1,4,2,3,'#a0784a');r(13,4,2,3,'#a0784a');r(2,11,2,3,'#a0784a');r(12,11,2,3,'#a0784a');r(5,5,6,6,'#b8905a')},
@@ -2944,7 +3087,7 @@ function pxIcon(k){if(PXI[k])return PXI[k];try{const c=document.createElement('c
 // ---------------- attaché case: a grid inventory like Resident Evil 4. Every stack takes room; no room, no pickup
 const CW=12,CH=8;
 // [width, height, stack size]
-const ITEM={scrip:[1,1,999],saw:[3,1,1],veg:[1,1,6],stew:[1,1,2],broth:[1,1,2],jerky:[1,1,10],roast:[1,1,4],hotbeans:[1,1,2],tnt:[1,2,3],pipebomb:[1,1,4],bunk:[3,2,1],Pistol:[2,2,1],Bat:[4,1,1],Pickaxe:[2,2,1],ammo:[2,1,60],scrap:[1,1,10],cloth:[1,1,10],fuel:[2,2,1],food:[1,1,3],bandage:[1,1,3],wood:[2,1,10],plank:[2,1,20],
+const ITEM={wheel:[2,2,1],engine:[3,2,1],battery:[2,1,1],carradio:[2,1,1],wrench:[2,1,1],scrip:[1,1,999],saw:[3,1,1],veg:[1,1,6],stew:[1,1,2],broth:[1,1,2],jerky:[1,1,10],roast:[1,1,4],hotbeans:[1,1,2],tnt:[1,2,3],pipebomb:[1,1,4],bunk:[3,2,1],Pistol:[2,2,1],Bat:[4,1,1],Pickaxe:[2,2,1],ammo:[2,1,60],scrap:[1,1,10],cloth:[1,1,10],fuel:[2,2,1],food:[1,1,3],bandage:[1,1,3],wood:[2,1,10],plank:[2,1,20],
   dirt:[1,1,32],stone:[1,1,32],coal:[1,1,16],iron:[1,1,16],metal:[2,1,4],kit:[2,1,1],meat:[1,1,4],cooked:[1,1,4],hide:[2,2,3],bone:[1,1,8],
   spikes:[2,1,2],beartrap:[2,2,1],mine:[1,1,2],tent:[3,1,1],stairs:[1,1,16],bed:[3,2,1],fire:[2,1,2],
   hardhat:[2,1,1],helmet:[2,2,1],jacket:[2,3,1],vest:[2,2,1],hidecoat:[2,3,1],scrapvest:[2,2,1],cargo:[2,3,1],riot:[2,3,1]};
@@ -3074,7 +3217,11 @@ function ladderAt(e){
   const x0=vc(e.pos.x-.3),x1=vc(e.pos.x+.3-1e-4),y0=vc(e.pos.y),y1=vc(e.pos.y+1.7),z0=vc(e.pos.z-.3),z1=vc(e.pos.z+.3-1e-4);
   for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)if(get(x,y,z)===B.LADDER)return true;return false;
 }
-const manGeo=new THREE.CylinderGeometry(.48,.48,.06,16);
+const manGeo=new THREE.CylinderGeometry(.44,.44,.06,20),manRing=new THREE.RingGeometry(.41,.75,24),manShaft=new THREE.CylinderGeometry(.41,.41,.5,20,1,true);
+const manCovered=m=>get(m.x,G,m.z)===B.METAL;
+function placeCover(m){const c=m.cov,top=(G+1)*VS;if(!c)return;if(manCovered(m)){c.position.set((m.x+1)*VS,top+.03,(m.z+1)*VS);c.rotation.z=0}else{c.position.set(m.x*VS+(m.alongZ?1.55:.5)+.25,top+.03,m.z*VS+(m.alongZ?.5:1.55)+.25);c.rotation.z=.05}if(c.updateMatrix){c.updateMatrix();c.updateMatrixWorld(true)}}
+function nearestManhole(p,r){let b=null,bd=r;for(const m of manholes){const d=Math.hypot((m.x+1)*VS-p.pos.x,(m.z+1)*VS-p.pos.z);if(d<bd&&Math.abs((G+1)*VS-p.pos.y)<1){bd=d;b=m}}return b}
+function openManhole(m){for(let a=0;a<2;a++)for(let b=0;b<2;b++)setBlock(m.x+a,G,m.z+b,B.LADDER);placeCover(m);SND.place&&SND.place()}
 const manObjs=[];
 function makeManhole(m){
   const g=new THREE.Group(),bot=(SY+1)*VS,top=(G+1)*VS,hgt=top-bot;
@@ -3082,7 +3229,10 @@ function makeManhole(m){
   for(const sx of[.18,.82])part(g,.05,hgt+.4,.05,0x5a5a5a,sx,bot+hgt/2+.2,.07);
   for(let y=bot+.25;y<top+.3;y+=.3)part(g,.66,.04,.04,0x6a6a6a,.5,y,.07);
   scene.add(g);
-  const c=new THREE.Mesh(manGeo,lam(0x3a3430));c.position.set(m.x*VS+(m.alongZ?1.55:.5),top+.03,m.z*VS+(m.alongZ?.5:1.55));c.rotation.z=.05;scene.add(c);freeze(c);freeze(g);manObjs.push(c);g.position.y=0;g.userData.c=[m.x*VS+.5,m.z*VS+.5];manObjs.push(g);
+  // round iron collar over the square shaft, so the opening reads as a circle
+  const ring=new THREE.Mesh(manRing,lam(0x4a4642));ring.material.side=THREE.DoubleSide;ring.rotation.x=-Math.PI/2;ring.position.set(VS,top+.012,VS);ring.receiveShadow=true;g.add(ring);
+  const sh=new THREE.Mesh(manShaft,lam(0x34302c));sh.material.side=THREE.DoubleSide;sh.position.set(VS,top-.25,VS);g.add(sh);
+  const c=new THREE.Mesh(manGeo,lam(0x3a3430));c.receiveShadow=c.castShadow=true;scene.add(c);m.cov=c;placeCover(m);freeze(c);freeze(g);manObjs.push(c);g.position.y=0;g.userData.c=[m.x*VS+.5,m.z*VS+.5];manObjs.push(g);
   for(let i=0;i<4;i++)part(c,.7,.02,.04,0x2a2622,0,.035,-.24+i*.16);
 }
 
@@ -3139,7 +3289,7 @@ function explode0(pos,pw=1){
   for(const[x,y,z,b]of gone)if(rng()<.35){let yy=y;while(yy>0&&get(x,yy-1,z)===0)yy--;const u=get(x,yy-1,z);if(u&&!SH[u]&&u!==B.GLASS&&get(x,yy,z)===0)setv(x,yy,z,rubOf(b,x,z))}
   for(const k of ch){const[x,z]=k.split(',').map(Number);rebuildAt(x,z)}
   if(ch.size)for(const p of players)if(p.dig)p.dig=null;
-  for(const sp of furnSpecs){const b=sp.bb;if(sp.gone||!b)continue;if(Math.hypot((b[0]+b[3])/2-pos.x,(b[1]+b[4])/2-pos.y,(b[2]+b[5])/2-pos.z)<2.6*pw)breakFurn(null,sp,null,rng()<.5)}
+  for(const sp of furnSpecs){const b=sp.bb;if(sp.gone||!b||FLAT.has(sp[0]))continue;if(Math.hypot((b[0]+b[3])/2-pos.x,(b[1]+b[4])/2-pos.y,(b[2]+b[5])/2-pos.z)<2.6*pw)breakFurn(null,sp,null,rng()<.5)}
   for(const bd of[...beds])if(bd.pos.distanceTo(pos)<2.2*pw)breakBed(null,bd);
 }
 // thrown pipe bombs: arc, bounce, and go off after a short fuse
@@ -3296,6 +3446,35 @@ function updateAvatars(dt){const now=performance.now();for(const[k,a]of NET.av){
   if(a.fl&2||a.fl&8){const o=emotePose(b,7,0);g.position.y+=o.y;if(a.fl&8){g.rotation.x=-Math.PI/2;g.position.y+=.35}}
   else if(a.em>=0&&a.em<EMOTES.length){a.emT+=dt;const o=emotePose(b,a.em,a.emT);g.position.y+=o.y;g.rotation.y+=o.spin}
   else{b.legL.rotation.x=sw;b.legR.rotation.x=-sw;b.armL.rotation.x=-sw*.6;b.armR.rotation.x=a.tool===1?-1.4:-.5}}}
+// ---------------- creative palette: every block, vehicle, creature, person and piece of decor
+let CREATIVE_=null;const CRE=()=>CREATIVE_||(CREATIVE_=(()=>{const L=[];for(let i=0;i<CMATS.length;i++)L.push({cat:'Blocks',label:LABEL[CMATS[i][0]]||CMATS[i][0],kind:'block',i});
+  for(const k in VT)L.push({cat:'Vehicles',label:VT[k].name,kind:'veh',k});
+  L.push({cat:'Creatures',label:'Zombie',kind:'zombie'});for(const k in ANIM)L.push({cat:'Creatures',label:k[0].toUpperCase()+k.slice(1),kind:'animal',k});
+  for(const[l,k,x]of[['Survivor','survivor'],['Bandit','bandit'],['Friendly drifter','bandit',{friendly:true}],['Parent','family',{role:'husband'}],['Child','family',{role:'kid'}]])L.push({cat:'People',label:l,kind:'npc',k,x});
+  for(const[k,l]of TRAPS)L.push({cat:'Items',label:l,kind:'trap',k});L.push({cat:'Items',label:'Supply crate',kind:'crate'},{cat:'Items',label:'Stash',kind:'crate',rich:true});
+  for(const k in FD)L.push({cat:'Furniture',label:k.replace(/^./,c=>c.toUpperCase()),kind:'furn',k});
+  for(const[l,k,x]of[['Stop sign','stop',{lit:0,names:null}],['Traffic light','tlight',{lit:2,names:null}],['Speed limit sign','rsign',{k:'speed'}],['No parking sign','rsign',{k:'noparking'}],['One way sign','rsign',{k:'oneway'}],['Yield sign','rsign',{k:'yield'}],['Bench','bench']])L.push({cat:'Street',label:l,kind:'furn',k,x});
+  return L})());
+let cpalOpen=false,cpalCat='Blocks';
+function creativeSel(p){return CRE()[p.csel|0]||CRE()[0]}
+function openCPal(on,p){cpalOpen=on;const el=$('#cpal');el.classList.toggle('hidden',!on);if(!on){if(!isTouch&&running&&!document.pointerLockElement)lock();return}
+  if(!isTouch&&document.pointerLockElement)document.exitPointerLock();renderCPal(p||players[0])}
+function renderCPal(p){const cats=[...new Set(CRE().map(e=>e.cat))],tabs=$('#cpalT'),list=$('#cpalL');tabs.textContent='';list.textContent='';
+  for(const c of cats){const b=document.createElement('button');b.type='button';b.textContent=c;b.className=c===cpalCat?'on':'';b.onclick=e=>{e.stopPropagation();cpalCat=c;renderCPal(p)};tabs.appendChild(b)}
+  CRE().forEach((e,i)=>{if(e.cat!==cpalCat)return;const b=document.createElement('button');b.type='button';b.textContent=e.label;if((p.csel|0)===i)b.className='on';
+    b.onclick=ev=>{ev.stopPropagation();p.csel=i;if(e.kind==='block')p.mat=e.i;p.tool=3;msg(p,`Creative: ${e.label} — click to place`);openCPal(false)};list.appendChild(b)})}
+function placeCreative(p,vh,e){if(!vh||vh.t>8){msg(p,'Aim at the ground or a wall to place it');return}
+  const wx=(vh.px+.5)*VS,wy=vh.py*VS,wz=(vh.pz+.5)*VS;
+  if(e.kind==='veh'){const v=makeVehicle({type:e.k,x:wx,z:wz,yaw:p.yaw+Math.PI/2,good:true});v.fuel=100;v.hp=100;v.broken=false;vehicles.push(v)}
+  else if(e.kind==='zombie')spawnZ(wx,wy,wz,true);
+  else if(e.kind==='animal')animals.push(makeAnimal(e.k,wx,wy+.3,wz));
+  else if(e.kind==='npc'){const kind=e.k,rec=Object.assign({name:makeName(new Set()),kind,alive:true,hp:kind==='bandit'?70:85,kills:0,pk:0,nights:0},e.x||{});spawnNPC(wx,wy,wz,kind,rec)}
+  else if(e.kind==='crate'){const k=makeCrate(wx,wy,wz,!!e.rich);crates.push(k)}
+  else if(e.kind==='trap'){const t=TRAPS.findIndex(q=>q[0]===e.k);if(t>=0){const ot=p.trap;p.trap=t;placeTrap(p,vh);p.trap=ot}return}
+  else if(e.kind==='furn'){const sp=[e.k,wx,wy,wz,p.yaw,e.x?JSON.parse(JSON.stringify(e.x)):undefined];if(sp[5]===undefined)sp.length=5;sp.user=true;
+    const R=reg(Math.floor(vc(wx)/RS),Math.floor(vc(wz)/RS));if(R.spec){sp.reg=R;sp.ri=R.spec.furnSpecs.length;R.spec.furnSpecs.push(sp)}furnSpecs.push(sp);
+    FBUF.clear();buildOne(sp);FBUF.clear();buildFurnMeshes(furnSpecs,sp.k)}
+  SND.place()}
 // ---------------- touch button icons (pixel bitmaps) and live labels
 const TBI={jump:['....#....','...###...','..#####..','.#######.','....#....','....#....','....#....','....#....'],
  use:['...#.#.#.','..##.#.#.','..#######','..#######','#.#######','########.','.#####...','..###....'],
@@ -3310,6 +3489,7 @@ const TBI={jump:['....#....','...###...','..#####..','.#######.','....#....','..
  duck:['....#....','....#....','....#....','.#######.','..#####..','...###...','....#....'],
  bomb:['......#.#','.....#...','..####...','.######..','.######..','.######..','..####...'],
  talk:['#######..','#.....#..','#.#.#.#..','#.....#..','#######..','.#.......','#........'],
+ home:['....#....','...###...','..#####..','.#######.','..#...#..','..#.#.#..','..#.#.#..'],
  emote:['..#####..','.#.....#.','#..#.#..#','#.......#','#.#...#.#','#..###..#','.#.....#.','..#####..'],
  rsp:['..####...','.#....#.#','#......##','#.....###','#........','.#....#..','..####...'],
  car:['..####...','.#....#..','########.','#.#####.#','########.','.#....#..']};
@@ -3318,9 +3498,9 @@ function tbIcon(k){if(TBIC[k])return TBIC[k];try{const rows=TBI[k],c=document.cr
   const oy=Math.floor((9-rows.length)/2);rows.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==='#')x.fillRect(i,j+oy,1,1)}));return TBIC[k]=c.toDataURL()}catch(e){return TBIC[k]=''}}
 const ACTL=['Swing','Shoot','Dig','Build','Set trap'];
 // what the second-function button does for the held tool (null = none, so the button hides)
-function altFor(p){if(p.vehicle||p.sleeping||p.dead>0)return null;const t=p.tool;
-  if(t===0)return p.inv.saw>0?[p.useSaw?'Bat':'Chainsaw','swap']:null;if(t===1)return['Aim','aim'];if(t===2)return['Place','block'];if(t===3)return['Type','next'];if(t===4)return['Next trap','next'];return null}
-function touchAlt(p,inp){const a=altFor(p);if(!a)return;const t=p.tool;
+function altFor(p){if(p.vehicle&&!p.vehicle.pedal&&!p.vehicle.two)return[p.vehicle.radioOn?'Radio '+p.vehicle.radioOn:'Radio','next'];if(p.vehicle||p.sleeping||p.dead>0)return null;const t=p.tool;
+  if(t===0)return p.inv.saw>0?[p.useSaw?'Bat':'Chainsaw','swap']:null;if(t===1)return['Aim','aim'];if(t===2)return['Place','block'];if(t===3)return[p.creative?'Pick':'Type','next'];if(t===4)return['Next trap','next'];return null}
+function touchAlt(p,inp){const a=altFor(p);if(!a)return;if(p.vehicle){toggleRadio(p,p.vehicle);return}const t=p.tool;
   if(t===0)inp.tool=0;else if(t===1){T.aim=!T.aim}else if(t===2)inp.place=true;else inp.matNext=true}
 let tbLast='';
 function touchLabels(p){const tb=k=>document.querySelector(`#touch .tb[data-b=${k}]`);if(p.tool!==1&&T.aim)T.aim=false;
@@ -3330,7 +3510,7 @@ function touchLabels(p){const tb=k=>document.querySelector(`#touch .tb[data-b=${
   const set=(k,label,icon,src)=>{const b=tb(k);if(!b)return;b.classList.toggle('gone',label==null);if(label==null)return;const sp=b.querySelector('span'),im=b.querySelector('.ti');if(sp)sp.textContent=label;if(im){const u=src||tbIcon(icon);if(im.getAttribute('src')!==u)im.setAttribute('src',u)}};
   set('act',act,null,act?pxIcon(TOOLS[p.tool]):'');set('jump',veh?'Brake':'Jump','jump');set('use',use,veh?'car':'use');tb('use').classList.toggle('idle',!veh&&!p.sleeping&&!m);
   set('alt',alt&&alt[0],alt&&alt[1])}
-function initTouchIcons(){for(const k of['bag','tool','view','run','duck','bomb','talk','emote','rsp']){const b=document.querySelector(`#touch .tb[data-b=${k}]`);if(!b||b.querySelector('.ti'))continue;const t=b.textContent;b.innerHTML=`<img class="ti" alt="" src="${tbIcon(k)}"><span></span>`;b.querySelector('span').textContent=t}}
+function initTouchIcons(){for(const k of['bag','tool','view','run','duck','bomb','talk','emote','home','rsp']){const b=document.querySelector(`#touch .tb[data-b=${k}]`);if(!b||b.querySelector('.ti'))continue;const t=b.textContent;b.innerHTML=`<img class="ti" alt="" src="${tbIcon(k)}"><span></span>`;b.querySelector('span').textContent=t}}
 // ---------------- touch controls
 const T={aim:false,on:false,mx:0,my:0,held:{},pressed:new Set(),stick:null,look:null,run:false,sx:0,sy:0,lx:0,ly:0};
 {
@@ -3831,7 +4011,7 @@ function rumor(n,p){const opts=[],dirName=(dx,dz)=>{const a=Math.atan2(dx,-dz)*1
   opts.push(`Walkers are ${WX.type==='storm'?'restless in storms':'slower in daylight'}. Move by day, hole up at night.`,`There's maybe ${zLeft()} of those things left around here. They don't stop coming, but they don't come back either once they're down.`);
   return pick(opts)}
 // ---- scrip prices: what things are worth; traders sell at a markup and buy at a discount
-const VALUE={ammo:2,food:6,veg:3,meat:3,cooked:6,stew:14,broth:10,jerky:4,roast:5,hotbeans:7,bandage:10,fuel:14,kit:30,scrap:2,cloth:2,wood:1,plank:1,metal:8,coal:2,iron:3,stone:1,
+const VALUE={wheel:20,engine:60,battery:25,carradio:15,wrench:20,ammo:2,food:6,veg:3,meat:3,cooked:6,stew:14,broth:10,jerky:4,roast:5,hotbeans:7,bandage:10,fuel:14,kit:30,scrap:2,cloth:2,wood:1,plank:1,metal:8,coal:2,iron:3,stone:1,
   pipebomb:15,tnt:30,mine:20,spikes:10,beartrap:16,saw:120,tent:25,bed:20,bunk:30,fire:6,hide:4,bone:1,hardhat:15,helmet:30,jacket:22,vest:40,hidecoat:30,scrapvest:35,cargo:18,riot:35};
 const UNIT={ammo:10,scrap:5,cloth:5,wood:5,plank:10,stone:10,coal:5,bone:5};
 const buyPrice=k=>Math.ceil(VALUE[k]*(UNIT[k]||1)*1.3),sellPrice=k=>Math.max(1,Math.floor(VALUE[k]*(UNIT[k]||1)*.6));
@@ -3943,7 +4123,7 @@ function spawnNPCsNear(){
 const introCam=new THREE.PerspectiveCamera(60,1,.1,200);
 let spawnT=2,animT=3,sleepT=0,hudT=0,lastDl=1,clockT=performance.now();
 function update(dt){
-  netTick(dt);updateAvatars(dt);  const dlPrev=dayLight();tDay+=dt/DAYLEN;if(tDay>=1){tDay-=1;day++;nightPassed();msg(null,`Dawn of day ${day}. The dead slow down.`)}
+  netTick(dt);updateAvatars(dt);try{radioTick()}catch(e){}  const dlPrev=dayLight();tDay+=dt/DAYLEN;if(tDay>=1){tDay-=1;day++;nightPassed();msg(null,`Dawn of day ${day}. The dead slow down.`)}
   const dl=dayLight(),night=dl<.25;
   if(dlPrev>=.25&&dl<.25)msg(null,'Night falls. They are faster now — find walls.');
   updSky();
@@ -4054,6 +4234,7 @@ function loadRegion(R){
 }
 function spawnRegion(Rg){
   const S=Rg.spec,st=Rg.st||{},first=!Rg.visited;Rg.visited=true;Rg.objs=[];
+  for(let i=S.furnSpecs.length-1;i>=0;i--)if(S.furnSpecs[i].user)S.furnSpecs.splice(i,1);for(const a of st.uf||[]){const sp=a.slice();sp.user=true;S.furnSpecs.push(sp)}
   const fg=new Set(st.fg||[]);S.furnSpecs.forEach((sp,i)=>{sp.ri=i;sp.reg=Rg;sp.gone=fg.has(i)});Rg.to=new Set((st.to||[]).map(a=>a.join(',')));
   buildFurnMeshes(S.furnSpecs);
   for(const sg of S.signSpecs)Rg.objs.push(makeSign(sg));
@@ -4063,7 +4244,7 @@ function spawnRegion(Rg){
   S.doorSpecs.forEach((d,i)=>{makeDoor(d);const o=doors[doors.length-1];o.reg=Rg;o.di=i;const ch=ds[i];
     if(ch==='2'){o.gone=true;scene.remove(o.pivot);for(const c of o.cells){if(get(...c)===B.DOOR)setv(...c,0);doorMap.delete(dkey(...c))}}
     else if(ch==='1'){o.open=true;o.ang=-o.inward*Math.PI/2;for(const c of o.cells)setv(...c,0)}});
-  if(st.vh)for(const a of st.vh){const v=makeVehicle({type:a[0],x:a[1],z:a[2],yaw:a[3],col:a[7],good:true});v.fuel=a[4];v.hp=a[5];v.broken=!!a[6];vehicles.push(v)}
+  if(st.vh)for(const a of st.vh){const v=makeVehicle({type:a[0],x:a[1],z:a[2],yaw:a[3],col:a[7],good:true});v.fuel=a[4];v.hp=a[5];v.broken=!!a[6];unpackParts(v,a[8]);v.radioOn=a[9]|0;vehicles.push(v)}
   else for(const c of S.carSpots)vehicles.push(makeVehicle(c));
   for(const m of S.manholes)makeManhole(m);
   const bg=new Set(st.bg||[]);S.bedSpecs.forEach((b,i)=>{if(bg.has(i))return;const o=(b[4]?makeBunk:makeBed)(b[0],b[1],b[2],b[3]);o.reg=Rg;o.si=i});Rg.bedGone=bg;
@@ -4078,10 +4259,10 @@ function spawnRegion(Rg){
     bloodPuddles(T)}
 }
 // snapshot what changed in a region: looted crates, doors, vehicles parked in it, things you built
-function gatherState(R){const st={c:[],d:'',vh:[],b:[],f:[],tr:[],zp:R.zpop|0,fg:R.spec?R.spec.furnSpecs.map((sp,i)=>sp.gone?i:-1).filter(i=>i>=0):(R.st&&R.st.fg)||[],bg:[...(R.bedGone||[])],to:[...(R.to||[])].map(k=>k.split(',').map(Number))};
+function gatherState(R){const st={c:[],d:'',vh:[],b:[],f:[],tr:[],zp:R.zpop|0,fg:R.spec?R.spec.furnSpecs.map((sp,i)=>sp.gone&&!sp.user?i:-1).filter(i=>i>=0):(R.st&&R.st.fg)||[],uf:R.spec?R.spec.furnSpecs.filter(sp=>sp.user&&!sp.gone).map(sp=>sp.slice(0,6)):(R.st&&R.st.uf)||[],bg:[...(R.bedGone||[])],to:[...(R.to||[])].map(k=>k.split(',').map(Number))};
   for(const c of crates)if(c.reg===R&&c.looted)st.c.push(c.ci);
   st.d=doors.filter(d=>d.reg===R).sort((a,b)=>a.di-b.di).map(d=>d.gone?2:d.open?1:0).join('').replace(/0+$/,'');
-  for(const v of vehicles)if(inReg(R,v.pos.x,v.pos.z))st.vh.push([v.type,r2(v.pos.x),r2(v.pos.z),r2(v.yaw),Math.round(v.fuel),Math.round(v.hp),v.broken?1:0,v.col|0]);
+  for(const v of vehicles)if(inReg(R,v.pos.x,v.pos.z))st.vh.push([v.type,r2(v.pos.x),r2(v.pos.z),r2(v.yaw),Math.round(v.fuel),Math.round(v.hp),v.broken?1:0,v.col|0,packParts(v),v.radioOn|0]);
   for(const b of beds)if(b.user&&inReg(R,b.pos.x,b.pos.z))st.b.push([r2(b.pos.x),r2(b.pos.y),r2(b.pos.z),r2(b.tent?b.yaw-Math.PI:b.yaw),b.tent?1:b.bunk?2:0]);
   for(const f of fires)if(f.user&&inReg(R,f.pos.x,f.pos.z))st.f.push([r2(f.pos.x),r2(f.pos.y),r2(f.pos.z)]);
   for(const t of traps)if(inReg(R,t.pos.x,t.pos.z))st.tr.push([t.type,r2(t.pos.x),r2(t.pos.y),r2(t.pos.z),t.armed?1:0,t.uses]);
