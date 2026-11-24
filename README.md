@@ -12,7 +12,7 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 - **320 × 320 m world** built from half-metre pixel-textured blocks: a large central town plus several smaller towns, rolling hills and mountains, forests and caves. Every world comes from a **seed**, so the same seed always builds the same world.
 - **Chunk streaming:** only the 8 × 8 m chunks around the players are meshed; the rest load in as you move and unload behind you. Pick a render distance from 32 to 128 m. Fog and camera range follow it.
-- **Realistic towns:** 6 m two-lane roads, 1.5 m sidewalks, 15 m lots, and houses 11–15 m across with 3.5 m floors, 1–3 storeys, framed windows (some smashed or boarded), front and back doors, stairs and roof access.
+- **Realistic towns:** 6 m two-lane roads, 1.5 m sidewalks, 15 m lots, and houses 11–15 m across (level with the sidewalks) with 3.5 m floors, 1–3 storeys, framed windows (some smashed or boarded), front and back doors, stairs and roof access.
 - **Furnished rooms:** each floor is split into rooms joined by doorways and doors.
   - Living rooms: couch facing a TV on a TV stand, coffee table, rug, armchair, bookcase.
   - Kitchens: fridge, counters, sink and stove, plus a table and chairs.
@@ -23,9 +23,21 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 - **Sewers** under every town road, reached through open manholes with ladders.
 - **Caves** that open into the hillsides and wind underground, with exposed coal and iron, stalactites and stashes.
 
+## Graphics
+
+Three quality levels (start screen or backpack). They change effects only, never the resolution:
+- **High:** soft sun shadows, crepuscular rays, lens flare that hides when the sun is blocked, motion blur, edge smoothing, drifting ground fog, distance haze, vignette and color grading.
+- **Medium:** lighter shadows and effects, no motion blur.
+- **Low:** fastest, the default on phones.
+
+Also on every level: a sky dome with sun, moon and stars; pixel textures that span 2×2 blocks so bricks, planks and tiles run continuously; swaying grass tufts; and seasonal ambience (ash and dust, fireflies, falling leaves, snow and rain that stop at roofs, embers and flies).
+
+Performance: chunk streaming, typed-array meshing, merged furniture, frozen static meshes, only large parts casting shadows, shadow maps refreshed every few frames, and dynamic render scale that only drops if frames get slow.
+
 ## Surviving
 
-- **Zombies** are slow by day and fast at night. They jump 2 blocks, smash wood, glass and doors, and at night even stone. Some wear hard hats, helmets, vests or jackets that soak up damage.
+- **Zombies** are slow by day and fast at night. They notice you only within range (22 m by day, 34 m at night) and in line of sight, give up once you're well out of range, and come to investigate gunshots. They break blocks hit by hit: a window in one hit, a wooden door in about 10 s, a brick wall only with a crowd. Metal holds longest. Some wear hard hats, helmets, vests or jackets that soak up damage.
+- **Aiming:** hold right-click (pistol) to aim down sights, which is more accurate but slower. There's a light aim assist toward visible targets, a bit stronger on touch and gamepad.
 - **Shooting:** bullets leave holes where they hit. Shoot off arms and legs: legless zombies crawl, armless ones bite weaker, and a headshot pops the head off. Cars and tripwire bombs tear limbs off too.
 - **Loot:** crates in houses, basements, sewers and caves. Dead zombies drop loot bags, sometimes with the clothing they wore.
 - **Wild animals:** deer and rabbits flee, wolves hunt in packs (worse at night), and boars charge if you get close. Kill them for raw meat, hide and bone. Cook meat at a campfire, because raw meat can make you sick.
@@ -35,8 +47,13 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
   - Placeables: spike traps, bear traps, tripwire bombs, beds, campfires.
   - Wearables: helmets, armor, coats, pants.
 - **Building and digging:** place plank, stone, dirt or metal blocks and dig anything except bedrock. Build walls 3 high in stone or metal.
+- **Seasons:** spring, summer, autumn and winter turn every 3 days.
+  - Seasonal grass and leaves, and in winter snow on the ground, roads, roofs and trees.
+  - Rain, storms and snowfall; winter days are shorter.
+  - Cold drains your warmth unless you're indoors, by a fire, in a car or wearing a coat.
+- **People:** survivors in the towns shoot zombies and trade with you. Bandits in the wilds shoot on sight.
 - **Beds:** sleep through the night (in co-op, both players lie down). A bed also sets your respawn point.
-- **Vehicles:** sedans and pickup trucks need fuel and repairs.
+- **Vehicles:** sedans, pickups, vans, police cruisers, ambulances, city buses and motorcycles. They need fuel and repairs, and they collide with each other, with people and with animals (you can stand on the roofs).
   - First-person cabin with a turning steering wheel, working gauges, seats and mirror, or switch to the outside view.
   - Run zombies over and carry a passenger.
 - Health, hunger, stamina, day/night cycle and flashlight. The light turns on by itself underground.
