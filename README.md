@@ -148,6 +148,20 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 - **Driver view:** mostly windshield, with the top of the dash and a sliver of hood.
 - **Creative mode:** using a vehicle repairs and refuels it, and it never runs dry.
 
+## Realism
+
+- **Thirst:** a water bar beside food. Bottled water and soda are in stores and gas stations. Use at a river or pond to drink (risky) or fill an empty bottle; boil dirty water at a campfire; stand in the rain with empty bottles and they fill with clean water. Dehydration kills.
+- **Injuries:** zombie bites, animal attacks and gunshots can make you bleed (you drip blood and lose health until you bandage it), hurt an arm (weaker swings, shakier aim) or hurt a leg (a limp, no sprinting). Wounds left unbandaged too long can get infected: a fever that slowly drains you until you take antibiotics. Splints make limbs heal four times faster. A status line under the bars shows BLEEDING, INFECTED, HURT LEG and so on.
+- **Fatigue:** you need to sleep about once a day. Exhausted, your view blurs, your aim shakes, stamina drains and eventually you black out for a moment.
+- **Sickness:** bad water or raw meat can make you sick: retching, lost stamina and faster hunger.
+- **Noise:** gunshots carry about 90 m; explosions 120 m; breaking glass, running engines, car alarms and lit windows at night all draw zombies to the source.
+- **Weapon wear:** the bat loses condition with every hit and finally splinters (repair it with a plank and scrap). The pistol holds 12 rounds; reload with R (or it reloads itself when empty), and now and then it jams and needs clearing.
+- **Food spoils:** fresh meat, cooked meat, vegetables and stews partly rot overnight. Canned food keeps.
+- **Darkness:** nights are truly dark, with a moon that waxes and wanes over eight days. Your flashlight (T) is the only light you carry, and it runs on batteries.
+- **Weather:** rain soaks you, and wet clothes make you colder until you dry off by a fire. Snow slows you down and shows your footprints. Fog shrinks how far you can see to a few metres.
+- **Decay:** each day weeds creep further onto the roads, and abandoned cars rust and their tyres go flat.
+- **Cars:** about 3 in 10 parked cars have an alarm that wails when bumped or stripped, calling every zombie nearby. Rubble and spike traps blow out tyres (slower, pulls to one side; fit a spare wheel). Leave the headlights on at night and the battery goes flat (fit a car battery).
+
 ## Surviving
 
 - **A limited number of zombies:** each region starts with so many walkers (towns hold the most). Kill them and they're gone; the top bar shows how many are still out there. New ones only come from people who turn.
