@@ -24,6 +24,10 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
   - **Parks:** grass, gravel paths, a stone fountain, park benches, a swing set, a slide, picnic tables, lamp posts and old trees.
   - **Malls:** a tall hall under a skylight, a row of shops (clothes, snacks, tools) with glass fronts and their own signs, a food court and benches.
   - **Airports** out on the flats: a marked runway, taxiway and apron, a glass terminal with check-in desks and gate seating, a control tower with a ladder up to the glass cab, a hangar with a light plane, airliners at the gates and a burned-out wreck on the runway. Now and then an airliner crosses the sky overhead with its long roar.
+- **City blocks of different sizes:** in cities, some neighbouring blocks merge into superblocks with 6–10 storey office towers (glass curtain walls, a lobby, open-plan floors of desks). Cities also have a **college**.
+- **Kitchens** are set for dinner: plates, bowls, cups, glasses, forks and knives, and stacks of dishes and mugs on the counters. **Bathroom mirrors** show a live reflection of you and the room.
+- **Sky and sound:** chunky pixel clouds drift with the wind (grey in storms), flocks of birds cross the sky by day, and the wind carries far-off moans, groaning metal, banging doors, howling dogs and whistling through broken windows. More often at night.
+- **Roads on hills:** country roads climb and dip with the land in quarter-metre steps rather than half-metre ledges.
 - **Lights:** every room has a wall switch for its ceiling light (Use to flip it). Craft wire, lamps and switches and lay your own: wire pieces join when side by side, and a switch turns on every lamp its wire reaches.
 - **Public buildings:** each town has some of these, under faded signs over the doors.
   - **Hospitals** (2–3 storeys): reception, waiting chairs, wards with hospital beds and IV stands, medicine cabinets and a pharmacy full of bandages.
@@ -126,6 +130,23 @@ Shadows are snapped to texture pixels on every level that has them. When it rain
 Also on every level: a sky dome with sun, moon and stars; pixel textures that span 2×2 blocks so bricks, planks and tiles run continuously; swaying grass tufts; and seasonal ambience (ash and dust, fireflies, falling leaves, snow and rain that stop at roofs, embers and flies).
 
 Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60% less GPU memory), typed-array meshing, merged furniture, frozen static meshes, only large parts casting shadows, shadow maps refreshed every few frames, and dynamic render scale that only drops if frames get slow.
+
+## Pockets, backpacks and how you died
+
+- **Pockets are your hotbar:** the pants you wear decide how many hotbar slots you get — shorts 2, slacks 3, jeans 4, riot pants 4, cargo pants 8. You start with random pants.
+- **Backpacks are your case:** no pack gives an 8 × 5 case; a school backpack 10 × 6; a hiking pack 12 × 8; a military rucksack 14 × 9. Schools are full of backpacks. Sew one from cloth, then upgrade the one you're wearing in the crafting list. Every recipe shows pictures of what it makes and needs.
+- **Death:** when you die, the game says how (eaten, shot by a named bandit, run over, starved, frozen, blown up…), to you, the other split-screen player and everyone online.
+- **Cigarettes** bring your stamina back at a small cost to health. **Marijuana** slows and softens everything for a while, eases pain a little, and makes you very hungry.
+
+## Vehicles, crashes and the map
+
+- **Blood** splashes onto the windshield and the exact front panels that hit a zombie, and streaks back along the hood.
+- **Visible damage:** dents push panels back and bend them, scuffs show bare metal and rust, the windshield cracks in spider-webs, and hard hits tear off bumpers and lights, which stay lying in the road. Abandoned wrecks already show their damage.
+- **Crashing through things:** hit a wall fast enough and glass, drywall, planks and doors give way, and at higher speed brick and concrete too. Furniture in the way goes flying.
+- **Construction machines:** bulldozers push slowly through anything; excavators dig a bucket of ground in front of them when you hold attack; dump trucks are fast and heavy.
+- **Self-driving cars** (the rare Volta S): press M (or Map in the pause menu) and click anywhere. The car steers itself there, keeping to paved roads and backing out of dead ends. Touching the controls takes over.
+- **Driver view:** mostly windshield, with the top of the dash and a sliver of hood.
+- **Creative mode:** using a vehicle repairs and refuels it, and it never runs dry.
 
 ## Surviving
 
