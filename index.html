@@ -589,7 +589,7 @@ function fpFree(fx0,fz0,fw,fd,fb,h){
 function occupy(type,fx0,fz0,fw,fd,fb,yaw){
   const h=FD[type][2];
   for(let x=fx0;x<fx0+fw;x++)for(let z=fz0;z<fz0+fd;z++){resv.add(rk(x,z,fb));for(let y=fb+1;y<=fb+h;y++)setv(x,y,z,B.FURN)}
-  const sp=[type,(fx0+fw/2)*VS,(fb+1)*VS,(fz0+fd/2)*VS,yaw];
+  const sp=[type,(fx0+fw/2)*VS,(fb+1)*VS,(fz0+fd/2)*VS,yaw];sp.cells=[fx0,fz0,fw,fd,fb,h];
   if(type==='bed'||type==='bunk')bedSpecs.push([...sp.slice(1),type==='bunk'?1:0]);else furnSpecs.push(sp);
 }
 const SIDES=['N','S','W','E'],OPP={N:'S',S:'N',W:'E',E:'W'};
@@ -1288,12 +1288,12 @@ function buildChunk(cx,cz){
       for(const r of[a,a+1.5708]){const dx=Math.cos(r)*ww,dz=Math.sin(r)*ww,n=TP.length/3;TP.push(ox-dx,yb,oz-dz,ox+dx,yb,oz+dz,ox+dx,yb+hh,oz+dz,ox-dx,yb+hh,oz-dz);TU.push(0,0,1,0,1,1,0,1);for(let q=0;q<4;q++)TC.push(sh,sh,sh);TI.push(n,n+1,n+2,n,n+2,n+3)}}
     let cr=1,cg=1,cb=1;const v=.88+.12*h3(x,y,z),tiles=TILE_OF[b];
     const pr=paintRooms.length?roomsFor(cx,cz):null;
-    if(winIdx.size){const we=winIdx.get(i);if(we)winTrim(we,x,y,z,x0,z0)}
+    if(winIdx.size){const we=winIdx.get(i);if(we&&!(trimOff.size&&trimOff.has(x+','+y+','+z)))winTrim(we,x,y,z,x0,z0)}
     if(!shp){for(let fi=0;fi<6;fi++){const o=nb[fi];if(isOpq(o)||(fi===2&&SH[o]&&BOTFULL[o]))continue;
         let t=tiles[fi],r=cr,g=cg,bb=cb;
         let rm=null;if(pr&&(fi<2||fi>3)&&(b===19||b===6||b===11)){rm=roomAt(pr,x+FACES[fi][0],y,z+FACES[fi][2]);if(rm){t=TILE.wall;r=rm.c[0];g=rm.c[1];bb=rm.c[2]}}
         quad(x,y,z,x0,z0,fi,FULLBOX[0],t,r,g,bb,v*FACES[fi][4]);
-        if(rm&&(y===rm.y0||y===rm.y1)){const bot=y===rm.y0,tc=TRIMC[rm.trim];
+        if(rm&&(y===rm.y0||y===rm.y1)&&!(trimOff.size&&trimOff.has(x+','+y+','+z))){const bot=y===rm.y0,tc=TRIMC[rm.trim];
           // baseboard: 2/16 deep x 6/16 tall + 3/16 bevelled cap; crown: 2-step moulding
           const parts=bot?[[2/16,0,6/16],[3/16,6/16,7/16]]:[[2/16,12/16,1],[3/16,14/16,1],[1/16,11/16,12/16]];
           for(const[T,ya,yb]of parts){const bx=fi===0?[1,ya,0,1+T,yb,1]:fi===1?[-T,ya,0,0,yb,1]:fi===4?[0,ya,1,1,yb,1+T]:[0,ya,-T,1,yb,0];
@@ -1328,7 +1328,7 @@ const WRECT=[[.68,1,1,4.32,2/16],[3,1,3.32,4.32,2/16],[.68,4,3.32,4.32,2/16],[.5
 const DRECT=[[.68,.5,1,4.32,2/16],[3,.5,3.32,4.32,2/16],[.68,4,3.32,4.32,2/16],[.62,0,1,.5,3/16],[3,0,3.38,.5,3/16]];
 const DCELL=[];for(let dv=0;dv<5;dv++)for(let du=0;du<4;du++){const L=[];for(const[u0,v0,u1,v1,T]of DRECT){const a=Math.max(u0,du),b=Math.min(u1,du+1),c=Math.max(v0,dv),d=Math.min(v1,dv+1);if(a<b-1e-6&&c<d-1e-6)L.push([a-du,c-dv,b-du,d-dv,T])}DCELL.push(L)}
 const WCELL=[];for(let dv=0;dv<5;dv++)for(let du=0;du<4;du++){const L=[];for(const[u0,v0,u1,v1,T]of WRECT){const a=Math.max(u0,du),b=Math.min(u1,du+1),c=Math.max(v0,dv),d=Math.min(v1,dv+1);if(a<b-1e-6&&c<d-1e-6)L.push([a-du,c-dv,b-du,d-dv,T])}WCELL.push(L)}
-const winIdx=new Map();
+const winIdx=new Map(),trimOff=new Set(); // trimOff: trim stripped off by the player ("x,y,z")
 function winTrim(we,x,y,z,x0,z0){const tc=TRIMC[we.tc]||TRIMC[0];
   for(const[u0,v0,u1,v1,T]of we.L)for(const side of[1,-1]){
     let bx,fo;if(we.ax){bx=side>0?[u0,v0,1,u1,v1,1+T]:[u0,v0,-T,u1,v1,0];fo=side>0?4:5;if(isOpq(get(x,y,z+side)))continue}
@@ -1374,14 +1374,15 @@ const furnMeshes=[],FBUF=new Map(),furnMat=pxShadows(new THREE.MeshLambertMateri
 const WOODS=[0x6b4a2e,0x8a6a44,0x4a3424,0x5a4030],FABRIC=[0x5a3a3a,0x3a4a5a,0x4a5a3a,0x6a5a48,0x3a3a42,0x6a4a30];
 const tmpCol=new THREE.Color();
 function fbuf(k){let b=FBUF.get(k);if(!b){b={P:[],N:[],C:[],I:[]};FBUF.set(k,b)}return b}
+const FBB=[0,0,0,0,0,0];let FBK=0;
 function furnBuilder(wx,wy,wz,yaw){
-  const k=slotOf(Math.floor(vc(wx)/CS),Math.floor(vc(wz)/CS)),b=fbuf(k),c=Math.cos(yaw),s=Math.sin(yaw);
+  const k=FBK=slotOf(Math.floor(vc(wx)/CS),Math.floor(vc(wz)/CS)),b=fbuf(k),c=Math.cos(yaw),s=Math.sin(yaw);
   return(w,h,d,col,x,y,z,ry=0,rz=0)=>{ // box in local metres, origin at footprint floor centre, front = +z; rz rolls about local z
     tmpCol.setHex(col);const v=.88+rng()*.16,cr=tmpCol.r*v,cg=tmpCol.g*v,cb=tmpCol.b*v,c2=Math.cos(ry),s2=Math.sin(ry);
     for(const f of FACES){const n=b.P.length/3,sh=.75+f[4]*.25;
       let fnx=f[0],fny=f[1];if(rz){const cr=Math.cos(rz),sr=Math.sin(rz);fnx=f[0]*cr-f[1]*sr;fny=f[0]*sr+f[1]*cr}const nx0=fnx*c2+f[2]*s2,nz0=-fnx*s2+f[2]*c2,nx=nx0*c+nz0*s,nz=-nx0*s+nz0*c;
       for(const q of f[3]){let lx=(q[0]-.5)*w,ly=(q[1]-.5)*h,lz=(q[2]-.5)*d;if(rz){const cr=Math.cos(rz),sr=Math.sin(rz),t=lx*cr-ly*sr;ly=lx*sr+ly*cr;lx=t}ly+=y;const rx=lx*c2+lz*s2+x,rz2=-lx*s2+lz*c2+z;
-        b.P.push(wx+rx*c+rz2*s,wy+ly,wz-rx*s+rz2*c);b.N.push(nx,fny,nz);b.C.push(cr*sh,cg*sh,cb*sh)}
+        const X=wx+rx*c+rz2*s,Y=wy+ly,Z=wz-rx*s+rz2*c;b.P.push(X,Y,Z);if(X<FBB[0])FBB[0]=X;if(Y<FBB[1])FBB[1]=Y;if(Z<FBB[2])FBB[2]=Z;if(X>FBB[3])FBB[3]=X;if(Y>FBB[4])FBB[4]=Y;if(Z>FBB[5])FBB[5]=Z;b.N.push(nx,fny,nz);b.C.push(cr*sh,cg*sh,cb*sh)}
       b.I.push(n,n+1,n+2,n,n+2,n+3)}};
 }
 const pick=a=>a[RI(0,a.length-1)];
@@ -1494,8 +1495,11 @@ function makeSign(sg){const c=document.createElement('canvas'),h=64,w=Math.round
   const back=new THREE.Mesh(box(sg.w+.12,hh+.12,.1),lam(0x2a2a2a));back.position.z=-.02;g.add(back);
   const face=new THREE.Mesh(new THREE.PlaneGeometry(sg.w,hh),new THREE.MeshLambertMaterial({map:t}));face.position.z=-.075;face.rotation.y=Math.PI;g.add(face);
   if(rng()<.3)g.rotation.z=R(-.08,.08);scene.add(g);freeze(g);return g}
-function buildFurnMeshes(list){
-  for(const sp of list)buildFurn(sp);
+const furnSeed=sp=>(Math.imul(Math.round(sp[1]*64),73856093)^Math.imul(Math.round(sp[3]*64),19349663)^Math.imul(Math.round(sp[2]*64),83492791)^sp[0].length)|0;
+function buildOne(sp){const sv=rng;rng=mulberry(furnSeed(sp));FBB[0]=FBB[1]=FBB[2]=1e9;FBB[3]=FBB[4]=FBB[5]=-1e9;buildFurn(sp);rng=sv;sp.bb=FBB.slice();sp.k=FBK}
+function buildFurnMeshes(list,only){
+  for(const sp of list)if(!sp.gone&&(only==null||sp.k===only))buildOne(sp);
+  if(only!=null&&!FBUF.has(only)&&furnMeshes[only]){scene.remove(furnMeshes[only]);furnMeshes[only].geometry.dispose();furnMeshes[only]=null}
   for(const[k,b]of FBUF){if(furnMeshes[k]){scene.remove(furnMeshes[k]);furnMeshes[k].geometry.dispose()}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(b.P,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(b.N,3));
     g.setAttribute('color',new THREE.Float32BufferAttribute(b.C,3));g.setIndex(b.I);g.computeBoundingSphere();const m=new THREE.Mesh(g,furnMat);m.visible=!!loaded[k];m.castShadow=m.receiveShadow=true;freeze(m);scene.add(m);furnMeshes[k]=m}
   FBUF.clear();
@@ -2128,6 +2132,38 @@ function shoot(p,eye,dir){
   if(ah){hurtAnimal(ah.a,40,dir,p);return}
   if(vh){if(get(vh.x,vh.y,vh.z)===B.GLASS)breakGlass(vh.x,vh.y,vh.z);else burst(new V3(eye.x+dir.x*vh.t,eye.y+dir.y*vh.t,eye.z+dir.z*vh.t),6,2,DUST,1)}
 }
+// ---- breakable decor: furniture, rails, TVs, plants, beds and trim
+const FHP={rail:3,plant:1,rug:2,weeds:1,vine:1,sapling:2,nightstand:2,ctable:2,chairs:2,desk:2,tdesk:3,toilet:3,bsink:3,sink:3,tvstand:3,armchair:3,bench:3,dresser:4,ktable:3,counter:4,stove:4,heater:3,shelf:4,bookcase:4,couch:5,tub:5,wardrobe:5,fridge:5,checkout:5,reception:5,chalk:2,locker:5,cabinet:4,toolrack:3,cooler:6,aisle:6,lumber:6,hbed:4,lunch:4};
+const FMETAL=new Set(['fridge','stove','heater','locker','cabinet','cooler','aisle','checkout','toolrack','tub','hbed','sink','bsink','toilet','tvstand']),FCLOTH=new Set(['couch','armchair','rug','chairs']),FSOFT=new Set(['weeds','vine','plant']);
+function rayBox(o,d,b,max){let t0=0,t1=max;const O=[o.x,o.y,o.z],D=[d.x,d.y,d.z];for(let a=0;a<3;a++){const lo=b[a],hi=b[a+3];if(Math.abs(D[a])<1e-9){if(O[a]<lo||O[a]>hi)return -1;continue}
+  let ta=(lo-O[a])/D[a],tb=(hi-O[a])/D[a];if(ta>tb){const q=ta;ta=tb;tb=q}if(ta>t0)t0=ta;if(tb<t1)t1=tb;if(t0>t1)return -1}return t0}
+function decorRay(eye,dir,max){let best=null,bt=max;
+  for(const sp of furnSpecs){const b=sp.bb;if(sp.gone||!b)continue;if(Math.abs((b[0]+b[3])/2-eye.x)>max+3||Math.abs((b[2]+b[5])/2-eye.z)>max+3)continue;const t=rayBox(eye,dir,b,bt);if(t>=0&&t<bt){bt=t;best={sp,t}}}
+  for(const bd of beds){const r=1.1,top=bd.bunk?1.95:bd.tent?1.3:.8,P=bd.pos;if(Math.abs(P.x-eye.x)>max+3||Math.abs(P.z-eye.z)>max+3)continue;const t=rayBox(eye,dir,[P.x-r,P.y,P.z-r,P.x+r,P.y+top,P.z+r],bt);if(t>=0&&t<bt){bt=t;best={bed:bd,t}}}
+  return best}
+function hitDecor(p,h,dmg,eye,dir){const o=h.sp||h.bed,pt=new V3(eye.x+dir.x*h.t,eye.y+dir.y*h.t,eye.z+dir.z*h.t);o.dmg=(o.dmg||0)+dmg;
+  const metal=h.sp&&FMETAL.has(h.sp[0]);burst(pt,6,2,metal?[.55,.57,.6]:h.sp&&FSOFT.has(h.sp[0])?[.3,.5,.2]:BRGB[B.PLANK],1);sNoise(.12,metal?1400:500,.35);
+  if(o.dmg<(h.bed?4:FHP[h.sp[0]]||3))return;if(h.bed)breakBed(p,h.bed,pt);else breakFurn(p,h.sp,pt)}
+function breakFurn(p,sp,pt,quiet){if(sp.gone)return;sp.gone=true;const c=sp.cells;
+  if(c){const[fx0,fz0,fw,fd,fb,hh]=c;for(let x=fx0;x<fx0+fw;x++)for(let z=fz0;z<fz0+fd;z++)for(let y=fb+1;y<=fb+hh;y++)if(get(x,y,z)===B.FURN)setv(x,y,z,0)}
+  FBUF.clear();buildFurnMeshes(furnSpecs,sp.k);
+  const b=sp.bb||[sp[1],sp[2],sp[3],sp[1],sp[2],sp[3]],cp=pt||new V3((b[0]+b[3])/2,(b[1]+b[4])/2,(b[2]+b[5])/2),t=sp[0],metal=FMETAL.has(t);
+  burst(cp,22,4,metal?[.55,.57,.6]:FSOFT.has(t)?[.3,.5,.2]:BRGB[B.PLANK],1.5);sNoise(.35,metal?900:350,.6);
+  if(!quiet&&!FSOFT.has(t)){const n=Math.max(1,Math.round((FHP[t]||3)/2));for(let i=0;i<n;i++)dropItem(cp.x+R(-.3,.3),cp.y,cp.z+R(-.3,.3),metal?'scrap':'plank',1,metal?0x8a9094:BCOL[B.PLANK]);
+    if(FCLOTH.has(t))dropItem(cp.x,cp.y,cp.z,'cloth',1,0x8a6a5a);if(t==='sapling')dropItem(cp.x,cp.y,cp.z,'wood',1,BCOL[B.LOG])}}
+function breakBed(p,bd,pt){scene.remove(bd.g);beds=beds.filter(x=>x!==bd);if(bd.reg&&bd.si!=null)bd.reg.bedGone.add(bd.si);
+  for(const q of players)if(q.spawnPt&&q.spawnPt.distanceTo(bd.pos)<1.5){q.spawnPt=null;msg(q,'Your bed is wrecked — your respawn point is back at the crossroads')}
+  burst(pt||bd.pos,24,4,BRGB[B.PLANK],1.5);sNoise(.35,350,.6);for(let i=0;i<2;i++)dropItem(bd.pos.x,bd.pos.y+.5,bd.pos.z,'plank',1,BCOL[B.PLANK]);dropItem(bd.pos.x,bd.pos.y+.5,bd.pos.z,'cloth',bd.tent?3:2,0x8a6a5a)}
+// trim (baseboards, crown moulding, window and door casings) pries off a wall in one hit
+function trimAt(x,y,z){const b=get(x,y,z);if(!b||b===13||trimOff.has(x+','+y+','+z))return false;if(winIdx.has(vi(x,y,z)))return true;const bs=BASE_OF[b]||b;
+  if(bs!==19&&bs!==6&&bs!==11)return false;const L=roomsFor(Math.floor(x/CS),Math.floor(z/CS));
+  for(const[dx,dz]of[[1,0],[-1,0],[0,1],[0,-1]]){const rm=roomAt(L,x+dx,y,z+dz);if(rm&&(y===rm.y0||y===rm.y1))return true}return false}
+function stripTrim(x,y,z){const k=x+','+y+','+z;trimOff.add(k);const Rg=regAt(x,z);(Rg.to=Rg.to||new Set()).add(k);rebuildAt(x,z);
+  burst(new V3((x+.5)*VS,(y+.5)*VS,(z+.5)*VS),10,2,[.85,.82,.75],1);sNoise(.15,800,.4);dropItem((x+.5)*VS,(y+.6)*VS,(z+.5)*VS,'plank',1,0xd8d4cc)}
+// one swing / tick of a tool at decor or trim in front of you; true if it hit something
+function smashDecor(p,eye,dir,vh,range,dmg){const dh=decorRay(eye,dir,range);
+  if(dh&&(!vh||dh.t<vh.t+.05)){hitDecor(p,dh,dmg,eye,dir);return true}
+  if(vh&&vh.t<range&&trimAt(vh.x,vh.y,vh.z)){stripTrim(vh.x,vh.y,vh.z);return true}return false}
 // ---- chainsaw: hold to cut; limbs come off, hold it on the torso and they come apart at the waist
 function sawTick(p,eye,dir,vh,dt){
   if(!(p.sawFuel>0)){if(p.inv.fuel>0||p.creative){if(!p.creative)p.inv.fuel--;p.sawFuel=100;msg(p,'Poured a fuel can into the chainsaw')}else{if(p.cool<=0){p.cool=1;SND.click();msg(p,'The chainsaw is out of fuel — find a fuel can')}return}}
@@ -2147,6 +2183,7 @@ function sawTick(p,eye,dir,vh,dt){
     if(z.hp<=0&&!z.dead)killZombie(z,p);return}
   const nh=npcRay(eye,dir,2.4);if(nh){hurtNPC(nh.n,9,dir,p);return}
   const a=nearestAnimalInFront(p,dir,2.4);if(a){hurtAnimal(a,12,dir,p);return}
+  if(smashDecor(p,eye,dir,vh,2.4,.5))return;
   // it cuts wood: logs, planks, leaves, stairs
   if(vh&&vh.t<2.4){const b=get(vh.x,vh.y,vh.z),base=BASE_OF[b]||b;if(base===B.LOG||base===B.PLANK||base===B.LEAF||(b>=26&&b<=29)){p.sawW=(p.sawW||0)+.1;burst(new V3((vh.x+.5)*VS,(vh.y+.5)*VS,(vh.z+.5)*VS),4,2,BRGB[B.PLANK],1);
     if(p.sawW>=.35){p.sawW=0;setBlock(vh.x,vh.y,vh.z,0);const d=DROP[b];if(d&&!p.creative)dropBlock(vh.x,vh.y,vh.z,b)}}}}
@@ -2178,12 +2215,13 @@ function placeBlock(p,vh){
 }
 function primary(p,eye,dir,vh,dt){
   if(p.tool===0&&p.useSaw){sawTick(p,eye,dir,vh,dt);return}
-  if(p.tool===0){if(p.cool<=0){p.cool=.55;p.swing=1;if(melee(p,eye,dir,2.8,36)){bloody(p.vm.items[0],2)}else if(vh&&vh.t<2.8&&get(vh.x,vh.y,vh.z)===B.GLASS)breakGlass(vh.x,vh.y,vh.z);else sNoise(.08,300,.15)}}
+  if(p.tool===0){if(p.cool<=0){p.cool=.55;p.swing=1;if(melee(p,eye,dir,2.8,36)){bloody(p.vm.items[0],2)}else if(smashDecor(p,eye,dir,vh,2.8,1)){}else if(vh&&vh.t<2.8&&get(vh.x,vh.y,vh.z)===B.GLASS)breakGlass(vh.x,vh.y,vh.z);else sNoise(.08,300,.15)}}
   else if(p.tool===1){if(p.cool<=0){if(p.inv.ammo<=0){p.cool=.4;SND.click();msg(p,'Click. Out of ammo — craft more from scrap + coal');return}
     p.cool=.3;p.inv.ammo--;p.swing=p.aim?.25:.5;p.pitch=Math.min(1.5,p.pitch+(p.aim?.018:.035));shoot(p,eye,dir)}}
   else if(p.tool===2){
     const z=zombieRay(eye,dir,2.4)||nearestZombieInFront(p,dir,2.4)||nearestAnimalInFront(p,dir,2.4);
     if(z){if(p.cool<=0){p.cool=.6;p.swing=1;melee(p,eye,dir,2.4,26)}p.dig=null;return}
+    if(p.cool<=0&&(!p.dig||!p.dig.t||p.dig.t<.05)){const nv=vh&&vh.t<=5?vh:null;if(smashDecor(p,eye,dir,nv,5,1.5)){p.cool=.35;p.swing=1;p.dig=null;return}}
     if(!vh||vh.t>5){p.dig=null;return}
     const b=get(vh.x,vh.y,vh.z);if(b===B.BED){if(!p.dig)msg(p,'Bedrock. Nothing gets through that.');p.dig={x:-1};return}
     if(!p.dig||p.dig.x!==vh.x||p.dig.y!==vh.y||p.dig.z!==vh.z)p.dig={x:vh.x,y:vh.y,z:vh.z,t:LVL[b]/4,s:0};
@@ -2899,6 +2937,8 @@ function explode(pos,pw=1){
   for(const[x,y,z,b]of gone)if(rng()<.35){let yy=y;while(yy>0&&get(x,yy-1,z)===0)yy--;const u=get(x,yy-1,z);if(u&&!SH[u]&&u!==B.GLASS&&get(x,yy,z)===0)setv(x,yy,z,rubOf(b,x,z))}
   for(const k of ch){const[x,z]=k.split(',').map(Number);rebuildAt(x,z)}
   if(ch.size)for(const p of players)if(p.dig)p.dig=null;
+  for(const sp of furnSpecs){const b=sp.bb;if(sp.gone||!b)continue;if(Math.hypot((b[0]+b[3])/2-pos.x,(b[1]+b[4])/2-pos.y,(b[2]+b[5])/2-pos.z)<2.6*pw)breakFurn(null,sp,null,rng()<.5)}
+  for(const bd of[...beds])if(bd.pos.distanceTo(pos)<2.2*pw)breakBed(null,bd);
 }
 // thrown pipe bombs: arc, bounce, and go off after a short fuse
 let bombs=[];
@@ -3593,6 +3633,7 @@ function loadRegion(R){
 }
 function spawnRegion(Rg){
   const S=Rg.spec,st=Rg.st||{},first=!Rg.visited;Rg.visited=true;Rg.objs=[];
+  const fg=new Set(st.fg||[]);S.furnSpecs.forEach((sp,i)=>{sp.ri=i;sp.reg=Rg;sp.gone=fg.has(i)});Rg.to=new Set((st.to||[]).map(a=>a.join(',')));
   buildFurnMeshes(S.furnSpecs);
   for(const sg of S.signSpecs)Rg.objs.push(makeSign(sg));
   const looted=new Set(st.c||[]);
@@ -3604,7 +3645,7 @@ function spawnRegion(Rg){
   if(st.vh)for(const a of st.vh){const v=makeVehicle({type:a[0],x:a[1],z:a[2],yaw:a[3],col:a[7],good:true});v.fuel=a[4];v.hp=a[5];v.broken=!!a[6];vehicles.push(v)}
   else for(const c of S.carSpots)vehicles.push(makeVehicle(c));
   for(const m of S.manholes)makeManhole(m);
-  for(const b of S.bedSpecs)(b[4]?makeBunk:makeBed)(b[0],b[1],b[2],b[3]).reg=Rg;
+  const bg=new Set(st.bg||[]);S.bedSpecs.forEach((b,i)=>{if(bg.has(i))return;const o=(b[4]?makeBunk:makeBed)(b[0],b[1],b[2],b[3]);o.reg=Rg;o.si=i});Rg.bedGone=bg;
   const nb=beds.length,nf=fires.length;for(const c of S.campSpecs)campsite(c[0],c[1],!!c[2]);for(let i=nb;i<beds.length;i++)beds[i].reg=Rg;for(let i=nf;i<fires.length;i++)fires[i].reg=Rg;
   for(const a of st.b||[])(a[4]===1?makeTent(a[0],a[1],a[2],a[3]):a[4]===2?makeBunk(a[0],a[1],a[2],a[3]):makeBed(a[0],a[1],a[2],a[3])).user=true;
   for(const a of st.f||[])makeFire(a[0],a[1],a[2]).user=true;
@@ -3616,7 +3657,7 @@ function spawnRegion(Rg){
     bloodPuddles(T)}
 }
 // snapshot what changed in a region: looted crates, doors, vehicles parked in it, things you built
-function gatherState(R){const st={c:[],d:'',vh:[],b:[],f:[],tr:[],zp:R.zpop|0};
+function gatherState(R){const st={c:[],d:'',vh:[],b:[],f:[],tr:[],zp:R.zpop|0,fg:R.spec?R.spec.furnSpecs.map((sp,i)=>sp.gone?i:-1).filter(i=>i>=0):(R.st&&R.st.fg)||[],bg:[...(R.bedGone||[])],to:[...(R.to||[])].map(k=>k.split(',').map(Number))};
   for(const c of crates)if(c.reg===R&&c.looted)st.c.push(c.ci);
   st.d=doors.filter(d=>d.reg===R).sort((a,b)=>a.di-b.di).map(d=>d.gone?2:d.open?1:0).join('').replace(/0+$/,'');
   for(const v of vehicles)if(inReg(R,v.pos.x,v.pos.z))st.vh.push([v.type,r2(v.pos.x),r2(v.pos.z),r2(v.yaw),Math.round(v.fuel),Math.round(v.hp),v.broken?1:0,v.col|0]);
@@ -3651,7 +3692,7 @@ function unloadRegion(R,keep=true){
 }
 function rebuildGlobals(){for(const k of SPEC_KEYS)SCRATCH[k].length=0;
   for(const R of regions.values())if(R.live)for(const k of SPEC_KEYS)for(const e of R.spec[k])SCRATCH[k].push(e);
-  roomIdx.clear();winIdx.clear();
+  roomIdx.clear();winIdx.clear();trimOff.clear();for(const R of regions.values())if(R.live&&R.to)for(const k of R.to)trimOff.add(k);
   for(const[x,y,z,ax,tc,door]of winSpecs)for(let du=0;du<4;du++)for(let dv=0;dv<5;dv++){if(du>0&&du<3&&(door?dv<4:dv>0&&dv<4))continue;const L=(door?DCELL:WCELL)[dv*4+du];if(!L.length)continue;
     winIdx.set(vi(ax?x+du:x,y+dv,ax?z:z+du),{L,ax,tc})}}
 function setWindow(nox,noz,force){
@@ -3701,7 +3742,7 @@ function unpackEdits(t){const u=unb64(t);let p=0,cur=0;const m=new Map();while(p
 const r2=v=>Math.round(v*100)/100;
 function collectState(){
   for(const R of regions.values())if(R.live)gatherState(R);
-  const emptySt=st=>!st||(st.zp!=null&&false)||(!st.c.length&&!st.d&&!st.vh.length&&!st.b.length&&!st.f.length&&!st.tr.length);
+  const emptySt=st=>!st||(!(st.fg&&st.fg.length)&&!(st.bg&&st.bg.length)&&!(st.to&&st.to.length)&&!st.c.length&&!st.d&&!st.vh.length&&!st.b.length&&!st.f.length&&!st.tr.length);
   return{v:2,gv:GENV,seed,day,t:r2(tDay),k:kills,
     p:players.map(p=>({x:r2(p.pos.x),y:r2(p.pos.y),z:r2(p.pos.z),a:r2(p.yaw),hp:Math.round(p.hp),hu:Math.round(p.hunger),k:p.kills,pk:p.pk|0,n:p.nights|0,w:p.wear,cr:p.creative?1:0,sf:Math.round(p.sawFuel||0),
       i:Object.fromEntries(Object.entries(p.inv).filter(e=>e[1]>0)),s:p.spawnPt?[r2(p.spawnPt.x),r2(p.spawnPt.y),r2(p.spawnPt.z)]:0})),

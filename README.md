@@ -86,6 +86,7 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
   - Materials: planks, metal plates, ammo (from scrap or bone), bandages, repair kits, fuel.
   - Placeables: spike traps, bear traps, tripwire bombs, beds, campfires.
   - Wearables: helmets, armor, coats, pants.
+- **Break the decor:** hit furniture with the bat, pickaxe or chainsaw: TVs, couches, tables, fridges, shelves, school desks, hospital beds, shop aisles, stair rails, plants, ivy, weeds, saplings, beds, bunks and tents. Small things go in a hit or two, big ones take more. Wood breaks into planks, metal into scrap, upholstery into cloth. Hitting a wall pries off its trim first (baseboards, crown moulding, window and door casings). Explosions wreck furniture nearby. What you break stays broken, even after saving.
 - **Pick up what you break:** blocks you dig or cut, doors you smash and explosion debris drop as small spinning items. Walk near them and they're pulled into your case, unless it's full.
 - **Building and digging:** place plank, stone, dirt, metal or stair blocks (stairs face the way you're looking) and dig anything except bedrock. Build walls 3 high in stone or metal.
 - **Seasons:** spring, summer, autumn and winter turn every 3 days.
