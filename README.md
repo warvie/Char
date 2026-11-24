@@ -10,7 +10,7 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 ## Features
 
-- Voxel world built from small half-size blocks that you can dig and build in. Stone starts about 7 blocks down, with coal and iron deeper.
+- Voxel world built from small half-size, pixel-textured blocks (grass, dirt, stone, ores, brick, planks, bark, corrugated metal, glass) that you can dig and build in. Stone starts about 7 blocks down, with coal and iron deeper.
 - Ruined concrete and brick buildings with framed glass windows (some smashed or boarded up), front and back doors that open and close, stairs, and supply crates to raid.
 - Sewers under every road: climb down open manholes, wade past the sludge channel in the dark, and find better-stocked stashes guarded by the dead.
 - Zombies that are slow by day and fast at night. They jump 2 blocks and smash wood, glass and doors, so build walls 3 high in stone or metal.

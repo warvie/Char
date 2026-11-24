@@ -324,34 +324,105 @@ const FACES=[[1,0,0,[[1,0,0],[1,1,0],[1,1,1],[1,0,1]],.8],[-1,0,0,[[0,0,1],[0,1,
 for(const f of FACES){const c=f[3],a=[0,1,2].map(i=>c[1][i]-c[0][i]),b=[0,1,2].map(i=>c[2][i]-c[0][i]);
   const n=[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];if(n[0]*f[0]+n[1]*f[1]+n[2]*f[2]<0)c.reverse()}
 const BRGB=BCOL.map(c=>{const k=new THREE.Color(c);return[k.r,k.g,k.b]});
-const vmat=new THREE.MeshLambertMaterial({vertexColors:true});
-const gmat=new THREE.MeshLambertMaterial({color:0xa8d0dc,transparent:true,opacity:.32,depthWrite:false});
+// ---------------- procedural texture atlas (16px tiles, drawn at load)
+const TS=16,ACOLS=8,AROWS=4,AW=TS*ACOLS,AH=TS*AROWS;
+const atlasC=document.createElement('canvas');atlasC.width=AW;atlasC.height=AH;
+const TILE={grassTop:0,grassSide:1,dirt:2,stone:3,coal:4,iron:5,conc:6,asph:7,plank:8,bark:9,logTop:10,leaf:11,brick:12,metal:13,bed:14,glass:15,frame:16,sludge:17};
+{
+  const ctx=atlasC.getContext('2d'),tr=mulberry(seed^0x5eed),rr=()=>tr();
+  const px=(t,x,y,r,g,b,a=1)=>{ctx.fillStyle=`rgba(${r|0},${g|0},${b|0},${a})`;ctx.fillRect((t%ACOLS)*TS+x,((t/ACOLS)|0)*TS+y,1,1)};
+  const noise=(t,r,g,b,amt)=>{for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const k=1+(rr()-.5)*amt;px(t,x,y,r*k,g*k,b*k)}};
+  const specks=(t,n,r,g,b,amt=.2)=>{for(let i=0;i<n;i++){const k=1+(rr()-.5)*amt;px(t,rr()*TS|0,rr()*TS|0,r*k,g*k,b*k)}};
+  const blob=(t,n,size,r,g,b)=>{for(let i=0;i<n;i++){const cx=1+rr()*(TS-3)|0,cy=1+rr()*(TS-3)|0;for(let j=0;j<size;j++){const k=.85+rr()*.3;px(t,clamp(cx+(rr()*3|0)-1,0,TS-1),clamp(cy+(rr()*3|0)-1,0,TS-1),r*k,g*k,b*k)}}};
+  const crack=(t,r,g,b)=>{let x=rr()*TS|0,y=rr()*TS|0;for(let i=0;i<9;i++){px(t,x,y,r,g,b);x=clamp(x+(rr()*3|0)-1,0,TS-1);y=clamp(y+1-(rr()<.3?1:0),0,TS-1)}};
+  // grass top: dead olive with dry tufts
+  noise(TILE.grassTop,86,97,58,.35);specks(TILE.grassTop,26,110,118,62);specks(TILE.grassTop,16,104,84,50);specks(TILE.grassTop,10,52,62,34);
+  // dirt
+  noise(TILE.dirt,90,70,50,.3);specks(TILE.dirt,14,64,48,34);specks(TILE.dirt,8,120,104,86,.1);
+  // grass side: dirt with a ragged grass lip
+  noise(TILE.grassSide,90,70,50,.3);specks(TILE.grassSide,10,64,48,34);
+  for(let x=0;x<TS;x++){const d=2+(rr()*3|0);for(let y=0;y<d;y++){const k=.8+rr()*.4;px(TILE.grassSide,x,y,86*k,97*k,58*k)}}
+  // stone
+  noise(TILE.stone,106,106,104,.22);specks(TILE.stone,20,84,84,84,.1);specks(TILE.stone,10,130,130,126,.1);crack(TILE.stone,70,70,70);
+  // ores: stone base + clusters
+  for(const [t,c] of[[TILE.coal,[28,28,30]],[TILE.iron,[176,122,86]]]){noise(t,106,106,104,.22);specks(t,14,84,84,84,.1);blob(t,6,8,...c)}
+  // concrete: pale fine grain, cracks, grime
+  noise(TILE.conc,140,137,128,.12);specks(TILE.conc,14,118,114,106,.1);crack(TILE.conc,96,94,88);
+  for(let x=0;x<TS;x++)if(rr()<.5)px(TILE.conc,x,TS-1,112,108,100);
+  // asphalt
+  noise(TILE.asph,46,46,50,.3);specks(TILE.asph,22,92,92,94,.15);specks(TILE.asph,6,30,30,32,.1);
+  // planks: 4 boards with seams, grain and nails
+  for(let y=0;y<TS;y++){const board=y>>2,base=[139,106,64].map(v=>v*(.86+((board*37)%5)*.05));for(let x=0;x<TS;x++){
+    let k=1+(rr()-.5)*.12;if((y&3)===3)k=.55;else if(((x+board*5)%7)===0&&rr()<.7)k*=.85;px(TILE.plank,x,y,base[0]*k,base[1]*k,base[2]*k)}}
+  for(let b=0;b<4;b++){px(TILE.plank,1,b*4+1,60,60,60);px(TILE.plank,14,b*4+1,60,60,60)}
+  // bark: vertical streaks
+  for(let x=0;x<TS;x++){const kx=.75+rr()*.4;for(let y=0;y<TS;y++){const k=kx*(1+(rr()-.5)*.25);px(TILE.bark,x,y,74*k,56*k,38*k)}}
+  for(let i=0;i<5;i++){const x=rr()*TS|0;for(let y=0;y<TS;y++)if(rr()<.7)px(TILE.bark,x,y,44,32,22)}
+  // log top: rings
+  for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const d=Math.hypot(x-7.5,y-7.5),ring=(d|0)%3===0;const k=(ring?.75:1)*(1+(rr()-.5)*.12);
+    if(d>7)px(TILE.logTop,x,y,74*k*.85,56*k*.85,38*k*.85);else px(TILE.logTop,x,y,150*k,118*k,76*k)}
+  // leaves: dark, sickly, with gaps
+  noise(TILE.leaf,60,71,40,.45);specks(TILE.leaf,30,34,40,24,.2);specks(TILE.leaf,12,92,96,50,.2);specks(TILE.leaf,8,96,80,44,.2);
+  // brick: running bond, mortar lines, soot
+  for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const row=y>>2,off=(row&1)*4,mort=(y&3)===3||((x+off)&7)===7;
+    const bv=(((x+off)>>3)*13+row*7)%5;const k=1+(rr()-.5)*.15;
+    if(mort)px(TILE.brick,x,y,150*k,144*k,130*k);else{const base=[122-bv*6,58-bv*2,44-bv*2];px(TILE.brick,x,y,base[0]*k,base[1]*k,base[2]*k)}}
+  for(let i=0;i<8;i++)px(TILE.brick,rr()*TS|0,TS-1-(rr()*4|0),50,30,26);
+  // corrugated metal with rivets and rust
+  for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const k=(x%4===0?.7:x%4===2?1.12:1)*(1+(rr()-.5)*.1);px(TILE.metal,x,y,118*k,131*k,138*k)}
+  for(const [x,y] of[[2,1],[10,1],[2,14],[10,14]])px(TILE.metal,x,y,70,74,78);blob(TILE.metal,3,6,140,84,46);
+  // bedrock
+  noise(TILE.bed,26,26,28,.6);specks(TILE.bed,20,8,8,8,.1);
+  // glass: pale with a highlight streak (alpha used by glass material)
+  for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const streak=Math.abs(x-y-3)<1.2||Math.abs(x-y+6)<.7;
+    const edge=x===0||y===0||x===TS-1||y===TS-1;const a=streak?.9:edge?.75:.35+rr()*.1;const v=streak?245:edge?150:190;px(TILE.glass,x,y,v*.85,v*.95,v,a)}
+  for(let i=0;i<6;i++)px(TILE.glass,rr()*TS|0,rr()*TS|0,110,100,80,.8);
+  // window/door frame: off-white paint peeling to wood
+  noise(TILE.frame,210,203,184,.1);blob(TILE.frame,4,6,120,90,58);for(let x=0;x<TS;x++)px(TILE.frame,x,0,170,164,148);
+  // sludge
+  noise(TILE.sludge,48,58,28,.35);specks(TILE.sludge,16,70,80,36,.2);specks(TILE.sludge,6,120,128,70,.2);
+}
+const atlas=new THREE.CanvasTexture(atlasC);atlas.magFilter=THREE.NearestFilter;atlas.minFilter=THREE.NearestFilter;atlas.generateMipmaps=false;
+// face order: +X,-X,+Y,-Y,+Z,-Z
+const TILE_OF=[];{const T=TILE,all=t=>[t,t,t,t,t,t];
+  TILE_OF[B.GRASS]=[T.grassSide,T.grassSide,T.grassTop,T.dirt,T.grassSide,T.grassSide];TILE_OF[B.DIRT]=all(T.dirt);TILE_OF[B.STONE]=all(T.stone);
+  TILE_OF[B.COAL]=all(T.coal);TILE_OF[B.IRON]=all(T.iron);TILE_OF[B.CONC]=all(T.conc);TILE_OF[B.ASPH]=all(T.asph);TILE_OF[B.PLANK]=all(T.plank);
+  TILE_OF[B.LOG]=[T.bark,T.bark,T.logTop,T.logTop,T.bark,T.bark];TILE_OF[B.LEAF]=all(T.leaf);TILE_OF[B.BRICK]=all(T.brick);TILE_OF[B.METAL]=all(T.metal);
+  TILE_OF[B.BED]=all(T.bed);TILE_OF[B.GLASS]=all(T.glass);TILE_OF[B.FRAME]=all(T.frame);TILE_OF[B.SLUDGE]=all(T.sludge);TILE_OF[B.DOOR]=all(T.plank);TILE_OF[B.LADDER]=all(T.plank)}
+const FACE_UV=[[2,1],[2,1],[0,2],[0,2],[0,1],[0,1]]; // which corner axes give (u,v)
+function pushUV(UV,tile,fi,c){const a=FACE_UV[fi],u=c[a[0]],v=c[a[1]],tx=tile%ACOLS,ty=(tile/ACOLS)|0;
+  UV.push((tx*TS+.02+u*(TS-.04))/AW,1-(ty*TS+.02+(1-v)*(TS-.04))/AH)}
+function tileTex(tile,rep=1){const c=document.createElement('canvas');c.width=c.height=TS;c.getContext('2d').drawImage(atlasC,(tile%ACOLS)*TS,((tile/ACOLS)|0)*TS,TS,TS,0,0,TS,TS);
+  const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep,rep);return t}
+
+const vmat=new THREE.MeshLambertMaterial({vertexColors:true,map:atlas});
+const gmat=new THREE.MeshLambertMaterial({map:atlas,color:0xcfe6ee,transparent:true,opacity:.8,depthWrite:false});
 const chunkMeshes=[],glassMeshes=[];
-function mkGeo(P,N,C,I){const g=new THREE.BufferGeometry();
+function mkGeo(P,N,C,I,UV){const g=new THREE.BufferGeometry();if(UV)g.setAttribute('uv',new THREE.Float32BufferAttribute(UV,2));
   g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));
   if(C)g.setAttribute('color',new THREE.Float32BufferAttribute(C,3));g.setIndex(I);g.computeBoundingSphere();return g}
 function buildChunk(cx,cz){
-  const P=[],N=[],C=[],I=[],GP=[],GN=[],GI=[];
+  const P=[],N=[],C=[],I=[],UV=[],GP=[],GN=[],GI=[],GUV=[];
   for(let x=cx*CS;x<cx*CS+CS;x++)for(let z=cz*CS;z<cz*CS+CS;z++)for(let y=0;y<H;y++){
     const b=vox[(y*W+z)*W+x];if(!b||b===B.DOOR||b===B.LADDER)continue;
     if(b===B.GLASS){
       for(const f of FACES){const nb=get(x+f[0],y+f[1],z+f[2]);if(nb===B.GLASS||opaque(nb))continue;
-        const n=GP.length/3;for(const c of f[3]){GP.push(x+c[0],y+c[1],z+c[2]);GN.push(f[0],f[1],f[2])}GI.push(n,n+1,n+2,n,n+2,n+3)}
+        const n=GP.length/3,fi=FACES.indexOf(f);for(const c of f[3]){GP.push(x+c[0],y+c[1],z+c[2]);GN.push(f[0],f[1],f[2]);pushUV(GUV,TILE.glass,fi,c)}GI.push(n,n+1,n+2,n,n+2,n+3)}
       continue;
     }
-    let col=BRGB[b];const v=.8+.2*h3(x,y,z);
-    if((b===B.ASPH||b===B.CONC||b===B.DIRT)&&h3(x>>1,y+7,z>>1)<.035)col=[.32,.04,.03];
-    for(const f of FACES){
+    let col=[1,1,1];const v=.88+.12*h3(x,y,z),tiles=TILE_OF[b];
+    if((b===B.ASPH||b===B.CONC||b===B.DIRT)&&h3(x>>1,y+7,z>>1)<.035)col=[.75,.16,.13];
+    for(let fi=0;fi<6;fi++){const f=FACES[fi];
       if(opaque(get(x+f[0],y+f[1],z+f[2])))continue;
       const n=P.length/3,s=v*f[4];
-      for(const c of f[3]){P.push(x+c[0],y+c[1],z+c[2]);N.push(f[0],f[1],f[2]);C.push(col[0]*s,col[1]*s,col[2]*s)}
+      for(const c of f[3]){P.push(x+c[0],y+c[1],z+c[2]);N.push(f[0],f[1],f[2]);C.push(col[0]*s,col[1]*s,col[2]*s);pushUV(UV,tiles[fi],fi,c)}
       I.push(n,n+1,n+2,n,n+2,n+3);
     }
   }
   const k=cz*NC+cx;
   for(const arr of[chunkMeshes,glassMeshes])if(arr[k]){scene.remove(arr[k]);arr[k].geometry.dispose();arr[k]=null}
-  const m=new THREE.Mesh(mkGeo(P,N,C,I),vmat);m.scale.setScalar(VS);scene.add(m);chunkMeshes[k]=m;
-  if(GP.length){const gm=new THREE.Mesh(mkGeo(GP,GN,null,GI),gmat);gm.scale.setScalar(VS);gm.renderOrder=2;scene.add(gm);glassMeshes[k]=gm}
+  const m=new THREE.Mesh(mkGeo(P,N,C,I,UV),vmat);m.scale.setScalar(VS);scene.add(m);chunkMeshes[k]=m;
+  if(GP.length){const gm=new THREE.Mesh(mkGeo(GP,GN,null,GI,GUV),gmat);gm.scale.setScalar(VS);gm.renderOrder=2;scene.add(gm);glassMeshes[k]=gm}
 }
 function rebuildAt(x,z){
   const cx=Math.floor(x/CS),cz=Math.floor(z/CS);buildChunk(cx,cz);
@@ -460,7 +531,8 @@ const TOOLS=['Bat','Pistol','Pickaxe','Build','Trap'];
 const TRAPS=[['spikes','Spike trap'],['beartrap','Bear trap'],['mine','Tripwire bomb']];
 
 // ---------------- crates & vehicles
-function makeCrate(x,y,z,rich){const g=new THREE.Group();part(g,.9,.6,.6,rich?0x46543a:0x6b5030,0,.3,0);part(g,.92,.07,.62,0x333333,0,.15,0);part(g,.92,.07,.62,0x333333,0,.45,0);
+const crateMat=new THREE.MeshLambertMaterial({map:tileTex(TILE.plank),color:0xb08a60}),stashMat=new THREE.MeshLambertMaterial({map:tileTex(TILE.metal),color:0x7a8a60});
+function makeCrate(x,y,z,rich){const g=new THREE.Group();part(g,.9,.6,.6,0,0,.3,0).material=rich?stashMat:crateMat;part(g,.92,.07,.62,0x333333,0,.15,0);part(g,.92,.07,.62,0x333333,0,.45,0);
   const lid=part(g,.92,.08,.62,0x5a4228,0,.64,0);g.position.set(x,y,z);g.rotation.y=rich?(rng()<.5?0:Math.PI/2):rng()*Math.PI;scene.add(g);return{g,lid,looted:false,pos:g.position,rich}}
 const wheelGeo=new THREE.CylinderGeometry(.38,.38,.3,14).rotateZ(Math.PI/2),hubGeo=new THREE.CylinderGeometry(.2,.2,.32,10).rotateZ(Math.PI/2);
 const torusGeo=new THREE.TorusGeometry(.18,.024,6,20),circGeo=new THREE.CircleGeometry(1,20).rotateY(Math.PI),ringGeo=new THREE.RingGeometry(.86,1,24).rotateY(Math.PI);
@@ -533,10 +605,11 @@ function makeVehicle(s){
 }
 
 // ---------------- doors
+const doorTex=tileTex(TILE.plank);doorTex.repeat.set(1,2);
 function makeDoor(s){
   const pivot=new THREE.Group();pivot.position.set(s.x*VS,s.y*VS,(s.z+.5)*VS);
   const c=[0x6a4a2e,0x56665a,0x7a3a2a,0x4a4a5a][RI(0,3)],dk=new THREE.Color(c).multiplyScalar(.7).getHex();
-  part(pivot,1,2,.1,c,.5,1,0);
+  part(pivot,1,2,.1,c,.5,1,0).material=new THREE.MeshLambertMaterial({map:doorTex,color:new THREE.Color(c).lerp(new THREE.Color(0xffffff),.45)});
   for(const sz of[-1,1]){part(pivot,.34,.7,.02,dk,.28,1.45,sz*.055);part(pivot,.34,.7,.02,dk,.72,1.45,sz*.055);part(pivot,.78,.6,.02,dk,.5,.5,sz*.055);
     part(pivot,.06,.06,.05,0xb8a050,.88,1,sz*.07)}
   scene.add(pivot);
