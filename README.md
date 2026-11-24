@@ -17,6 +17,14 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
   - Everything else is stored as nothing but the seed plus your edits. It is rebuilt exactly when you return.
 - **Chunk streaming:** only the 8 × 8 m chunks around the players are meshed; the rest load in as you move and unload behind you. Pick a render distance from 32 to 80 m. Fog and camera range follow it.
 - **Realistic towns:** 6 m two-lane roads, 1.5 m sidewalks, 15 m lots, and houses 11–15 m across (level with the sidewalks) with 3 m storeys (2.5 m ceilings), 1–3 storeys, painted drywall in a different colour per room with baseboards and crown moulding, switchback staircases with landings (two steps per block) and wooden or iron railings, framed windows (some smashed or boarded), front and back doors, stairs and roof access.
+- **Land:** rolling hills, mountain ranges (ridged peaks of bare stone, far from towns), winding rivers and ponds you can swim in, boulders and scattered pebbles, and dirt off-road trails wandering through the wilds.
+- **Roads between towns** curve and wiggle across the country, cut and filled to an even grade, with yellow centre dashes. Where they cross water or a deep dip they become bridges: an asphalt deck on concrete, with parapets and piers. Road paint only sits on solid road, and disappears where the road is dug out.
+- **Settlements of every size:** single-block hamlets at lonely crossroads, ordinary towns, and big cities (about 1 region in 10) with 3–6 storey buildings, a mall and far more abandoned traffic.
+  - **Gas stations:** a lit canopy over two pump islands (Use a pump to siphon the last of its fuel), a price-sign pole, and a little shop with a till, coolers, shelves and fuel cans in the back.
+  - **Parks:** grass, gravel paths, a stone fountain, park benches, a swing set, a slide, picnic tables, lamp posts and old trees.
+  - **Malls:** a tall hall under a skylight, a row of shops (clothes, snacks, tools) with glass fronts and their own signs, a food court and benches.
+  - **Airports** out on the flats: a marked runway, taxiway and apron, a glass terminal with check-in desks and gate seating, a control tower with a ladder up to the glass cab, a hangar with a light plane, airliners at the gates and a burned-out wreck on the runway. Now and then an airliner crosses the sky overhead with its long roar.
+- **Lights:** every room has a wall switch for its ceiling light (Use to flip it). Craft wire, lamps and switches and lay your own: wire pieces join when side by side, and a switch turns on every lamp its wire reaches.
 - **Public buildings:** each town has some of these, under faded signs over the doors.
   - **Hospitals** (2–3 storeys): reception, waiting chairs, wards with hospital beds and IV stands, medicine cabinets and a pharmacy full of bandages.
   - **Grocery stores:** a plate-glass storefront, stocked aisles, checkouts, drinks coolers and a stockroom. Mostly food.
@@ -42,6 +50,12 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 - **Caves** that open into the hillsides and wind underground, with exposed coal and iron, stalactites and stashes.
 
 ## Graphics
+
+- **One pixel size everywhere:** every texture — blocks, vehicles and their parts, furniture, tents, grass, paintings — is drawn at 16 pixels per metre, so nothing looks stretched. (Shop signs are the one exception: their lettering is drawn at sign resolution.)
+- **Zombies differ at a glance:** heights from short to tall, thin to heavy builds, and outfits from tees, hoodies, flannel and overalls to suits, dresses, hospital gowns and police uniforms, with jeans, slacks or shorts, different shoes, and hair from bald and buzzed to long, ponytails, mohawks and patchy, plus beards.
+- **Tents** are pixel-built: a stepped ridge, a door flap, a rainfly with guy lines and stakes, and gear inside.
+- **Sound** is all synthesized but modelled on the real thing: footsteps that change with the ground, a gunshot crack with room echo, an engine whose note follows its revs, rolling thunder, rain and gusting wind, and the roar of passing airliners.
+- **Update log:** the start screen lists what changed in each update.
 
 **Pixel size** (start screen or case): the 3D view renders at full resolution by default (*Smooth*), with no pixelated upscaling. Pick ×2, ×3 or ×4 for a chunky retro look, where the view is drawn at a fraction of the resolution and blown up with hard pixel edges.
 

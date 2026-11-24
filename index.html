@@ -19,6 +19,7 @@ button{font:600 20px DGPixel,'Pixelify Sans',sans-serif;color:var(--ink);backgro
 button:hover:not(:disabled){background:#332d21;border-color:var(--olive)}
 button:focus-visible{outline:2px solid var(--olive);outline-offset:2px}
 button:disabled{opacity:.4;cursor:not-allowed}
+#ulog .ulog{max-height:220px;overflow:auto;text-align:left;font-size:13px;line-height:1.35;padding:4px 8px}#ulog h4{margin:8px 0 2px;font-size:14px;color:#f0c070}#ulog ul{margin:0;padding-left:18px}#ulog li{margin:2px 0}
 button.go{background:var(--rust);border-color:#e0634c;font:20px/1 DGPixel,'VT323',sans-serif;letter-spacing:.04em;padding:14px 28px}
 button.go:hover{background:#d24c36}
 h1,h2,h3{font-family:DGPixel,'VT323',sans-serif;font-weight:400;letter-spacing:.03em;margin:0;line-height:1.05}
@@ -218,6 +219,7 @@ body.touch .homeb{display:none}.phud.narrow .homeb{display:none}
 #cpal h3{margin:0 0 8px;font-size:20px;color:var(--rust)}#cpal small{display:block;margin-top:8px;font-size:10px;color:var(--dim)}
 #cpalT{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}#cpalT button,#cpalL button{min-height:34px;font:20px DGPixel,monospace;padding:3px 8px}#cpal button.on{outline:2px solid var(--olive)}
 #cpalL{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px}
+#lookHint{position:fixed;left:50%;top:58%;transform:translateX(-50%);z-index:9;pointer-events:none;font:20px DGPixel,monospace;color:var(--ink);background:rgba(14,12,9,.75);padding:6px 12px;border:1px solid rgba(235,230,216,.3)}
 #emo h3{margin:0 0 8px;font-size:20px;color:var(--rust)}#emo small{display:block;margin-top:8px;font-size:10px;color:var(--dim)}
 #emoL{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}#emoL button{min-height:40px;font:20px DGPixel,monospace;text-align:left;padding:4px 8px}#emoL button i{font-style:normal;color:var(--dim);margin-right:6px}
 .tb[data-b=emote]{right:calc(62px + env(safe-area-inset-right));top:calc(308px + env(safe-area-inset-top))}
@@ -318,6 +320,21 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>Graphics <select id="gfxSel"></select></label>
     <label>Pixel size <select id="pixSel"></select></label>
   </div>
+  <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
+    <h4>v12 · Nov 24, 2026 — the wider world</h4><ul>
+      <li>Winding roads between towns, graded into the hills, with bridges over rivers and ponds. Off-road dirt trails.</li>
+      <li>Rivers, ponds and swimming. Mountain ranges with stone peaks, boulders and pebbles.</li>
+      <li>Hamlets, big cities (taller buildings, much more traffic), gas stations with pumps you can siphon, parks with benches, swings, slides and a fountain, malls with shops and a food court.</li>
+      <li>Airports: runway, terminal, control tower, hangar, parked airliners and a crashed one. Planes fly overhead now and then.</li>
+      <li>Light switches in every room. Craft wire, lamps and switches and wire up your own lights.</li>
+      <li>Zombies with different heights, builds, clothes, hair and beards. Pixel textures on every vehicle and part, all at one pixel size. New tents.</li>
+      <li>More realistic sound: footsteps, gunshots, engine, thunder, wind and rain.</li>
+      <li>Fixes: creative camera lock, road paint over holes, mobile controls hidden on computers.</li></ul>
+    <h4>v11 — cars and homes</h4><ul><li>Car textures, readable dashboards, car parts and radios, lootable store shelves, paintings, candles, lava lamps, Minecraft-style hotbar editing, branch thicknesses.</li></ul>
+    <h4>v10 — online</h4><ul><li>Multiplayer across devices, unique usernames, profile pictures, emotes and dances, blood on the windshield, creative palette for every block, vehicle and mob.</li></ul>
+    <h4>v9 — the dead</h4><ul><li>Ragdoll car hits, severed and halved limbs, rotting textures with exposed bone, flowers and coloured grass, road paint, curbs, signs and traffic lights, round covered manholes.</li></ul>
+    <h4>Earlier</h4><ul><li>Endless voxel world, towns, sewers, caves, crafting, building, survivors and bandits, day and night, weather, split-screen co-op.</li></ul>
+  </div></details>
   <details class="opts" id="onl" open><summary>Online &amp; profile</summary>
     <p id="netSt" class="note" style="margin:6px 0">Checking for online play…</p>
     <div class="row"><label>Username <input id="unIn" maxlength="16" autocomplete="off" spellcheck="false" placeholder="3–16 letters, numbers, _"></label><button id="unBtn" type="button">Claim name</button><span id="unMsg" class="note"></span></div>
@@ -374,6 +391,7 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
 </div></div>
 
 <div id="cpal" class="hidden"><h3>Creative: place anything</h3><div id="cpalT"></div><div id="cpalL"></div><small>Pick something, then use the Build tool (4) to place it · R to close</small></div>
+<div id="lookHint" class="hidden">Click to look around</div>
 <div id="emo" class="hidden"><h3>Emotes &amp; dances</h3><div id="emoL"></div><small>J or Emote to close · moving stops a dance</small></div>
 <div id="pause" class="screen hidden" style="background:rgba(0,0,0,.6)"><div class="kit" style="max-width:420px;text-align:center">
   <h2 style="font-size:40px;color:var(--rust)">Paused</h2><p class="sub" style="margin:8px auto 16px">Click to take back the mouse and keep surviving.</p>
@@ -418,7 +436,7 @@ const fbm=(x,z)=>vnoise(x/16,z/16)*.6+vnoise(x/7,z/7)*.3+vnoise(x/3,z/3)*.1;
 // ---------------- world data
 // VS = size of one voxel in world units (0.5 = half-size blocks). The world is 96x96 units.
 // infinite world: an endless grid of RS x RS regions; a 3x3-region window (W x W) around the players lives in a ring buffer
-const VS=.5,RS=224,W=RS*3,H=68,CS=16,NC=W/CS,G=24,FH=6,P=48;
+const VS=.5,RS=224,W=RS*3,H=96,CS=16,NC=W/CS,G=24,FH=6,P=48;
 let OX=-RS,OZ=-RS; // world voxel coords of the window's corner (multiples of RS)
 const vox=new Uint8Array(W*H*W), hmap=new Int16Array(W*W);
 const md=v=>{v%=W;return v<0?v+W:v};
@@ -429,11 +447,12 @@ function get(x,y,z){if(!inWin(x,z)||y<0)return 13;if(y>=H)return 0;return vox[(y
 const hm=(x,z)=>hmap[md(z)*W+md(x)];
 let REC=false;
 function setv(x,y,z,v){if(inB(x,y,z)){vox[(y*W+md(z))*W+md(x)]=v;if(REC){recEdit(x,y,z,v);rtDirty=true}}}
-const solid=(x,y,z)=>{const b=get(x,y,z);return b!==0&&b!==17};
+const WATER=255,solid=(x,y,z)=>{const b=get(x,y,z);return b!==0&&b!==17&&b!==255};
 const vc=a=>Math.floor(a/VS);
 const B={GRASS:1,DIRT:2,STONE:3,COAL:4,IRON:5,CONC:6,ASPH:7,PLANK:8,LOG:9,LEAF:10,BRICK:11,METAL:12,BED:13,DOOR:14,GLASS:15,FRAME:16,LADDER:17,SLUDGE:18,WALL:19,FURN:20,TILEF:21,ROOF:22,G25:23,G50:24,G75:25,STPX:26,STNX:27,STPZ:28,STNZ:29};
 const BCOL=[0,0x56613a,0x5a4632,0x6a6a68,0x2a2a2c,0x8f6a52,0x8a8780,0x2e2e32,0x8b6a40,0x4a3826,0x3c4728,0x7a3a2c,0x76838a,0x161616,0x6a4a2e,0x9fc4d0,0xcfc8b4,0x6b4a2a,0x2f3a1a,0xb8b0a0,0x6a5040,0xd0d0c8,0x48443e,0x56613a,0x56613a,0x56613a,0x8b6a40,0x8b6a40,0x8b6a40,0x8b6a40];
 const HARD=[0,.18,.18,.55,.65,.85,.6,.55,.35,.4,.08,.6,1.5,1e9,1.2,.1,.3,1e9,.3,.5,1e9,.5,.6,.15,.15,.15,.35,.35,.35,.35];
+BCOL[255]=0x2a5a78;HARD[255]=1e9;
 const DROP=[null,'dirt','dirt','stone','coal','iron','stone','stone','plank','wood',null,'stone','metal',null,null,null,'plank',null,'dirt','stone',null,'stone','stone','dirt','dirt','dirt','stairs','stairs','stairs','stairs'];
 const opaque=b=>b!==0&&b!==B.GLASS&&b!==B.DOOR&&b!==B.LADDER&&b!==B.FURN&&!SH[b];
 // collision/render shapes in voxel fractions [x0,y0,z0,x1,y1,z1]; undefined = full cube
@@ -505,16 +524,16 @@ const MATS=[['plank',B.PLANK],['stone',B.STONE],['dirt',B.DIRT],['metal',B.METAL
 // creative mode: every block, unlimited
 const CMATS=[['grass',B.GRASS],['dirt',B.DIRT],['stone',B.STONE],['coal',B.COAL],['iron',B.IRON],['conc',B.CONC],['asph',B.ASPH],['plank',B.PLANK],['log',B.LOG],['leaf',B.LEAF],['brick',B.BRICK],['metal',B.METAL],['glass',B.GLASS],['wall',B.WALL],['tile',B.TILEF],['roof',B.ROOF],['stairs',B.STPX],['frame',B.FRAME],['ladder',B.LADDER],['sludge',B.SLUDGE],['bedrock',B.BED],['gcap1',B.G25],['gcap2',B.G50],['gcap3',B.G75]];
 const matList=p=>p.creative?CMATS:MATS,curMat=p=>{const L=matList(p);return L[p.mat%L.length]};
-const LABEL={wheel:'Wheel',engine:'Engine',battery:'Car battery',carradio:'Car radio',wrench:'Wrench',frame:'Wood frame',ladder:'Ladder',sludge:'Sewer sludge',bedrock:'Bedrock',gcap1:'Grass (¼ step)',gcap2:'Grass (½ step)',gcap3:'Grass (¾ step)',scrip:'Scrip',saw:'Chainsaw',grass:'Grass',conc:'Concrete',asph:'Asphalt',log:'Log',leaf:'Leaves',brick:'Brick',glass:'Glass',wall:'Drywall',tile:'Tile',roof:'Roof',veg:'Vegetables',stew:'Meat stew',broth:'Bone broth',jerky:'Jerky',roast:'Roast veg',hotbeans:'Hot beans',tnt:'Dynamite',pipebomb:'Pipe bomb',bunk:'Bunk bed',tent:'Tent',stairs:'Stairs',bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
+const LABEL={lswitch:'Light switch',lamp:'Lamp',wire:'Wire',wheel:'Wheel',engine:'Engine',battery:'Car battery',carradio:'Car radio',wrench:'Wrench',frame:'Wood frame',ladder:'Ladder',sludge:'Sewer sludge',bedrock:'Bedrock',gcap1:'Grass (¼ step)',gcap2:'Grass (½ step)',gcap3:'Grass (¾ step)',scrip:'Scrip',saw:'Chainsaw',grass:'Grass',conc:'Concrete',asph:'Asphalt',log:'Log',leaf:'Leaves',brick:'Brick',glass:'Glass',wall:'Drywall',tile:'Tile',roof:'Roof',veg:'Vegetables',stew:'Meat stew',broth:'Bone broth',jerky:'Jerky',roast:'Roast veg',hotbeans:'Hot beans',tnt:'Dynamite',pipebomb:'Pipe bomb',bunk:'Bunk bed',tent:'Tent',stairs:'Stairs',bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
 // towns: a large one in the middle, smaller ones scattered through the wilds
 const towns=[];
 function townAt(x,z,m){for(const t of towns)if(x>=t.x0-m&&x<=t.x1+m&&z>=t.z0-m&&z<=t.z1+m)return t;return null}
-const isRoad=(x,z)=>{const t=townAt(x,z,0);return!!t&&((x-t.x0)%P<12||(z-t.z0)%P<12)};
+const isRoad=(x,z)=>{const t=townAt(x,z,0);return!!t&&!t.air&&((x-t.x0)%P<12||(z-t.z0)%P<12)};
 const WALK=new Uint8Array(P);WALK[12]=WALK[13]=WALK[14]=WALK[P-3]=WALK[P-2]=WALK[P-1]=1;
-const isWalk=(x,z)=>{const t=townAt(x,z,0);if(!t)return false;const a=(x-t.x0)%P,b=(z-t.z0)%P;return!(a<12||b<12)&&(WALK[a]||WALK[b])===1};
+const isWalk=(x,z)=>{const t=townAt(x,z,0);if(!t||t.air)return false;const a=(x-t.x0)%P,b=(z-t.z0)%P;return!(a<12||b<12)&&(WALK[a]||WALK[b])===1};
 const inTown=(x,z)=>!!townAt(x,z,4);
 function townDist(x,z){let m=1e9;for(const t of towns){const dx=Math.max(t.x0-4-x,x-t.x1-4,0),dz=Math.max(t.z0-4-z,z-t.z1-4,0),d=Math.hypot(dx,dz);if(d<m)m=d}return m}
-const TSZ=n=>P*n+15,MAIN=Math.floor((RS-TSZ(4))/2);
+const TSZ=n=>P*n+15,MAIN=Math.floor((RS-TSZ(4))/2),AIRW=200,AIRD=96;
 // ---- regions: each is planned and generated from its own seed, so any part of the endless world can be rebuilt on demand
 const regions=new Map(),planCache=new Map();
 const rkey=(rx,rz)=>rx+','+rz;
@@ -526,9 +545,16 @@ function recEdit(x,y,z,v){const rx=Math.floor(x/RS),rz=Math.floor(z/RS);reg(rx,r
 function planRegion(rx,rz){const k=rkey(rx,rz);let L=planCache.get(k);if(L)return L;L=[];const r=mulberry(rhash(rx,rz,1)),X0=rx*RS,Z0=rz*RS;
   const mk=(x0,z0,n)=>L.push({x0,z0,n,x1:x0+TSZ(n)-1,z1:z0+TSZ(n)-1,rk:k});
   if(rx===0&&rz===0)mk(X0+MAIN,Z0+MAIN,4);
-  else if(r()<.72){const n=r()<.35?3:2,S=TSZ(n);mk(X0+8+Math.floor(r()*(RS-16-S)),Z0+8+Math.floor(r()*(RS-16-S)),n);
+  else{const u=r();
+  // a big city: a full 4x4 grid with tall buildings, a mall and a lot more traffic
+  if(u<.1){mk(X0+MAIN,Z0+MAIN,4);L[L.length-1].city=1}
+  // hamlets: a single block, a house or a gas station at a crossroads in the middle of nowhere
+  else if(u<.3){const S=TSZ(1);for(let t=0,c=0;t<10&&c<(r()<.4?2:1);t++){const x=X0+8+Math.floor(r()*(RS-16-S)),z=Z0+8+Math.floor(r()*(RS-16-S));if(!L.some(o=>x<o.x1+30&&x+S>o.x0-30&&z<o.z1+30&&z+S>o.z0-30)){mk(x,z,1);c++}}}
+  // airports: a runway, a terminal, a control tower and a hangar out on the flats
+  else if(u<.38){const x0=X0+12,z0=Z0+8+Math.floor(r()*(RS-16-AIRD));L.push({x0,z0,n:2,x1:x0+AIRW-1,z1:z0+AIRD-1,rk:k,air:1})}
+  else if(u<.84){const n=r()<.35?3:2,S=TSZ(n);mk(X0+8+Math.floor(r()*(RS-16-S)),Z0+8+Math.floor(r()*(RS-16-S)),n);
     if(n===2&&r()<.3){const S2=TSZ(2);for(let t=0;t<6;t++){const x=X0+8+Math.floor(r()*(RS-16-S2)),z=Z0+8+Math.floor(r()*(RS-16-S2));
-      if(!L.some(o=>x<o.x1+24&&x+S2>o.x0-24&&z<o.z1+24&&z+S2>o.z0-24)){mk(x,z,2);break}}}}
+      if(!L.some(o=>x<o.x1+24&&x+S2>o.x0-24&&z<o.z1+24&&z+S2>o.z0-24)){mk(x,z,2);break}}}}}
   planCache.set(k,L);return L}
 function planTowns(){towns.length=0;const wx=OX/RS,wz=OZ/RS;for(let rz=wz-1;rz<=wz+3;rz++)for(let rx=wx-1;rx<=wx+3;rx++)towns.push(...planRegion(rx,rz));
   towns.sort((a,b)=>(a.rk==='0,0'?-1:0)-(b.rk==='0,0'?-1:0))}
@@ -546,38 +572,100 @@ function genRegion(Rg){
   genFill(Rg,topB,capQ,hh);
   restOfRegion(Rg);
 }
+// ---------------- natural terrain: rolling hills, mountain ranges (ridged noise, far from towns), winding rivers and ponds
+const WL=G-2; // river water level
+function natH(x,z){const d=townDist(x,z),far=Math.min(1,d/16),wide=Math.min(1,d/50);
+  let hf=G+(fbm(x/2,z/2)-.42)*26*far+(vnoise(x/110,z/110)-.38)*34*wide;
+  const mm=Math.max(0,(vnoise(x/520+31,z/520-17)-.52)/.48)*Math.min(1,d/90);
+  if(mm>0){const r1=1-Math.abs(vnoise(x/70+5,z/70+9)*2-1),r2=1-Math.abs(vnoise(x/31-3,z/31+4)*2-1);hf+=mm*mm*(r1*r1*48+r2*r2*14)}
+  let wl=0,rv=0,pond=0;
+  // rivers: the zero line of a warped noise field, so they meander; they stay out of towns and fade out in the mountains
+  const wx=x+vnoise(x/90,z/90)*60,wz=z+vnoise(x/90+40,z/90+40)*60,rn=Math.abs(vnoise(wx/300+77,wz/300-13)-.5);
+  rv=Math.max(0,1-rn/.03)*Math.min(1,d/12)*(1-Math.min(1,mm*2));
+  if(rv>0){const bed=WL-1-rv*3.2,bank=Math.min(hf,WL+1+(1-rv)*6);hf=rv>.25?Math.min(hf,bed):Math.min(hf,bank);if(rv>.25)wl=WL}
+  // ponds: blobs of low noise, filled to the level of the surrounding ground
+  const pn=vnoise(x/46+123,z/46-77);if(pn>.76&&d>14&&mm<.1&&!wl){const k=(pn-.76)/.24,rim=Math.floor(G+(vnoise(x/110,z/110)-.38)*34*wide);pond=k;
+    if(k>.18){hf=Math.min(hf,rim-1-k*4);wl=rim}else hf=Math.min(hf,rim)}
+  hf=hf<12?12:hf>H-10?H-10:hf;return{hf,wl,mm,rv,pond}}
+// roads between towns: each town links to its nearest neighbour to the east and to the south with a winding curve (Bezier plus a
+// slow wiggle), graded to the land with cuts and fills, and carried over rivers and ponds on bridges
+function townExits(T){if(T.air){const zm=T.z0+46,xm=T.x0+100;return{E:[T.x1+1,zm,1,0],W:[T.x0-1,zm,-1,0],S:[xm,T.z1+1,0,1],N:[T.x0-1,zm-4,0,-1]}}const n=Math.round((T.x1-T.x0-14)/P),m=Math.floor(n/2);return{E:[T.x1+1,T.z0+m*P+6,1,0],W:[T.x0-1,T.z0+m*P+6,-1,0],S:[T.x0+m*P+6,T.z1+1,0,1],N:[T.x0+m*P+6,T.z0-1,0,-1]}}
+const linkCache=new Map();
+function townLinks(rx,rz){const k=rkey(rx,rz);if(linkCache.has(k))return linkCache.get(k);const out=[];
+  for(const A of planRegion(rx,rz)){const ax=(A.x0+A.x1)/2,az=(A.z0+A.z1)/2;let bE=null,dE=1e9,bS=null,dS=1e9;
+    for(let ry=rz-2;ry<=rz+3;ry++)for(let rr=rx-2;rr<=rx+3;rr++)for(const B_ of planRegion(rr,ry)){if(B_===A)continue;const bx=(B_.x0+B_.x1)/2,bz=(B_.z0+B_.z1)/2,dx=bx-ax,dz=bz-az,dd=Math.hypot(dx,dz);if(dd>640)continue;
+      if(dx>Math.abs(dz)*.8&&dd<dE){dE=dd;bE=B_}if(dz>Math.abs(dx)*.8&&dd<dS){dS=dd;bS=B_}}
+    if(bE)out.push([townExits(A).E,townExits(bE).W,rhash(A.x0,bE.x0,5)]);if(bS)out.push([townExits(A).S,townExits(bS).N,rhash(A.z0,bS.z0,6)])}
+  linkCache.set(k,out);return out}
+function curvePts(a,b,hs){const r=mulberry(hs),L=Math.hypot(b[0]-a[0],b[1]-a[1]),px=-(b[1]-a[1])/L,pz=(b[0]-a[0])/L,j=()=>(r()-.5)*L*.35;
+  const c1=[a[0]+a[2]*L*.3+px*j(),a[1]+a[3]*L*.3+pz*j()],c2=[b[0]+b[2]*L*.3+px*j(),b[1]+b[3]*L*.3+pz*j()],amp=6+r()*14,fr=1+Math.floor(r()*3),ph=r()*6,N=Math.ceil(L*2.2),pts=[];
+  for(let i=0;i<=N;i++){const t=i/N,u=1-t,w=Math.sin(t*Math.PI)*Math.sin(t*Math.PI*fr+ph)*amp;
+    pts.push([u*u*u*a[0]+3*u*u*t*c1[0]+3*u*t*t*c2[0]+t*t*t*b[0]+px*w,u*u*u*a[1]+3*u*u*t*c1[1]+3*u*t*t*c2[1]+t*t*t*b[1]+pz*w])}return pts}
+function regionRoads(Rg){const X0=Rg.rx*RS,Z0=Rg.rz*RS,X1=X0+RS,Z1=Z0+RS,cells=new Map(),dash=[];
+  for(let rz=Rg.rz-3;rz<=Rg.rz+1;rz++)for(let rx=Rg.rx-3;rx<=Rg.rx+1;rx++)for(const[a,b,hs]of townLinks(rx,rz)){
+    if(Math.max(a[0],b[0])+60<X0||Math.min(a[0],b[0])-60>X1||Math.max(a[1],b[1])+60<Z0||Math.min(a[1],b[1])-60>Z1)continue;
+    const pts=curvePts(a,b,hs),hs0=pts.map(([x,z])=>{const n=natH(Math.round(x),Math.round(z));return n.wl?Math.max(n.hf,WL+2):n.hf}),N=pts.length,sm=new Float32Array(N);
+    for(let i=0;i<N;i++){let t=0,c=0;for(let k=-14;k<=14;k++){const q=hs0[Math.max(0,Math.min(N-1,i+k))];t+=q;c++}let y=t/c;const e=Math.min(i,N-1-i);if(e<24)y=G+(y-G)*e/24;sm[i]=y}
+    for(let i=0;i<N;i++){const[x,z]=pts[i];if(x<X0-6||x>X1+6||z<Z0-6||z>Z1+6)continue;const ry=Math.round(sm[i]);
+      for(let dz=-5;dz<=5;dz++)for(let dx=-5;dx<=5;dx++){const cx=Math.round(x+dx),cz=Math.round(z+dz);if(cx<X0||cz<Z0||cx>=X1||cz>=Z1)continue;const dd=Math.hypot(cx-x,cz-z);if(dd>5)continue;
+        const c=(cz-Z0)*RS+(cx-X0),o=cells.get(c);if(!o||dd<o.d)cells.set(c,{d:dd,y:ry,core:dd<=3.2})}
+      if(i%9===0&&x>=X0&&x<X1&&z>=Z0&&z<Z1){const j=Math.min(N-1,i+1);dash.push([x,z,ry,Math.atan2(pts[j][0]-x,pts[j][1]-z)])}}}
+  // off-road trails: a couple of winding dirt tracks wandering across the wild part of each region
+  const r=mulberry(rhash(Rg.rx,Rg.rz,41)),trail=new Set();
+  for(let t=0;t<2;t++){const a=[X0+20+r()*(RS-40),Z0+20+r()*(RS-40),0,0],b=[X0+20+r()*(RS-40),Z0+20+r()*(RS-40),0,0];if(Math.hypot(b[0]-a[0],b[1]-a[1])<80)continue;
+    for(const[x,z]of curvePts(a,b,rhash(Rg.rx,Rg.rz,50+t)))for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const cx=Math.round(x+dx),cz=Math.round(z+dz);if(cx<X0||cz<Z0||cx>=X1||cz>=Z1||(dx&&dz&&r()<.5))continue;trail.add((cz-Z0)*RS+(cx-X0))}}
+  return{cells,dash,trail}}
+// airport ground (local coords): runway, taxiway, apron, service road, terminal car park, hangar floor
+function airPaved(T,x,z){const a=x-T.x0,b=z-T.z0;return(b>=8&&b<=21&&a>=3&&a<=196)||(a>=56&&a<=61&&b>=22&&b<=33)||(a>=30&&a<=195&&b>=34&&b<=60)||(b>=44&&b<=49)||(a>=50&&a<=150&&b>=80)||(a>=150&&a<=186&&b>=61&&b<=92)||(a>=97&&a<=103&&b>=60)}
 // pass 1: per-column height + surface block (noise in world coordinates, so regions meet seamlessly)
 function regionHeights(Rg,topB,capQ,hh){const X0=Rg.rx*RS,Z0=Rg.rz*RS,X1=X0+RS,Z1=Z0+RS;
+  const RD_=regionRoads(Rg),wlA=new Int16Array(RS*RS),deck=new Int16Array(RS*RS);Rg._wl=wlA;Rg._deck=deck;Rg._dash=RD_.dash;Rg._road=RD_.cells;Rg._trail=RD_.trail;
   for(let z=Z0;z<Z1;z++)for(let x=X0;x<X1;x++){
     const col=(z-Z0)*RS+(x-X0),town=inTown(x,z);let h=G;
-    let q=0;
-    if(!town){const d=townDist(x,z);let hf=G+(fbm(x/2,z/2)-.42)*26*Math.min(1,d/16)+(vnoise(x/110,z/110)-.38)*34*Math.min(1,d/50);hf=hf<14?14:hf>H-22?H-22:hf;h=Math.floor(hf);q=Math.round((hf-h)*4);if(q===4){h++;q=0}}
-    h=h<14?14:h>H-22?H-22:h;
+    let q=0,nat=null;
+    if(!town){nat=natH(x,z);let hf=nat.hf;h=Math.floor(hf);q=Math.round((hf-h)*4);if(q===4){h++;q=0}if(nat.wl)q=0;wlA[col]=nat.wl}
+    h=h<12?12:h>H-10?H-10:h;
+    // roads: cut or fill to the graded line; over water (or a deep dip) the road becomes a bridge deck and the ground stays below
+    const rc=!town&&RD_.cells.get(col);if(rc){if(rc.core&&(wlA[col]||h<rc.y-3)){deck[col]=rc.y;q=0}else if(rc.core){h=rc.y;q=0;wlA[col]=0}else if(!wlA[col]){const k=(rc.d-3.2)/1.8;h=Math.round(rc.y+(h-rc.y)*k);q=0}}
+    {const AT=town&&townAt(x,z,0);if(AT&&AT.air){topB[col]=airPaved(AT,x,z)?7:1;capQ[col]=0;hh[col]=G;hmap[md(z)*W+md(x)]=G;continue}}
     const road=town&&isRoad(x,z),walk=town&&!road&&isWalk(x,z);
     if(town&&!road&&townAt(x,z,0))h=G+1; // lots + sidewalks sit one curb (0.5 m) above the road
-    topB[col]=road?7:walk?6:(town&&h3(x>>1,99,z>>1)<.45?2:1);capQ[col]=q;hh[col]=h+(q?1:0);hmap[md(z)*W+md(x)]=hh[col];
+    let tb=road?7:walk?6:(town&&h3(x>>1,99,z>>1)<.45?2:1);
+    if(nat){if(wlA[col]&&h<wlA[col])tb=2;else if(nat.mm>.2&&h>G+18)tb=h>G+30||h3(x,5,z)<.5?3:tb;if(rc&&rc.core&&!deck[col])tb=7;else if(RD_.trail.has(col)&&!wlA[col]&&!rc)tb=2}
+    topB[col]=tb;capQ[col]=q;hh[col]=h+(q?1:0);hmap[md(z)*W+md(x)]=Math.max(hh[col],deck[col]?deck[col]:0,wlA[col]||0);
   }}
 function genFill(Rg,topB,capQ,hh){const X0=Rg.rx*RS,Z0=Rg.rz*RS,Z1=Z0+RS;
   for(let y=0;y<H;y++)for(let z=Z0;z<Z1;z++){let i=(y*W+md(z))*W+md(X0);const c0=(z-Z0)*RS;for(let x=0;x<RS;x++,i++){
     const col=c0+x,cq=capQ[col],h=hh[col]-(cq?1:0),wx=X0+x;let b=0;
-    if(y===0)b=13;else if(y<h-7){b=3;if(y<h-8){const r=h3(wx,y,z);if(r<.05)b=4;else if(r<.08&&y<h-12)b=5}}else if(y<h)b=2;else if(y===h)b=cq?2:topB[col];else if(y===h+1&&cq)b=22+cq;
+    if(y===0)b=13;else if(y<h-7){b=3;if(y<h-8){const r=h3(wx,y,z);if(r<.05)b=4;else if(r<.08&&y<h-12)b=5}}else if(y<h)b=(topB[col]===3?3:2);else if(y===h)b=cq?2:topB[col];else if(y===h+1&&cq)b=22+cq;
+    if(!b){const wl=Rg._wl[col],dk=Rg._deck[col];if(dk&&y===dk)b=7;else if(dk&&y===dk-1)b=6;else if(dk&&y===dk+1&&Rg._road.get(col)&&Rg._road.get(col).d>2.5)b=6;else if(dk&&y<dk&&y>h&&(((wx%12)+12)%12<2)&&(((z%12)+12)%12<2))b=6;else if(wl&&y<=wl&&y>h)b=255}
     vox[i]=b}}}
 function restOfRegion(Rg){const X0=Rg.rx*RS,Z0=Rg.rz*RS,X1=X0+RS,Z1=Z0+RS;
   caves(Rg);
   const mine=towns.filter(t=>t.rk===Rg.key);
-  for(const T of mine)sewerTown(T);
-  for(const t of mine){const lots=[];for(let lx=t.x0+15;lx+30<=t.x1;lx+=P)for(let lz=t.z0+15;lz+30<=t.z1;lz+=P)lots.push([lx,lz]);
+  for(const T of mine)if(!T.air)sewerTown(T);
+  for(const T of mine)if(T.air)airport(T);
+  for(const t of mine){if(t.air)continue;CITY=!!t.city;const lots=[];for(let lx=t.x0+15;lx+30<=t.x1;lx+=P)for(let lz=t.z0+15;lz+30<=t.z1;lz+=P)lots.push([lx,lz]);
     // the big town gets one of each; small towns a couple (never the lot next to the spawn crossroads)
-    const main=t.rk==='0,0'&&t.n===4,kinds=shuf(['hospital','school','grocery','hardware']).slice(0,t.n>3?4:t.n>2?2:1),pickL=shuf(lots.map((_,i)=>i)).filter(i=>!(main&&lots[i][0]===t.x0+2*P+15&&lots[i][1]===t.z0+2*P+15));
+    const main=t.rk==='0,0'&&t.n===4,extra=t.city||main?['mall','gas','park']:t.n===3?(rng()<.7?['gas','park']:['gas']):t.n===2?(rng()<.5?['gas']:rng()<.6?['park']:[]):(rng()<.45?['gas']:[]),
+      kinds=extra.concat(shuf(['hospital','school','grocery','hardware']).slice(0,t.n>3?4:t.n>2?2:t.n>1?1:0)),pickL=shuf(lots.map((_,i)=>i)).filter(i=>!(main&&lots[i][0]===t.x0+2*P+15&&lots[i][1]===t.z0+2*P+15));
     const kindAt=new Map();kinds.forEach((k,i)=>{if(i<pickL.length)kindAt.set(pickL[i],k)});
     lots.forEach(([lx,lz],i)=>{const k=kindAt.get(i);
-      if(k)commercial(lx,lz,30,k);
+      if(k==='gas')gasStation(lx,lz,30);else if(k==='park')park(lx,lz,30);else if(k==='mall')mall(lx,lz,30);
+      else if(k)commercial(lx,lz,30,k);
       else if(rng()<(t.n>3?.88:.78))building(lx,lz,30);
       else for(let n=0;n<22;n++){const x=lx+RI(0,29),z=lz+RI(0,29);if(rng()<.35)setv(x,G+2,z,chipOf(B.CONC,x,G+2,z));else rubbleAt(x,G+2,z,rng()<.5?B.CONC:B.BRICK)}})}
-  for(let i=0;i<Math.round(1400*AREA);i++){const x=RI(X0+6,X1-7),z=RI(Z0+6,Z1-7);if(inTown(x,z))continue;tree(x,z)}
+  CITY=false;
+  for(let i=0;i<Math.round(1400*AREA);i++){const x=RI(X0+6,X1-7),z=RI(Z0+6,Z1-7);if(inTown(x,z))continue;const c=(z-Z0)*RS+(x-X0);if(Rg._road&&(Rg._road.has(c)||Rg._trail.has(c)||Rg._wl[c]))continue;tree(x,z)}
+  // rocks: boulders of stone (some with coal), pebbles scattered on the grass, more of both on the mountains
+  for(let i=0;i<Math.round(260*AREA*4);i++){const x=RI(X0+4,X1-5),z=RI(Z0+4,Z1-5),c=(z-Z0)*RS+(x-X0);if(inTown(x,z)||(Rg._road&&(Rg._road.has(c)||Rg._wl[c])))continue;const y=topY(x,z),tb=get(x,y,z);
+    if(tb!==B.GRASS&&tb!==B.STONE&&tb!==B.DIRT)continue;const hi=y>G+16;
+    if(rng()<(hi?.35:.12)){const r=RI(1,hi?3:2);for(let dx=-r;dx<=r;dx++)for(let dz=-r;dz<=r;dz++)for(let dy=0;dy<=r;dy++)if(dx*dx+dz*dz+dy*dy*1.6<=r*r+.5&&rng()<.85&&get(x+dx,y+1+dy,z+dz)===0)setv(x+dx,y+1+dy,z+dz,rng()<.08?B.COAL:B.STONE)}
+    else furnSpecs.push(['pebbles',(x+.5)*VS,(y+1)*VS,(z+.5)*VS,rng()*6.28])}
+  if(Rg._dash)for(const[x,z,ry,a]of Rg._dash)if(!inTown(x|0,z|0))furnSpecs.push(['rdash',x*VS,(ry+1)*VS,z*VS,a]);
   decorateCaves(Rg);
   if(Rg.rx===0&&Rg.rz===0)carSpots.push({x:(MAIN+2*P+3)*VS,z:(MAIN+P+32)*VS,yaw:Math.PI,type:'car',good:true});
-  for(const T of mine)for(let i=0,tries=0;i<T.n*3+1&&tries<120;tries++){
+  for(const T of mine)if(!T.air)for(let i=0,tries=0;i<(T.city?T.n*9:T.n*3)+1&&tries<(T.city?400:120);tries++){
     const vt=pickVType(),vL=VT[vt].L;
     const alongZ=rng()<.5,k=RI(0,T.n),ln=rng()<.5?3:9,x=alongZ?(T.x0+P*k+ln)*VS:R((T.x0+8)*VS,(T.x1-8)*VS),z=alongZ?R((T.z0+8)*VS,(T.z1-8)*VS):(T.z0+P*k+ln)*VS;
     if(carSpots.some(c=>Math.hypot(c.x-x,c.z-z)<(vL+(VT[c.type]||VT.car).L)/2+2))continue;
@@ -590,8 +678,16 @@ function restOfRegion(Rg){const X0=Rg.rx*RS,Z0=Rg.rz*RS,X1=X0+RS,Z1=Z0+RS;
   for(const T of mine)roadDecor(T); // last, so older saves' broken-decor indices still line up
 }
 // ---------------- streets: paint, curbs, traffic lights, stop signs and road signs (decor pieces merged into the chunk meshes)
+// is there road surface (dy 0: asphalt at road level) or sidewalk (dy 1) under this spot of a street piece (local metres)?
+function roadAt(sp,lx,lz,dy){const c=Math.cos(sp[4]),s=Math.sin(sp[4]),X=sp[1]+lx*c+lz*s,Z=sp[3]-lx*s+lz*c,b=get(vc(X),vc(sp[2])-1+dy,vc(Z));if(!b)return false;const bs=BASE_OF[b]||b;return dy?bs===B.CONC||bs===B.ASPH:bs===B.ASPH}
+function paintRun(F,sp,lx,z0,L,w,col,dy){const n=Math.max(1,Math.round(L/.5)),sl=L/n;let a=-1;
+  for(let i=0;i<=n;i++){const ok=i<n&&roadAt(sp,lx,z0+(i+.5)*sl,dy);if(ok&&a<0)a=i;if(!ok&&a>=0){F(w,.012,(i-a)*sl,col,lx,.006,z0+(a+i)/2*sl);a=-1}}}
+// after road cells change, rebuild the street pieces that cover them
+function refreshPaint(x0,z0,x1,z1){const X0=x0*VS-.1,X1=(x1+1)*VS+.1,Z0=z0*VS-.1,Z1=(z1+1)*VS+.1,ks=new Set();
+  for(const sp of furnSpecs)if(FLAT.has(sp[0])&&sp.bb&&!sp.gone&&sp.bb[0]<X1&&sp.bb[3]>X0&&sp.bb[2]<Z1&&sp.bb[5]>Z0)ks.add(sp.k);
+  for(const k of ks){FBUF.clear();buildFurnMeshes(furnSpecs,k)}}
 const STREETS=['MAIN','OAK','ELM','PINE','MAPLE','CEDAR','BIRCH','WALNUT','ASH','LAKE','HILL','PARK','MILL','CHURCH','RIVER','HIGH','1ST','2ND','3RD','4TH','5TH','6TH'];
-function roadDecor(T){const y=(G+1)*VS,ys=(G+2)*VS,n=Math.round((T.x1-T.x0-14)/P),big=T.n>=3;
+function roadDecor(T){if(T.air)return;const y=(G+1)*VS,ys=(G+2)*VS,n=Math.round((T.x1-T.x0-14)/P),big=T.n>=3;
   const nmX=[],nmZ=[];const pool=shuf(STREETS.slice());for(let i=0;i<=n;i++){nmX.push(pool[i%pool.length]+' ST');nmZ.push(pool[(i+n+1)%pool.length]+' AVE')}
   const add=sp=>furnSpecs.push(sp);
   for(let i=0;i<=n;i++)for(let j=0;j<=n;j++){const ix=T.x0+i*P,iz=T.z0+j*P;
@@ -684,7 +780,7 @@ function doorAt(x,y,z,inward,chance=.8){ // 2 wide x 4 tall opening along x; the
   if(real)doorSpecs.push({x,y,z,inward});
 }
 // ---- furniture: footprint w (along wall) x d (depth) x h (collision height) in voxels
-const FD={couch:[5,2,2],tvstand:[4,1,2],ctable:[3,2,1],armchair:[2,2,2],bookcase:[3,1,4],plant:[1,1,2],rug:[5,4,0],
+const FD={pbench:[4,2,2],swing:[7,3,5],slide:[2,6,4],picnic:[4,4,2],lamppost:[1,1,9],pump:[1,1,4],atable:[3,3,2],lamp:[1,1,3],lswitch:[1,1,3],wire:[1,1,0],gsign:[1,1,12],plane:[40,40,10],couch:[5,2,2],tvstand:[4,1,2],ctable:[3,2,1],armchair:[2,2,2],bookcase:[3,1,4],plant:[1,1,2],rug:[5,4,0],
   counter:[2,2,2],sink:[2,2,2],stove:[2,2,2],fridge:[2,2,4],ktable:[3,3,2],
   toilet:[1,2,2],bsink:[2,1,2],tub:[5,2,1],
   bed:[2,4,1],bunk:[2,4,4],nightstand:[1,1,1],wardrobe:[3,1,4],dresser:[3,1,2],
@@ -819,12 +915,14 @@ function houseDetails(lx,lz,S,x0,x1,z0,z1,g,floors,top,mat,xm,xs,zs,w0,rooms){
   for(let i=w0;i<winSpecs.length;i++){const[x,y,z,ax,,door]=winSpecs[i];if(door||rng()>.6)continue;
     if(ax){const into=z===z0?1:-1;furnSpecs.push(['curtain',(x+2)*VS,(y)*VS,(z+(into>0?1:0))*VS+into*.02,into>0?0:Math.PI,{c:pick([0x8a2a2a,0x3a5a7a,0xd8d0b8,0x5a6a3a,0x6a4a6a])}])}
     else{const into=x===x0?1:-1;furnSpecs.push(['curtain',(x+(into>0?1:0))*VS+into*.02,(y)*VS,(z+2)*VS,into>0?Math.PI/2:-Math.PI/2,{c:pick([0x8a2a2a,0x3a5a7a,0xd8d0b8,0x5a6a3a,0x6a4a6a])}])}}
-  for(let k=0;k<floors;k++){const b=g+FH*k;for(const r of Object.values(rooms(b)))if(r.x1-r.x0>2&&r.z1-r.z0>2)furnSpecs.push(['clamp',((r.x0+r.x1+1)/2)*VS,(b+FH)*VS,((r.z0+r.z1+1)/2)*VS,0])}}
+  for(let k=0;k<floors;k++){const b=g+FH*k;for(const r of Object.values(rooms(b)))if(r.x1-r.x0>2&&r.z1-r.z0>2){const gk=r.x0+','+r.z0+','+b,east=r.x1<xs;
+    furnSpecs.push(['clamp',((r.x0+r.x1+1)/2)*VS,(b+FH)*VS,((r.z0+r.z1+1)/2)*VS,0,{g:gk}],['lswitch',east?(r.x1+1)*VS-.02:r.x0*VS+.02,(b+1)*VS,(r.z0+.7)*VS,0,{g:gk,wall:1}])}}}
+let CITY=false;
 function building(lx,lz,S){
   resv=new Set();winFront=new Set();const hurt=rng()<.3;WB=hurt?.5:.08;const w0=winSpecs.length,wild=rng()<(hurt?.55:.18);if(wild)WB=Math.max(WB,.35);
   const w=RI(22,S),d=RI(22,S),x0=lx+RI(0,S-w),z0=lz+RI(0,S-d),x1=x0+w-1,z1=z0+d-1;
   const rail=['wood','metal','none','wood','metal'][RI(0,4)],trimC=rng()<.6?0:RI(1,2);
-  const floors=RI(1,3),g=G+1,mat=rng()<.5?B.CONC:B.BRICK,top=g+floors*FH,BD=7;WMAT=mat;WTRIM=trimC;
+  const floors=CITY?RI(3,6):RI(1,3),g=G+1,mat=rng()<.5?B.CONC:B.BRICK,top=g+floors*FH,BD=7;WMAT=mat;WTRIM=trimC;
   for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
     const edge=x===x0||x===x1||z===z0||z===z1;
     for(let y=g+1;y<=top;y++){if(y===top)setv(x,y,z,B.ROOF);else if(edge)setv(x,y,z,mat);else if((y-g)%FH===0)setv(x,y,z,B.PLANK)}
@@ -970,6 +1068,109 @@ function classroom(r,fb){
   if(rng()<.5)placeF('bookcase',r,fb,OPP[sd]);
 }
 function cafeteria(r,fb){floorMat(r,fb,B.TILEF);for(let i=0;i<3;i++)for(let j=0;j<3;j++)fitAt('lunch',r,r.x0+4+i*6,r.z0+3+j*5,fb,0);placeF('counter',r,fb,'E');placeF('fridge',r,fb,'E');placeF('stove',r,fb,'E');crateAt(r,fb,2,'school',true)}
+// ---- gas stations: a canopy over two pump islands, a little shop with a till, fuel left in the back
+function gasStation(lx,lz,S){
+  resv=new Set();winFront=new Set();const hurt=rng()<.35;WB=hurt?.5:.08;const g=G+1;WMAT=B.BRICK;WTRIM=0;
+  for(let x=lx;x<lx+S;x++)for(let z=lz;z<lz+S;z++)setv(x,g,z,B.CONC);
+  const cx0=lx+3,cx1=lx+26,cz0=lz+3,cz1=lz+14,cy=g+10,gk='gas'+lx+','+lz;
+  for(const ix of[lx+9,lx+19]){for(let z=lz+6;z<=lz+11;z++)for(let a=0;a<2;a++)setv(ix+a,g+1,z,B.CONC);
+    for(const pz of[lz+6,lz+11])for(let y=g+2;y<cy;y++)setv(ix+(pz===lz+6?0:1),y,pz,B.CONC);
+    for(const pz of[lz+8,lz+9.6])furnSpecs.push(['pump',(ix+1)*VS,(g+2)*VS,pz*VS,Math.PI/2*(pz>lz+9?1:-1)])}
+  for(let x=cx0;x<=cx1;x++)for(let z=cz0;z<=cz1;z++){setv(x,cy,z,B.METAL);if(x===cx0||x===cx1||z===cz0||z===cz1)setv(x,cy-1,z,B.METAL)}
+  for(let x=cx0+3;x<cx1-2;x+=5)for(let z=cz0+3;z<cz1-1;z+=5)furnSpecs.push(['clamp',(x+.5)*VS,cy*VS,(z+.5)*VS,0,{g:gk}]);
+  const nm=pick(['GAS N GO','QUIK FUEL','PETRO STOP','FILL-UP','GAS-O-RAMA','EZ GAS']);signSpecs.push({x:((cx0+cx1+1)/2)*VS,y:(cy-.3)*VS,z:cz0*VS-.04,w:Math.min(6,nm.length*.42+1.2),text:nm,bg:'#c8281e',fg:'#ffffff'});
+  furnSpecs.push(['gsign',(lx+1)*VS,(g+1)*VS,(lz+1)*VS,0,{nm}]);
+  // the shop
+  const x0=lx+4,x1=lx+25,z0=lz+19,z1=lz+28,top=g+FH,xm=x0+Math.floor((x1-x0)/2)-1;
+  for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){const edge=x===x0||x===x1||z===z0||z===z1;for(let y=g+1;y<=top;y++){if(y===top)setv(x,y,z,B.ROOF);else if(edge)setv(x,y,z,B.BRICK)}if(!edge)setv(x,g,z,B.TILEF)}
+  for(let x=x0+1;x<x1;x++){if(x>=xm-1&&x<=xm+2)continue;const mull=(x-x0)%4===0;for(let y=g+1;y<=g+5;y++)setv(x,y,z0,y===g+1||mull?B.FRAME:(rng()<WB*.6?0:B.GLASS))}
+  doorAt(xm,g+1,z0,1,.9);reserve(xm-1,xm+2,z0+1,z0+3,g);
+  curB={x0,x1,z0,z1,g,floors:1,door:[xm,z0],kind:'gas'};homes.push(curB);
+  const r={x0:x0+1,x1:x1-1,z0:z0+1,z1:z1-1};paintRooms.push({...r,y0:g+1,y1:top-1,c:[.93,.9,.82],trim:0});
+  placeAt('checkout',x0+4,z0+3,g,Math.PI/2);placeF('cooler',r,g,'E');placeF('cooler',r,g,'E');placeF('shelf',r,g,'N');placeF('shelf',r,g,'N');placeF('shelf',r,g,'W');
+  furnSpecs.push(['clamp',((x0+x1+1)/2)*VS,top*VS,((z0+z1+1)/2)*VS,0,{g:gk+'s'}],['lswitch',(x0+1)*VS+.02,(g+1)*VS,(z0+1.7)*VS,0,{g:gk+'s',wall:1}],['lswitch',(x0+1)*VS+.02,(g+1)*VS,(z0+2.4)*VS,0,{g:gk,wall:1}]);
+  crateAt(r,g,2,'gas');crateAt(r,g,1,'gas',true);spawnIn(r,g,1);
+  if(hurt)wreck(x0,x1,z0,z1,g,1,rng()*.7);
+  if(rng()<.6)carSpots.push({x:(lx+R(12,17))*VS,z:(lz+R(7,10))*VS,yaw:Math.PI/2+R(-.2,.2)+(rng()<.5?Math.PI:0),type:pickVType()})}
+// ---- parks: grass, a gravel loop and cross paths, a fountain, benches, a swing set, a slide, picnic tables and lamps
+function park(lx,lz,S){const g=G+1,cx=lx+S/2,cz=lz+S/2;
+  for(let x=lx;x<lx+S;x++)for(let z=lz;z<lz+S;z++){const dx=x+.5-cx,dz=z+.5-cz,d=Math.hypot(dx,dz);let b=B.GRASS;
+    if(Math.abs(dx)<1.6||Math.abs(dz)<1.6||Math.abs(d-10)<1.2)b=B.DIRT;if(d<3.4)b=B.STONE;setv(x,g,z,b);
+    if(d>=2.3&&d<3.4)setv(x,g+1,z,B.STONE);else if(d<2.3)setv(x,g,z,255)}
+  // a low hedge-and-fence edge would block the paths; corner trees instead
+  for(const[x,z]of[[lx+3,lz+3],[lx+S-4,lz+3],[lx+3,lz+S-4],[lx+S-4,lz+S-4],[lx+3,lz+9],[lx+S-4,lz+S-10]])if(rng()<.85)tree(x,z);
+  for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4;furnSpecs.push(['pbench',(cx+Math.sin(a)*12.2)*VS,(g+1)*VS,(cz+Math.cos(a)*12.2)*VS,a+Math.PI])}
+  furnSpecs.push(['swing',(lx+7)*VS,(g+1)*VS,(lz+S-7)*VS,0],['slide',(lx+S-7)*VS,(g+1)*VS,(lz+7)*VS,Math.PI/2],['picnic',(lx+S-7)*VS,(g+1)*VS,(lz+S-7)*VS,R(-.3,.3)],['picnic',(lx+7)*VS,(g+1)*VS,(lz+7)*VS,R(-.3,.3)]);
+  for(const[x,z]of[[cx-2.4,lz+1.5],[cx+2.4,lz+S-1.5],[lx+1.5,cz+2.4],[lx+S-1.5,cz-2.4]])furnSpecs.push(['lamppost',x*VS,(g+1)*VS,z*VS,Math.atan2(cx-x,cz-z)])}
+// ---- malls: a tall hall with a skylight, a row of shop units with glass fronts, a food court and a fountain bench area
+function mall(lx,lz,S){
+  resv=new Set();winFront=new Set();const hurt=rng()<.3;WB=hurt?.5:.08;const x0=lx+1,z0=lz+1,x1=lx+S-2,z1=lz+S-2,w=x1-x0+1,g=G+1,mat=(WMAT=B.CONC),Ht=10,top=g+Ht,xmid=(x0+x1)/2;WTRIM=0;
+  for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){const edge=x===x0||x===x1||z===z0||z===z1;
+    for(let y=g+1;y<=top;y++){if(y===top)setv(x,y,z,!edge&&Math.abs(x+.5-xmid)<3&&z>z0+3&&z<z1-11?B.GLASS:B.ROOF);else if(edge)setv(x,y,z,mat)}
+    if(!edge)setv(x,g,z,B.TILEF);if(edge)setv(x,top+1,z,mat)}
+  const xm=x0+Math.floor(w/2)-3;
+  for(let x=x0+2;x<=x1-2;x++){if(x>=xm-1&&x<=xm+5)continue;const mull=(x-x0)%4===2;for(let y=g+1;y<=g+7;y++)setv(x,y,z0,y===g+1||y===g+7||mull?B.FRAME:(rng()<WB*.6?0:B.GLASS))}
+  doorAt(xm,g+1,z0,1,.9);doorAt(xm+3,g+1,z0,1,.9);reserve(xm-2,xm+6,z0+1,z0+6,g);
+  curB={x0,x1,z0,z1,g,floors:1,door:[xm,z0],kind:'mall'};homes.push(curB);
+  const nm=pick(['RIVERSIDE MALL','PLAZA CENTER','THE GALLERIA','TOWNE CENTRE','MAPLE MALL']);signSpecs.push({x:(xm+2.5)*VS,y:(g+Ht-1)*VS,z:z0*VS-.04,w:Math.min(7,nm.length*.42+1.2),text:nm,bg:'#3a2a5a',fg:'#f0e0b0'});
+  const zs=z1-9,uw=Math.floor((w-2)/4),SN={grocery:['SNAX','MINI MART','FOOD 4 U'],hardware:['TOOL SHED','FIX-IT'],mall:['THREADS','STYLE','SHOE BOX','SPORTZ','GAME ZONE','BOOKS']};
+  const hall={x0:x0+1,x1:x1-1,z0:z0+1,z1:zs-1};paintRooms.push({...hall,y0:g+1,y1:top-1,c:[.94,.92,.88],trim:0});
+  for(let i=0;i<4;i++){const ux0=x0+1+i*uw,ux1=i===3?x1-1:ux0+uw-2,kind=pick(['mall','mall','grocery','hardware']),ur={x0:ux0,x1:ux1,z0:zs+1,z1:z1-1};
+    if(i<3)for(let z=zs;z<z1;z++)for(let y=g+1;y<top;y++)setv(ux1+1,y,z,B.WALL);
+    for(let x=ux0;x<=ux1;x++){const door=x-ux0>=1&&x-ux0<=2;for(let y=g+1;y<top;y++)setv(x,y,zs,door&&y<=g+4?0:y<=g+5&&!door?(x===ux0||x===ux1?B.FRAME:rng()<WB*.6?0:B.GLASS):B.WALL)}
+    reserve(ux0,ux0+3,zs-2,zs+2,g);const t=pick(SN[kind]);signSpecs.push({x:((ux0+ux1+1)/2)*VS,y:(g+7)*VS,z:zs*VS-.04,w:Math.min((ux1-ux0)*VS,t.length*.4+.8),text:t,bg:pick(['#1a4a7a','#7a1a3a','#2a6a3a','#6a4a1a','#1a1a1a']),fg:'#f4f0e0'});
+    paintRooms.push({...ur,y0:g+1,y1:top-1,c:PAINT[RI(0,PAINT.length-1)],trim:0});placeF('shelf',ur,g,'N');placeF('shelf',ur,g,'E');if(kind==='grocery')placeF('cooler',ur,g,'W');
+    crateAt(ur,g,1,kind==='mall'?'mall':kind);furnSpecs.push(['clamp',((ux0+ux1+1)/2)*VS,top*VS,(zs+4.5)*VS,0,{g:'mall'+lx+','+lz}])}
+  // food court on the left, a seating island under the skylight, plants in the corners
+  for(let i=0;i<6;i++)placeAt('atable',x0+4+(i%2)*4,z0+8+Math.floor(i/2)*4,g,R(0,.4),true);
+  furnSpecs.push(['pbench',xmid*VS,(g+1)*VS,(z0+12)*VS,0],['pbench',xmid*VS,(g+1)*VS,(z0+15)*VS,Math.PI]);
+  for(const[x,z]of[[x1-2,z0+2],[x0+2,zs-2],[x1-2,zs-2]])placeAt('plant',x,z,g,0,true);
+  for(let z=z0+5;z<zs;z+=6)for(const x of[x0+7,x1-6])furnSpecs.push(['clamp',(x+.5)*VS,top*VS,(z+.5)*VS,0,{g:'mall'+lx+','+lz}]);
+  furnSpecs.push(['lswitch',(x0+1)*VS+.02,(g+1)*VS,(z0+2.5)*VS,0,{g:'mall'+lx+','+lz,wall:1}]);
+  crateAt(hall,g,2,'mall');spawnIn(hall,g,4);
+  if(hurt)wreck(x0,x1,z0,z1,g,1,rng()*.6,Ht)}
+// ---- airports: runway with markings, taxiway and apron, a glass terminal, a control tower, a hangar and planes (one wrecked on the runway)
+function airport(T){const g=G,X=T.x0,Z=T.z0,rn=mulberry(rhash(X,Z,77)),livery=[0x2a5aa0,0xc0282a,0x2a7a4a,0x6a3a9a,0xd8a020][Math.floor(rn()*5)];
+  for(let x=X+18;x<X+182;x+=12)furnSpecs.push(['rwy',(x+.5)*VS,(g+1)*VS,(Z+15)*VS,0,{L:3,w:.25}]);
+  for(const x of[X+8,X+191])for(let k=0;k<6;k++)furnSpecs.push(['rwy',(x+.5)*VS,(g+1)*VS,(Z+9.5+k*2.2)*VS,0,{L:4,w:.45}]);
+  for(let z=Z+22;z<Z+34;z+=3)furnSpecs.push(['rwy',(X+59)*VS,(g+1)*VS,(z+.5)*VS,Math.PI/2,{L:1,w:.15,c:0xe0c020}]);
+  // terminal
+  resv=new Set();winFront=new Set();WB=.25;WMAT=B.CONC;WTRIM=0;const x0=X+60,x1=X+124,z0=Z+62,z1=Z+78,top=g+10,xm=Math.floor((x0+x1)/2)-1;
+  for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){const edge=x===x0||x===x1||z===z0||z===z1;for(let y=g+1;y<=top;y++){if(y===top)setv(x,y,z,B.ROOF);else if(edge)setv(x,y,z,B.CONC)}setv(x,g,z,B.TILEF);if(edge)setv(x,top+1,z,B.CONC)}
+  for(let x=x0+1;x<x1;x++){if(Math.abs(x-xm-.5)<3)continue;const mull=(x-x0)%4===0;for(let y=g+1;y<=g+8;y++)setv(x,y,z0,y===g+1||mull?B.FRAME:(rng()<WB*.5?0:B.GLASS))}
+  doorAt(xm,g+1,z0,1,.9);doorAt(xm,g+1,z1,-1,.9);reserve(xm-1,xm+2,z0+1,z1-1,g);
+  curB={x0,x1,z0,z1,g,floors:1,door:[xm,z1],kind:'air'};homes.push(curB);
+  const hall={x0:x0+1,x1:x1-1,z0:z0+1,z1:z1-1};paintRooms.push({...hall,y0:g+1,y1:top-1,c:[.9,.92,.94],trim:0});
+  const nm=pick(['COUNTY AIRPORT','REGIONAL AIRFIELD','MUNICIPAL AIRPORT','TRI-STATE AIRPORT']);
+  signSpecs.push({x:(xm+1)*VS,y:(g+9)*VS,z:(z1+1)*VS+.04,w:Math.min(7,nm.length*.42+1.2),text:nm,bg:'#1a3a6a',fg:'#ffffff',ry:Math.PI},{x:(xm+1)*VS,y:(g+9.5)*VS,z:z0*VS-.04,w:4.5,text:'GATES 1-4',bg:'#1a3a6a',fg:'#f0d040'});
+  for(const cx of[x0+8,x0+18,x1-18,x1-8])placeAt('reception',cx,z1-4,g,0,true);
+  for(let k=0;k<4;k++)for(const cx of[x0+10,x0+22,x1-22,x1-10])placeAt('chairs',cx,z0+5+k*2.5,g,0,true);
+  placeF('shelf',hall,g,'W');placeF('shelf',hall,g,'W');placeF('cooler',hall,g,'E');
+  for(let x=x0+6;x<x1;x+=10)for(const z of[z0+5,z1-5])furnSpecs.push(['clamp',(x+.5)*VS,top*VS,(z+.5)*VS,0,{g:'air'+X}]);
+  furnSpecs.push(['lswitch',(xm-2)*VS,(g+1)*VS,(z1)*VS-.02,0,{g:'air'+X,wall:1,z:1}]);
+  crateAt(hall,g,4,'air');crateAt(hall,g,1,'air',true);spawnIn(hall,g,6);
+  // control tower: a concrete shaft with a ladder up to a glass cab
+  const tx=X+132,tz=Z+64,th=g+26;
+  for(let x=tx;x<tx+6;x++)for(let z=tz;z<tz+6;z++){const edge=x===tx||x===tx+5||z===tz||z===tz+5;
+    for(let y=g+1;y<=th+6;y++){let b=0;if(y<th)b=edge?B.CONC:0;else if(y===th)b=B.CONC;else if(y<th+5)b=edge?(y===th+1?B.CONC:B.GLASS):0;else b=B.ROOF;setv(x,y,z,b)}}
+  for(let y=g+1;y<=th;y++)for(let a=0;a<2;a++)setv(tx+2+a,y,tz+4,B.LADDER);
+  for(let y=g+1;y<=g+4;y++)for(let a=0;a<2;a++)setv(tx+2+a,y,tz,0);
+  furnSpecs.push(['clamp',(tx+3)*VS,(th+5)*VS,(tz+3)*VS,0,{g:'twr'+X}],['lswitch',(tx+1)*VS+.02,(th+1)*VS,(tz+2)*VS,0,{g:'twr'+X,wall:1}],['desk',(tx+3)*VS,(th+1)*VS,(tz+1.6)*VS,0]);
+  // hangar: tall metal shed, open toward the apron, a light plane inside
+  const hx0=X+150,hx1=X+186,hz0=Z+64,hz1=Z+92,hy=g+16;
+  for(let x=hx0;x<=hx1;x++)for(let z=hz0;z<=hz1;z++){const edge=x===hx0||x===hx1||z===hz1;for(let y=g+1;y<=hy;y++){if(y===hy)setv(x,y,z,B.METAL);else if(edge||(z===hz0&&(y>g+12||x<hx0+3||x>hx1-3)))setv(x,y,z,B.METAL)}setv(x,g,z,B.CONC)}
+  furnSpecs.push(['plane',(hx0+18)*VS,(g+1)*VS,(hz0+14)*VS,R(-.3,.3),{c:livery,small:1}]);
+  for(let x=hx0+6;x<hx1;x+=10)furnSpecs.push(['clamp',(x+.5)*VS,hy*VS,(hz0+14.5)*VS,0,{g:'hgr'+X}]);
+  furnSpecs.push(['lswitch',(hx0+1)*VS+.02,(g+1)*VS,(hz0+3)*VS,0,{g:'hgr'+X,wall:1}]);
+  {const hr={x0:hx0+1,x1:hx1-1,z0:hz0+1,z1:hz1-1};curB={x0:hx0,x1:hx1,z0:hz0,z1:hz1,g,floors:1,door:[hx0+18,hz0],kind:'hangar'};homes.push(curB);resv=new Set();
+    placeF('toolrack',hr,g,'E');placeF('toolrack',hr,g,'E');placeF('shelf',hr,g,'N');crateAt(hr,g,3,'hardware');spawnIn(hr,g,2)}
+  // airliners at the gates, one wreck that never made it off the runway
+  furnSpecs.push(['plane',(X+82)*VS,(g+1)*VS,(Z+48)*VS,R(-.08,.08),{c:livery}]);
+  if(rn()<.7)furnSpecs.push(['plane',(X+120)*VS,(g+1)*VS,(Z+48)*VS,R(-.08,.08),{c:[0x2a5aa0,0xc0282a,0x2a7a4a][Math.floor(rn()*3)]}]);
+  furnSpecs.push(['plane',(X+R(140,170))*VS,(g+1)*VS,(Z+R(12,18))*VS,Math.PI/2+R(-.7,.7),{c:livery,wreck:1}]);
+  // cars left in the car park
+  for(let i=0;i<10;i++){const x=(X+52+RI(0,24)*4)*VS,z=(rng()<.5?Z+84:Z+91)*VS;if(!carSpots.some(c=>Math.hypot(c.x-x,c.z-z)<3))carSpots.push({x,z,yaw:R(-.1,.1)+(rng()<.5?Math.PI:0),type:pickVType()})}
+  for(let i=0;i<14;i++){const x=R(X,T.x1)*VS,z=R(Z,T.z1)*VS;splat({x,y:topW(x,z),z},R(.6,1.6))}}
 function tree(x,z){
   {const t=topY(x,z),tb=get(x,t,z);if(tb>=23&&tb<=25)setv(x,t,z,B.GRASS)}
   // three sizes: young (25 cm stem, thin limbs, small crown), normal (log trunk) and old (1 m trunk of 2x2 logs, flared roots, heavy limbs)
@@ -1003,7 +1204,8 @@ function tree(x,z){
 
 // ---------------- renderer + scene
 const canvas=$('#c');
-const isTouch=(window.matchMedia&&matchMedia('(pointer: coarse)').matches)||('ontouchstart' in window);
+// touch controls only when the device's main pointer is a finger; switches live: a touch shows them, a mouse or keyboard hides them
+let isTouch=!!(window.matchMedia&&matchMedia('(pointer: coarse)').matches&&!matchMedia('(any-pointer: fine)').matches);
 const renderer=new THREE.WebGLRenderer({canvas,antialias:!isTouch,powerPreference:'high-performance'});
 // PIX: chunky screen pixels. The canvas renders at 1/PIX of the CSS resolution and the browser blows it up with hard edges
 let PIX=1;try{const v=localStorage.getItem('deadground-pix2');if(v!==null)PIX=+v||1}catch(e){}
@@ -1284,7 +1486,7 @@ const BRGB=BCOL.map(c=>{const k=new THREE.Color(c);return[k.r,k.g,k.b]});
 // 32px tiles: each tile spans a 2x2 group of voxels (1 m), every voxel face shows one quarter, so patterns run across blocks
 const TS=32,ACOLS=8,AROWS=4,AW=TS*ACOLS,AH=TS*AROWS;
 const atlasC=document.createElement('canvas');atlasC.width=AW;atlasC.height=AH;
-const TILE={grassTop:0,grassSide:1,dirt:2,stone:3,coal:4,iron:5,conc:6,asph:7,plank:8,bark:9,logTop:10,leaf:11,brick:12,metal:13,bed:14,glass:15,frame:16,sludge:17,wall:18,tilef:19,dirtTop:20,asphTop:21,roofTop:22,roofSide:23,trim:24};
+const TILE={water:25,grassTop:0,grassSide:1,dirt:2,stone:3,coal:4,iron:5,conc:6,asph:7,plank:8,bark:9,logTop:10,leaf:11,brick:12,metal:13,bed:14,glass:15,frame:16,sludge:17,wall:18,tilef:19,dirtTop:20,asphTop:21,roofTop:22,roofSide:23,trim:24};
 let drawSeason=()=>{},realism=()=>{},down8=()=>{};
 {
   const ctx=atlasC.getContext('2d'),tr=mulberry(seed^0x5eed),rr=()=>tr(),A=TS*TS/256;
@@ -1322,6 +1524,7 @@ let drawSeason=()=>{},realism=()=>{},down8=()=>{};
   for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const streak=Math.abs(x-y-6)<1.6||Math.abs(x-y+12)<1;
     const a=streak?.85:.32+rr()*.08,v=streak?245:190;px(TILE.glass,x,y,v*.85,v*.95,v,a)}
   specks(TILE.glass,6,110,100,80);
+  for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const w=Math.sin((x+y*.6)*.7)*.5+.5,k=.85+rr()*.15,hl=((x+y*3)%11===0)?1.35:1;px(TILE.water,x,y,40*k*hl,92*k*hl,118*k*hl,.62+w*.12)}
   noise(TILE.frame,210,203,184,.1);blob(TILE.frame,3,10,120,90,58);
   for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const k=(x%8===0?.92:1)*(1+(rr()-.5)*.05);px(TILE.wall,x,y,196*k,186*k,166*k)}
   blob(TILE.wall,2,16,160,150,120);for(let x=0;x<TS;x++){px(TILE.wall,x,31,110,96,78);px(TILE.wall,x,30,130,114,94)}
@@ -1403,7 +1606,7 @@ const TILE_OF=[];{const T=TILE,all=t=>[t,t,t,t,t,t],top=(s,t)=>[s,s,t,s,s,s];
   TILE_OF[B.GRASS]=[T.grassSide,T.grassSide,T.grassTop,T.dirt,T.grassSide,T.grassSide];TILE_OF[B.DIRT]=top(T.dirt,T.dirtTop);TILE_OF[B.STONE]=all(T.stone);
   TILE_OF[B.COAL]=all(T.coal);TILE_OF[B.IRON]=all(T.iron);TILE_OF[B.CONC]=all(T.conc);TILE_OF[B.ASPH]=top(T.asph,T.asphTop);TILE_OF[B.PLANK]=all(T.plank);
   TILE_OF[B.LOG]=[T.bark,T.bark,T.logTop,T.logTop,T.bark,T.bark];TILE_OF[B.LEAF]=all(T.leaf);TILE_OF[B.BRICK]=all(T.brick);TILE_OF[B.METAL]=all(T.metal);
-  TILE_OF[B.BED]=all(T.bed);TILE_OF[B.GLASS]=all(T.glass);TILE_OF[B.FRAME]=all(T.frame);TILE_OF[B.SLUDGE]=all(T.sludge);TILE_OF[B.DOOR]=all(T.plank);TILE_OF[B.LADDER]=all(T.plank);
+  TILE_OF[B.BED]=all(T.bed);TILE_OF[B.GLASS]=all(T.glass);TILE_OF[255]=all(T.water);TILE_OF[B.FRAME]=all(T.frame);TILE_OF[B.SLUDGE]=all(T.sludge);TILE_OF[B.DOOR]=all(T.plank);TILE_OF[B.LADDER]=all(T.plank);
   TILE_OF[B.WALL]=all(T.wall);TILE_OF[B.TILEF]=[T.tilef,T.tilef,T.tilef,T.plank,T.tilef,T.tilef];TILE_OF[B.ROOF]=[T.roofSide,T.roofSide,T.roofTop,T.conc,T.roofSide,T.roofSide];
   for(let b=23;b<=25;b++)TILE_OF[b]=TILE_OF[B.GRASS];for(let b=26;b<=29;b++)TILE_OF[b]=all(T.plank);for(let b=CHIP0;b<RUB0+RUBN;b++)TILE_OF[b]=TILE_OF[BASE_OF[b]];for(const b of BRANCH)TILE_OF[b]=all(T.bark)}
 const FACE_UV=[[2,1],[2,1],[0,2],[0,2],[0,1],[0,1]]; // which axes give (u,v) on each face
@@ -1416,26 +1619,23 @@ function tileTex(tile,rep=1){const c=document.createElement('canvas');c.width=c.
 
 const vmat=new THREE.MeshLambertMaterial({vertexColors:true,map:atlas});installVmatShader();
 // grass tufts: crossed alpha-tested quads on top of grass blocks, swaying in the wind
-const grassC=document.createElement('canvas');grassC.width=256;grassC.height=32;const grassTex=new THREE.CanvasTexture(grassC);grassTex.magFilter=grassTex.minFilter=THREE.NearestFilter;grassTex.generateMipmaps=false;
+const grassC=document.createElement('canvas');grassC.width=64;grassC.height=12;const grassTex=new THREE.CanvasTexture(grassC);grassTex.magFilter=grassTex.minFilter=THREE.NearestFilter;grassTex.generateMipmaps=false;
 // 8 cut-out sprites side by side: two grasses, five wildflowers, clover. Flowers fade to seed heads in autumn
 const GSLOTS=8;
-function drawGrassTex(s){const g=grassC.getContext('2d');g.clearRect(0,0,256,32);const C=[[78,124,52],[96,108,62],[150,112,54],[200,206,214]][s],r=mulberry(seed^77);
-  const px=(x,y,c)=>{g.fillStyle=`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;g.fillRect(x|0,y|0,1,1)};
-  const blades=(ox,n,hmin,hmax,w2)=>{for(let i=0;i<n;i++){let x=ox+2+r()*28,lean=(r()-.5)*.5;const h=hmin+r()*(hmax-hmin);for(let y=0;y<h;y++){const k=.7+.5*(y/h)+(r()-.5)*.1;g.fillStyle=`rgb(${C[0]*k|0},${C[1]*k|0},${C[2]*k|0})`;g.fillRect(x|0,31-y,y<h*w2?2:1,1);x+=lean}}};
-  blades(0,11,14,31,.6);blades(32,16,20,31,.3);
-  const autumn=s===2;
-  const flower=(ox,n,petal,center,kind)=>{blades(ox,5,8,18,.5);for(let i=0;i<n;i++){const x=ox+4+r()*24,h=12+r()*14;let sx=x;for(let y=0;y<h;y++){px(sx,31-y,[C[0]*.8,C[1]*.9,C[2]*.7]);sx+=(r()-.5)*.3}const cy=31-h;
-      if(autumn){px(sx,cy,[120,96,60]);px(sx+1,cy,[100,80,50]);continue}
-      if(kind==='daisy'){for(const[a,b]of[[-2,0],[2,0],[0,-2],[0,2],[-1,-1],[1,-1],[-1,1],[1,1]])px(sx+a,cy+b,petal);px(sx,cy,center)}
-      else if(kind==='poppy'){for(const[a,b]of[[-1,0],[1,0],[0,-1],[-1,-1],[1,-1],[0,0]])px(sx+a,cy+b,petal);px(sx,cy,center)}
-      else if(kind==='dand'){for(const[a,b]of[[-1,0],[1,0],[0,-1],[0,1],[0,0],[-1,-1],[1,-1]])px(sx+a,cy+b,petal)}
-      else if(kind==='bell'){for(let k=0;k<3;k++){px(sx+1+k%2,cy+k*2,petal);px(sx+1+k%2,cy+k*2+1,center)}}
-      else if(kind==='lav'){for(let k=0;k<5;k++){px(sx,cy+k,petal);if(k%2)px(sx+1,cy+k,center)}}}};
-  flower(64,6,[236,234,224],[230,196,60],'daisy');flower(96,6,[200,34,30],[30,20,20],'poppy');flower(128,7,[236,200,50],[0,0,0],'dand');
-  flower(160,6,[90,110,210],[60,70,160],'bell');flower(192,7,[150,110,200],[120,80,170],'lav');
-  // clover patch: low round leaves with a few white heads
-  for(let i=0;i<14;i++){const x=226+r()*26,y=24+r()*7;for(const[a,b]of[[0,0],[1,0],[0,1],[1,1]])px(x+a,y+b,[C[0]*.85,C[1]*1.05,C[2]*.8])}
-  if(!autumn)for(let i=0;i<3;i++){const x=228+r()*22,y=20+r()*4;px(x,y,[240,236,232]);px(x+1,y,[220,210,220]);px(x,y+1,[230,226,224])}
+function drawGrassTex(s){const g=grassC.getContext('2d');g.clearRect(0,0,64,12);const C=[[78,124,52],[96,108,62],[150,112,54],[200,206,214]][s],r=mulberry(seed^77),autumn=s===2;
+  const px=(x,y,c)=>{g.fillStyle=`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;g.fillRect(x|0,y|0,1,1)},sh=k=>C.map(v=>v*k);
+  // same texel size as the blocks: each sprite is 8 x 12 texture pixels on a quad one block wide and 1.5 tall
+  const blades=(ox,n,hmin,hmax)=>{for(let i=0;i<n;i++){const x=ox+(r()*8|0),h=hmin+(r()*(hmax-hmin+1)|0);for(let y=0;y<h;y++)px(x,11-y,sh(.72+.45*y/h))}};
+  blades(0,6,5,12);blades(8,8,7,12);
+  const flower=(ox,petal,center,kind)=>{blades(ox,3,3,6);for(const fx of[1,5]){const h=7+(r()*3|0),x=ox+fx+(r()*2|0);for(let y=0;y<h;y++)px(x,11-y,sh(.8));const cy=11-h;
+      if(autumn){px(x,cy,[120,96,60]);continue}
+      if(kind==='daisy'){px(x-1,cy,petal);px(x+1,cy,petal);px(x,cy-1,petal);px(x,cy,center)}
+      else if(kind==='poppy'){px(x-1,cy,petal);px(x+1,cy,petal);px(x,cy-1,petal);px(x,cy,[40,20,20])}
+      else if(kind==='dand'){px(x,cy,petal);px(x-1,cy,petal);px(x+1,cy,petal);px(x,cy-1,petal)}
+      else if(kind==='bell'){px(x+1,cy,petal);px(x+1,cy+1,center);px(x-1,cy+2,petal)}
+      else{px(x,cy,petal);px(x,cy-1,center);px(x,cy-2,petal)}}};
+  flower(16,[236,234,224],[230,196,60],'daisy');flower(24,[200,34,30],0,'poppy');flower(32,[236,200,50],0,'dand');flower(40,[90,110,210],[60,70,160],'bell');flower(48,[150,110,200],[120,80,170],'lav');
+  for(let i=0;i<7;i++)px(56+(r()*8|0),9+(r()*3|0),sh(.95));if(!autumn){px(58,8,[240,236,232]);px(61,9,[240,236,232])}
   grassTex.needsUpdate=true}
 // grass colour patches: lush, yellow-green, blue-green and dry olive meadows blending over ~12 blocks
 const GPAL=[[.94,.94,.94],[1,.95,.64],[.75,.92,.94],[.98,.84,.64],[.82,1,.78]];
@@ -1462,7 +1662,7 @@ function mGrow(){mCap*=2;const g=(a,n)=>{const b=new a.constructor(n);b.set(a);r
 // shaped blocks whose base fully covers the block below (slabs, stairs, chipped blocks with an intact bottom); rubble and stubs with gaps don't hide it
 const BOTFULL=new Uint8Array(256);for(let b=0;b<256;b++){const sh=SH[b];if(!sh)continue;let ok=1;
   for(let i=0;i<8&&ok;i++)for(let j=0;j<8&&ok;j++){const x=(i+.5)/8,z=(j+.5)/8;if(!sh.some(q=>q[1]<=.001&&x>=q[0]&&x<=q[3]&&z>=q[2]&&z<=q[5]))ok=0}BOTFULL[b]=ok}
-const isOpq=b=>b!==0&&b!==14&&b!==15&&b!==17&&b!==20&&!SH[b];
+const isOpq=b=>b!==0&&b!==14&&b!==15&&b!==17&&b!==20&&b!==255&&!SH[b];
 const FULLBOX=[[0,0,0,1,1,1]];
 let mv=0,mi=0;
 const loaded=new Uint8Array(NC*NC);
@@ -1501,11 +1701,13 @@ function buildChunk(cx,cz){
     if(LAZYM&&y<LIMC[lr+x])continue;
     const b=vox[i];if(!b||b===14||b===17||b===20)continue;
     nb[0]=x<x1?vox[i+1]:get(x+1,y,z);nb[1]=x>x0?vox[i-1]:get(x-1,y,z);nb[2]=y<H-1?vox[i+WW]:0;nb[3]=y>0?vox[i-WW]:13;nb[4]=z<z1?vox[i+W]:get(x,y,z+1);nb[5]=z>z0?vox[i-W]:get(x,y,z-1);
+    if(b===255){for(let fi=0;fi<6;fi++){const o=nb[fi];if(o===255||isOpq(o)||(fi===3))continue;const f=FACES[fi],n=GP.length/3,top=fi===2;
+      for(const c of f[3]){GP.push(x+c[0],y+(c[1]&&nb[2]!==255?.88:c[1]),z+c[2]);GN.push(f[0],f[1],f[2]);pushUV(GUV,TILE.water,fi,c,x,y,z)}GI.push(n,n+1,n+2,n,n+2,n+3)}continue}
     if(b===15){for(let fi=0;fi<6;fi++){const o=nb[fi];if(o===15||isOpq(o))continue;const f=FACES[fi],n=GP.length/3;
       for(const c of f[3]){GP.push(x+c[0],y+c[1],z+c[2]);GN.push(f[0],f[1],f[2]);pushUV(GUV,TILE.glass,fi,c,x,y,z)}GI.push(n,n+1,n+2,n,n+2,n+3)}continue}
     const shp=SH[b],topF=shp?BTOP[b]:1;
     qBT=0;if((b===1||b===2||(b>=23&&b<=25))&&!isOpq(nb[2]))groundBlend(b,x,y,z);
-    if((b===1||(b>=23&&b<=25))&&!isOpq(nb[2])&&!SH[nb[2]]&&h3(x,y+11,z)<gd){const ox=x+.5+(h3(x,1,z)-.5)*.5,oz=z+.5+(h3(z,2,x)-.5)*.5,hh=.8+h3(x,3,z)*.9,ww=.55+h3(x,4,z)*.35,a=h3(x,5,z)*3,sh=.8+h3(x,6,z)*.3,yb=y+topF;
+    if((b===1||(b>=23&&b<=25))&&!isOpq(nb[2])&&!SH[nb[2]]&&h3(x,y+11,z)<gd){const ox=x+.5+(h3(x,1,z)-.5)*.5,oz=z+.5+(h3(z,2,x)-.5)*.5,hh=1.5,ww=.5,a=h3(x,5,z)*3,sh=.8+h3(x,6,z)*.3,yb=y+topF;
       // which sprite: mostly grass; flower meadows pick one kind per patch, with scattered singles elsewhere
       const fm=h3(Math.floor(x/9),71,Math.floor(z/9)),fr=h3(x,7,z);let slot=h3(x,8,z)<.35?1:0;
       if(fm<.35&&fr<.38)slot=2+Math.floor(h3(Math.floor(x/9),72,Math.floor(z/9))*5);else if(fr<.05)slot=2+Math.floor(h3(x,9,z)*6);
@@ -1584,7 +1786,7 @@ function streamChunks(centers,budget){
   return want.length;
 }
 const viewUnits=()=>RD*CS*VS;
-function setBlock(x,y,z,v){if(!inB(x,y,z))return;setv(x,y,z,v);rebuildAt(x,z);if(y===G&&manholes.length)for(const m of manholes)if(x>=m.x&&x<=m.x+1&&z>=m.z&&z<=m.z+1)placeCover(m);if(NET.wr&&!NET.applying)netEdit('b',x,y,z,v)}
+function setBlock(x,y,z,v){if(!inB(x,y,z))return;setv(x,y,z,v);rebuildAt(x,z);if((y===G||y===G+1)&&inTown(x,z))refreshPaint(x,z,x,z);if(y===G&&manholes.length)for(const m of manholes)if(x>=m.x&&x<=m.x+1&&z>=m.z&&z<=m.z+1)placeCover(m);if(NET.wr&&!NET.applying)netEdit('b',x,y,z,v)}
 function breakGlass(x,y,z){
   const st=[[x,y,z]],done=new Set();let n=0;
   while(st.length&&n<16){const[a,b,c]=st.pop();if(get(a,b,c)!==B.GLASS)continue;setv(a,b,c,0);n++;
@@ -1598,7 +1800,7 @@ function breakGlass(x,y,z){
 const furnMeshes=[],FBUF=new Map(),furnMat=pxShadows(new THREE.MeshLambertMaterial({vertexColors:true}));
 // furniture gets a pixel grain (1/32 m texels, same as blocks), hashed in world space so it never stretches
 {const prev=furnMat.onBeforeCompile;furnMat.onBeforeCompile=(sh,r)=>{prev.call(furnMat,sh,r);sh.fragmentShader=sh.fragmentShader.replace('#include <color_fragment>',
-  '#include <color_fragment>\n{vec3 q=floor((vPxW-normalize(vPxN)*.002)*32.);float h=fract(sin(dot(q,vec3(12.9898,78.233,37.719)))*43758.5453);float h2=fract(sin(dot(floor(q/4.),vec3(7.13,3.71,5.17)))*24634.6345);diffuseColor.rgb*=.88+.14*h+.06*h2;}')}}
+  '#include <color_fragment>\n{vec3 q=floor((vPxW-normalize(vPxN)*.002)*16.);float h=fract(sin(dot(q,vec3(12.9898,78.233,37.719)))*43758.5453);float h2=fract(sin(dot(floor(q/4.),vec3(7.13,3.71,5.17)))*24634.6345);diffuseColor.rgb*=.88+.14*h+.06*h2;}')}}
 const WOODS=[0x6b4a2e,0x8a6a44,0x4a3424,0x5a4030],FABRIC=[0x5a3a3a,0x3a4a5a,0x4a5a3a,0x6a5a48,0x3a3a42,0x6a4a30];
 const tmpCol=new THREE.Color();
 function fbuf(k){let b=FBUF.get(k);if(!b){b={P:[],N:[],C:[],I:[]};FBUF.set(k,b)}return b}
@@ -1622,6 +1824,42 @@ function buildFurn(sp){
   const lava=(x,y,z)=>{const gc=pick([0xd84a20,0x9a30c0,0x30a0d0,0x40c050]),bc=pick([0xf0d040,0xf06090,0xf0f0f0]);F(.11,.1,.11,0x8a8c90,x,y+.05,z);F(.08,.03,.08,0x6a6c70,x,y+.115,z);
     F(.085,.22,.085,gc,x,y+.24,z);for(let k=0;k<3;k++)F(R(.03,.05),R(.03,.06),R(.03,.05),bc,x+R(-.02,.02),y+.16+k*.06,z+R(-.02,.02));F(.06,.04,.06,0x8a8c90,x,y+.37,z)};
   switch(type){
+  case'pump':{F(.62,.12,.42,0x8a8a86,0,.06,0);const c=pick([0xd8281e,0xe8e8e0,0x1e5a9a,0x2a7a3a]);F(.5,1.45,.32,c,0,.84,0);F(.52,.2,.34,0xf0f0ea,0,1.66,0);F(.3,.22,.02,0x1a2a1a,0,1.28,.17);F(.3,.22,.02,0x1a2a1a,0,1.28,-.17);
+    for(const sz of[-1,1]){F(.1,.28,.06,0x2a2a2a,.18,.95,sz*.19);F(.03,.55,.03,0x141414,.24,.55,sz*.2)}F(.4,.06,.02,0x2a2a2a,0,.5,.17);break}
+  case'gsign':{const o=sp[5]||{};F(.18,5.2,.18,0x6a6c70,0,2.6,0);F(1.6,.9,.16,0xc8281e,0,5.4,0);F(1.4,.7,.17,0xf4f0e0,0,4.5,0);for(let k=0;k<3;k++)F(1.2,.12,.18,0x1a1a1a,0,4.7-k*.2,0);break}
+  case'pbench':{const L=1.7,wd=pick([0x7a5232,0x5a3a22,0x3a5a3a]);for(let k=0;k<3;k++)F(L,.05,.11,wd,0,.46,-.13+k*.13);for(let k=0;k<2;k++)F(L,.11,.04,wd,0,.66+k*.16,-.24);
+    for(const sx of[-1,1]){F(.05,.46,.42,0x2a2a2c,sx*L*.42,.23,-.03);F(.05,.48,.05,0x2a2a2c,sx*L*.42,.68,-.26);F(.05,.05,.36,0x2a2a2c,sx*L*.42,.62,-.03)}break}
+  case'swing':{const fc=pick([0x3a6a9a,0xb83a2a,0x3a7a3a]);F(3.4,.09,.09,fc,0,2.25,0);for(const sx of[-1,1])for(const sz of[-1,1]){F(.08,.7,.08,fc,sx*1.66,1.95,sz*.12);F(.08,.8,.08,fc,sx*1.66,1.3,sz*.36);F(.08,.85,.08,fc,sx*1.66,.45,sz*.62)}
+    for(const x of[-.75,.75]){const lo=rng()<.2;F(.02,lo?1.2:1.68,.02,0x9a9a9a,x-.22,lo?1.6:1.4,0);F(.02,1.68,.02,0x9a9a9a,x+.22,1.4,0);F(.5,.04,.2,0x1a1a1a,x+(lo?.1:0),lo?.75:.56,0,lo?.6:0)}break}
+  case'slide':{const fc=pick([0xd84a30,0xe0b020,0x3a8ac8]);for(const sx of[-1,1])F(.06,1.7,.06,0x6a6c70,sx*.32,.85,-1.3);for(let k=1;k<6;k++)F(.6,.04,.06,0x6a6c70,0,k*.3,-1.3);
+    F(.76,.06,.62,0x6a6c70,0,1.66,-1.0);for(const sx of[-1,1])F(.05,.4,.6,0x6a6c70,sx*.36,1.88,-1.0);for(let k=0;k<10;k++){F(.56,.05,.26,fc,0,1.6-k*.155,-.6+k*.23);for(const sx of[-1,1])F(.05,.14,.26,fc,sx*.3,1.66-k*.155,-.6+k*.23)}
+    for(const sx of[-1,1])F(.06,.15,.06,0x6a6c70,sx*.25,.07,1.7);break}
+  case'picnic':{const wd=pick([0x7a5232,0x8a6a42]);F(1.8,.06,.8,wd,0,.76,0);for(const sz of[-1,1]){F(1.8,.05,.28,wd,0,.44,sz*.62);for(const sx of[-1,1])F(.07,.76,.07,wd,sx*.7,.38,sz*.3)}break}
+  case'lamppost':{F(.12,.3,.12,0x1e2024,0,.15,0);F(.08,4,.08,0x2a2c30,0,2.15,0);F(.06,.06,.7,0x2a2c30,0,4.1,.32);F(.3,.14,.36,0x2a2c30,0,4.02,.62);F(.22,.03,.26,0xfff1c8,0,3.94,.62);break}
+  case'atable':{F(.8,.05,.8,0xe8e4d8,0,.75,0);F(.07,.72,.07,0x8a8a8a,0,.37,0);F(.4,.03,.4,0x8a8a8a,0,.02,0);const c=pick([0xc83a2a,0x2a6aa8,0xe0b020]);for(const[a,b]of[[.6,0],[-.6,0],[0,.6],[0,-.6]]){F(.32,.05,.32,c,a,.46,b);F(.05,.44,.05,0x8a8a8a,a,.22,b)}break}
+  case'rwy':{const o=sp[5]||{};F(o.L||3,.02,o.w||.25,o.c||0xe8e8e0,0,.01,0);break}
+  case'lswitch':{const o=sp[5]||{};if(o.wall){if(o.z)F(.09,.14,.04,0xe8e4d8,0,1.25,0);else F(.04,.14,.09,0xe8e4d8,0,1.25,0);F(.045,.045,.045,0xc8c4b8,0,1.25,0)}
+    else{F(.08,1.0,.08,0x5a5a5a,0,.5,0);F(.18,.24,.14,0x8a8a8a,0,1.1,0);F(.04,.12,.04,0xd02a20,0,1.26,.05);F(.1,.03,.02,0xf0f0f0,0,1.02,.075)}break}
+  case'lamp':{F(.3,.04,.3,0x3a3a3a,0,.02,0);F(.04,1.32,.04,0x8a8a8a,0,.68,0);F(.42,.26,.42,0xe8dcc0,0,1.46,0);F(.14,.04,.14,0xfff1c8,0,1.32,0);break}
+  case'wire':{F(.08,.04,.08,0x2a1a14,0,.02,0);let any=0;
+    for(const[dx,dz]of[[1,0],[-1,0],[0,1],[0,-1]])if(furnSpecs.some(o=>o!==sp&&!o.gone&&WIRE.has(o[0])&&Math.abs(o[1]-(wx+dx*VS))<.05&&Math.abs(o[3]-(wz+dz*VS))<.05&&Math.abs(o[2]-wy)<.3)){any=1;F(dx?.27:.03,.03,dz?.27:.03,0x7a1a14,dx*.125,.015,dz*.125)}
+    if(!any)F(.3,.03,.03,0x7a1a14,0,.015,0);break}
+  case'plane':{const o=sp[5]||{},c=o.c||0x2a5aa0,wh=0xe8e8e4,gr=0xb4b8bc,dk=0x1a1c20;
+    if(o.small){F(1.1,1.2,5.5,wh,0,1.35,0);F(1.12,.2,5.5,c,0,1.0,0);F(.9,.9,1,wh,0,1.3,3.2);F(.22,.22,.3,dk,0,1.3,3.85);F(.1,1.7,.08,dk,0,1.3,3.98);F(1.7,.1,.08,dk,0,1.3,3.98);
+      F(10.5,.12,1.4,wh,0,2.0,.6);F(10.5,.13,.3,c,0,2.0,.2);F(.86,.5,.06,0x3a4a5a,0,1.72,1.9);for(const sx of[-1,1])F(.04,.45,1.4,0x3a4a5a,sx*.56,1.6,.8);
+      F(.12,1.3,1.1,c,0,2.3,-2.6);F(3.4,.08,.8,wh,0,1.45,-2.7);for(const sx of[-1,1]){F(.07,.85,.07,dk,sx*.8,.45,.6);F(.14,.38,.38,dk,sx*.8,.19,.6);F(.05,1.1,.05,0x8a8a8a,sx*2.1,1.5,.7,0)}F(.07,.75,.07,dk,0,.4,2.6);F(.12,.34,.34,dk,0,.17,2.6);break}
+    const wr=o.wreck,y0=wr?1.25:2.6,fl=16;
+    F(2.6,2.6,fl,wh,0,y0,0);F(2.62,.36,fl,c,0,y0-.55,0);F(2.2,2.2,1.4,wh,0,y0-.05,fl/2+.7);F(1.6,1.6,1,wh,0,y0-.1,fl/2+1.9);F(.9,.9,.6,wh,0,y0-.15,fl/2+2.7);F(1.7,.35,.08,dk,0,y0+.35,fl/2+1.45);
+    for(let i=0;i<13;i++)for(const sx of[-1,1])F(.04,.26,.22,dk,sx*1.31,y0+.4,-fl/2+1.5+i*1.05);for(const sx of[-1,1])F(.03,1.6,.9,0xc8ccd0,sx*1.31,y0-.1,fl/2-1.5);
+    if(!wr){F(2.2,2.2,2,wh,0,y0+.1,-fl/2-1);F(1.4,1.4,2.2,wh,0,y0+.35,-fl/2-3.1);F(.25,3.6,2.6,c,0,y0+2.9,-fl/2-3.3);F(7.2,.2,1.6,gr,0,y0+.6,-fl/2-3.4);F(19,.3,3.2,gr,0,y0-.9,.8);F(18.6,.32,.4,c,0,y0-.9,-.7);
+      for(const sx of[-1,1]){F(1.1,1.1,2.6,gr,sx*4.4,y0-1.62,1.6);F(.85,.85,.05,dk,sx*4.4,y0-1.62,2.93);F(.2,.5,1.2,gr,sx*4.4,y0-1.06,1.3);F(.3,1.25,.3,dk,sx*1.5,.62,-.4);F(.5,.8,.8,dk,sx*1.5,.4,-.4)}
+      F(.25,1.2,.25,dk,0,.6,fl/2+.9);F(.35,.7,.7,dk,0,.35,fl/2+.9);break}
+    // the wreck: belly on the ground, one wing torn off and lying beside it, the tail broken away, scorch and debris everywhere
+    F(9.5,.3,3.2,gr,-4.9,y0-.9,.8);F(1.1,1.1,2.6,gr,-4.4,y0-1.0,1.6);F(7,.25,2.8,gr,9,.13,-3,.7);F(1.1,1.1,2.6,0x2a2a2a,6.5,.55,-1.5,.9);
+    F(2.2,2.2,2.2,wh,1.6,y0+.1,-fl/2-2.6,.45);F(.25,3.4,2.4,c,2.3,y0+2.6,-fl/2-3.6,.45);F(6.5,.2,1.5,gr,2.2,y0+.5,-fl/2-3.8,.45);F(2.64,2.64,.3,0x141210,0,y0,-fl/2);
+    for(let i=0;i<10;i++)F(R(1,3.5),.02,R(1,4),0x141210,R(-5,6),.01,R(-12,10),R(0,3));for(let i=0;i<16;i++)F(R(.3,1.3),R(.1,.4),R(.3,1.6),pick([wh,gr,c,dk]),R(-9,10),.12,R(-16,16),R(0,3));break}
+  case'pebbles':{for(let k=0;k<RI(3,7);k++){const s2=R(.05,.16);F(s2,s2*R(.5,.8),s2*R(.8,1.2),pick([0x7a7a76,0x8a8680,0x5e5c58,0x9a948a,0x6a625a]),R(-.22,.22),s2*.3,R(-.22,.22),R(0,3))}break}
+  case'rdash':{if(roadAt(sp,0,0,0))F(.12,.012,1.5,0xd8b030,0,.006,0);break}
   case'roofac':{F(.9,.6,.7,0x9a9c9a,0,.3,0);for(let i=0;i<5;i++)F(.86,.02,.02,0x5a5c5a,0,.1+i*.1,.36);F(.5,.04,.5,0x3a3c3a,0,.62,0);F(.08,.3,.08,0x6a6c6a,.4,.15,-.4);break}
   case'roofvent':{F(.12,.55,.12,0x6a6c70,0,.27,0);F(.22,.06,.22,0x4a4c50,0,.58,0);if(rng()<.6)F(.1,.35,.1,0x6a6c70,.4,.17,.2);break}
   case'porch':{const c=0xb8b4ac;F(2.2,.14,1.2,0x9a968e,0,.07,.6);for(const sx of[-1,1])F(.12,2.5,.12,0xe0dcd0,sx*1.0,1.25,1.1);F(2.5,.1,1.5,0x4a4038,0,2.55,.7);F(2.5,.16,.08,0xe0dcd0,0,2.45,1.42);
@@ -1630,9 +1868,9 @@ function buildFurn(sp){
   case'fence':{const L=sp[5].L,n=Math.round(L/.14);F(L,.06,.03,0xe8e4da,0,.35,0);F(L,.06,.03,0xe8e4da,0,.75,0);for(let i=0;i<n;i++)if(rng()<.94)F(.08,.95,.02,0xe8e4da,-L/2+(i+.5)*L/n,.47,.02);break}
   case'curtain':{const c=sp[5].c;F(2.1,.04,.04,0x3a3028,0,2.05,.04);for(const sx of[-1,1]){F(.42,1.6,.03,c,sx*.78,1.22,.05);for(let k=0;k<3;k++)F(.03,1.6,.04,c,sx*.78-.18+k*.18,1.22,.065)}break}
   case'clamp':{F(.02,.3,.02,0x2a2a2a,0,-.15,0);const st=rng();if(st<.5){F(.34,.14,.34,0xe8e0c8,0,-.36,0);F(.12,.04,.12,0xfff4d0,0,-.44,0)}else{F(.5,.06,.5,0xd8d4c8,0,-.33,0);F(.3,.03,.3,0xfff4d0,0,-.37,0)}break}
-  case'painting':{const{w,h,st}=sp[5];const fr=pick([0x5a3a1e,0x2a2018,0xb08a40,0x1a1a1a,0xe8e0d0]);F(w+.08,h+.08,.03,fr,0,1.5,.015);
+  case'painting':{const{w,h,st}=sp[5];const fr=pick([0x5a3a1e,0x2a2018,0xb08a40,0x1a1a1a,0xe8e0d0]),NX=Math.max(4,Math.round(w/.0625)),NY=Math.max(3,Math.round(h/.0625));F(NX*.0625+.08,NY*.0625+.08,.03,fr,0,1.5,.015);
     // the canvas: a grid of pixel squares painted by style — landscape, sea at sunset, abstract blocks, portrait or flowers in a vase
-    const nx=Math.round(w/.06),ny=Math.round(h/.06),cw=w/nx,ch=h/ny,P0=[[0x7ab0d8,0x9ac8e0,0x4a7a3a,0x6a9a4a,0x3a5a2a],[0xe07040,0xf0a050,0x2a4a7a,0x3a6a9a,0xf0d080],[0xc83a2a,0x2a5aa0,0xe8c040,0xe8e4d8,0x1a1a1a],[0x3a2a2a,0x5a4030,0xd8a878,0xc89060,0x2a1a1a],[0x2a2a30,0x3a3a44,0xd83a50,0xf0d040,0x4a8a3a]][st];
+    const nx=Math.max(4,Math.round(w/.0625)),ny=Math.max(3,Math.round(h/.0625)),cw=.0625,ch=.0625;P0=[[0x7ab0d8,0x9ac8e0,0x4a7a3a,0x6a9a4a,0x3a5a2a],[0xe07040,0xf0a050,0x2a4a7a,0x3a6a9a,0xf0d080],[0xc83a2a,0x2a5aa0,0xe8c040,0xe8e4d8,0x1a1a1a],[0x3a2a2a,0x5a4030,0xd8a878,0xc89060,0x2a1a1a],[0x2a2a30,0x3a3a44,0xd83a50,0xf0d040,0x4a8a3a]][st];
     for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const u=i/(nx-1),v=1-j/(ny-1);let c;
       if(st===0)c=v>.55?(v>.8?P0[0]:P0[1]):v>.35+Math.sin(u*6)*.08?P0[3]:v>.15?P0[2]:P0[4];
       else if(st===1)c=v>.5?(Math.hypot(u-.6,v-.62)<.12?P0[4]:v>.7?P0[0]:P0[1]):(v>.45?P0[4]:v>.25?P0[3]:P0[2]);
@@ -1641,9 +1879,10 @@ function buildFurn(sp){
       else c=v<.3&&Math.abs(u-.5)<.15?0x8a9aa8:v>.35&&v<.85&&Math.hypot(u-.5,v-.6)<.3?(rng()<.5?P0[2]:P0[3]):v>.3&&v<.5&&Math.abs(u-.5)<.05?P0[4]:P0[(u+v)>1?1:0];
       F(cw,ch,.006,c,-w/2+cw*(i+.5),1.5-h/2+ch*(ny-1-j+.5),.034)}
     break}
-  case'lane':{const L=sp[5].L;for(const sx of[-.09,.09])F(.1,.012,L,0xd8b030,sx,.006,0);for(const sx of[-2.75,2.75])F(.12,.012,L+5,0xdcdad2,sx,.006,0);break}
-  case'xwalk':{for(let k=0;k<7;k++)F(.42,.012,2,0xdcdad2,-2.55+k*.85,.006,0);F(2.7,.012,.3,0xdcdad2,1.45,.006,1.35);break}
-  case'curb':{const{L,paint}=sp[5];F(.2,.52,L,0xb4b0a8,0,.26,0);F(.22,.04,L,0xc4c0b8,0,.52,0);if(paint){F(.205,.53,2.6,paint,0,.265,L/2-1.3);F(.205,.53,2.6,paint,0,.265,-L/2+1.3)}break}
+  // road paint and curbs go down in 50 cm pieces, each only where there's asphalt (or sidewalk, for curbs) under it: a hole stays a hole
+  case'lane':{const L=sp[5].L;for(const sx of[-.09,.09])paintRun(F,sp,sx,-L/2,L,.1,0xd8b030,0);for(const sx of[-2.75,2.75])paintRun(F,sp,sx,-L/2-2.5,L+5,.12,0xdcdad2,0);break}
+  case'xwalk':{for(let k=0;k<7;k++)paintRun(F,sp,-2.55+k*.85,-1,2,.42,0xdcdad2,0);for(let k=0;k<6;k++)if(roadAt(sp,.2+k*.5,1.35,0))F(.5,.012,.3,0xdcdad2,.2+k*.5,.006,1.35);break}
+  case'curb':{const{L,paint}=sp[5];const n=Math.round(L/.5);for(let i=0;i<n;i++){const z=-L/2+(i+.5)*L/n;if(!roadAt(sp,0,z,1))continue;const pt=paint&&(z>L/2-2.6||z<-L/2+2.6);F(.2,.52,L/n,pt?paint:0xb4b0a8,0,.26,z);F(.22,.04,L/n,pt?paint:0xc4c0b8,0,.52,z)}break}
   case'stop':{const red=0xb81c1c,pole=0x8a8c8e;F(.07,2.5,.07,pole,0,1.25,0);for(const r of[Math.PI/8,3*Math.PI/8])F(.68,.68,.025,red,0,2.15,.05,0,r);
     sunTxt(F,'STOP',0,2.15,.068,.024,0xf0ece4);
     const nm=sp[5].names;if(nm){F(1.3,.2,.03,0x1e6a3a,0,2.62,0);sunTxt(F,nm[0],0,2.62,.017,.02,0xf0f0e8);F(1.3,.2,.03,0x1e6a3a,0,2.86,0,Math.PI/2);sunTxt(F,nm[1],0,2.86,.017,.02,0xf0f0e8,Math.PI/2);F(.06,.5,.06,pole,0,2.74,0)}break}
@@ -1761,7 +2000,7 @@ function makeSign(sg){const c=document.createElement('canvas'),h=64,w=Math.round
   const g=new THREE.Group(),hh=.9;g.position.set(sg.x,sg.y,sg.z);
   const back=new THREE.Mesh(box(sg.w+.12,hh+.12,.1),lam(0x2a2a2a));back.position.z=-.02;g.add(back);
   const face=new THREE.Mesh(new THREE.PlaneGeometry(sg.w,hh),new THREE.MeshLambertMaterial({map:t}));face.position.z=-.075;face.rotation.y=Math.PI;g.add(face);
-  if(rng()<.3)g.rotation.z=R(-.08,.08);scene.add(g);freeze(g);return g}
+  if(sg.ry)g.rotation.y=sg.ry;if(rng()<.3)g.rotation.z=R(-.08,.08);scene.add(g);freeze(g);return g}
 const furnSeed=sp=>(Math.imul(Math.round(sp[1]*64),73856093)^Math.imul(Math.round(sp[3]*64),19349663)^Math.imul(Math.round(sp[2]*64),83492791)^sp[0].length)|0;
 function buildOne(sp){const sv=rng;rng=mulberry(furnSeed(sp));FBB[0]=FBB[1]=FBB[2]=1e9;FBB[3]=FBB[4]=FBB[5]=-1e9;buildFurn(sp);rng=sv;sp.bb=FBB.slice();sp.k=FBK}
 function buildFurnMeshes(list,only){
@@ -1773,26 +2012,30 @@ function buildFurnMeshes(list,only){
 }
 
 // ---------------- model helpers
-const geoC={},matC={};
+const geoC={},matC={},vGeoC={},vMatC={};
 const box=(w,h,d)=>{const k=w+','+h+','+d;return geoC[k]||(geoC[k]=new THREE.BoxGeometry(w,h,d))};
 const lam=c=>matC[c]||(matC[c]=pxShadows(new THREE.MeshLambertMaterial({color:c})));
-function part(par,w,h,d,c,x,y,z){const m=new THREE.Mesh(box(w,h,d),lam(c));m.position.set(x,y,z);par.add(m);return m}
+function partKind(c){const r=(c>>16)&255,g=(c>>8)&255,b=c&255,l=(r+g+b)/765,sat=Math.max(r,g,b)-Math.min(r,g,b);if(l>.85&&r>200&&g>190&&b<190)return null;if(r>200&&g<60&&b<60)return null;
+  if(l<.09)return'rubber';if(l<.16)return'plastic';if(sat<18&&l<.8)return'metal';return'plain'}
+function part(par,w,h,d,c,x,y,z){const k=typeof vMat==='function'?partKind(c):null,m=new THREE.Mesh(k?vbox(w,h,d):box(w,h,d),k?vMat(c,k):lam(c));m.position.set(x,y,z);m.userData.dims=[w,h,d];par.add(m);return m}
 function limb(par,w,h,d,c,x,y,z){const g=new THREE.Group();g.position.set(x,y,z);part(g,w,h,d,c,0,-h/2,0);par.add(g);return g}
 function makeHuman(o){
   const g=new THREE.Group();
-  const legL=limb(g,.22,.85,.24,o.pants,-.13,.85,0),legR=limb(g,.22,.85,.24,o.pants,.13,.85,0);
-  const torso=part(g,.55,.7,.32,o.shirt,0,1.2,0);
-  const head=part(g,.38,.38,.38,o.skin,0,1.75,0);
-  const armL=limb(g,.16,.66,.18,o.arm||o.skin,-.37,1.5,0),armR=limb(g,.16,.66,.18,o.arm||o.skin,.37,1.5,0);
+  // hs: height, ws: build (width). Parts are built at their real size (not scaled) so their textures keep the shared pixel size
+  const hs=o.hs||1,ws=o.ws||1,lh=.85*hs,th=.7*hs,tw=.55*ws,td=.32*(ws*.6+.4),ah=.66*hs,ax=tw/2+.095;
+  const legL=limb(g,.22*Math.min(1.25,ws),lh,.24*Math.min(1.2,ws),o.pants,-.13*Math.min(1.3,ws),lh,0),legR=limb(g,.22*Math.min(1.25,ws),lh,.24*Math.min(1.2,ws),o.pants,.13*Math.min(1.3,ws),lh,0);
+  const torso=part(g,tw,th,td,o.shirt,0,lh+th/2,0);
+  const head=part(g,.38,.38,.38,o.skin,0,lh+th+.2,0);
+  const armL=limb(g,.16*Math.min(1.25,ws),ah,.18*Math.min(1.2,ws),o.arm||o.skin,-ax,lh+th-.05,0),armR=limb(g,.16*Math.min(1.25,ws),ah,.18*Math.min(1.2,ws),o.arm||o.skin,ax,lh+th-.05,0);
   if(o.zombie){
     part(head,.07,.05,.02,0xd8e44a,-.09,.03,.2);part(head,.07,.05,.02,0xd8e44a,.09,.03,.2);part(head,.18,.05,.02,0x3a0808,0,-.1,.2);
-    part(g,.26,.22,.02,0x5c0b0b,.1,1.25,.17);part(g,.2,.12,.02,0x5c0b0b,-.12,1.0,-.17);
+    part(torso,.26,.22,.02,0x5c0b0b,.1,.05,td/2+.01);part(torso,.2,.12,.02,0x5c0b0b,-.12,-.2,-td/2-.01);
     armL.rotation.x=armR.rotation.x=-1.4;
   }else{
     part(head,.06,.06,.02,0x111111,-.09,.03,.2);part(head,.06,.06,.02,0x111111,.09,.03,.2);
     part(head,.42,.12,.42,o.hat,0,.2,0);part(g,.42,.5,.2,0x3a3a2a,0,1.2,-.25);
   }
-  return{g,legL,legR,armL,armR,head,torso};
+  return{g,legL,legR,armL,armR,head,torso,hs,ws};
 }
 function makeVM(){
   const g=new THREE.Group();g.position.set(.38,-.36,-.7);
@@ -1877,19 +2120,59 @@ function wallSplat(p){for(let t=0;t<4;t++){const k=RI(0,3),dx=[1,-1,0,0][k],dz=[
     if(dx){m.position.set((dx>0?cx:cx+1)*VS-dx*off,h,p.z);m.rotation.y=dx>0?-Math.PI/2:Math.PI/2}else{m.position.set(p.x,h,(dz>0?cz:cz+1)*VS-dz*off);m.rotation.y=dz>0?Math.PI:0}
     const sc=R(.6,1.2);m.scale.set(sc,sc,1);addDecal(m);return}}}
 // ---------------- audio
-let AC=null,master,nbuf,eng,engG;
-function initAudio(){if(AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=.45;master.connect(AC.destination);
-  nbuf=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=nbuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
-  eng=AC.createOscillator();eng.type='sawtooth';const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=380;engG=AC.createGain();engG.gain.value=0;eng.connect(lp).connect(engG).connect(master);eng.start()}catch(e){AC=null}}
-function sNoise(dur,freq,vol,type='lowpass'){if(!AC)return;const t=AC.currentTime,s=AC.createBufferSource();s.buffer=nbuf;const f=AC.createBiquadFilter();f.type=type;f.frequency.value=freq;
-  const g=AC.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);s.connect(f).connect(g).connect(master);s.start(t,Math.random()*.5);s.stop(t+dur)}
-function sTone(f0,f1,dur,vol,type='sawtooth'){if(!AC)return;const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+dur);
-  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(master);o.start(t);o.stop(t+dur)}
-const SND={shot:()=>{sNoise(.3,2200,1);sTone(160,40,.15,.35,'square')},hit:()=>sNoise(.12,500,.6),dig:()=>sNoise(.07,1100,.25,'bandpass'),
-  place:()=>sNoise(.08,300,.4),hurt:()=>sTone(320,110,.25,.3,'square'),pick:()=>sTone(600,950,.14,.15,'triangle'),
-  groan:v=>sTone(R(70,115),R(45,70),R(.6,1.2),v*.22,'sawtooth'),crash:()=>sNoise(.5,700,.9),boom:()=>{sNoise(1.2,400,1.4);sTone(90,30,.8,.6,'sine')},click:()=>sTone(900,800,.04,.1,'square'),
-  glass:()=>{sNoise(.35,5200,.5,'highpass');sTone(2400,1800,.2,.08,'triangle')},creak:()=>{sTone(190,140,.35,.1,'triangle');sNoise(.1,250,.3)}};
-
+// ---------------- sound: everything synthesized, but modelled on the real thing (transients, bodies, tails), through a compressor and an outdoor reverb
+let AC=null,master,nbuf,bbuf,verb,eng,engG,engLP,engAM,amb={};
+function initAudio(){if(AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)();const comp=AC.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=4;comp.connect(AC.destination);
+  master=AC.createGain();master.gain.value=.5;master.connect(comp);
+  const n=AC.sampleRate*2;nbuf=AC.createBuffer(1,n,AC.sampleRate);bbuf=AC.createBuffer(1,n,AC.sampleRate);const d=nbuf.getChannelData(0),b=bbuf.getChannelData(0);let last=0;
+  for(let i=0;i<n;i++){d[i]=Math.random()*2-1;last=(last+.02*d[i])/1.02;b[i]=last*3.5} // white and brown noise
+  // outdoor reverb: a sparse early bounce, then a long soft tail
+  const ir=AC.createBuffer(2,AC.sampleRate*1.8,AC.sampleRate);for(let c=0;c<2;c++){const q=ir.getChannelData(c);for(let i=0;i<q.length;i++){const t=i/AC.sampleRate;q[i]=(Math.random()*2-1)*Math.exp(-t*3.2)*(t<.02?0:1)}}
+  const cv=AC.createConvolver();cv.buffer=ir;verb=AC.createGain();verb.gain.value=.22;verb.connect(cv).connect(master);
+  // engine: a sawtooth at the firing frequency, a sub-octave square for rumble, chopped by a pulse at the firing rate, through a lowpass
+  eng=AC.createOscillator();eng.type='sawtooth';const sub=AC.createOscillator();sub.type='square';const subG=AC.createGain();subG.gain.value=.6;
+  engAM=AC.createGain();engAM.gain.value=.6;const lfo=AC.createOscillator();lfo.type='square';const lfoG=AC.createGain();lfoG.gain.value=.35;lfo.connect(lfoG).connect(engAM.gain);
+  engLP=AC.createBiquadFilter();engLP.type='lowpass';engLP.frequency.value=420;engLP.Q.value=1.4;engG=AC.createGain();engG.gain.value=0;
+  eng.connect(engAM);sub.connect(subG).connect(engAM);engAM.connect(engLP).connect(engG).connect(master);eng.start();sub.start();lfo.start();eng._sub=sub;eng._lfo=lfo;
+  // weather beds: rain (filtered white noise) and wind (brown noise, slowly moving filter)
+  for(const k of['rain','wind','jet']){const s=AC.createBufferSource();s.buffer=k==='rain'?nbuf:bbuf;s.loop=true;const f=AC.createBiquadFilter();f.type=k==='rain'?'highpass':'lowpass';f.frequency.value=k==='rain'?1400:380;
+    const g=AC.createGain();g.gain.value=0;s.connect(f).connect(g).connect(master);s.start();amb[k]={g,f}}}catch(e){AC=null}}
+const sOut=rv=>{if(rv&&verb){const g=AC.createGain();g.gain.value=1;g.connect(master);const s=AC.createGain();s.gain.value=rv;g.connect(s).connect(verb);return g}return master};
+function sNoise(dur,freq,vol,type='lowpass',q=.8,rv=.3,brown,delay=0){if(!AC)return;const t=AC.currentTime+delay,s=AC.createBufferSource();s.buffer=brown?bbuf:nbuf;const f=AC.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q;
+  const g=AC.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);s.connect(f).connect(g).connect(sOut(rv));s.start(t,Math.random()*1.4);s.stop(t+dur+.05)}
+function sTone(f0,f1,dur,vol,type='sawtooth',rv=.2,delay=0){if(!AC)return;const t=AC.currentTime+delay,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(1,f1),t+dur);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.004);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(sOut(rv));o.start(t);o.stop(t+dur+.05)}
+// a voice through two formant filters (for groans and grunts)
+function sVoice(f0,f1,dur,vol,F1,F2,rv=.25,breath=.3){if(!AC)return;const t=AC.currentTime,o=AC.createOscillator(),vib=AC.createOscillator(),vg=AC.createGain();o.type='sawtooth';o.frequency.setValueAtTime(f0,t);o.frequency.linearRampToValueAtTime(f1,t+dur);
+  vib.frequency.value=R(4,7);vg.gain.value=f0*.04;vib.connect(vg).connect(o.frequency);const out=sOut(rv),env=AC.createGain();env.gain.setValueAtTime(0,t);env.gain.linearRampToValueAtTime(vol,t+dur*.2);env.gain.linearRampToValueAtTime(vol*.7,t+dur*.7);env.gain.linearRampToValueAtTime(0,t+dur);env.connect(out);
+  for(const[F,g]of[[F1,1],[F2,.6]]){const f=AC.createBiquadFilter();f.type='bandpass';f.frequency.value=F;f.Q.value=6;const fg=AC.createGain();fg.gain.value=g*2.2;o.connect(f).connect(fg).connect(env)}
+  if(breath){const s=AC.createBufferSource();s.buffer=nbuf;const f=AC.createBiquadFilter();f.type='bandpass';f.frequency.value=F1*1.6;f.Q.value=1;const g=AC.createGain();g.gain.value=breath;s.connect(f).connect(g).connect(env);s.start(t,Math.random());s.stop(t+dur)}
+  o.start(t);vib.start(t);o.stop(t+dur+.05);vib.stop(t+dur+.05)}
+const SND={
+  // pistol: a supersonic crack, the muzzle blast body, a low thump, a long echo, then the slide
+  shot:()=>{sNoise(.025,2500,1.6,'highpass',.7,.1);sNoise(.18,900,1.1,'bandpass',.9,.9);sTone(150,45,.12,.7,'sine',.5);sNoise(.06,5000,.12,'bandpass',4,0,0,.07)},
+  // bat on flesh: a dull thud with a wet slap on top
+  hit:()=>{sNoise(.09,320,.9,'lowpass',.7,.1,true);sTone(95,55,.08,.35,'sine',.05);sNoise(.05,1300,.25,'bandpass',2,.05)},
+  // pickaxe: steel tick, then gravel spilling
+  dig:()=>{sNoise(.02,3400,.45,'bandpass',8,.15);sNoise(.09,1700,.22,'bandpass',1.2,.1,false,.015)},
+  place:()=>{sNoise(.07,240,.6,'lowpass',.8,.1,true);sNoise(.02,2200,.15,'bandpass',3,.05)},
+  hurt:()=>{sVoice(R(150,175),R(105,120),.28,.5,R(650,720),1150,.15,.25)},
+  pick:()=>{sNoise(.07,2600,.12,'bandpass',1.5,.05);sNoise(.03,5200,.08,'bandpass',4,0,false,.05)},
+  // a groan: a breathy, rattling voice with vowel formants (uh / oh), falling in pitch
+  groan:v=>{const o=rng()<.5;sVoice(R(85,120),R(55,75),R(.7,1.4),v*.45,o?R(420,520):R(560,680),o?R(820,900):R(1000,1150),.35,.45)},
+  // car crash: crunch, a metal ring and some glass
+  crash:()=>{sNoise(.45,1200,1.2,'lowpass',.7,.5,true);sTone(410,380,.6,.12,'triangle',.4);sTone(637,600,.5,.08,'triangle',.4);for(let i=0;i<5;i++)sNoise(.05,R(3500,7000),.15,'bandpass',8,.2,false,.05+i*.04)},
+  // explosion: a crack, then a deep roll of brown noise that lasts, with a sub drop
+  boom:()=>{sNoise(.05,3000,1.4,'highpass',.7,.3);sNoise(2.4,420,2.2,'lowpass',.6,.9,true);sTone(70,24,1.4,.9,'sine',.6);sNoise(1.6,160,1.2,'lowpass',.7,.8,true,.25)},
+  click:()=>{sNoise(.012,6000,.3,'highpass',1,0);sTone(2900,2600,.02,.08,'square',0)},
+  // glass: many little shards, each its own bright ping
+  glass:()=>{sNoise(.06,3000,.7,'highpass',.7,.3);for(let i=0;i<10;i++){const d=R(0,.35);sNoise(R(.03,.08),R(3500,8000),R(.08,.2),'bandpass',12,.3,false,d)}},
+  // a door: the hinge creak (a stick-slip squeal) and a woody knock
+  creak:()=>{sVoice(R(160,220),R(120,150),.4,.15,R(500,700),1400,.2,.05);sNoise(.06,260,.3,'lowpass',.8,.1,true,.32)},
+  // footsteps by surface
+  step:(b)=>{const hard=b===B.CONC||b===B.ASPH||b===B.STONE||b===B.BRICK||b===B.TILEF,wood=b===B.PLANK||b===B.STPX||b===B.STNX||b===B.STPZ||b===B.STNZ,metal=b===B.METAL;
+    if(metal){sNoise(.05,1900,.22,'bandpass',3,.1);sTone(600,520,.05,.04,'triangle',.1)}else if(wood){sNoise(.06,420,.32,'lowpass',1,.05,true);sTone(180,150,.05,.08,'sine',0)}
+    else if(hard){sNoise(.035,1500,.18,'bandpass',1.2,.08);sNoise(.05,300,.18,'lowpass',.8,0,true)}else{sNoise(.08,900,.16,'lowpass',.7,.02);sNoise(.06,2400,.05,'bandpass',1,0)}}};
 // ---------------- game state
 let players=[],zombies=[],vehicles=[],crates=[],doors=[];const doorMap=new Map(),dkey=(x,y,z)=>x+','+y+','+z;
 let startCreative=false,flashT=0,boardT=0,running=false,paused=false,menuP=null,tDay=.08,day=1,kills=0,wasLocked=false;
@@ -1900,6 +2183,9 @@ const CLOTHES={hardhat:{slot:'head',armor:.12,col:0xd8a820},helmet:{slot:'head',
   hidecoat:{slot:'body',armor:.2,col:0x7a5a3a},scrapvest:{slot:'body',armor:.38,col:0x7c8184},cargo:{slot:'legs',armor:.1,col:0x5a5a3a},riot:{slot:'legs',armor:.2,col:0x18181c}};
 const armorOf=p=>Math.min(.7,['head','body','legs'].reduce((s,k)=>s+(p.wear[k]?CLOTHES[p.wear[k]].armor:0),0));
 const RECIPES=[
+  {out:'wire',n:6,need:{scrap:1},label:'Strip some wire'},
+  {out:'lamp',n:1,need:{scrap:2,cloth:1},label:'Make a lamp'},
+  {out:'lswitch',n:1,need:{scrap:1},label:'Make a light switch'},
   {out:'saw',n:1,need:{metal:2,scrap:4,fuel:1},label:'Build a chainsaw'},
   {out:'pipebomb',n:1,need:{scrap:2,coal:2},label:'Pipe bomb (throw with Q)'},
   {out:'tnt',n:1,need:{coal:3,cloth:1,scrap:1},label:'Bundle of dynamite (place it)'},
@@ -1926,12 +2212,14 @@ const RECIPES=[
   {out:'ammo',n:5,need:{bone:2,scrap:1},label:'Bone-tipped rounds'}];
 const LOOT=[['scrip',16,3,15],['veg',7,1,2],['pipebomb',2,1,1],['ammo',20,4,10],['scrap',18,1,3],['cloth',14,1,3],['food',16,1,2],['bandage',8,1,1],['fuel',10,1,1],['kit',3,1,1],['metal',4,1,2],['coal',7,1,3],['beartrap',3,1,1],['mine',2,1,1],['spikes',3,1,1],['tent',1,1,1],['hardhat',3,1,1],['jacket',3,1,1],['vest',2,1,1],['riot',2,1,1],['cargo',2,1,1],['helmet',1,1,1]];
 // shops stock what you'd expect: groceries feed you, hardware stores build and trap, hospitals patch you up, schools have a bit of everything
-const LOOTK={grocery:[['scrip',8,4,20],['veg',22,1,3],['food',46,1,3],['cloth',4,1,2],['fuel',5,1,1],['bandage',5,1,1],['scrap',6,1,2],['coal',4,1,2]],
+const LOOTK={gas:[['fuel',40,1,2],['food',14,1,2],['jerky',8,1,2],['scrap',8,1,2],['scrip',10,3,12],['bandage',4,1,1],['kit',3,1,1],['hotbeans',4,1,1]],
+  mall:[['cloth',24,1,3],['jacket',6,1,1],['cargo',6,1,1],['hardhat',4,1,1],['scrip',18,4,20],['food',10,1,2],['jerky',6,1,2],['bandage',6,1,1],['scrap',6,1,2]],
+  air:[['food',18,1,2],['jerky',10,1,2],['cloth',14,1,2],['scrip',16,4,16],['bandage',8,1,1],['kit',4,1,1],['jacket',3,1,1],['fuel',6,1,1]],grocery:[['scrip',8,4,20],['veg',22,1,3],['food',46,1,3],['cloth',4,1,2],['fuel',5,1,1],['bandage',5,1,1],['scrap',6,1,2],['coal',4,1,2]],
   hardware:[['wrench',6,1,1],['battery',3,1,1],['saw',2,1,1],['tnt',3,1,1],['pipebomb',4,1,1],['scrap',22,1,4],['metal',14,1,2],['plank',12,2,5],['wood',8,1,3],['fuel',10,1,1],['kit',8,1,1],['beartrap',5,1,1],['spikes',5,1,1],['mine',2,1,1],['hardhat',6,1,1],['coal',6,1,3]],
   hospital:[['bandage',44,1,3],['cloth',14,1,3],['food',6,1,1],['kit',3,1,1],['scrap',6,1,2],['ammo',5,2,6],['vest',2,1,1]],
   school:[['food',20,1,2],['cloth',18,1,3],['scrap',12,1,2],['bandage',9,1,1],['jacket',4,1,1],['cargo',4,1,1],['ammo',5,2,5],['plank',6,1,3]]};
 const TOOLS=['Bat','Pistol','Pickaxe','Build','Place'];
-const TRAPS=[['spikes','Spike trap'],['beartrap','Bear trap'],['mine','Tripwire bomb'],['tnt','Dynamite'],['bed','Bed'],['bunk','Bunk bed'],['fire','Campfire'],['tent','Tent']];
+const TRAPS=[['spikes','Spike trap'],['beartrap','Bear trap'],['mine','Tripwire bomb'],['tnt','Dynamite'],['bed','Bed'],['bunk','Bunk bed'],['fire','Campfire'],['tent','Tent'],['lswitch','Light switch'],['lamp','Lamp'],['wire','Wire']];
 
 // ---------------- crates & vehicles
 const crateMat=new THREE.MeshLambertMaterial({map:tileTex(TILE.plank),color:0xb08a60}),stashMat=new THREE.MeshLambertMaterial({map:tileTex(TILE.metal),color:0x7a8a60});
@@ -2011,10 +2299,9 @@ function makeInterior(g,I,Wd,col,opt){
 }
 function lightBar(g,y,z,w){part(g,w,.1,.26,0x1a1a1a,0,y,z);const r=part(g,w*.4,.12,.22,0,-w*.26,y+.03,z),b=part(g,w*.4,.12,.22,0,w*.26,y+.03,z);r.material=basic(0xd01818);b.material=basic(0x1838e0);return[r,b]}
 // ---------------- vehicle textures: every part gets a 16 x 16 pixel texture chosen by what it is (paint, tyre rubber, metal, seat fabric,
-// dash plastic), point-sampled, with UVs scaled to the part's size so texture pixels are the same size as on blocks (1/32 m)
-const vGeoC={},vMatC={};
+// dash plastic), point-sampled, with UVs scaled to the part's size so texture pixels are the same size as on blocks (1/16 m)
 function vbox(w,h,d){const k=w+','+h+','+d;if(vGeoC[k])return vGeoC[k];const g=new THREE.BoxGeometry(w,h,d),uv=g.attributes&&g.attributes.uv;
-  if(uv&&uv.array){const dims=[[d,h],[d,h],[w,d],[w,d],[w,h],[w,h]];for(let f=0;f<6;f++)for(let v=0;v<4;v++){const i=(f*4+v)*2;uv.array[i]*=dims[f][0]/.5;uv.array[i+1]*=dims[f][1]/.5}uv.needsUpdate=true}
+  if(uv&&uv.array){const dims=[[d,h],[d,h],[w,d],[w,d],[w,h],[w,h]];for(let f=0;f<6;f++)for(let v=0;v<4;v++){const i=(f*4+v)*2;uv.array[i]*=dims[f][0];uv.array[i+1]*=dims[f][1]}uv.needsUpdate=true}
   return vGeoC[k]=g}
 function vKind(c,body){if(c===body)return'paint';const r=(c>>16)&255,g=(c>>8)&255,b=c&255,l=(r+g+b)/765,sat=Math.max(r,g,b)-Math.min(r,g,b);
   if(l>.85&&r>200&&g>200&&b<190)return null;if(r>120&&g<40&&b<40)return null; // lamps
@@ -2022,14 +2309,14 @@ function vKind(c,body){if(c===body)return'paint';const r=(c>>16)&255,g=(c>>8)&25
 function vMat(c,kind){const key=c+kind;if(vMatC[key])return vMatC[key];const N=16,cv=document.createElement('canvas');cv.width=cv.height=N;const x=cv.getContext('2d'),r=mulberry(c^kind.length*7919),base=[(c>>16)&255,(c>>8)&255,c&255];
   const px=(i,j,k,t)=>{const q=t||base;x.fillStyle=`rgb(${Math.min(255,q[0]*k)|0},${Math.min(255,q[1]*k)|0},${Math.min(255,q[2]*k)|0})`;x.fillRect(i,j,1,1)};
   for(let j=0;j<N;j++)for(let i=0;i<N;i++){let k=1;
-    if(kind==='paint')k=.93+r()*.1;else if(kind==='rubber')k=(j%4<2?.8:1.15)*(.9+r()*.2);else if(kind==='metal')k=.82+(j%2)*.1+r()*.12;else if(kind==='fabric')k=((i+j)%2?.86:1.08)*(.95+r()*.1);else k=.9+r()*.15;
+    if(kind==='paint'||kind==='plain')k=.93+r()*.1;else if(kind==='rubber')k=(j%4<2?.8:1.15)*(.9+r()*.2);else if(kind==='metal')k=.82+(j%2)*.1+r()*.12;else if(kind==='fabric')k=((i+j)%2?.86:1.08)*(.95+r()*.1);else k=.9+r()*.15;
     px(i,j,k)}
   if(kind==='paint'){for(let n=0;n<3;n++){const cx=r()*N|0,cy=r()*N|0;for(let q=0;q<2+r()*4;q++)px((cx+(r()*3|0))%N,(cy+(r()*2|0))%N,1,[110+r()*40,62+r()*20,34])} // rust
     for(let n=0;n<2;n++){let cx=r()*N|0,cy=r()*N|0;for(let q=0;q<5;q++){px(cx%N,cy%N,1.25);cx++;if(r()<.4)cy++}}} // scratches
   const t=new THREE.CanvasTexture(cv);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.RepeatWrapping;
-  return vMatC[key]=pxShadows(new THREE.MeshLambertMaterial({map:t}))}
-function texVehicle(g,body){g.traverse(o=>{if(!o.isMesh||!o.material||o.material.map||o.material.isMeshBasicMaterial||o.material===glassMat||o.material.transparent)return;
-  const c=o.material.color&&o.material.color.getHex?o.material.color.getHex():null;if(c==null)return;const k=vKind(c,body);if(!k)return;
+  const m=pxShadows(new THREE.MeshLambertMaterial({map:t}));m.userData.c=c;m.userData.kind=kind;return vMatC[key]=m}
+function texVehicle(g,body){g.traverse(o=>{if(!o.isMesh||!o.material||o.material.isMeshBasicMaterial||o.material===glassMat||o.material.transparent)return;if(o.material.map&&!(o.material.userData&&o.material.userData.kind))return;
+  const c=o.material.userData&&o.material.userData.c!=null?o.material.userData.c:o.material.color&&o.material.color.getHex?o.material.color.getHex():null;if(c==null)return;const k=vKind(c,body);if(!k)return;
   const P=o.geometry&&o.geometry.parameters;if(P&&P.width!=null&&P.depth!=null&&o.geometry.type==='BoxGeometry')o.geometry=vbox(P.width,P.height,P.depth);o.material=vMat(c,k)})}
 function makeVehicle(s){
   const t=s.type,D=VT[t],g=new THREE.Group(),L=D.L,Wd=D.Wd,rust=0x5a3a22,glass=0;
@@ -2092,7 +2379,7 @@ function makeVehicle(s){
   let gy=H-1;while(gy>0&&get(vc(s.x),gy,vc(s.z))===0)gy--;g.position.set(s.x,(gy+1)*VS,s.z);g.rotation.y=s.yaw;scene.add(g);castBig(g,.45);
   const broken=!s.good&&rng()<(D.pedal?.15:.4);
   // windshield blood layer: a transparent pixel canvas on the front face of the glass, seen from outside and from the driver's seat
-  let wsh=null;g.children.forEach(c=>{if(!wsh&&c.material===glassMat&&c.geometry&&c.geometry.parameters){const P=c.geometry.parameters,cv=document.createElement('canvas');cv.width=48;cv.height=Math.max(12,Math.round(48*P.height/P.width));
+  let wsh=null;g.children.forEach(c=>{if(!wsh&&c.material===glassMat&&c.geometry&&c.geometry.parameters){const P=c.geometry.parameters,cv=document.createElement('canvas');cv.width=Math.max(8,Math.round(P.width*16));cv.height=Math.max(4,Math.round(P.height*16));
     const tx=new THREE.CanvasTexture(cv);tx.magFilter=tx.minFilter=THREE.NearestFilter;tx.generateMipmaps=false;
     const m=new THREE.Mesh(new THREE.PlaneGeometry(P.width-.03,P.height-.03),new THREE.MeshLambertMaterial({map:tx,transparent:true,depthWrite:false,side:THREE.DoubleSide}));
     m.position.set(c.position.x,c.position.y,c.position.z+P.depth/2+.012);m.renderOrder=3;m.visible=false;g.add(m);wsh={m,cv,tx,amt:0,t:0}}});
@@ -2199,7 +2486,7 @@ function zTex(kind,col,v){const key=kind+col+'_'+v;if(zTexC[key])return zTexC[ke
     for(let n=0;n<2+ri(3);n++){const cx=ri(N),cy=ri(N);for(let t=0;t<3+ri(4);t++)px((cx+ri(3))%N,(cy+ri(2))%N,[112,124,88])}
     for(let n=0;n<2+ri(2);n++){const cx=ri(N),cy=ri(N/2),w=1+ri(3);for(let i=0;i<w;i++){const L=2+ri(7);for(let j=0;j<L;j++)px((cx+i)%N,(cy+j)%N,j<L-1?[92+ri(30),8,8]:[60,6,6])}}
     for(let i=0;i<N;i++)if(r()<.55)px(i,N-1-ri(2),sh(base,.55))}
-  const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;
+  const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.RepeatWrapping;
   return zTexC[key]=pxShadows(new THREE.MeshLambertMaterial({map:t}))}
 const BONE=0xd9cfb4,GORE=0x5c0b0b;
 function boneOut(par,x,y,z,len,ax){ // a broken bone poking out of a wound
@@ -2212,36 +2499,66 @@ function zombieLook(zo,m,turned,skin,shirt,pants){const v=RI(0,2);
   if(rng()<.35){part(m.head,.1,.12,.02,GORE,.12,-.06,.196);for(let i=0;i<3;i++)part(m.head,.025,.03,.02,0xe6dcc0,.09+i*.03,-.06,.205)}
   if(rng()<.25){const sd=rng()<.5?-1:1;part(m.head,.02,.2,.22,BONE,sd*.195,.08,-.02);part(m.head,.02,.05,.08,GORE,sd*.197,-.03,.05)}
   // ribs through a hole in the shirt, spine down the back
-  if(rng()<.4){const sx=rng()<.5?-.12:.1;part(m.g,.2,.26,.02,0x2a0505,sx,1.22,.165);for(let i=0;i<4;i++){const w=R(.12,.19);part(m.g,w,.026,.03,i%2?0xc9bd9c:BONE,sx+R(-.02,.02)+(.2-w)/2*(sx<0?-1:1),1.13+i*.062,.172)}part(m.g,.03,.24,.03,0xc9bd9c,sx+(sx<0?.09:-.09),1.22,.17)}
-  if(rng()<.2){for(let i=0;i<5;i++)part(m.g,.05,.05,.03,BONE,0,.95+i*.1,-.172);part(m.g,.12,.5,.02,GORE,0,1.15,-.166)}
+  const T_=m.torso,tz=T_.userData.dims[2]/2;
+  if(rng()<.4){const sx=rng()<.5?-.12:.1;part(T_,.2,.26,.02,0x2a0505,sx,.02,tz+.005);for(let i=0;i<4;i++){const w=R(.12,.19);part(T_,w,.026,.03,i%2?0xc9bd9c:BONE,sx+R(-.02,.02)+(.2-w)/2*(sx<0?-1:1),-.07+i*.062,tz+.012)}part(T_,.03,.24,.03,0xc9bd9c,sx+(sx<0?.09:-.09),.02,tz+.01)}
+  if(rng()<.2){for(let i=0;i<5;i++)part(T_,.05,.05,.03,BONE,0,-.25+i*.1,-tz-.012);part(T_,.12,.5,.02,GORE,0,-.05,-tz-.006)}
   // bones snapped through the forearm or shin
-  for(const k of['armL','armR'])if(rng()<.22)boneOut(m[k],R(-.03,.03),-.66-.07,0,.16,0);
+  for(const k of['armL','armR'])if(rng()<.22)boneOut(m[k],R(-.03,.03),-.66*m.hs-.07,0,.16,0);
   for(const k of['legL','legR'])if(rng()<.1){part(m[k],.06,.16,.06,BONE,0,-.5,.12);part(m[k],.12,.12,.04,GORE,0,-.5,.125)}
   // some have already lost limbs (not freshly turned people)
   if(!turned){const r=rng();
     if(r<.16)amputate(zo,rng()<.5?'armL':'armR');else if(r<.21){amputate(zo,'armL');amputate(zo,'armR')}
     else if(r<.27)amputate(zo,rng()<.5?'legL':'legR');
     if(rng()<.1){const k=['armL','armR'].find(q=>!zo.cut[q]);if(k)halfStump(zo,k)}}}
-function amputate(z,k){if(z.cut[k])return;const o=z[k];if(!o||!o.parent)return;o.parent.remove(o);z.cut[k]=true;const st=STUMP[k];
-  part(z.g,st[3],st[4],st[5],GORE,st[0],st[1],st[2]);boneOut(z.g,st[0],st[1]-.07,st[2],.1,0);
+function zombieHair(m,st,c){const H=m.head;if(st==='bald')return;
+  if(st==='buzz')part(H,.39,.05,.39,c,0,.19,0);
+  else if(st==='short'){part(H,.4,.1,.41,c,0,.18,-.01);part(H,.4,.14,.06,c,0,.06,-.18)}
+  else if(st==='long'){part(H,.41,.1,.42,c,0,.18,-.01);part(H,.42,.42,.07,c,0,-.02,-.2);for(const sx of[-1,1])part(H,.06,.3,.3,c,sx*.2,.02,-.04)}
+  else if(st==='mohawk')part(H,.09,.14,.42,c,0,.25,0);
+  else if(st==='pony'){part(H,.4,.1,.41,c,0,.18,-.01);part(H,.1,.3,.1,c,0,-.06,-.25)}
+  else for(let i=0;i<5;i++)part(H,R(.08,.14),.06,R(.08,.14),c,R(-.14,.14),.19,R(-.14,.14))}
+function amputate(z,k){if(z.cut[k])return;const o=z[k];if(!o||!o.parent)return;o.parent.remove(o);z.cut[k]=true;const st=STUMP[k],jp=z.jp&&z.jp[k]||st;
+  part(z.g,st[3]*(z.ws||1),st[4],st[5],GORE,jp[0],jp[1],jp[2]);boneOut(z.g,jp[0],jp[1]-.07,jp[2],.1,0);
   if(k[0]==='l')z.crawl=true;if(z.cut.armL&&z.cut.armR)z.noArms=true}
-function halfStump(z,k){const o=z[k],m=o.children[0];m.scale.y=.5;m.position.y=-.33*.5;part(o,.15,.04,.15,GORE,0,-.33,0);boneOut(o,0,-.4,0,.12,0);z.half=z.half||{};z.half[k]=true}
+function halfStump(z,k){const o=z[k],m=o.children[0],L=m.userData.dims[1];m.scale.y=.5;m.position.y=-L/4;part(o,.15,.04,.15,GORE,0,-L/2,0);boneOut(o,0,-L/2-.07,0,.12,0);z.half=z.half||{};z.half[k]=true}
 const OUTFITS=[['hardhat',3],['helmet',1],['jacket',3],['vest',2],['riot',1],['cargo',2]];
 function spawnZ(x,y,z,turned){
   if(!turned&&!takeZ(x,z))return null;
   const night=dayLight()<.25;
-  const zSk=[0x7d8f5a,0x8a9a6a,0x6f7d52,0x9a9a78,0x8a8c80][RI(0,4)],zSh=[0x4a3b34,0x34404a,0x5a2a26,0x3d3d3d,0x6a6250,0x6e6e64][RI(0,5)],zPa=[0x2a2f3a,0x3b3328,0x262626,0x3a3f2a][RI(0,3)];
-  const m=makeHuman({zombie:true,skin:zSk,shirt:zSh,pants:zPa});
+  // every walker is someone different: height, build, what they died wearing, hair
+  const zSk=[0x7d8f5a,0x8a9a6a,0x6f7d52,0x9a9a78,0x8a8c80,0x6a7a58,0x9a9078][RI(0,6)];
+  const hs=R(.86,1.15),ws=pick([.8,.9,1,1,1,1.12,1.22,1.32]);
+  const style=pick(['tee','tee','long','long','tank','hoodie','suit','gown','dress','police','overalls','flannel']);
+  const SH=style==='suit'?pick([0x1e1e24,0x2a2a30,0x3a3426]):style==='gown'?0x9ab8c8:style==='police'?0x1e2a44:style==='flannel'?pick([0x8a2a22,0x2a5a3a,0x3a3a6a]):style==='dress'?pick([0x7a2a4a,0x2a4a6a,0x8a6a2a,0x5a2a2a]):pick([0x4a3b34,0x34404a,0x5a2a26,0x3d3d3d,0x6a6250,0x6e6e64,0xb8b0a0,0x2a4a2a,0x7a6a3a,0x8a4a2a]);
+  const legStyle=style==='gown'||style==='dress'?'bare':style==='suit'||style==='police'?'slacks':rng()<.25?'shorts':'jeans';
+  const PA=legStyle==='bare'||legStyle==='shorts'?zSk:style==='suit'?SH:style==='police'?0x1a2030:style==='overalls'?0x3a5070:pick([0x2a2f3a,0x3b3328,0x262626,0x3a3f2a,0x3a4a6a,0x4a4038]);
+  const zSh=SH,zPa=PA,longS=style==='long'||style==='hoodie'||style==='suit'||style==='police'||style==='flannel';
+  const m=makeHuman({zombie:true,skin:zSk,shirt:SH,pants:PA,arm:longS?SH:zSk,hs,ws});
+  const lh=.85*hs,ah=.66*hs,tor=m.torso,tdz=tor.userData.dims[2]/2,tw=tor.userData.dims[0],th=tor.userData.dims[1];
+  if(style==='tee')for(const k of['armL','armR'])part(m[k],.18*Math.min(1.25,ws),.22*hs,.2*Math.min(1.2,ws),SH,0,-.1*hs,0);
+  if(style==='hoodie'){part(tor,.36,.2,.12,SH,0,th/2+.02,-tdz-.04);part(tor,.3,.12,.02,new THREE.Color(SH).multiplyScalar(.7).getHex(),0,-.16,tdz+.01)}
+  if(style==='suit'){part(tor,.12,th*.6,.012,0xe0e0dc,0,.1,tdz+.006);part(tor,.05,th*.5,.014,pick([0x8a1a1a,0x1a2a6a,0x2a2a2a]),0,.08,tdz+.012)}
+  if(style==='police'){part(tor,.06,.07,.012,0xd8b840,-.12,.14,tdz+.008);part(tor,tw+.02,.06,tdz*2+.02,0x1a1a1a,0,-th/2+.05,0)}
+  if(style==='overalls'){for(const sx of[-1,1])part(tor,.06,th*.8,.012,0x3a5070,sx*tw*.25,.05,tdz+.006);part(tor,tw*.6,th*.35,.014,0x3a5070,0,-th*.25,tdz+.008)}
+  if(style==='gown'||style==='dress')part(tor,tw+.05,.38*hs,tdz*2+.06,SH,0,-th/2-.17*hs,0);
+  if(legStyle==='shorts')for(const k of['legL','legR'])part(m[k],.24*Math.min(1.25,ws),.34*hs,.26*Math.min(1.2,ws),pick([0x3a4a6a,0x6a5a3a,0x2a2a2a]),0,-.16*hs,0);
+  for(const k of['legL','legR'])part(m[k],.23*Math.min(1.25,ws),.08,.3,pick([0x1a1a1a,0x3a2a1a,0x6a6a6a,0xd8d8d0]),0,-lh+.04,.03);
+  // hair (unless something covers the head): buzz, short, long, mohawk, ponytail or patches of it; some have beards
+  const hc=pick([0x1a1410,0x3a2618,0x6a4a2a,0xc8a050,0x8a8a8a,0x8a3a1a,0x2a1a10]),hst=pick(['bald','buzz','short','short','long','long','mohawk','pony','patchy']);
+  m.hairT=hst;m.hairC=hc;
+  if(rng()<.2)part(m.head,.32,.12,.05,hc,0,-.15,.19);
   m.g.rotation.order='YXZ';
   let outfit=null;
   if(rng()<.32){let r=rng()*12;for(const[o,w]of OUTFITS){r-=w;if(r<=0){outfit=o;break}}outfit=outfit||'jacket';
     const C=CLOTHES[outfit],c=C.col;
     if(C.slot==='head'){part(m.head,.45,.16,.45,c,0,.22,0);if(outfit==='hardhat')part(m.head,.56,.03,.56,c,0,.15,0)}
-    else if(C.slot==='body'){part(m.g,.61,.6,.38,c,0,1.24,0);if(outfit==='vest')part(m.g,.2,.08,.02,0xd8d0a0,0,1.38,.2)}
+    else if(C.slot==='body'){part(tor,tw+.06,th*.86,tdz*2+.06,c,0,.04,0);if(outfit==='vest')part(tor,.2,.08,.02,0xd8d0a0,0,.18,tdz+.04)}
     else{part(m.legL,.25,.62,.27,c,0,-.34,0);part(m.legR,.25,.62,.27,c,0,-.34,0)}}
   m.g.position.set(x,y,z);scene.add(m.g);castBig(m.g,.3);
   const zo={...m,pos:m.g.position,vel:new V3(),hp:RI(55,85)+day*4,spd:R(1.3,2.2)+(night?.4:0),kx:0,kz:0,dead:0,atk:0,walk:R(0,6),gro:R(1,8),stuck:0,wT:0,wD:0,grounded:false,chasing:false,lunge:0,seeT:0,sees:false,hitT:.5,alert:null,alertT:0,
     outfit,cut:{},crawl:false,noArms:false,lhp:{head:60,armL:35,armR:35,legL:45,legR:45}};
+  zo.hs=hs;zo.ws=ws;zo.jp={};for(const k of['armL','armR','legL','legR'])zo.jp[k]=[m[k].position.x,m[k].position.y,m[k].position.z];zo.jp.head=[0,lh+th,0];
+  if(!outfit||CLOTHES[outfit].slot!=='head')zombieHair(m,hst,hc);
   zombieLook(zo,m,turned,zSk,zSh,zPa);
   m.g.traverse(o=>{if(o.isMesh){o.userData.part='torso';o.userData.zo=zo}});
   for(const k of['legL','legR','armL','armR','head'])if(!zo.cut[k])m[k].traverse(o=>{if(o.isMesh)o.userData.part=k});
@@ -2280,7 +2597,7 @@ function hurtZombie(z,dmg,dir,by){
 // ---------------- physics
 function hit(x,y,z,hw,h){
   const x0=vc(x-hw),x1=vc(x+hw-1e-4),y0=vc(y),y1=vc(y+h-1e-4),z0=vc(z-hw),z1=vc(z+hw-1e-4);
-  for(let ix=x0;ix<=x1;ix++)for(let iy=y0;iy<=y1;iy++)for(let iz=z0;iz<=z1;iz++){const b=get(ix,iy,iz);if(!b||b===17)continue;const sh=SH[b];if(!sh)return true;
+  for(let ix=x0;ix<=x1;ix++)for(let iy=y0;iy<=y1;iy++)for(let iz=z0;iz<=z1;iz++){const b=get(ix,iy,iz);if(!b||b===17||b===255)continue;const sh=SH[b];if(!sh)return true;
     for(const q of sh)if((ix+q[0])*VS<x+hw&&(ix+q[3])*VS>x-hw&&(iy+q[1])*VS<y+h&&(iy+q[4])*VS>y&&(iz+q[2])*VS<z+hw&&(iz+q[5])*VS>z-hw)return true}
   return false;
 }
@@ -2310,7 +2627,7 @@ function rayVox(O,d,max){
   let tx=d.x?(d.x>0?x+1-o.x:o.x-x)*tdx:1e9,ty=d.y?(d.y>0?y+1-o.y:o.y-y)*tdy:1e9,tz=d.z?(d.z>0?z+1-o.z:o.z-z)*tdz:1e9;
   let px=x,py=y,pz=z,t=0;
   for(let i=0;i<300&&t<=max;i++){
-    if(inB(x,y,z)){const b=vox[vi(x,y,z)];if(b&&b!==B.LADDER&&b!==B.FURN)return{x,y,z,px,py,pz,t:t*VS}}
+    if(inB(x,y,z)){const b=vox[vi(x,y,z)];if(b&&b!==B.LADDER&&b!==B.FURN&&b!==255)return{x,y,z,px,py,pz,t:t*VS}}
     px=x;py=y;pz=z;
     if(tx<ty&&tx<tz){x+=sx;t=tx;tx+=tdx}else if(ty<tz){y+=sy;t=ty;ty+=tdy}else{z+=sz;t=tz;tz+=tdz}
   }
@@ -2348,7 +2665,7 @@ function lightning(){
     if(rng()<.25){const m2=new THREE.Mesh(box(1,1,1),boltMat);m2.scale.set(.12,R(2,5),.12);m2.position.set(nx+R(-1,1),ny+R(-1,1),nz+R(-1,1));m2.rotation.z=R(-1,1);g.add(m2)}px=nx;py=ny;pz=nz}
   scene.add(g);bolts.push({g,t:.35});WX.flash=1;flashT=Math.max(flashT,.18);
   const dist=Math.min(...cs.map(q=>Math.hypot(q.x-x,q.z-z)));
-  setTimeout(()=>{if(dist<35)sNoise(.35,4000,1.4,'highpass');sNoise(2.4,140,Math.min(1.4,25/dist+.25));sTone(50,28,1.8,Math.min(.6,12/dist+.1),'sine')},dist/343*1000);
+  setTimeout(()=>{const k=Math.min(1.6,25/dist+.3);if(dist<40)sNoise(.3,3500,1.5,'highpass',.7,.6);sNoise(3.2,dist<60?300:160,k*1.4,'lowpass',.6,.9,true);sNoise(2.6,120,k,'lowpass',.6,.9,true,.6);sTone(48,26,2.2,Math.min(.6,12/dist+.1),'sine',.7)},dist/343*1000);
   // the strike itself
   const hp=new V3(x,gy,z);burst(new V3(x,gy+.3,z),40,6,[1,1,.85],3);
   const b=get(ix,ty,iz);if(b&&!isRub(b)&&b!==B.BED){const nb=worsen(b,ix,ty,iz,Math.min(3,LVL[b]+2));if(nb!==b)setBlock(ix,ty,iz,nb)}
@@ -2390,7 +2707,7 @@ function openEmo(on){emoOpen=on;$('#emo').classList.toggle('hidden',!on);if(on){
   else if(!isTouch&&running&&!document.pointerLockElement)lock()}
 $('#cpal').addEventListener('pointerdown',e=>e.stopPropagation());
 $('#emo').addEventListener('pointerdown',e=>{e.stopPropagation();const b=e.target.closest('button');if(b&&players[0]){startEmote(players[0],+b.dataset.e);openEmo(false)}});
-addEventListener('keydown',e=>{if(!running)return;if(cpalOpen&&e.code==='Escape'){e.preventDefault();e.stopPropagation();openCPal(false);return}if(e.code==='KeyJ'&&players.length===1&&!e.repeat){openEmo(!emoOpen);return}
+addEventListener('keydown',e=>{if(!running)return;if(cpalOpen&&(e.code==='Escape'||e.code==='KeyR')){e.preventDefault();e.stopPropagation();openCPal(false);return}if(e.code==='KeyJ'&&players.length===1&&!e.repeat){openEmo(!emoOpen);return}
   if(emoOpen){const i=EMKEY.indexOf(e.code);if(i>=0&&players[0]){e.preventDefault();e.stopPropagation();startEmote(players[0],i);openEmo(false)}else if(e.code==='Escape')openEmo(false)}},true);
 function startEmote(p,i){if(p.vehicle||p.dead>0)return;p.emote={id:i,t:0};p.body.g.traverse(o=>o.layers.set(0));p.fpBody=null}
 function stopEmote(p){if(!p.emote)return;p.emote=null;const b=p.body;b.g.rotation.order='XYZ';for(const k of['armL','armR','legL','legR'])b[k].rotation.z=0;b.head.rotation.z=0;setBodyFP(p,false)}
@@ -2516,11 +2833,11 @@ function shoot(p,eye,dir){
   if(vh){if(get(vh.x,vh.y,vh.z)===B.GLASS)breakGlass(vh.x,vh.y,vh.z);else burst(new V3(eye.x+dir.x*vh.t,eye.y+dir.y*vh.t,eye.z+dir.z*vh.t),6,2,DUST,1)}
 }
 // ---- breakable decor: furniture, rails, TVs, plants, beds and trim
-const FHP={painting:1,curtain:1,clamp:1,mailbox:2,fence:2,porch:4,roofac:3,roofvent:2,rail:3,plant:1,rug:2,weeds:1,vine:1,sapling:2,nightstand:2,ctable:2,chairs:2,desk:2,tdesk:3,toilet:3,bsink:3,sink:3,tvstand:3,armchair:3,bench:3,dresser:4,ktable:3,counter:4,stove:4,heater:3,shelf:4,bookcase:4,couch:5,tub:5,wardrobe:5,fridge:5,checkout:5,reception:5,chalk:2,locker:5,cabinet:4,toolrack:3,cooler:6,aisle:6,lumber:6,hbed:4,lunch:4};
-const FMETAL=new Set(['fridge','stove','heater','locker','cabinet','cooler','aisle','checkout','toolrack','tub','hbed','sink','bsink','toilet','tvstand']),FCLOTH=new Set(['couch','armchair','rug','chairs']),FSOFT=new Set(['weeds','vine','plant']);
+const FHP={pbench:3,swing:4,slide:5,picnic:3,lamppost:4,pump:6,atable:2,lamp:1,lswitch:1,wire:1,gsign:6,plane:60,painting:1,curtain:1,clamp:1,mailbox:2,fence:2,porch:4,roofac:3,roofvent:2,rail:3,plant:1,rug:2,weeds:1,vine:1,sapling:2,nightstand:2,ctable:2,chairs:2,desk:2,tdesk:3,toilet:3,bsink:3,sink:3,tvstand:3,armchair:3,bench:3,dresser:4,ktable:3,counter:4,stove:4,heater:3,shelf:4,bookcase:4,couch:5,tub:5,wardrobe:5,fridge:5,checkout:5,reception:5,chalk:2,locker:5,cabinet:4,toolrack:3,cooler:6,aisle:6,lumber:6,hbed:4,lunch:4};
+const FMETAL=new Set(['pump','lamppost','swing','slide','plane','gsign','lswitch','fridge','stove','heater','locker','cabinet','cooler','aisle','checkout','toolrack','tub','hbed','sink','bsink','toilet','tvstand']),FCLOTH=new Set(['couch','armchair','rug','chairs']),FSOFT=new Set(['weeds','vine','plant']);
 function rayBox(o,d,b,max){let t0=0,t1=max;const O=[o.x,o.y,o.z],D=[d.x,d.y,d.z];for(let a=0;a<3;a++){const lo=b[a],hi=b[a+3];if(Math.abs(D[a])<1e-9){if(O[a]<lo||O[a]>hi)return -1;continue}
   let ta=(lo-O[a])/D[a],tb=(hi-O[a])/D[a];if(ta>tb){const q=ta;ta=tb;tb=q}if(ta>t0)t0=ta;if(tb<t1)t1=tb;if(t0>t1)return -1}return t0}
-const FLAT=new Set(['lane','xwalk','curb']);
+const FLAT=new Set(['lane','xwalk','curb','pebbles','rdash','rwy']);
 function decorRay(eye,dir,max){let best=null,bt=max;
   for(const sp of furnSpecs){const b=sp.bb;if(sp.gone||!b||FLAT.has(sp[0]))continue;if(Math.abs((b[0]+b[3])/2-eye.x)>max+3||Math.abs((b[2]+b[5])/2-eye.z)>max+3)continue;const t=rayBox(eye,dir,b,bt);if(t>=0&&t<bt){bt=t;best={sp,t}}}
   for(const bd of beds){const r=1.1,top=bd.bunk?1.95:bd.tent?1.3:.8,P=bd.pos;if(Math.abs(P.x-eye.x)>max+3||Math.abs(P.z-eye.z)>max+3)continue;const t=rayBox(eye,dir,[P.x-r,P.y,P.z-r,P.x+r,P.y+top,P.z+r],bt);if(t>=0&&t<bt){bt=t;best={bed:bd,t}}}
@@ -2711,10 +3028,10 @@ function exitVehicle(p){
   p.vel.set(0,0,0);p.yaw=v.yaw+Math.PI;p.pitch=-.1;p.eye=p.pos.y+1.6;
 }
 // ---------------- shelves: grocery aisles and coolers hold food you can take, three helpings each; hardware aisles hold scrap and odds
-const SHELF_LOOT={grocery:[['food',5,1,2],['veg',3,1,2],['jerky',2,1,2],['hotbeans',1,1,1],['bandage',1,1,1]],cooler:[['food',3,1,2],['veg',2,1,2],['meat',1,1,1]],hardware:[['scrap',5,1,3],['plank',3,2,4],['kit',1,1,1],['fuel',1,1,1]]};
-function nearestShelf(p,r){let b=null,bd=r;for(const sp of furnSpecs){if(sp.gone||!sp.bb||(sp[0]!=='aisle'&&sp[0]!=='cooler')||(sp.taken|0)>=3)continue;const B_=sp.bb;
+const SHELF_LOOT={pump:[['fuel',1,1,1]],grocery:[['food',5,1,2],['veg',3,1,2],['jerky',2,1,2],['hotbeans',1,1,1],['bandage',1,1,1]],cooler:[['food',3,1,2],['veg',2,1,2],['meat',1,1,1]],hardware:[['scrap',5,1,3],['plank',3,2,4],['kit',1,1,1],['fuel',1,1,1]]};
+function nearestShelf(p,r){let b=null,bd=r;for(const sp of furnSpecs){if(sp.gone||!sp.bb||(sp[0]!=='aisle'&&sp[0]!=='cooler'&&sp[0]!=='pump')||(sp.taken|0)>=3)continue;const B_=sp.bb;
   const dx=Math.max(B_[0]-p.pos.x,0,p.pos.x-B_[3]),dz=Math.max(B_[2]-p.pos.z,0,p.pos.z-B_[5]);if(Math.abs(p.pos.y-B_[1])>1.2)continue;const d=Math.hypot(dx,dz);if(d<bd){bd=d;b=sp}}return b}
-function takeShelf(p,sp){const kind=sp[0]==='cooler'?'cooler':sp[5]&&sp[5].k==='hardware'?'hardware':'grocery',T=SHELF_LOOT[kind],tot=T.reduce((a,l)=>a+l[1],0),got={};
+function takeShelf(p,sp){const kind=sp[0]==='pump'?'pump':sp[0]==='cooler'?'cooler':sp[5]&&sp[5].k==='hardware'?'hardware':'grocery',T=SHELF_LOOT[kind],tot=T.reduce((a,l)=>a+l[1],0),got={};
   for(let i=0;i<RI(1,2);i++){let r=rng()*tot;for(const l of T){r-=l[1];if(r<=0){got[l[0]]=(got[l[0]]||0)+RI(l[2],l[3]);break}}}
   const left={};for(const k in got){if(roomFor(p,k,got[k]))p.inv[k]+=got[k];else left[k]=got[k]}
   if(Object.keys(left).length)dropBag(p.pos.clone(),left);sp.taken=(sp.taken|0)+1;FBUF.clear();buildFurnMeshes(furnSpecs,sp.k);SND.pick();
@@ -2729,6 +3046,7 @@ function interact(p){
   const sh=nearestStash(p,1.8);if(sh){raidStash(p,sh);return}
   const bd=nearestBed(p,1.8);if(bd){trySleep(p,bd);return}
   const fi=nearestFire(p,1.9);if(fi){cook(p,fi);return}
+  {const sw=nearestSwitch(p,1.5);if(sw){flipSwitch(p,sw);return}}
   const d=nearestDoor(p,1.9);if(d){toggleDoor(d,p);return}
   const tr=nearestTrap(p,1.3);if(tr){pickTrap(p,tr);return}
   const v=nearestVehicle(p,3.6);if(v)useVehicle(p,v);
@@ -2738,13 +3056,14 @@ function promptFor(p){
   if(p.vehicle)return`${K} — get out · ${p.i?',':'V'} — ${p.carView?'outside view':'driver view'}`;
   if(p.sleeping)return sleepT?'':players.length>1?`Sleeping · waiting for the other player to lie down · ${K} — get up`:`Sleeping · ${K} — get up`;
   if(nearestCrate(p,2.6))return`${K} — search supply crate`;
-  {const sh=nearestShelf(p,1.3);if(sh&&!nearestNPC(p,2.4))return`${K} — take ${sh[0]==='cooler'?'drinks and food from the cooler':sh[5]&&sh[5].k==='hardware'?'supplies off the shelf':'food off the shelf'}`}
+  {const sh=nearestShelf(p,1.3);if(sh&&!nearestNPC(p,2.4))return`${K} — ${sh[0]==='pump'?'siphon the last fuel out of the pump':'take '+(sh[0]==='cooler'?'drinks and food from the cooler':sh[5]&&sh[5].k==='hardware'?'supplies off the shelf':'food off the shelf')}`}
   {const mh=nearestManhole(p,1.4);if(mh&&manCovered(mh))return`${K} — open manhole`}
   const bg=nearestBag(p,1.8);if(bg)return`${K} — take ${bg.label}`;
   const sh0=nearestStash(p,1.8);if(sh0&&!nearestNPC(p,2.4))return`${K} — raid ${sh0.owner?sh0.owner.name+"'s":'a'} stash (${Object.values(sh0.items).reduce((a,b)=>a+b,0)} items)`;
   const np=nearestNPC(p,2.4);if(np)return npcHostileTo(np,p)?`${np.name} (hostile)`:`${K} — talk to ${np.name} (${np.infected!=null?'bitten':np.kind==='family'?(np.role==='kid'?'child':np.role==='wife'?'mother':'father'):np.follow?'with you':np.kind==='bandit'?'drifter':'survivor'})`;
   if(nearestBed(p,1.8))return dayLight()<.35?`${K} — sleep until dawn`:`Bed · sleep here at night (sets respawn)`;
   {const f=nearestFire(p,1.9);if(f)return f.cook?`Cooking ${LABEL[f.cook.r.out].toLowerCase()} · ${Math.ceil(f.cook.t)}s`:`${K} — cook at the fire`}
+  {const sw=nearestSwitch(p,1.5);if(sw)return`${K} — flip the light switch (${sw.on?'on':'off'})`}
   const dr=nearestDoor(p,1.9);if(dr)return`${K} — ${dr.open?'close':'open'} door`;
   const tr=nearestTrap(p,1.3);if(tr)return`${K} — pick up ${tr.name.toLowerCase()}`;
   if(ladderAt(p))return`On a ladder · ${p.i?'I/N':'W/Space'} climb, ${p.i?'K':'S'} down`;
@@ -2802,16 +3121,18 @@ function updatePlayer(p,dt){
   if(p.fly&&inp.crouch)p.crouch=false;
   // watchdog: if a block ends up inside you (placed, loaded or fallen in), duck if that frees you, otherwise move to the nearest free spot
   if(inWin(vc(p.pos.x),vc(p.pos.z))&&hit(p.pos.x,p.pos.y+.02,p.pos.z,.28,p.crawl?.45:p.crouch?1.05:1.75)){p.stuckT=(p.stuckT||0)+dt;if(p.stuckT>.25){if(!p.crouch&&!hit(p.pos.x,p.pos.y+.02,p.pos.z,.28,1.05)){p.crouch=true;p.stuckT=0}else settle(p)}}else p.stuckT=0;
+  const inWater=get(vc(p.pos.x),vc(p.pos.y+.5),vc(p.pos.z))===255;p.swim=inWater;
   const PH=p.crawl?.45:p.crouch?1.05:1.75;p.body.g.scale.y=p.crouch&&!p.crawl?.62:1;
   const sp=(p.crawl?1.3:sprint&&!p.crouch?7.2:p.crouch?2.2:4.4)*(p.aim?.5:1);p.vel.x=mx*sp;p.vel.z=mz*sp;p.vel.y=Math.max(-18,p.vel.y-24*dt);
   if(p.creative&&inp.jump&&!p.jumpHeld){const t=performance.now();if(t-(p.lastJump||0)<300){p.fly=!p.fly;msg(p,p.fly?'Flying — jump to rise, crouch to sink, double-tap jump to land':'Landed')}p.lastJump=t}p.jumpHeld=!!inp.jump;
   if(!p.creative)p.fly=false;
   if(p.fly){const fs=sprint?18:9;p.vel.x=mx*fs;p.vel.z=mz*fs;p.vel.y=(inp.jump?1:0)*8-(inp.crouch?1:0)*8;p.crouch=false}
+  else if(p.swim){p.vel.x*=.55;p.vel.z*=.55;p.vel.y=inp.jump?3:Math.max(p.vel.y,-1.6)}
   else if(inp.jump&&p.grounded){p.vel.y=8.2;p.grounded=false}
   if(ladderAt(p)){p.vel.y=(inp.jump||inp.f>0)?3.4:inp.f<0?-3.4:-.5;p.grounded=true}
   moveEnt(p,dt,.3,PH);vehPush(p,.3,PH);
   if(p.pos.y<-4)respawn(p);
-  p.walk+=dt*l*sp*1.6;
+  {const w0=p.walk;p.walk+=dt*l*sp*1.6;if(p.i===0&&p.grounded&&!p.fly&&Math.floor(w0/Math.PI)!==Math.floor(p.walk/Math.PI))SND.step&&SND.step(get(vc(p.pos.x),vc(p.pos.y-.05),vc(p.pos.z)))}
   p.eye+=(p.pos.y+(p.crawl?.32:p.crouch?.95:1.6)-p.eye)*Math.min(1,dt*14);
   p.cam.position.set(p.pos.x,p.eye+(l>.1&&p.grounded?Math.sin(p.walk)*.04:0),p.pos.z);p.cam.rotation.set(p.pitch,p.yaw,0);
   const cp=Math.cos(p.pitch),dir=new V3(-Math.sin(p.yaw)*cp,Math.sin(p.pitch),-Math.cos(p.yaw)*cp),eye=p.cam.position;
@@ -3242,7 +3563,7 @@ const CW=12,CH=8;
 // [width, height, stack size]
 const ITEM={wheel:[2,2,1],engine:[3,2,1],battery:[2,1,1],carradio:[2,1,1],wrench:[2,1,1],scrip:[1,1,999],saw:[3,1,1],veg:[1,1,6],stew:[1,1,2],broth:[1,1,2],jerky:[1,1,10],roast:[1,1,4],hotbeans:[1,1,2],tnt:[1,2,3],pipebomb:[1,1,4],bunk:[3,2,1],Pistol:[2,2,1],Bat:[4,1,1],Pickaxe:[2,2,1],ammo:[2,1,60],scrap:[1,1,10],cloth:[1,1,10],fuel:[2,2,1],food:[1,1,3],bandage:[1,1,3],wood:[2,1,10],plank:[2,1,20],
   dirt:[1,1,32],stone:[1,1,32],coal:[1,1,16],iron:[1,1,16],metal:[2,1,4],kit:[2,1,1],meat:[1,1,4],cooked:[1,1,4],hide:[2,2,3],bone:[1,1,8],
-  spikes:[2,1,2],beartrap:[2,2,1],mine:[1,1,2],tent:[3,1,1],stairs:[1,1,16],bed:[3,2,1],fire:[2,1,2],
+  lswitch:[1,1,4],lamp:[1,2,2],wire:[1,1,32],spikes:[2,1,2],beartrap:[2,2,1],mine:[1,1,2],tent:[3,1,1],stairs:[1,1,16],bed:[3,2,1],fire:[2,1,2],
   hardhat:[2,1,1],helmet:[2,2,1],jacket:[2,3,1],vest:[2,2,1],hidecoat:[2,3,1],scrapvest:[2,2,1],cargo:[2,3,1],riot:[2,3,1]};
 const DESC={scrip:'Hand-stamped trade tokens: the money of the end of the world. Survivors and drifters buy and sell for scrip.',saw:'Runs on fuel cans. Press 1 again (or tap Tool) to switch between bat and saw; hold attack to cut. Limbs come off, and hold it on the torso to cut them in half. Also cuts wood.',veg:'Potatoes, carrots, onions. Better cooked.',stew:'Hearty: lots of food, health and warmth.',broth:'Hot drink. Warms you right up.',jerky:'Smoked meat. Light and keeps forever.',roast:'Roast vegetables.',hotbeans:'Warm beans straight from the can.',tnt:'Place it and run: a long fuse, then a big blast that tears through walls.',pipebomb:'Throwable. Short fuse, shrapnel.',bunk:'Two beds stacked. Place it to set your respawn point.',Pistol:'9 mm sidearm. Always with you.',Bat:'Ash bat with a taped grip. Always with you.',Pickaxe:'Digs dirt, stone and walls. Always with you.',
   ammo:'9 mm rounds.',scrap:'Bent metal and wire. Crafting and repairs.',cloth:'Rags. Bandages, tents and clothing.',fuel:'A can of petrol. Pour into a car.',food:'Canned beans. Restores hunger.',
@@ -3412,6 +3733,7 @@ function placeTrap(p,vh){
   if(get(x,y,z)!==0||!solid(x,y-1,z)){msg(p,'Aim at open ground to place it');return}
   if(p.creative)p.inv[key]++;if(!(p.inv[key]>0)){msg(p,`No ${name.toLowerCase()} — craft one in your case (Tab)`);return}
   const wx=(x+.5)*VS,wy=y*VS,wz=(z+.5)*VS;
+  if(key==='lswitch'||key==='lamp'||key==='wire'){p.inv[key]--;const oy=p.yaw;if(key==='wire')p.yaw=0;placeCreative(p,vh,{kind:'furn',k:key});p.yaw=oy;msg(p,key==='wire'?'Wire laid — pieces join when side by side':key==='lamp'?'Lamp set down — wire it to a switch':'Switch set down — run wire from it to your lamps');return}
   if(key==='bed'){p.inv.bed--;makeBed(wx,wy,wz,p.yaw+Math.PI).user=true;SND.place();msg(p,'Bed set down — sleep in it at night');return}
   if(key==='bunk'){p.inv.bunk--;makeBunk(wx,wy,wz,p.yaw+Math.PI).user=true;SND.place();msg(p,'Bunk bed set up — sleep in it to set your respawn');return}
   if(key==='tent'){p.inv.tent--;makeTent(wx,wy,wz,p.yaw).user=true;SND.place();msg(p,'Tent pitched — sleep in it at night to skip to dawn (sets respawn)');return}
@@ -3440,7 +3762,7 @@ function explode0(pos,pw=1){
     else if(d<3.2*pw&&!isRub(b)){const c=worsen(b,x,y,z,Math.min(3,LVL[b]+(d<2*pw?2:1)));if(c!==b){setv(x,y,z,c);ch.add(x+','+z)}}}
   for(const[x,y,z,b]of gone)if(rng()<.25&&DROP[b])dropBlock(x,y,z,b);
   for(const[x,y,z,b]of gone)if(rng()<.35){let yy=y;while(yy>0&&get(x,yy-1,z)===0)yy--;const u=get(x,yy-1,z);if(u&&!SH[u]&&u!==B.GLASS&&get(x,yy,z)===0)setv(x,yy,z,rubOf(b,x,z))}
-  for(const k of ch){const[x,z]=k.split(',').map(Number);rebuildAt(x,z)}
+  {let a=1e9,b=1e9,c=-1e9,d=-1e9;for(const k of ch){const[x,z]=k.split(',').map(Number);rebuildAt(x,z);a=Math.min(a,x);b=Math.min(b,z);c=Math.max(c,x);d=Math.max(d,z)}if(ch.size&&inTown(a,b))refreshPaint(a,b,c,d)}
   if(ch.size)for(const p of players)if(p.dig)p.dig=null;
   for(const sp of furnSpecs){const b=sp.bb;if(sp.gone||!b||FLAT.has(sp[0]))continue;if(Math.hypot((b[0]+b[3])/2-pos.x,(b[1]+b[4])/2-pos.y,(b[2]+b[5])/2-pos.z)<2.6*pw)breakFurn(null,sp,null,rng()<.5)}
   for(const bd of[...beds])if(bd.pos.distanceTo(pos)<2.2*pw)breakBed(null,bd);
@@ -3689,10 +4011,14 @@ function touchLabels(p){const tb=k=>document.querySelector(`#touch .tb[data-b=${
   set('alt',alt&&alt[0],alt&&alt[1])}
 function initTouchIcons(){for(const k of['view','run','duck','bomb','talk','emote','home','rsp']){const b=document.querySelector(`#touch .tb[data-b=${k}]`);if(!b||b.querySelector('.ti'))continue;const t=b.textContent;b.innerHTML=`<img class="ti" alt="" src="${tbIcon(k)}"><span></span>`;b.querySelector('span').textContent=t}}
 // ---------------- touch controls
+function setTouchMode(on){isTouch=on;document.body.classList.toggle('touch',on);const tc=$('#touch');if(tc)tc.classList.toggle('hidden',!on||!running);tbLast='';if(!on)T.on=false;fitView(true)}
 const T={aim:false,on:false,mx:0,my:0,held:{},pressed:new Set(),stick:null,look:null,run:false,sx:0,sy:0,lx:0,ly:0};
 {
   const stickEl=$('#stick'),knob=$('#stick i');
-  if(isTouch)document.body.classList.add('touch');initTouchIcons();
+  initTouchIcons();setTouchMode(isTouch);
+  addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!isTouch)setTouchMode(true)},true);
+  addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&isTouch&&(Math.abs(e.movementX)+Math.abs(e.movementY))>2)setTouchMode(false)},true);
+  addEventListener('keydown',e=>{if(isTouch&&!/^(Audio|Media|Volume)/.test(e.key))setTouchMode(false)},true);
   document.querySelectorAll('.tb').forEach(b=>{const k=b.dataset.b;
     b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();T.on=true;T.held[k]=true;T.pressed.add(k);
       if(k==='run'){T.run=!T.run;b.classList.toggle('on',T.run)}else if(k==='duck'){T.duck=!T.duck;b.classList.toggle('on',T.duck)}else if(k==='aim'){T.aim=!T.aim;b.classList.toggle('on',T.aim)}else b.classList.add('on')});
@@ -3751,7 +4077,7 @@ function sever(z,pn,dir){
   const wp=o.getWorldPosition(new V3());
   gibs.push({o,vel:new V3((dir.x||0)*2.5+R(-1.5,1.5),R(2.5,5),(dir.z||0)*2.5+R(-1.5,1.5)),spin:new V3(R(-9,9),R(-9,9),R(-9,9)),t:0,rest:false});
   if(gibs.length>50){const g=gibs.shift();scene.remove(g.o)}
-  const st=STUMP[pn];part(z.g,st[3],st[4],st[5],0x6a0808,st[0],st[1],st[2]);
+  const st=STUMP[pn],jp=z.jp&&z.jp[pn]||st;part(z.g,st[3]*(z.ws||1),st[4],st[5],0x6a0808,jp[0],jp[1],jp[2]);
   burst(wp,30,4,RED,2.5);splat(z.pos,R(.6,1.2));sNoise(.2,900,.5);
   if(pn==='legL'||pn==='legR')z.crawl=true;
   if(z.cut.armL&&z.cut.armR)z.noArms=true;
@@ -3785,9 +4111,9 @@ function wsTick(v,dt){const W=v.wsh;if(!W||W.amt<=0)return;W.t+=dt;if(W.t<.6)ret
   W.amt-=rate*W.t*.8;W.t=0;if(W.amt<=0){W.amt=0;x.clearRect(0,0,W.cv.width,W.cv.height);W.m.visible=false}W.tx.needsUpdate=true}
 // cut a limb through the middle: the lower half flies off as a gib, the upper half stays on with a bloody end
 function halfLimb(z,k,dir){const o=z[k];if(!o||!o.parent||z.cut[k])return;z.half=z.half||{};if(z.half[k]){sever(z,k,dir);return}z.half[k]=true;
-  const L=k[0]==='l'?.85:.66,yc=-L/2;z.g.updateMatrixWorld(true);const low=new THREE.Group();
+  const L=(k[0]==='l'?.85:.66)*(z.hs||1),yc=-L/2;z.g.updateMatrixWorld(true);const low=new THREE.Group();
   for(const m of[...o.children]){if(!m.isMesh||!m.geometry||!m.geometry.parameters)continue;const P=m.geometry.parameters,top=m.position.y+P.height/2,bot=m.position.y-P.height/2;
-    if(bot>=yc)continue;const cl=new THREE.Mesh(box(P.width,Math.min(top,yc)-bot,P.depth),m.material);cl.position.set(m.position.x,(Math.min(top,yc)+bot)/2,m.position.z);low.add(cl);
+    if(bot>=yc)continue;const cl=new THREE.Mesh(vbox(P.width,Math.min(top,yc)-bot,P.depth),m.material);cl.position.set(m.position.x,(Math.min(top,yc)+bot)/2,m.position.z);low.add(cl);
     if(top<=yc){m.visible=false;continue}m.scale.y=(top-yc)/P.height;m.position.y=(top+yc)/2}
   const w=k[0]==='l'?.2:.15;part(o,w,.04,w,0x6a0808,0,yc,0);part(low,w,.04,w,0x6a0808,0,yc+.02,0);
   low.quaternion.copy(o.getWorldQuaternion(new THREE.Quaternion()));scene.add(low);
@@ -3965,14 +4291,25 @@ function makeBunk(x,y,z,yaw){const g=new THREE.Group(),wd=0x6a4a2a,bl=[0x4a6a9a,
   g.position.set(x,y,z);g.rotation.y=yaw;scene.add(g);castBig(g,.3);freeze(g);const b={g,pos:g.position,yaw,bunk:true};beds.push(b);return b}
 // A-frame tent: sleeps like a bed (sets respawn)
 function makeTent(x,y,z,yaw,col){
-  col=col||[0x5a6a3a,0x8a5a2a,0x3a5a6a,0x7a2a22,0x6a6a5a][RI(0,4)];const g=new THREE.Group(),L=2.3,hw=1.05,rh=1.25,ang=Math.atan2(rh,hw),sl=Math.hypot(hw,rh);
-  const dk=new THREE.Color(col).multiplyScalar(.75).getHex();
-  for(const sx of[-1,1]){const pn=part(g,sl,.04,L,col,sx*hw/2,rh/2,0);pn.rotation.z=-sx*ang;const st=part(g,sl*.98,.02,.05,dk,sx*hw/2,rh/2+.03,L*.2);st.rotation.z=-sx*ang}
-  for(let i=0;i<5;i++){const w=2*hw*(1-(i+.5)/5),h=rh/5;part(g,w,h,.03,col,0,h*(i+.5),-L/2)}
-  for(const sx of[-1,1]){const f=part(g,hw*.8,.03,rh*.9,col,sx*hw*.45,rh*.45,L/2+.25);f.rotation.x=Math.PI/2-.35;f.rotation.y=sx*.5}
-  part(g,.05,rh+.1,.05,0x5a4a32,0,(rh+.1)/2,L/2);part(g,.05,rh+.1,.05,0x5a4a32,0,(rh+.1)/2,-L/2);part(g,.06,.06,L+.2,0x4a3a26,0,rh,0);
-  part(g,2*hw-.1,.02,L-.1,0x3a3a30,0,.01,0);part(g,.7,.1,1.8,[0x8a2a22,0x2a4a7a,0x4a6a3a][RI(0,2)],-.35,.06,-.1);part(g,.32,.08,.22,0x8a8a80,-.35,.1,-.85);
-  for(const sx of[-1,1])for(const sz of[-1,1]){const gl=part(g,.012,.012,1.1,0xcfc8b0,sx*(hw+.35),.42,sz*(L/2-.2));gl.rotation.x=sz*.0;gl.rotation.z=sx*.85}
+  col=col||[0x5a6a3a,0x8a5a2a,0x3a5a6a,0x7a2a22,0x6a6a5a,0x2a4a7a][RI(0,5)];const g=new THREE.Group(),L=2.3,hw=1.05,rh=1.25,ang=Math.atan2(rh,hw),sl=Math.hypot(hw,rh);
+  const dk=new THREE.Color(col).multiplyScalar(.72).getHex(),fly=new THREE.Color(col).multiplyScalar(.85).getHex(),ST=1/16;
+  // roof panels with a seam down each, a rainfly that overhangs the sides
+  for(const sx of[-1,1]){const pn=part(g,sl,.04,L,col,sx*hw/2,rh/2,0);pn.rotation.z=-sx*ang;
+    const sm=part(g,sl*.98,.045,.0625,dk,sx*hw/2,rh/2,0);sm.rotation.z=-sx*ang;
+    const fl=part(g,sl*.6,.03,L+.3,fly,sx*(hw*.3+.06),rh*.72+.06,0);fl.rotation.z=-sx*ang}
+  // back wall: a triangle built in 1/16 m steps so its edge is pixel-crisp, not a staircase of big strips
+  for(let k=0;k*ST<rh;k++){const yk=(k+.5)*ST,w=2*hw*(1-yk/rh);if(w>.01)part(g,w,ST,.03,col,0,yk,-L/2)}
+  // front: two door panels, one rolled up and tied, the other zipped half shut
+  for(let k=0;k*ST<rh;k++){const yk=(k+.5)*ST,w=hw*(1-yk/rh);if(w<.02)continue;if(yk>rh*.15)part(g,w,ST,.03,col,w/2,yk,L/2);if(yk>rh*.62)part(g,w,ST,.03,col,-w/2,yk,L/2)}
+  part(g,.02,rh*.85,.035,0x1a1a1a,0,rh*.43,L/2+.01);const roll=part(g,hw*.75,.14,.14,dk,-hw*.42,rh*.55,L/2+.05);roll.rotation.z=ang*.85;
+  part(g,.05,rh+.1,.05,0x5a4a32,0,(rh+.1)/2,L/2+.02);part(g,.05,rh+.1,.05,0x5a4a32,0,(rh+.1)/2,-L/2-.02);part(g,.06,.06,L+.3,0x4a3a26,0,rh+.02,0);
+  // inside: ground sheet, sleeping bag with a pillow, a lantern
+  part(g,2*hw-.1,.02,L-.1,0x3a3a30,0,.01,0);part(g,.72,.12,1.8,[0x8a2a22,0x2a4a7a,0x4a6a3a][RI(0,2)],-.33,.07,-.12);part(g,.7,.13,.5,0xb8b0a0,-.33,.075,.55);
+  part(g,.34,.1,.24,0xd8d0c0,-.33,.14,-.86);part(g,.1,.16,.1,0x2a2a2a,.6,.1,-.7);part(g,.07,.09,.07,0xf0d080,.6,.13,-.7);
+  // guy lines out to stakes at the four corners
+  for(const sx of[-1,1])for(const sz of[-1,1]){const ln=part(g,.012,.012,1.0,0xcfc8b0,sx*(hw+.33),.4,sz*(L/2-.15));ln.rotation.z=sx*.85;part(g,.04,.16,.04,0x8a8a80,sx*(hw+.68),.05,sz*(L/2-.15))}
+  // canvas gets a woven fabric texture at the shared pixel size
+  g.traverse(o=>{if(o.isMesh&&o.material&&o.material.userData&&o.material.userData.c!=null&&o.material.userData.kind==='plain')o.material=vMat(o.material.userData.c,'fabric')});
   g.position.set(x,y,z);g.rotation.y=yaw;scene.add(g);castBig(g,.3);freeze(g);
   const b={g,pos:g.position,yaw:yaw+Math.PI,tent:true};beds.push(b);return b;
 }
@@ -4182,9 +4519,9 @@ function famLine(n){if(n.infected!=null)return"I... I got bit. It burns. Don't l
 function rumor(n,p){const opts=[],dirName=(dx,dz)=>{const a=Math.atan2(dx,-dz)*180/Math.PI,i=Math.round(((a+360)%360)/45)%8;return['north','north-east','east','south-east','south','south-west','west','north-west'][i]};
   const px=p.pos.x/VS,pz=p.pos.z/VS;
   const t=towns.filter(t=>!(px>=t.x0&&px<=t.x1&&pz>=t.z0&&pz<=t.z1)).sort((a,b)=>Math.hypot((a.x0+a.x1)/2-px,(a.z0+a.z1)/2-pz)-Math.hypot((b.x0+b.x1)/2-px,(b.z0+b.z1)/2-pz))[0];
-  if(t){const dx=(t.x0+t.x1)/2-px,dz=(t.z0+t.z1)/2-pz;opts.push(`There's a ${t.n>3?'big town':'town'} about ${Math.round(Math.hypot(dx,dz)*VS/10)*10} m ${dirName(dx,dz)} of here. Haven't been since it fell.`)}
+  if(t){const dx=(t.x0+t.x1)/2-px,dz=(t.z0+t.z1)/2-pz;opts.push(`There's ${t.air?'an airport':t.city?'a city':t.n>3?'a big town':t.n===1?'a little crossroads place':'a town'} about ${Math.round(Math.hypot(dx,dz)*VS/10)*10} m ${dirName(dx,dz)} of here. Haven't been since it fell.`)}
   const b=roster.find(r=>r.alive&&r.kind==='bandit'&&Math.hypot((r.camp[0]-px),(r.camp[1]-pz))<500);if(b){const dx=b.camp[0]-px,dz=b.camp[1]-pz;opts.push(`Stay away from the camp ${Math.round(Math.hypot(dx,dz)*VS/10)*10} m ${dirName(dx,dz)}. Bandits. ${b.name} runs it.`)}
-  const c=crates.filter(c=>!c.looted&&c.kind).sort((a,b)=>a.pos.distanceTo(p.pos)-b.pos.distanceTo(p.pos))[0];if(c){const dx=c.pos.x/VS-px,dz=c.pos.z/VS-pz;opts.push(`The ${c.kind==='hospital'?'hospital':c.kind==='grocery'?'grocery store':c.kind==='hardware'?'hardware store':'school'} ${Math.round(Math.hypot(dx,dz)*VS/10)*10} m ${dirName(dx,dz)} still had supplies last I looked.`)}
+  const c=crates.filter(c=>!c.looted&&c.kind).sort((a,b)=>a.pos.distanceTo(p.pos)-b.pos.distanceTo(p.pos))[0];if(c){const dx=c.pos.x/VS-px,dz=c.pos.z/VS-pz;opts.push(`The ${c.kind==='hospital'?'hospital':c.kind==='grocery'?'grocery store':c.kind==='hardware'?'hardware store':c.kind==='gas'?'gas station':c.kind==='mall'?'mall':c.kind==='air'?'airport':'school'} ${Math.round(Math.hypot(dx,dz)*VS/10)*10} m ${dirName(dx,dz)} still had supplies last I looked.`)}
   opts.push(`Walkers are ${WX.type==='storm'?'restless in storms':'slower in daylight'}. Move by day, hole up at night.`,`There's maybe ${zLeft()} of those things left around here. They don't stop coming, but they don't come back either once they're down.`);
   return pick(opts)}
 // ---- scrip prices: what things are worth; traders sell at a markup and buy at a discount
@@ -4299,11 +4636,47 @@ function spawnNPCsNear(){
 // ---------------- main loop
 const introCam=new THREE.PerspectiveCamera(60,1,.1,200);
 let spawnT=2,animT=3,sleepT=0,hudT=0,lastDl=1,clockT=performance.now();
+// ---------------- lights and simple wiring: wall switches in buildings turn their room's lights on; you can also lay your own
+// wire on the ground between a switch and lamps (pieces must touch side by side) and flip it with Use
+const WIRE=new Set(['wire','lamp','lswitch']),litSet=new Set();
+function lightGroup(sw){const o=sw[5]||{};
+  if(o.g)return furnSpecs.filter(s=>!s.gone&&s[0]==='clamp'&&s[5]&&s[5].g===o.g);
+  const pool=furnSpecs.filter(s=>!s.gone&&WIRE.has(s[0])&&!(s[5]&&s[5].g)&&Math.hypot(s[1]-sw[1],s[3]-sw[3])<60),seen=new Set([sw]),q=[sw],out=[];
+  while(q.length){const a=q.pop();if(a[0]==='lamp')out.push(a);for(const b of pool)if(!seen.has(b)&&Math.hypot(b[1]-a[1],b[2]-a[2],b[3]-a[3])<.56){seen.add(b);q.push(b)}}
+  return out}
+function nearestSwitch(p,r){let b=null,bd=r;for(const s of furnSpecs){if(s.gone||s[0]!=='lswitch')continue;const dy=s[2]+1.2-(p.pos.y+1.2);if(Math.abs(dy)>1.6)continue;const d=Math.hypot(s[1]-p.pos.x,s[3]-p.pos.z);if(d<bd){bd=d;b=s}}return b}
+function flipSwitch(p,sw){sw.on=!sw.on;const L=lightGroup(sw);for(const l of L){l.on=sw.on;if(l.on)litSet.add(l)}SND.click();
+  msg(p,L.length?`Lights ${sw.on?'on':'off'} (${L.length})`:'Click. Nothing is wired to it — lay wire from the switch to a lamp')}
+const lampLights=[0,1,2].map(()=>{const l=new THREE.PointLight(0xffe0a8,0,10,1.5);scene.add(l);return l});let glowGeo=null,glowMat=null;
+function bulbPos(s){return s[0]==='lamp'?[s[1],s[2]+1.3,s[3]]:[s[1],s[2]-.42,s[3]]}
+const viewPos=()=>players[0]&&players[0].cam?players[0].cam.position:new V3();
+function updLamps(){const cp=viewPos(),near=[];
+  for(const s of litSet){const[x,y,z]=bulbPos(s),d=Math.hypot(x-cp.x,y-cp.y,z-cp.z);
+    if(!s.on||s.gone||d>140){if(s.glow){scene.remove(s.glow);s.glow=null}litSet.delete(s);if(d>140)s.on=false;continue}
+    if(!s.glow){glowGeo=glowGeo||box(.2,.05,.2);glowMat=glowMat||basic(0xfff1c8);s.glow=new THREE.Mesh(glowGeo,glowMat);s.glow.position.set(x,y,z);scene.add(s.glow)}
+    near.push([d,x,y,z])}
+  near.sort((a,b)=>a[0]-b[0]);const dk=1-dayLight();
+  lampLights.forEach((l,i)=>{const n=near[i];if(n&&n[0]<45){l.position.set(n[1],n[2]-.1,n[3]);l.intensity=.6+dk*1.4}else l.intensity=0})}
+// ---------------- an airliner crossing the sky now and then, with the long roar trailing behind it
+let flyer=null,flyT=90;
+function makeFlyer(){const g=new THREE.Group(),wh=0xe4e6ea,gr=0xa8acb2,MC={},part=(g,w,h,d,c,x,y,z)=>{const m=new THREE.Mesh(box(w,h,d),MC[c]||(MC[c]=new THREE.MeshLambertMaterial({color:c,fog:false})));m.position.set(x,y,z);g.add(m);return m};part(g,2.6,2.6,24,wh,0,0,0);part(g,2.62,.4,24,pick([0x2a5aa0,0xc0282a,0x2a7a4a]),0,-.6,0);part(g,1.7,1.7,2,wh,0,-.1,13);part(g,1.2,1.2,3,wh,0,.4,-13.5);
+  part(g,26,.3,3.6,gr,0,-.8,1);part(g,.3,4,3,wh,0,2.8,-13);part(g,8,.2,1.8,gr,0,.5,-13.5);for(const sx of[-1,1])part(g,1.2,1.2,3,gr,sx*5,-1.6,2);
+  const lt=(c,x,y,z)=>{const m=part(g,.35,.35,.35,0,x,y,z);m.material=new THREE.MeshBasicMaterial({color:c,fog:false});return m};g.userData.blink=[lt(0xff2020,-13,-.8,1),lt(0x20ff40,13,-.8,1),lt(0xffffff,0,-1.4,0)];
+  scene.add(g);return g}
+function updFlyer(dt){flyT-=dt;const cp=viewPos();
+  if(!flyer&&flyT<=0){const a=rng()*6.28,dir=new V3(Math.sin(a),0,Math.cos(a)),side=new V3(dir.z,0,-dir.x).multiplyScalar(R(-250,250));
+    const g=makeFlyer(),start=cp.clone().addScaledVector(dir,-1400).add(side);start.y=R(150,230);g.rotation.y=a;flyer={g,dir,t:0,p:start}}
+  if(!flyer){if(amb.jet)amb.jet.g.gain.setTargetAtTime(0,AC.currentTime,.5);return}
+  // the camera only sees ~150 m, so the plane is drawn closer and smaller along the same line of sight (same apparent size)
+  flyer.t+=dt;flyer.p.addScaledVector(flyer.dir,75*dt);{const dd=flyer.p.distanceTo(cp),k=Math.min(1,110/dd);flyer.g.position.copy(cp).lerp(flyer.p,k);flyer.g.scale.setScalar(k)}const bl=flyer.g.userData.blink;for(let i=0;i<3;i++)bl[i].visible=((flyer.t*(i===2?1.3:1))%1.2)<.15||i<2&&dayLight()<.3;
+  const d=flyer.p.distanceTo(cp);
+  if(amb.jet&&AC){const t=AC.currentTime,v=Math.max(0,1-d/1500);amb.jet.g.gain.setTargetAtTime(v*v*.5,t,.6);amb.jet.f.frequency.setTargetAtTime(120+v*380,t,.6)}
+  if(flyer.t>40){scene.remove(flyer.g);flyer=null;flyT=R(140,320)}}
 function update(dt){
   netTick(dt);updateAvatars(dt);try{radioTick()}catch(e){}  const dlPrev=dayLight();tDay+=dt/DAYLEN;if(tDay>=1){tDay-=1;day++;nightPassed();msg(null,`Dawn of day ${day}. The dead slow down.`)}
   const dl=dayLight(),night=dl<.25;
   if(dlPrev>=.25&&dl<.25)msg(null,'Night falls. They are faster now — find walls.');
-  updSky();
+  updSky();try{updLamps();updFlyer(dt)}catch(e){}
   for(const p of players)updatePlayer(p,dt);
   for(const v of vehicles)updateVehicle(v,dt);
   flashT=Math.max(0,flashT-dt);$('#flash').style.opacity=Math.min(.85,flashT*3.5);updateDoors(dt);updateTraps(dt);updateCooking(dt);updateBombs(dt);updateDrops(dt);for(const p of players)p.shake=Math.max(0,(p.shake||0)-dt*1.5);updateGibs(dt);updateFires(dt);updateBags(dt);
@@ -4317,11 +4690,13 @@ function update(dt){
   if(spawnT<=0){spawnT=night?1.1:3.2;if(zombies.filter(z=>!z.dead).length<maxZ)spawnOpen()}
   updParticles(dt);
   let es=0;for(const v of vehicles)if(v.driver&&!v.pedal)es=Math.max(es,Math.abs(v.speed)+1);
-  if(engG){engG.gain.value=es?.07:0;eng.frequency.value=38+es*7}
+  if(engG){let rpm=0;for(const v of vehicles)if(v.driver&&!v.pedal)rpm=Math.max(rpm,v.rpm||.15);const on=es>0,f=26+rpm*95,t=AC.currentTime;engG.gain.setTargetAtTime(on?.09:0,t,.1);eng.frequency.setTargetAtTime(f,t,.05);eng._sub.frequency.setTargetAtTime(f/2,t,.05);eng._lfo.frequency.setTargetAtTime(f/2,t,.05);engLP.frequency.setTargetAtTime(300+rpm*900,t,.08)}
+  if(amb.rain){const t=AC.currentTime,rn=(WX.type==='rain'||WX.type==='storm')?WX.amt:0,under=players[0]&&underground(players[0].pos);amb.rain.g.gain.setTargetAtTime(under?0:rn*.22,t,.5);amb.wind.g.gain.setTargetAtTime(under?0:(.03+Math.abs(WX.wind)*.025+(WX.type==='storm'?.08:0)),t,.8);amb.wind.f.frequency.setTargetAtTime(260+Math.sin(t*.3)*120+Math.abs(WX.wind)*40,t,.5)}
   hudT-=dt;if(hudT<=0){hudT=.1;players.forEach(updHud);updTop();if(boardOpen&&(boardT=(boardT||0)+1)%5===0)renderBoard()}else players.forEach(p=>{p.hud.hurt.style.opacity=Math.min(.9,p.flash*1.5+(p.hp<25?.35:0))});
   pressed.clear();T.pressed.clear();
 }
 function render(){
+  {const lh=$('#lookHint');if(lh&&lh.classList.contains){const show=running&&!isTouch&&!document.pointerLockElement&&!menuP&&!emoOpen&&!cpalOpen&&!paused&&players.length===1&&$('#talk').classList.contains('hidden')&&$('#cook').classList.contains('hidden');if(lh.classList.contains('hidden')===show)lh.classList.toggle('hidden',!show)}}
   fitView();const w=VW,h=VH;renderer.setScissorTest(true);
   const cen=running?players.map(p=>p.vehicle?p.vehicle.pos:p.pos):[spawn];updateShadowCam(cen);updateRT(cen[0]);
   RTU.sunDirU.value.copy(SUN_DIR);RTU.sunK.value=clamp(sun.intensity*1.5,0,1);RTU.wet.value=WX.wet;RTU.rtime.value=performance.now()/1000;
@@ -4386,7 +4761,7 @@ function lzd(src,out){let ip=0,op=0;while(ip<src.length){const t=src[ip++];let l
   out.set(src.subarray(ip,ip+lit),op);ip+=lit;op+=lit;if(ip>=src.length)break;const off=src[ip]|src[ip+1]<<8;ip+=2;let len=(t&15)+4;if((t&15)===15){let b;do{b=src[ip++];len+=b}while(b===255)}
   let r=op-off;for(let k=0;k<len;k++)out[op++]=out[r++]}return out}
 // every cell is compared with the bare terrain the seed would generate there; only differences (buildings, caves, trees, your edits) survive as non-zero bytes
-const baseCell=(y,cq,h,tb,wx,z)=>y===0?13:y<h-7?(y<h-8?ORE(h3(wx,y,z))||3:3):y<h?2:y===h?(cq?2:tb):y===h+1&&cq?22+cq:0;
+const baseCell=(y,cq,h,tb,wx,z)=>y===0?13:y<h-7?(y<h-8?ORE(h3(wx,y,z))||3:3):y<h?(tb===3?3:2):y===h?(cq?2:tb):y===h+1&&cq?22+cq:0;
 function regionBase(R){const RR=RS*RS,tb=new Uint8Array(RR),cq=new Uint8Array(RR),hh=new Int16Array(RR);regionHeights(R,tb,cq,hh);return[tb,cq,hh]}
 function rleEncode(R){const X0=R.rx*RS,Z0=R.rz*RS,[tb,cqa,hh]=regionBase(R);let o=0;
   for(let y=0;y<H;y++)for(let z=Z0;z<Z0+RS;z++){let i=(y*W+md(z))*W+md(X0),c=(z-Z0)*RS;for(let x=X0;x<X0+RS;x++,i++,c++){const v=vox[i],cq=cqa[c],h=hh[c]-(cq?1:0);
@@ -4535,7 +4910,7 @@ async function decodeSave(code){code=(code||'').trim();if(!/^DG1[zr]/.test(code)
   let u=unb64(code.slice(4));if(code[3]==='z'){u=await zip(u,1);if(!u)throw new Error('This browser cannot unpack compressed saves')}
   const st=JSON.parse(new TextDecoder().decode(u));if(st.v!==1&&st.v!==2)throw new Error('Unknown save version');return st}
 async function autoSave(){if(!running)return;try{localStorage.setItem('deadground-save',await encodeSave())}catch(e){}}
-const GENV=4; // bump when the world generator changes so old edits aren't applied to a different town layout
+const GENV=5; // bump when the world generator changes so old edits aren't applied to a different town layout
 function applyState(st){
   const old=st.v!==2||(st.gv|0)!==GENV;
   if(old){st.p=st.p.map(q=>({...q,x:spawn.x,y:spawn.y,z:spawn.z,s:0}));msg(null,'This save is from an older version of the world: your character and inventory carried over to a fresh, endless world')}
