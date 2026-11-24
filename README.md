@@ -24,7 +24,7 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
   - **Schools** (2 storeys): classrooms with chalkboards and rows of desks, lockers along the corridors and a cafeteria.
 - **Battle damage:** most buildings came through intact, with whole windows. About 3 in 10 took real damage, and those are mostly chipped rather than holed. Walls and roofs have chunks bitten out of blocks, with the broken pieces lying in rubble piles below. Only a few blocks are knocked clean through, and roofs have ragged holes with debris on the floor underneath. 
 - **Every block breaks in stages:** dirt, grass, stone, ore, concrete, brick, drywall, roof, asphalt, planks, logs, metal, tile and window frames all go through three broken stages (chipped, heavily damaged, crumbled stub) before they give way. That happens under your pickaxe, zombie claws and explosions, and the broken pieces land as rubble. A block that is already damaged breaks faster.
-- **Doors** get the same treatment: the jambs and head are the surrounding wall, with side casings, plinth blocks and a head casing of trim on both faces.
+- **Doors** sit on a proper floor threshold (planks or tile), and get the same treatment: the jambs and head are the surrounding wall, with side casings, plinth blocks and a head casing of trim on both faces.
 - **Windows** sit in ordinary wall (brick or concrete outside, painted drywall inside) with a proper casing of trim round the opening on both faces: side and head casings, a deeper sill and an apron under it.
 - **Blood that coats things:** every droplet falls, and where it lands it leaves a stain on the face it hit, one texture-pixel square (6 cm) at a time. That covers tops of blocks, walls, ceilings and the sides of things, and it runs down over edges. Your bat and chainsaw get bloodier with every hit, and cars that run zombies down get stained across the body.
 - **Blood:** pixel-art splatters with flung droplets where things die, spatter on nearby walls, and old dark pools in the streets where people fell months ago. No more red-tinted blocks.
@@ -52,7 +52,7 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 **Realism:** the block textures got a pass for depth: bevelled bricks with burnt and pale ones mixed in, soot and grime, concrete pores and stains, wood grain and knots, rust running from rivets, shingle rows, leaf clusters and mottling everywhere, at the same pixel count. On High and Ultra the image gets **ambient occlusion** from the depth buffer (corners, creases and contact shadows) and a soft **glow** around bright light. Every level gets a **filmic tone curve**.
 
-**Pause menu (Esc):** resume, *Respawn (unstuck)*, or **teleport** to your bed, the crossroads, the nearest town, a random town or your co-op partner.
+**Pause menu (Esc):** resume, *Respawn (unstuck)*, *Main menu* (saves, then back to the title screen to Continue or start another mode), or **teleport** to your bed, the crossroads, the nearest town, a random town or your co-op partner.
 
 **Unstuck:** a *Respawn* button is always on screen (and the ` key; = for player 2; *Unstuck* on phones). It puts you back at your respawn point with everything you're carrying, for when you glitch into something.
 
@@ -95,6 +95,7 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
   - Winter days are shorter.
   - Cold drains your warmth unless you're indoors, by a fire, in a car or wearing a coat.
 - **Families:** about 1 in 4 houses shelters a family: a father, a mother and one to three kids. They're unarmed and helpless; when zombies come they run and scream for help. Most need something (food or bandages); help them and they'll give you what they can spare and remember you. Kids can't be hurt or infected by anyone.
+- **Scrip:** hand-stamped trade tokens, the new currency. Find it in crates, on dead zombies and people, and from grateful families. Survivors and drifters each run a little shop: **buy** from their stock or **sell** them your goods (they pay about 60% of value and charge about 130%).
 - **Talking to people (E / Talk):** a conversation menu. Trade with survivors, ask them to come with you (they follow and fight), wait or go home, give food or bandages, ask about the area (nearby towns, bandit camps, stocked shops), or tell a family to lock up.
 - **People:** a fixed cast of named survivors and bandits with realistic names. Nobody respawns: when someone dies, they're gone for good and drop off the leaderboard. Out of sight, they keep fighting each night, and now and then one doesn't make it (you'll hear it on the radio).
   - About half the houses still have a survivor living in them. By day they forage (raid crates, hunt, pick up carcasses) and carry food back to a stash. They board up open windows and set spike traps at the door.

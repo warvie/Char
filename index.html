@@ -308,7 +308,7 @@ body.touch .prompt{top:auto;bottom:calc(50% + 22px);font-size:10px;line-height:1
 <div id="pause" class="screen hidden" style="background:rgba(0,0,0,.6)"><div class="kit" style="max-width:420px;text-align:center">
   <h2 style="font-size:40px;color:var(--rust)">Paused</h2><p class="sub" style="margin:8px auto 16px">Click to take back the mouse and keep surviving.</p>
   <button class="go" id="bResume">Resume</button>
-  <div class="row" style="justify-content:center;margin-top:14px"><button id="pRsp">Respawn (unstuck)</button></div>
+  <div class="row" style="justify-content:center;margin-top:14px"><button id="pRsp">Respawn (unstuck)</button><button id="pMenu">Main menu</button></div>
   <p class="note" style="margin:14px 0 6px">Teleport to</p><div class="row" id="pTp" style="justify-content:center"></div></div></div>
 
 <div id="menu" class="screen hidden" style="background:rgba(0,0,0,.55)"><div class="kit">
@@ -321,7 +321,7 @@ body.touch .prompt{top:auto;bottom:calc(50% + 22px);font-size:10px;line-height:1
   <h3>Workbench</h3>
   <div id="mRec"></div>
   <h3>World</h3>
-  <div class="row"><button id="mSave">Save now</button><button id="mRsp">Respawn (stuck?)</button><button id="mCreative">Creative: off</button><button id="mCode">Copy save code</button><label>Render distance <select id="rdSel2"></select></label><label>Graphics <select id="gfxSel2"></select></label><label>Pixel size <select id="pixSel2"></select></label></div>
+  <div class="row"><button id="mSave">Save now</button><button id="mRsp">Respawn (stuck?)</button><button id="mCreative">Creative: off</button><button id="mMain">Main menu</button><button id="mCode">Copy save code</button><label>Render distance <select id="rdSel2"></select></label><label>Graphics <select id="gfxSel2"></select></label><label>Pixel size <select id="pixSel2"></select></label></div>
   <textarea id="mCodeOut" class="hidden" rows="2" readonly></textarea>
   <p class="note" id="mSaveNote" style="margin:6px 0 0"></p>
   <div class="row" style="margin-top:14px"><button id="mEat">Eat</button><button id="mBand">Use bandage</button><button id="mClose" class="go" style="margin-left:auto">Close</button></div>
@@ -421,7 +421,7 @@ const MATS=[['plank',B.PLANK],['stone',B.STONE],['dirt',B.DIRT],['metal',B.METAL
 // creative mode: every block, unlimited
 const CMATS=[['grass',B.GRASS],['dirt',B.DIRT],['stone',B.STONE],['coal',B.COAL],['iron',B.IRON],['conc',B.CONC],['asph',B.ASPH],['plank',B.PLANK],['log',B.LOG],['leaf',B.LEAF],['brick',B.BRICK],['metal',B.METAL],['glass',B.GLASS],['wall',B.WALL],['tile',B.TILEF],['roof',B.ROOF],['stairs',B.STPX]];
 const matList=p=>p.creative?CMATS:MATS,curMat=p=>{const L=matList(p);return L[p.mat%L.length]};
-const LABEL={saw:'Chainsaw',grass:'Grass',conc:'Concrete',asph:'Asphalt',log:'Log',leaf:'Leaves',brick:'Brick',glass:'Glass',wall:'Drywall',tile:'Tile',roof:'Roof',veg:'Vegetables',stew:'Meat stew',broth:'Bone broth',jerky:'Jerky',roast:'Roast veg',hotbeans:'Hot beans',tnt:'Dynamite',pipebomb:'Pipe bomb',bunk:'Bunk bed',tent:'Tent',stairs:'Stairs',bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
+const LABEL={scrip:'Scrip',saw:'Chainsaw',grass:'Grass',conc:'Concrete',asph:'Asphalt',log:'Log',leaf:'Leaves',brick:'Brick',glass:'Glass',wall:'Drywall',tile:'Tile',roof:'Roof',veg:'Vegetables',stew:'Meat stew',broth:'Bone broth',jerky:'Jerky',roast:'Roast veg',hotbeans:'Hot beans',tnt:'Dynamite',pipebomb:'Pipe bomb',bunk:'Bunk bed',tent:'Tent',stairs:'Stairs',bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
 // towns: a large one in the middle, smaller ones scattered through the wilds
 const towns=[];
 function townAt(x,z,m){for(const t of towns)if(x>=t.x0-m&&x<=t.x1+m&&z>=t.z0-m&&z<=t.z1+m)return t;return null}
@@ -565,6 +565,8 @@ function doorAt(x,y,z,inward,chance=.8){ // 2 wide x 4 tall opening along x; the
   const nbm=[get(x-2,y+1,z),get(x+3,y+1,z)].find(v=>v===B.WALL||v===B.CONC||v===B.BRICK)||WMAT;
   for(let dy=0;dy<5;dy++){setv(x-1,y+dy,z,nbm);setv(x+2,y+dy,z,nbm)}
   setv(x,y+4,z,nbm);setv(x+1,y+4,z,nbm);winSpecs.push([x-1,y,z,1,WTRIM,1]);
+  // the threshold under the opening is floor, not wall or ground: planks or tile from whichever side has a floor
+  for(let dx=0;dx<2;dx++){const fl=[get(x+dx,y-1,z+inward),get(x+dx,y-1,z-inward)].find(v=>v===B.PLANK||v===B.TILEF);if(fl)setv(x+dx,y-1,z,fl)}
   const real=rng()<chance;
   for(let dx=0;dx<2;dx++)for(let dy=0;dy<4;dy++)setv(x+dx,y+dy,z,real?B.DOOR:0);
   if(real)doorSpecs.push({x,y,z,inward});
@@ -1654,9 +1656,9 @@ const RECIPES=[
   {out:'cargo',n:1,need:{cloth:4,hide:1},label:'Sew padded pants'},
   {out:'bandage',n:2,need:{hide:1,cloth:1},label:'Hide-and-rag dressings'},
   {out:'ammo',n:5,need:{bone:2,scrap:1},label:'Bone-tipped rounds'}];
-const LOOT=[['veg',7,1,2],['pipebomb',2,1,1],['ammo',20,4,10],['scrap',18,1,3],['cloth',14,1,3],['food',16,1,2],['bandage',8,1,1],['fuel',10,1,1],['kit',3,1,1],['metal',4,1,2],['coal',7,1,3],['beartrap',3,1,1],['mine',2,1,1],['spikes',3,1,1],['tent',1,1,1],['hardhat',3,1,1],['jacket',3,1,1],['vest',2,1,1],['riot',2,1,1],['cargo',2,1,1],['helmet',1,1,1]];
+const LOOT=[['scrip',16,3,15],['veg',7,1,2],['pipebomb',2,1,1],['ammo',20,4,10],['scrap',18,1,3],['cloth',14,1,3],['food',16,1,2],['bandage',8,1,1],['fuel',10,1,1],['kit',3,1,1],['metal',4,1,2],['coal',7,1,3],['beartrap',3,1,1],['mine',2,1,1],['spikes',3,1,1],['tent',1,1,1],['hardhat',3,1,1],['jacket',3,1,1],['vest',2,1,1],['riot',2,1,1],['cargo',2,1,1],['helmet',1,1,1]];
 // shops stock what you'd expect: groceries feed you, hardware stores build and trap, hospitals patch you up, schools have a bit of everything
-const LOOTK={grocery:[['veg',22,1,3],['food',46,1,3],['cloth',4,1,2],['fuel',5,1,1],['bandage',5,1,1],['scrap',6,1,2],['coal',4,1,2]],
+const LOOTK={grocery:[['scrip',8,4,20],['veg',22,1,3],['food',46,1,3],['cloth',4,1,2],['fuel',5,1,1],['bandage',5,1,1],['scrap',6,1,2],['coal',4,1,2]],
   hardware:[['saw',2,1,1],['tnt',3,1,1],['pipebomb',4,1,1],['scrap',22,1,4],['metal',14,1,2],['plank',12,2,5],['wood',8,1,3],['fuel',10,1,1],['kit',8,1,1],['beartrap',5,1,1],['spikes',5,1,1],['mine',2,1,1],['hardhat',6,1,1],['coal',6,1,3]],
   hospital:[['bandage',44,1,3],['cloth',14,1,3],['food',6,1,1],['kit',3,1,1],['scrap',6,1,2],['ammo',5,2,6],['vest',2,1,1]],
   school:[['food',20,1,2],['cloth',18,1,3],['scrap',12,1,2],['bandage',9,1,1],['jacket',4,1,1],['cargo',4,1,1],['ammo',5,2,5],['plank',6,1,3]]};
@@ -2513,7 +2515,7 @@ function updHud(p){
   h.slots.forEach((s,k)=>{s.classList.toggle('on',k===p.tool);if(k===1)s.lastChild.classList.toggle('low',p.inv.ammo<4);
     s.lastChild.textContent=k===4?`${TRAPS[p.trap][1]} ×${p.inv[TRAPS[p.trap][0]]}`:k===1?`${p.inv.ammo} rounds`:k===3?`${LABEL[curMat(p)[0]]} ${p.creative?'∞':'×'+p.inv[curMat(p)[0]]}`:k===2?'dig':p.useSaw?`${Math.round(p.sawFuel||0)}% fuel`:'melee';
     if(k===0){const sw=!!p.useSaw;if(s.dataset.saw!==String(sw)){s.dataset.saw=String(sw);s.querySelector('b').textContent=sw?'Saw':'Bat';s.querySelector('img').src=pxIcon(sw?'saw':'Bat')}}});
-  const show=['spikes','beartrap','mine','ammo','food','bandage','scrap','cloth','fuel','kit','wood','plank','stone','dirt','coal','iron','metal'].filter(x=>p.inv[x]>0||x==='ammo'||x==='food');
+  const show=['scrip','spikes','beartrap','mine','ammo','food','bandage','scrap','cloth','fuel','kit','wood','plank','stone','dirt','coal','iron','metal'].filter(x=>p.inv[x]>0||x==='ammo'||x==='food');
   h.inv.innerHTML=show.map(x=>`<span>${LABEL[x]}</span><b>${p.inv[x]}</b>`).join('');
   h.prompt.textContent=isTouch&&p.vehicle?'':promptFor(p); // on phones the car panel sits where the prompt would; the Use button gets you out
   h.cross.style.display=p.vehicle||p.dead>0||p.adsK>.6?'none':'';h.cross.classList.toggle('on',p.onTarget);
@@ -2696,6 +2698,7 @@ function pixelText(x,text,cx,cy,sc,col,maxW){let w=0;for(const ch of text){const
 
 // ---------------- pixel-art icons (16x16, hard pixels, scaled up with nearest filtering)
 const PXI={},PXD={
+  scrip:r=>{r(4,3,8,10,'#b8902a');r(3,4,10,8,'#b8902a');r(5,4,6,8,'#d8b040');r(4,5,8,6,'#d8b040');r(6,6,4,1,'#8a6a1a');r(7,6,2,4,'#8a6a1a');r(6,9,4,1,'#8a6a1a');r(11,4,1,1,'#f0e090')},
   saw:r=>{r(1,6,6,6,'#d8761e');r(1,6,6,1,'#f0a040');r(2,4,4,2,'#2a2a2a');r(7,7,8,3,'#9aa0a4');r(7,7,8,1,'#c8ccd0');for(let x=7;x<15;x+=2){r(x,6,1,1,'#3a3a3a');r(x,10,1,1,'#3a3a3a')}r(0,9,2,2,'#2a2a2a')},
   veg:r=>{r(3,7,5,6,'#c89040');r(4,6,3,1,'#d8a050');r(8,4,2,9,'#e07020');r(8,2,1,2,'#4a8a3a');r(9,1,1,3,'#5a9a4a');r(10,9,4,4,'#e8d8b0');r(11,8,2,1,'#c8b890')},
   stew:r=>{r(2,8,12,5,'#6a6a6e');r(1,7,14,2,'#8a8a8e');r(3,7,10,2,'#8a4a20');r(5,7,2,1,'#c86a3a');r(9,7,2,1,'#e0a040');r(6,3,1,3,'#c8c8c8');r(9,2,1,4,'#c8c8c8')},
@@ -2753,11 +2756,11 @@ function pxIcon(k){if(PXI[k])return PXI[k];try{const c=document.createElement('c
 // ---------------- attaché case: a grid inventory like Resident Evil 4. Every stack takes room; no room, no pickup
 const CW=12,CH=8;
 // [width, height, stack size]
-const ITEM={saw:[3,1,1],veg:[1,1,6],stew:[1,1,2],broth:[1,1,2],jerky:[1,1,10],roast:[1,1,4],hotbeans:[1,1,2],tnt:[1,2,3],pipebomb:[1,1,4],bunk:[3,2,1],Pistol:[2,2,1],Bat:[4,1,1],Pickaxe:[2,2,1],ammo:[2,1,60],scrap:[1,1,10],cloth:[1,1,10],fuel:[2,2,1],food:[1,1,3],bandage:[1,1,3],wood:[2,1,10],plank:[2,1,20],
+const ITEM={scrip:[1,1,999],saw:[3,1,1],veg:[1,1,6],stew:[1,1,2],broth:[1,1,2],jerky:[1,1,10],roast:[1,1,4],hotbeans:[1,1,2],tnt:[1,2,3],pipebomb:[1,1,4],bunk:[3,2,1],Pistol:[2,2,1],Bat:[4,1,1],Pickaxe:[2,2,1],ammo:[2,1,60],scrap:[1,1,10],cloth:[1,1,10],fuel:[2,2,1],food:[1,1,3],bandage:[1,1,3],wood:[2,1,10],plank:[2,1,20],
   dirt:[1,1,32],stone:[1,1,32],coal:[1,1,16],iron:[1,1,16],metal:[2,1,4],kit:[2,1,1],meat:[1,1,4],cooked:[1,1,4],hide:[2,2,3],bone:[1,1,8],
   spikes:[2,1,2],beartrap:[2,2,1],mine:[1,1,2],tent:[3,1,1],stairs:[1,1,16],bed:[3,2,1],fire:[2,1,2],
   hardhat:[2,1,1],helmet:[2,2,1],jacket:[2,3,1],vest:[2,2,1],hidecoat:[2,3,1],scrapvest:[2,2,1],cargo:[2,3,1],riot:[2,3,1]};
-const DESC={saw:'Runs on fuel cans. Press 1 again (or tap Tool) to switch between bat and saw; hold attack to cut. Limbs come off, and hold it on the torso to cut them in half. Also cuts wood.',veg:'Potatoes, carrots, onions. Better cooked.',stew:'Hearty: lots of food, health and warmth.',broth:'Hot drink. Warms you right up.',jerky:'Smoked meat. Light and keeps forever.',roast:'Roast vegetables.',hotbeans:'Warm beans straight from the can.',tnt:'Place it and run: a long fuse, then a big blast that tears through walls.',pipebomb:'Throwable. Short fuse, shrapnel.',bunk:'Two beds stacked. Place it to set your respawn point.',Pistol:'9 mm sidearm. Always with you.',Bat:'Ash bat with a taped grip. Always with you.',Pickaxe:'Digs dirt, stone and walls. Always with you.',
+const DESC={scrip:'Hand-stamped trade tokens: the money of the end of the world. Survivors and drifters buy and sell for scrip.',saw:'Runs on fuel cans. Press 1 again (or tap Tool) to switch between bat and saw; hold attack to cut. Limbs come off, and hold it on the torso to cut them in half. Also cuts wood.',veg:'Potatoes, carrots, onions. Better cooked.',stew:'Hearty: lots of food, health and warmth.',broth:'Hot drink. Warms you right up.',jerky:'Smoked meat. Light and keeps forever.',roast:'Roast vegetables.',hotbeans:'Warm beans straight from the can.',tnt:'Place it and run: a long fuse, then a big blast that tears through walls.',pipebomb:'Throwable. Short fuse, shrapnel.',bunk:'Two beds stacked. Place it to set your respawn point.',Pistol:'9 mm sidearm. Always with you.',Bat:'Ash bat with a taped grip. Always with you.',Pickaxe:'Digs dirt, stone and walls. Always with you.',
   ammo:'9 mm rounds.',scrap:'Bent metal and wire. Crafting and repairs.',cloth:'Rags. Bandages, tents and clothing.',fuel:'A can of petrol. Pour into a car.',food:'Canned beans. Restores hunger.',
   bandage:'Restores health.',wood:'Chopped logs.',plank:'Building planks.',dirt:'For building.',stone:'For building.',coal:'Fuel for fires and makeshift petrol.',iron:'Smelt into metal plates.',
   metal:'Armor, repairs and walls.',kit:'Fixes a wrecked vehicle.',meat:'Raw. Cook it at a campfire first.',cooked:'Cooked meat. Restores hunger and a little health.',hide:'Animal hide. Coats and dressings.',
@@ -2865,6 +2868,16 @@ function teleport(p,pos){if(p.vehicle)exitVehicle(p);p.sleeping=null;p.body.g.ro
   for(let i=0;i<40&&hit(p.pos.x,p.pos.y+.02,p.pos.z,.3,1.75);i++)p.pos.y+=VS;p.vel.set(0,0,0);p.eye=p.pos.y+1.6;msg(p,'Teleported')}
 function renderPause(){const p=players[0];if(!p){$('#pTp').innerHTML='';return}$('#pTp').innerHTML=tpTargets(p).map(([n],i)=>`<button data-i="${i}">${n}</button>`).join('')}
 $('#pTp').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');const p=players[0];if(!b||!p)return;const t=tpTargets(p)[+b.dataset.i];if(t){teleport(p,t[1]());$('#bResume').click()}});
+// back to the title screen: save, tear the players down, and let the next game start fresh (or Continue from this save)
+async function toMainMenu(){if(!running)return;try{await autoSave()}catch(e){}
+  if(menuP)closeMenu();if(cookP)closeCook();if(talkP)closeTalk();paused=false;$('#pause').classList.add('hidden');$('#board').classList.add('hidden');
+  for(const p of players){if(p.vehicle)exitVehicle(p);scene.remove(p.cam,p.body.g,p.light,p.light.target,p.outline);p.hud.el.remove()}
+  players=[];running=false;REC=false;bombs.forEach(b=>scene.remove(b.g));bombs=[];if(engG)engG.gain.value=0;
+  $('#top').classList.add('hidden');$('#split').classList.add('hidden');$('#touch').classList.add('hidden');
+  if(document.pointerLockElement)document.exitPointerLock();
+  try{if(localStorage.getItem('deadground-save'))$('#bCont').classList.remove('hidden')}catch(e){}
+  $('#start').classList.remove('hidden');setMsg('Game saved. Continue it, or pick a mode for a fresh world.')}
+$('#pMenu').onclick=()=>toMainMenu();$('#mMain').onclick=()=>toMainMenu();
 $('#pRsp').onclick=()=>{const p=players[0];if(p)unstick(p);$('#bResume').click()};
 $('#bResume').onclick=()=>{paused=false;$('#pause').classList.add('hidden');lock()};
 
@@ -3064,7 +3077,7 @@ function updateGibs(dt){
 
 // ---------------- loot bags (zombie + animal drops)
 let bags=[];
-const ZLOOT=[['cloth',28,1,2],['scrap',24,1,2],['ammo',18,2,6],['food',10,1,1],['bandage',9,1,1],['fuel',3,1,1],['mine',1,1,1]];
+const ZLOOT=[['scrip',20,1,6],['cloth',28,1,2],['scrap',24,1,2],['ammo',18,2,6],['food',10,1,1],['bandage',9,1,1],['fuel',3,1,1],['mine',1,1,1]];
 function rollZLoot(z){const items={},tot=ZLOOT.reduce((s,l)=>s+l[1],0),n=rng()<.3?0:RI(1,2);
   for(let i=0;i<n;i++){let r=rng()*tot;for(const l of ZLOOT){r-=l[1];if(r<=0){items[l[0]]=(items[l[0]]||0)+RI(l[2],l[3]);break}}}
   if(z.outfit&&rng()<.6)items[z.outfit]=1;return items}
@@ -3407,7 +3420,7 @@ function npcShot(n,tx,ty,tz){const d=Math.hypot(tx-n.pos.x,tz-n.pos.z);const nea
 function hurtNPC(n,dmg,dir,by){
   if(n.dead||n.kid)return;n.hp-=dmg;burst(new V3(n.pos.x,n.pos.y+1.2,n.pos.z),14,3,RED,1.5);SND.hit();
   if(by&&players.includes(by)&&(n.kind==='survivor'||n.rec&&n.rec.friendly)&&!n.hostileTo){n.hostileTo=by;msg(by,`${n.name} turns on you!`)}
-  if(n.hp<=0){n.dead=.001;splat(n.pos,R(1.2,2),true);n.rec.alive=false;n.rec.out=null;if(by&&players.includes(by))by.pk=(by.pk|0)+1;const it={ammo:RI(3,10)};if(rng()<.5)it.food=1;if(rng()<.4)it.bandage=1;if(rng()<.4)it.scrap=RI(1,3);if(rng()<.25)it[['jacket','vest','cargo','hardhat'][RI(0,3)]]=1;
+  if(n.hp<=0){n.dead=.001;splat(n.pos,R(1.2,2),true);n.rec.alive=false;n.rec.out=null;if(by&&players.includes(by))by.pk=(by.pk|0)+1;const it={ammo:RI(3,10),scrip:RI(4,30)};if(rng()<.5)it.food=1;if(rng()<.4)it.bandage=1;if(rng()<.4)it.scrap=RI(1,3);if(rng()<.25)it[['jacket','vest','cargo','hardhat'][RI(0,3)]]=1;
     dropBag(n.pos,it);if(by)msg(by,n.kind==='bandit'?`Bandit down — search the bag`:`${n.name} is dead`);if(!by&&(n.unarmed||n.infected))n.rise=R(5,9)}
 }
 function npcRay(eye,dir,far){let best=null,bt=far,dm=1;for(const n of npcs){if(n.dead)continue;
@@ -3426,29 +3439,46 @@ function rumor(n,p){const opts=[],dirName=(dx,dz)=>{const a=Math.atan2(dx,-dz)*1
   const c=crates.filter(c=>!c.looted&&c.kind).sort((a,b)=>a.pos.distanceTo(p.pos)-b.pos.distanceTo(p.pos))[0];if(c){const dx=c.pos.x/VS-px,dz=c.pos.z/VS-pz;opts.push(`The ${c.kind==='hospital'?'hospital':c.kind==='grocery'?'grocery store':c.kind==='hardware'?'hardware store':'school'} ${Math.round(Math.hypot(dx,dz)*VS/10)*10} m ${dirName(dx,dz)} still had supplies last I looked.`)}
   opts.push(`Walkers are ${WX.type==='storm'?'restless in storms':'slower in daylight'}. Move by day, hole up at night.`,`There's maybe ${zLeft()} of those things left around here. They don't stop coming, but they don't come back either once they're down.`);
   return pick(opts)}
-let talkP=null,talkN=null;
-function openTalk(p,n){talkP=p;talkN=n;$('#talk').classList.remove('hidden');if(document.pointerLockElement)document.exitPointerLock();if(players.length===1)paused=true;
+// ---- scrip prices: what things are worth; traders sell at a markup and buy at a discount
+const VALUE={ammo:2,food:6,veg:3,meat:3,cooked:6,stew:14,broth:10,jerky:4,roast:5,hotbeans:7,bandage:10,fuel:14,kit:30,scrap:2,cloth:2,wood:1,plank:1,metal:8,coal:2,iron:3,stone:1,
+  pipebomb:15,tnt:30,mine:20,spikes:10,beartrap:16,saw:120,tent:25,bed:20,bunk:30,fire:6,hide:4,bone:1,hardhat:15,helmet:30,jacket:22,vest:40,hidecoat:30,scrapvest:35,cargo:18,riot:35};
+const UNIT={ammo:10,scrap:5,cloth:5,wood:5,plank:10,stone:10,coal:5,bone:5};
+const buyPrice=k=>Math.ceil(VALUE[k]*(UNIT[k]||1)*1.3),sellPrice=k=>Math.max(1,Math.floor(VALUE[k]*(UNIT[k]||1)*.6));
+function shopOf(n){if(n.shop)return n.shop;const pool=n.kind==='bandit'?['ammo','ammo','pipebomb','tnt','fuel','kit','scrap','metal','helmet','vest','jerky','saw','beartrap']:['food','cooked','bandage','bandage','veg','ammo','fuel','cloth','stew','jacket','hardhat','broth','tent'];
+  const st={};for(let i=0;i<5;i++){const k=pick(pool);st[k]=(st[k]||0)+RI(1,3)}return n.shop=st}
+let talkP=null,talkN=null,talkMode=null;
+function openTalk(p,n){talkP=p;talkN=n;talkMode=null;$('#talk').classList.remove('hidden');if(document.pointerLockElement)document.exitPointerLock();if(players.length===1)paused=true;
   n.face=p.pos;renderTalk(n.kind==='family'?famLine(n):n.follow?pick(["Right behind you.","Lead the way.","Got your back."]):pick(["What do you need?","Make it quick. They hear voices.","You look like you've been through it.","Still breathing? Good."]))}
 function closeTalk(){if(!talkP)return;const p=talkP;talkP=talkN=null;$('#talk').classList.add('hidden');if(players.length===1)paused=false;if(p.i===0)lock()}
 function renderTalk(line){const p=talkP,n=talkN;if(!p||!n)return;const r=n.rec||{},food=Object.keys(FOODS).find(k=>k!=='meat'&&p.inv[k]>0);
   $('#talkName').innerHTML=`${n.name} <small>${n.kind==='family'?ROLE[n.role]:n.follow?'travelling with you':n.kind==='bandit'?'drifter (armed, friendly)':'survivor'}${n.infected!=null?' · bitten':''}</small>`;$('#talkLine').textContent=`"${line}"`;
   const O=[];
-  if(n.kind==='survivor'||n.rec&&n.rec.friendly){O.push(['trade',`Trade: ${n.trade.t}`]);O.push(n.follow?['stay','Wait here']:['follow','Come with me']);if(n.follow)O.push(['home','Go home'])}
+  if(talkMode==='buy'||talkMode==='sell'){const sh=shopOf(n);
+    if(talkMode==='buy')for(const[k,q]of Object.entries(sh)){if(q<=0)continue;const pr=buyPrice(k),u=UNIT[k]||1;O.push(['b:'+k,`Buy ${u} ${LABEL[k].toLowerCase()} — ${pr} scrip (${q} left)`,p.inv.scrip<pr])}
+    else for(const k of Object.keys(VALUE)){const u=UNIT[k]||1;if((p.inv[k]|0)<u)continue;O.push(['s:'+k,`Sell ${u} ${LABEL[k].toLowerCase()} — ${sellPrice(k)} scrip (you have ${p.inv[k]})`])}
+    if(O.length===0)O.push(['x',talkMode==='buy'?'Sold out':'Nothing they want',true]);O.push(['back','Back']);
+    $('#talkOpts').innerHTML=`<p class="note" style="margin:0 0 4px">You have ${p.inv.scrip|0} scrip</p>`+O.map(([a,t,dis])=>`<button data-t="${a}" ${dis?'disabled':''}>${t}</button>`).join('');return}
+  if(n.kind==='survivor'||n.rec&&n.rec.friendly){O.push(['buy',`Buy (you have ${p.inv.scrip|0} scrip)`]);O.push(['sell','Sell']);O.push(['trade',`Swap: ${n.trade.t}`]);O.push(n.follow?['stay','Wait here']:['follow','Come with me']);if(n.follow)O.push(['home','Go home'])}
   O.push(['food',food?`Give ${LABEL[food].toLowerCase()}`:'Give food (you have none)',!food]);
   if(n.role!=='kid')O.push(['band',p.inv.bandage?'Give a bandage':'Give a bandage (you have none)',!p.inv.bandage]);
   if(n.role==='kid')O.push(['hi',pick(['Ask what their name is','Ask if they are okay','Tell them a joke'])]);else O.push(['ask','Ask about the area']);
   if(n.kind==='family'&&n.role!=='kid')O.push(['lock','Tell them to lock the doors and stay inside']);
   O.push(['bye','Goodbye']);
   $('#talkOpts').innerHTML=O.map(([a,t,dis])=>`<button data-t="${a}" ${dis?'disabled':''}>${t}</button>`).join('')}
-$('#talkOpts').addEventListener('click',e=>{const b=e.target.closest('button[data-t]');const p=talkP,n=talkN;if(!b||!p||!n)return;const a=b.dataset.t,r=n.rec||{};let line='';
+$('#talkOpts').addEventListener('click',e=>{const b=e.target.closest('button[data-t]');if(!b||!talkP||!talkN||b.disabled)return;talkAct(talkP,talkN,b.dataset.t)});
+function talkAct(p,n,a){const r=n.rec||{};let line='';
   if(a==='bye'){closeTalk();return}
+  if(a==='buy'||a==='sell'){talkMode=a;renderTalk(a==='buy'?pick(["Here's what I've got.","Scrip only. No IOUs.","Take a look."]):pick(["Let's see what you've got.","I'll give you a fair price. Fair-ish."]));return}
+  if(a==='back'){talkMode=null;renderTalk("Anything else?");return}
+  if(a.startsWith('b:')){const k=a.slice(2),pr=buyPrice(k),sh=shopOf(n);if(p.inv.scrip>=pr&&sh[k]>0){p.inv.scrip-=pr;sh[k]--;p.inv[k]+=UNIT[k]||1;SND.pick();renderTalk(pick(['Pleasure.','Done.','Spend it wisely.']))}return}
+  if(a.startsWith('s:')){const k=a.slice(2),u=UNIT[k]||1;if((p.inv[k]|0)>=u){p.inv[k]-=u;p.inv.scrip+=sellPrice(k);SND.pick();renderTalk(pick(['Deal.',"I'll take it.",'Good doing business.']))}return}
   if(a==='trade'){const t=n.trade;if(!Object.entries(t.give).every(([k,q])=>p.inv[k]>=q))line=`Come back when you've got ${Object.entries(t.give).map(([k,q])=>`${q} ${LABEL[k].toLowerCase()}`).join(' and ')}.`;
     else{for(const[k,q]of Object.entries(t.give))p.inv[k]-=q;for(const[k,q]of Object.entries(t.get))p.inv[k]+=q;SND.pick();line=`Pleasure doing business. (${t.t.split(' for ')[0]})`;n.trade=TRADES[RI(0,TRADES.length-1)]}}
   else if(a==='follow'){n.follow=p;line=pick(["Alright. I'll watch your back.","Better than sitting here waiting to die.","Lead on."])}
   else if(a==='stay'){n.follow=null;n.home=n.pos.clone();line="I'll hold here."}
   else if(a==='home'){n.follow=null;line="Heading back. Stay alive out there."}
   else if(a==='food'){const k=Object.keys(FOODS).find(k=>k!=='meat'&&p.inv[k]>0);if(k){p.inv[k]--;n.hp=Math.min(100,n.hp+20);SND.pick();
-      if(n.kind==='family'&&!r.helped&&(r.need==='food'||n.role==='kid')){r.helped=1;for(const o of roster)if(o.fam&&o.fam===r.fam)o.helped=1;const it=pick(['ammo','bandage','scrap','cloth','pipebomb','kit']),q=it==='ammo'?RI(6,12):1;p.inv[it]+=q;
+      if(n.kind==='family'&&!r.helped&&(r.need==='food'||n.role==='kid')){r.helped=1;for(const o of roster)if(o.fam&&o.fam===r.fam)o.helped=1;const it=pick(['ammo','bandage','scrap','cloth','pipebomb','kit','scrip']),q=it==='ammo'?RI(6,12):it==='scrip'?RI(15,40):1;p.inv[it]+=q;
         line=n.role==='kid'?`Thank you! ...Here, my dad said to give you this. (${q} ${LABEL[it].toLowerCase()})`:`Oh thank God. Thank you. Here — it's not much, but take this. (${q} ${LABEL[it].toLowerCase()})`}
       else line=n.role==='kid'?"Yum! Thank you!":pick(["Thanks. I owe you.","That's... really kind. Thank you."])}}
   else if(a==='band'){if(p.inv.bandage>0){p.inv.bandage--;n.hp=Math.min(100,n.hp+40);SND.pick();
@@ -3458,7 +3488,7 @@ $('#talkOpts').addEventListener('click',e=>{const b=e.target.closest('button[dat
   else if(a==='ask')line=rumor(n,p);
   else if(a==='hi')line=pick([`I'm ${n.name.split(' ')[0]}. I'm ${RI(5,11)}.`,"I'm okay. I miss school. Isn't that weird?","Why did the zombie go to school? ...To get a little BRAIN-ier! Hehe.","When can we go outside again?"]);
   else if(a==='lock'){if(n.bld&&!n.bld.trap)npcFortify(n);line="We will. Thank you for checking on us."}
-  renderTalk(line)});
+  renderTalk(line)}
 function nearestNPC(p,r){let best=null,bd=r;for(const n of npcs){if(n.dead)continue;const d=n.pos.distanceTo(p.pos);if(d<bd){bd=d;best=n}}return best}
 function talkNPC(p,n){
   if(npcHostileTo(n,p)){msg(p,`${n.name} isn't in the mood to talk.`);return}
@@ -3576,13 +3606,13 @@ function startGame(n){
   initAudio();if(AC&&AC.resume)AC.resume();
   for(let i=0;i<n;i++){const p=makePlayer(i);if(startCreative){p.creative=true;msg(p,'Creative mode: every block, unlimited, no damage. Double-tap jump to fly, R picks the block')}players.push(p)}startCreative=false;
   $('#start').classList.add('hidden');$('#top').classList.remove('hidden');$('#split').classList.toggle('hidden',n<2);
-  running=true;REC=true;if(!loadingSave)tDay=.08;if(isTouch)$('#touch').classList.remove('hidden');
+  running=true;REC=true;worldUsed=true;if(!loadingSave)tDay=.08;if(isTouch)$('#touch').classList.remove('hidden');
   if(!loadingSave)msg(null,'Check the crates in the buildings. A sedan sits just up the road.');
   if(n>1)msg(players[1],'Player 2: I K J L to move, H to act, Y to use');
   lock();
 }
 // ---------------- world setup, reset, save + load
-let worldReady=false,loadingSave=false,saveT=90,initBeds=0,initFires=0;
+let worldUsed=false,worldReady=false,loadingSave=false,saveT=90,initBeds=0,initFires=0;
 const baseObjs=new Set();
 // ================= the endless world =================
 // Three tiers of storage:
@@ -3724,7 +3754,7 @@ function worldInit(){
   npcT=0;worldReady=true;
 }
 function resetWorld(ns){
-  worldReady=false;REC=false;
+  worldReady=false;worldUsed=false;REC=false;
   for(const arr of[chunkMeshes,glassMeshes,furnMeshes,grassMeshes]){for(const m of arr)if(m)m.geometry.dispose();arr.length=0}loaded.fill(0);dirtyC.clear();
   for(const o of[...scene.children])if(!baseObjs.has(o))scene.remove(o);
   zombies=[];npcs=[];vehicles=[];crates=[];doors=[];doorMap.clear();traps=[];gibs=[];bags=[];drops=[];animals=[];fires=[];beds=[];decals.length=0;manObjs.length=0;miscObjs.length=0;
@@ -3775,7 +3805,7 @@ function setMsg(t){$('#genMsg').textContent=t}
 function worldSummary(){return`Seed ${seed} · endless world · ${towns.length} towns nearby · ${crates.length} crates · ${vehicles.length} vehicles`}
 function preload(){streamChunks([spawn],1e9)}
 function withSeed(ns,then){const btns=document.querySelectorAll('#start button');btns.forEach(b=>b.disabled=true);
-  if(ns===seed&&worldReady){btns.forEach(b=>b.disabled=false);then();return}
+  if(ns===seed&&worldReady&&!worldUsed){btns.forEach(b=>b.disabled=false);then();return}
   setMsg('Generating world…');setTimeout(()=>{resetWorld(ns);preload();setMsg(worldSummary());btns.forEach(b=>b.disabled=false);then()},40)}
 function readSeed(){const v=$('#seedIn').value.trim();if(!v)return seed;if(/^-?\d+$/.test(v))return +v|0;let h=2166136261;for(const c of v)h=Math.imul(h^c.charCodeAt(0),16777619);return h|0}
 function play(n){const ns=readSeed();try{localStorage.setItem('deadground-seed',String(ns))}catch(e){}withSeed(ns,()=>{loadingSave=false;startGame(n)})}
