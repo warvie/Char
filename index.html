@@ -407,9 +407,20 @@ function gridBoxes(g,N){ // greedy-merge filled cells into boxes; [6] = mask of 
     SH[RUB0+m*3+v]=bx;BASE_OF[RUB0+m*3+v]=RUBM[m]}
   for(let id=CHIP0;id<RUB0+RUBN;id++){const b=BASE_OF[id];BCOL[id]=BCOL[b];HARD[id]=HARD[b]*(isRub(id)?.25:1);DROP[id]=DROP[b]}}
 // thin tree branches (14 cm) and twigs (8 cm) along x, z and y: wood you can walk past and cut
-const BRANCH=[230,231,232,233,234,235];{const a=.36,b=.64,c=.42,d=.58;
+const BRANCH=[230,231,232,233,234,235],ELB=[];{const a=.36,b=.64,c=.42,d=.58;
   SH[230]=[[0,a,a,1,b,b]];SH[231]=[[a,a,0,b,b,1]];SH[232]=[[a,0,a,b,1,b]];SH[233]=[[0,c,c,1,d,d]];SH[234]=[[c,c,0,d,d,1]];SH[235]=[[c,0,c,d,1,d]];
+  // curved elbows: a quarter-circle bend (radius half a block) from one face to a perpendicular face, built from overlapping cubes along the arc
+  // dirs 0 +x,1 -x,2 +y,3 -y,4 +z,5 -z. Thick: 8 up/down bends + 4 sideways bends; thin: 8 up/down bends. 254 is reserved by the save format
+  const DV=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]],FREE=[225,226,227,228,229];for(let i=236;i<=253;i++)FREE.push(i);
+  const elbow=(u,v,t)=>{const U=DV[u],V=DV[v],o=[],N=7,h=t/2,cl=q=>Math.max(0,Math.min(1,q));
+    for(let k=0;k<N;k++){const f=k/(N-1)*Math.PI/2,P=[0,1,2].map(j=>.5+.5*U[j]+.5*V[j]-.5*(V[j]*Math.cos(f)+U[j]*Math.sin(f)));
+      o.push([cl(P[0]-h),cl(P[1]-h),cl(P[2]-h),cl(P[0]+h),cl(P[1]+h),cl(P[2]+h)])}return o};
+  for(const thin of[0,1])for(const u of[0,1,4,5])for(const v of thin?[2,3]:[2,3,...(u<2?[4,5]:[])]){const id=FREE.shift();
+    SH[id]=elbow(u,v,thin?d-c:b-a);ELB[thin*36+u*6+v]=ELB[thin*36+v*6+u]=id;BRANCH.push(id)}
   for(const id of BRANCH){BCOL[id]=BCOL[B.LOG];HARD[id]=.12;DROP[id]='wood'}}
+// pick the branch piece joining direction p (toward where it came from) and n (where it goes; -1 = tip)
+function branchPiece(p,n,thin){if(n<0||(p>>1)===(n>>1)){const ax=p>>1;return(thin?233:230)+(ax===0?0:ax===2?1:2)}
+  if(thin&&(p>>1)!==1&&(n>>1)!==1)thin=0;return ELB[thin*36+p*6+n]}
 // pick a damaged variant of stage lvl (1-3) that faces outward: walls running along x show their ±z faces, walls along z their ±x faces
 function chipOf(b,x,y,z,lvl=1){const base=BASE_OF[b]||b,m=CHIPM.indexOf(base);if(m<0||isRub(b))return 0;const h=h3(x,y*7+3,z),alongX=solid(x+1,y,z)||solid(x-1,y,z),alongZ=solid(x,y,z+1)||solid(x,y,z-1);
   const set=lvl>=3?[9]:lvl===2?(base===B.ROOF?[8]:alongX&&!alongZ?[6,6,8]:alongZ&&!alongX?[7,7,8]:[6,7,8]):base===B.ROOF?[0,5,1,4]:alongX&&!alongZ?[0,1,2,5]:alongZ&&!alongX?[0,4,3,5]:[0,5];
@@ -845,10 +856,20 @@ function tree(x,z){
   for(let i=1;i<=th;i++)setv(x,h+i,z,B.LOG);
   // branches: thin limbs off the trunk, rising a little as they go, ending in leaf clusters (or bare twigs on dead trees)
   const put=(a,b,c,v)=>{if(get(a,b,c)===0)setv(a,b,c,v)};
-  for(let n=0,N=dead?RI(3,5):RI(2,4);n<N;n++){const k=RI(0,3),dx=[1,-1,0,0][k],dz=[0,0,1,-1][k],L=RI(2,dead?3:4);let y=h+RI(Math.max(3,th-6),th-1),cx=x,cz=z;
-    for(let i=1;i<=L;i++){cx+=dx;cz+=dz;const thin=i>=L-(dead?1:0)&&i>1;put(cx,y,cz,dx?(thin?233:230):(thin?234:231));if(i<L&&rng()<.4){y++;put(cx,y,cz,thin?235:232)}}
-    if(!dead)for(let a=-1;a<=1;a++)for(let b=0;b<=1;b++)for(let c=-1;c<=1;c++)if(rng()<.7)put(cx+a,y+b,cz+c,B.LEAF);
-    else if(rng()<.6)put(cx,y+1,cz,235)}
+  // each branch is a path of cells; every cell gets the straight or curved piece that joins its neighbours so limbs never break apart
+  const DI=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+  for(let n=0,N=dead?RI(3,5):RI(2,4);n<N;n++){let d=[0,1,4,5][RI(0,3)];const L=RI(2,dead?3:4);let y=h+RI(Math.max(3,th-6),th-1),cx=x,cz=z,cy=y;
+    const path=[];let k=d,steps=0;
+    while(steps<L){const v=DI[k],nx=cx+v[0],ny=cy+v[1],nz=cz+v[2];if(get(nx,ny,nz)!==0||path.some(q=>q[0]===nx&&q[1]===ny&&q[2]===nz))break;
+      path.push([nx,ny,nz,k]);cx=nx;cy=ny;cz=nz;
+      if(k===2)k=d;else{steps++;if(steps<L){const r=rng();if(r<.35)k=2;else if(r<.5){d=(d<2?[4,5]:[0,1])[RI(0,1)];k=d}}}}
+    if(!dead&&path.length&&path[path.length-1][3]===2)path.pop();
+    if(dead&&path.length&&rng()<.6&&get(cx,cy+1,cz)===0)path.push([cx,cy+1,cz,2]);
+    if(!path.length)continue;
+    for(let i=0;i<path.length;i++){const[px,py,pz,kin]=path[i],out=i+1<path.length?path[i+1][3]:-1,thin=i>=path.length-(dead?2:1)&&i>0;
+      setv(px,py,pz,branchPiece(kin^1,out,thin))}
+    [cx,cy,cz]=path[path.length-1];
+    if(!dead)for(let a=-1;a<=1;a++)for(let b=0;b<=1;b++)for(let c=-1;c<=1;c++)if(rng()<.7)put(cx+a,cy+b,cz+c,B.LEAF)}
   if(dead){put(x,h+th+1,z,232);put(x,h+th+2,z,235);return}
   for(let dx=-4;dx<=4;dx++)for(let dy=-2;dy<=4;dy++)for(let dz=-4;dz<=4;dz++){
     if(dx*dx+dy*dy*1.6+dz*dz<20&&rng()<.85&&get(x+dx,h+th+dy,z+dz)===0)setv(x+dx,h+th+dy,z+dz,B.LEAF)}
@@ -2490,7 +2511,7 @@ function canSee(z,p){
 }
 function alertZombies(pos,r){for(const z of zombies){if(z.dead||z.chasing)continue;if(z.pos.distanceTo(pos)<r){z.alert=pos.clone();z.alertT=10}}}
 // toughness in zombie hits (about 1 per second each)
-const TOUGH={230:3,231:3,232:3,233:2,234:2,235:2,[B.STPX]:7,[B.STNX]:7,[B.STPZ]:7,[B.STNZ]:7,[B.G25]:3,[B.G50]:3,[B.G75]:3,[B.GLASS]:1,[B.LEAF]:1,[B.DIRT]:4,[B.GRASS]:4,[B.PLANK]:7,[B.LOG]:9,[B.FRAME]:5,[B.WALL]:14,[B.TILEF]:14,[B.CONC]:45,[B.BRICK]:40,[B.STONE]:50,[B.ASPH]:40,[B.COAL]:50,[B.ROOF]:30,[B.IRON]:60,[B.METAL]:140};
+const TOUGH={230:3,231:3,232:3,233:2,234:2,235:2,[B.STPX]:7,[B.STNX]:7,[B.STPZ]:7,[B.STNZ]:7,[B.G25]:3,[B.G50]:3,[B.G75]:3,[B.GLASS]:1,[B.LEAF]:1,[B.DIRT]:4,[B.GRASS]:4,[B.PLANK]:7,[B.LOG]:9,[B.FRAME]:5,[B.WALL]:14,[B.TILEF]:14,[B.CONC]:45,[B.BRICK]:40,[B.STONE]:50,[B.ASPH]:40,[B.COAL]:50,[B.ROOF]:30,[B.IRON]:60,[B.METAL]:140};for(const id of BRANCH)if(!(id in TOUGH))TOUGH[id]=ELB.indexOf(id)>=36?2:3;
 for(let id=CHIP0;id<RUB0+RUBN;id++)TOUGH[id]=isRub(id)?Math.max(2,Math.round(TOUGH[BASE_OF[id]]*.1)):TOUGH[BASE_OF[id]];
 const blockDmg=new Map();
 function breakTarget(z,wx,wz){

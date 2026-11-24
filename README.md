@@ -29,7 +29,7 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 - **Blood that coats things:** every droplet falls, and where it lands it leaves a stain on the face it hit, one texture-pixel square (6 cm) at a time. That covers tops of blocks, walls, ceilings and the sides of things, and it runs down over edges. Your bat and chainsaw get bloodier with every hit, and cars that run zombies down get stained across the body.
 - **Blood:** pixel-art splatters with flung droplets where things die, spatter on nearby walls, and old dark pools in the streets where people fell months ago. No more red-tinted blocks.
 - **Overgrowth:** about 1 in 5 houses (more of the damaged ones) is being taken back by nature: ivy climbing the outside walls and in through open windows, trailing down inside, weeds across the floors, and sometimes a sapling breaking through the boards.
-- **Trees** have thin branches and twigs (14 cm and 8 cm thick) reaching off the trunk, ending in leaf clusters, or bare on dead trees.
+- **Trees** have thin branches and twigs (14 cm and 8 cm thick) reaching off the trunk, ending in leaf clusters, or bare on dead trees. Curved bend pieces join every turn, so a limb can rise, dip or swing sideways and still reads as one unbroken branch from the trunk to its tip.
 - **Windows stay clear:** nothing taller than half a metre is placed in front of a window (it goes elsewhere in the room), and ivy never fills a window or hangs over the glass.
 - **Furnished rooms:** each floor is split into rooms joined by doorways and doors.
   - Living rooms: couch facing a flat-screen or an old CRT TV (rabbit ears, VCR) on a TV stand, coffee table, rug, armchair, bookcase.
