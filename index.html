@@ -12,7 +12,7 @@
 :root{color-scheme:dark;--ink:#ebe6d8;--dim:#a9a393;--rust:#c2412d;--olive:#a3ae5e;--panel:rgba(16,15,12,.94);--line:#3a362c}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;height:100%;overflow:hidden;background:#000;color:var(--ink);font:20px/1.45 DGPixel,'Pixelify Sans',system-ui,sans-serif}
-canvas{display:block;position:fixed;inset:0;width:100vw;height:100vh;touch-action:none;image-rendering:pixelated}
+canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:none;image-rendering:pixelated}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
 .hidden{display:none!important}
 button{font:600 20px DGPixel,'Pixelify Sans',sans-serif;color:var(--ink);background:#262219;border:1px solid #4a4334;border-radius:4px;padding:12px 18px;min-height:44px;cursor:pointer}
@@ -881,7 +881,7 @@ const isTouch=(window.matchMedia&&matchMedia('(pointer: coarse)').matches)||('on
 const renderer=new THREE.WebGLRenderer({canvas,antialias:!isTouch,powerPreference:'high-performance'});
 // PIX: chunky screen pixels. The canvas renders at 1/PIX of the CSS resolution and the browser blows it up with hard edges
 let PIX=2;try{const v=localStorage.getItem('deadground-pix');if(v!==null)PIX=+v||1}catch(e){}
-function applyPix(){renderer.setPixelRatio(PIX>1?1/PIX:Math.min(devicePixelRatio,isTouch?1:1.5));renderer.domElement.style.imageRendering=PIX>1?'pixelated':'auto';renderer.setSize(innerWidth,innerHeight,false)}
+function applyPix(){renderer.setPixelRatio(PIX>1?1/PIX:Math.min(devicePixelRatio,isTouch?1:1.5));renderer.domElement.style.imageRendering=PIX>1?'pixelated':'auto';fitView(true)}
 renderer.setPixelRatio(PIX>1?1/PIX:Math.min(devicePixelRatio,isTouch?1:1.5));
 renderer.setSize(innerWidth,innerHeight,false);
 const scene=new THREE.Scene();
@@ -889,7 +889,13 @@ scene.fog=new THREE.Fog(0x8a8f86,18,85);scene.background=new THREE.Color(0x8a8f8
 const hemi=new THREE.HemisphereLight(0xc8ccc0,0x3a3428,.7);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffe2b8,.8);scene.add(sun,sun.target);
 scene.add(new THREE.AmbientLight(0x1c2230,.35));
-addEventListener('resize',()=>renderer.setSize(innerWidth,innerHeight,false));
+// keep the drawing buffer the same shape as the canvas on screen. Phones report the new size late after a rotation (and the address bar
+// changes the height), so the size is checked every frame and again after orientation changes, instead of trusting one resize event
+let VW=0,VH=0;
+function fitView(force){const c=renderer.domElement,w=Math.round(c.clientWidth||innerWidth),h=Math.round(c.clientHeight||innerHeight);
+  if(force||w!==VW||h!==VH){VW=w;VH=h;renderer.setSize(w,h,false)}}
+addEventListener('resize',()=>fitView());addEventListener('orientationchange',()=>{for(const t of[50,250,600,1200])setTimeout(()=>fitView(true),t)});
+if(window.visualViewport)visualViewport.addEventListener('resize',()=>fitView());
 // ---------------- graphics: quality levels, sun shadows, sky dome, post-processing (rays, flare, motion blur, AA, grade)
 let GFX=isTouch?0:3;try{const g=localStorage.getItem('deadground-gfx');if(g!==null&&+g>=0&&+g<=3)GFX=+g}catch(e){}
 const GFXN=['Low','Medium','High','Ultra'];
@@ -3620,7 +3626,7 @@ function update(dt){
   pressed.clear();T.pressed.clear();
 }
 function render(){
-  const w=innerWidth,h=innerHeight;renderer.setScissorTest(true);
+  fitView();const w=VW,h=VH;renderer.setScissorTest(true);
   const cen=running?players.map(p=>p.vehicle?p.vehicle.pos:p.pos):[spawn];updateShadowCam(cen);updateRT(cen[0]);
   RTU.sunDirU.value.copy(SUN_DIR);RTU.sunK.value=clamp(sun.intensity*1.5,0,1);RTU.wet.value=WX.wet;RTU.rtime.value=performance.now()/1000;
   if(!running){const t=performance.now()/1000*.05;introCam.position.set(spawn.x+Math.cos(t)*48,32,spawn.z+Math.sin(t)*48);introCam.lookAt(spawn.x,12,spawn.z);introCam.far=viewUnits()+60;

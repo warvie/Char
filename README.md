@@ -61,6 +61,8 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 **No overlapping UI:** the HUD is laid out (and checked by script) for desktop, laptop, split-screen, phones in portrait and landscape, and tablets, so nothing sits on top of anything else.
 
+**Rotating your phone:** the picture is resized to the new screen shape every frame and again just after a rotation, so turning between portrait and landscape never leaves the view stretched or squashed.
+
 **All-pixel UI:** a pixel font is built into the game (hand-drawn 5×7 glyphs turned into a real font at startup), so every label, menu, sign and button is crisp pixel type even offline. Touch buttons and the joystick are square too.
 
 Four quality levels (start screen or case). They change effects only:
