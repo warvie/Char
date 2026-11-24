@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Dead Ground</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,7 +12,8 @@
 :root{color-scheme:dark;--ink:#ebe6d8;--dim:#a9a393;--rust:#c2412d;--olive:#a3ae5e;--panel:rgba(16,15,12,.94);--line:#3a362c}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;height:100%;overflow:hidden;background:#000;color:var(--ink);font:15px/1.45 Barlow,system-ui,sans-serif}
-canvas{display:block;position:fixed;inset:0;width:100vw;height:100vh}
+canvas{display:block;position:fixed;inset:0;width:100vw;height:100vh;touch-action:none}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
 .hidden{display:none!important}
 button{font:600 16px Barlow,sans-serif;color:var(--ink);background:#262219;border:1px solid #4a4334;border-radius:4px;padding:12px 18px;min-height:44px;cursor:pointer}
 button:hover:not(:disabled){background:#332d21;border-color:var(--olive)}
@@ -72,12 +73,36 @@ h1,h2,h3{font-family:'Bebas Neue',sans-serif;font-weight:400;letter-spacing:.03e
 .rec small{color:var(--dim);display:block}
 #menu h3{font-size:24px;color:var(--rust);margin-top:6px}
 @media(max-width:700px){.slot{width:56px;font-size:10px}.inv{font-size:11px}.veh{width:150px}.stats{width:40%}}
+#touch{position:fixed;inset:0;pointer-events:none;z-index:7}
+.tb{pointer-events:auto;position:absolute;width:64px;height:64px;min-height:0;padding:0;border-radius:50%;background:rgba(20,18,14,.5);border:2px solid rgba(235,230,216,.35);font:17px/1 'Bebas Neue',sans-serif;letter-spacing:.04em;touch-action:none;color:var(--ink)}
+.tb.on{background:rgba(163,174,94,.65);border-color:var(--olive)}
+.tb.big{width:88px;height:88px;font-size:22px;right:calc(18px + env(safe-area-inset-right));bottom:calc(26px + env(safe-area-inset-bottom));background:rgba(140,40,25,.55)}
+.tb[data-b=jump]{right:calc(118px + env(safe-area-inset-right));bottom:calc(20px + env(safe-area-inset-bottom))}
+.tb[data-b=use]{right:calc(26px + env(safe-area-inset-right));bottom:calc(128px + env(safe-area-inset-bottom))}
+.tb[data-b=place]{right:calc(106px + env(safe-area-inset-right));bottom:calc(100px + env(safe-area-inset-bottom))}
+.tb.sm{width:50px;height:50px;font-size:14px;top:calc(48px + env(safe-area-inset-top))}
+.tb[data-b=bag]{right:calc(12px + env(safe-area-inset-right))}.tb[data-b=tool]{right:calc(68px + env(safe-area-inset-right))}.tb[data-b=mat]{right:calc(124px + env(safe-area-inset-right))}
+.tb[data-b=view]{right:calc(180px + env(safe-area-inset-right))}.tb[data-b=run]{right:calc(236px + env(safe-area-inset-right))}
+#stick{position:absolute;left:calc(24px + env(safe-area-inset-left));bottom:calc(24px + env(safe-area-inset-bottom));width:130px;height:130px;border-radius:50%;border:2px solid rgba(235,230,216,.3);background:rgba(0,0,0,.2);pointer-events:none}
+#stick.on{border-color:rgba(235,230,216,.55)}
+#stick i{position:absolute;left:39px;top:39px;width:52px;height:52px;border-radius:50%;background:rgba(235,230,216,.45)}
+body.touch .stats{bottom:auto;top:calc(12px + env(safe-area-inset-top));left:auto;right:calc(12px + env(safe-area-inset-right));width:150px;top:calc(104px + env(safe-area-inset-top))}
+body.touch .hot{bottom:auto;top:calc(40px + env(safe-area-inset-top))}
+body.touch .feed{top:auto;bottom:170px;right:auto;left:16px;align-items:flex-start}
+body.touch .veh{bottom:auto;top:calc(170px + env(safe-area-inset-top))}
+body.touch .slot{width:52px;font-size:9px;padding:3px}body.touch .slot b{font-size:13px}
+body.touch .inv{font-size:10px}
+body.touch #top{font-size:15px;padding:3px 10px}
+body.touch .prompt{top:calc(50% + 34px);font-size:13px}
 @media(prefers-reduced-motion:reduce){.feed div{animation:none}}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="huds"></div>
 <div id="top" class="hidden"></div>
 <div id="split" class="hidden"></div>
+<div id="touch" class="hidden"><div id="stick"><i></i></div>
+  <button class="tb big" data-b="act">Act</button><button class="tb" data-b="jump">Jump</button><button class="tb" data-b="use">Use</button><button class="tb" data-b="place">Place</button>
+  <button class="tb sm" data-b="bag">Bag</button><button class="tb sm" data-b="tool">Tool</button><button class="tb sm" data-b="mat">Type</button><button class="tb sm" data-b="view">View</button><button class="tb sm" data-b="run">Run</button></div>
 
 <div id="start" class="screen"><div class="kit">
   <h1>Dead Ground</h1>
@@ -92,9 +117,10 @@ h1,h2,h3{font-family:'Bebas Neue',sans-serif;font-weight:400;letter-spacing:.03e
       <dt>WASD / Mouse</dt><dd>Move / look (arrow keys also look)</dd>
       <dt>Click</dt><dd>Attack, shoot, dig or build</dd>
       <dt>Right-click</dt><dd>Place a block</dd>
-      <dt>1–4 / wheel</dt><dd>Bat, pistol, pickaxe, build</dd>
-      <dt>R</dt><dd>Change build material</dd>
-      <dt>E</dt><dd>Search, refuel, repair, enter/exit car</dd>
+      <dt>1–5 / wheel</dt><dd>Bat, pistol, pickaxe, build, trap</dd>
+      <dt>R</dt><dd>Change block material or trap type</dd>
+      <dt>E</dt><dd>Search, open doors, refuel, repair, enter/exit car</dd>
+      <dt>V</dt><dd>Driver view / outside view in a car</dd>
       <dt>Space / Shift</dt><dd>Jump (brake in car) / sprint</dd>
       <dt>Tab</dt><dd>Backpack & crafting</dd>
       <dt>G / X / T</dt><dd>Eat / bandage / flashlight</dd>
@@ -103,17 +129,21 @@ h1,h2,h3{font-family:'Bebas Neue',sans-serif;font-weight:400;letter-spacing:.03e
       <dt>I K / J L</dt><dd>Move / turn</dd>
       <dt>U / O</dt><dd>Look up / down</dd>
       <dt>H</dt><dd>Attack, shoot, dig or build</dd>
-      <dt>Y</dt><dd>Search, refuel, repair, car</dd>
+      <dt>Y</dt><dd>Search, doors, refuel, repair, car</dd>
+      <dt>,</dt><dd>Driver view / outside view</dd>
       <dt>N / P</dt><dd>Jump / sprint</dd>
-      <dt>B / M</dt><dd>Next tool / build material</dd>
+      <dt>B / M</dt><dd>Next tool / material or trap type</dd>
       <dt>[ / ] / \</dt><dd>Eat / bandage / backpack</dd>
       <dt>Gamepad</dt><dd>Sticks, RT act, LT place, A jump, X use, Y tool, RB material, Start bag</dd>
     </dl></div>
     <div><h3>Surviving</h3><dl>
       <dt>Loot</dt><dd>Crates inside buildings hold ammo, food, scrap, fuel</dd>
       <dt>Dig</dt><dd>Stone lies 4 blocks down; coal and iron below</dd>
-      <dt>Build</dt><dd>Zombies climb 1 block and smash wood — wall up 2 high in stone or metal</dd>
+      <dt>Build</dt><dd>Zombies jump 2 blocks and smash wood, glass and doors — wall up 3 high in stone or metal</dd>
       <dt>Cars</dt><dd>Need fuel cans; wrecks need a repair kit</dd>
+      <dt>Traps</dt><dd>Spikes wound and slow, bear traps pin a walker, tripwire bombs blow up a crowd (and you)</dd>
+      <dt>Sewers</dt><dd>Climb down open manholes in the roads. Dark, crawling with dead, better loot</dd>
+      <dt>Phone / tablet</dt><dd>Drag left side to move, right side to look; on-screen buttons for the rest</dd>
     </dl></div>
   </div>
   <p class="note">Split-screen co-op runs on one computer. Online play would need a game server, which this page can't host. Each run makes a new random world.</p>
@@ -148,95 +178,139 @@ function vnoise(x,z){const xi=Math.floor(x),zi=Math.floor(z),s=t=>t*t*(3-2*t),u=
 const fbm=(x,z)=>vnoise(x/16,z/16)*.6+vnoise(x/7,z/7)*.3+vnoise(x/3,z/3)*.1;
 
 // ---------------- world data
-const W=96,H=34,CS=16,NC=W/CS,G=12,T0=20,T1=79;
+// VS = size of one voxel in world units (0.5 = half-size blocks). The world is 96x96 units.
+const VS=.5,W=192,H=68,CS=16,NC=W/CS,G=24,T0=40,T1=159,FH=6;
 const vox=new Uint8Array(W*H*W), hmap=new Int16Array(W*W);
 const inB=(x,y,z)=>x>=0&&z>=0&&x<W&&z<W&&y>=0&&y<H;
 function get(x,y,z){if(y>=H&&x>=0&&z>=0&&x<W&&z<W)return 0;if(!inB(x,y,z))return 13;return vox[(y*W+z)*W+x]}
 function setv(x,y,z,v){if(inB(x,y,z))vox[(y*W+z)*W+x]=v}
-const solid=(x,y,z)=>get(x,y,z)!==0;
-const B={GRASS:1,DIRT:2,STONE:3,COAL:4,IRON:5,CONC:6,ASPH:7,PLANK:8,LOG:9,LEAF:10,BRICK:11,METAL:12,BED:13};
-const BCOL=[0,0x56613a,0x5a4632,0x6a6a68,0x2a2a2c,0x8f6a52,0x8a8780,0x2e2e32,0x8b6a40,0x4a3826,0x3c4728,0x7a3a2c,0x76838a,0x161616];
-const HARD=[0,.35,.35,1.1,1.3,1.7,1.2,1.1,.7,.8,.15,1.2,3,1e9];
-const DROP=[null,'dirt','dirt','stone','coal','iron','stone','stone','plank','wood',null,'stone','metal',null];
+const solid=(x,y,z)=>{const b=get(x,y,z);return b!==0&&b!==17};
+const vc=a=>Math.floor(a/VS);
+const B={GRASS:1,DIRT:2,STONE:3,COAL:4,IRON:5,CONC:6,ASPH:7,PLANK:8,LOG:9,LEAF:10,BRICK:11,METAL:12,BED:13,DOOR:14,GLASS:15,FRAME:16,LADDER:17,SLUDGE:18};
+const BCOL=[0,0x56613a,0x5a4632,0x6a6a68,0x2a2a2c,0x8f6a52,0x8a8780,0x2e2e32,0x8b6a40,0x4a3826,0x3c4728,0x7a3a2c,0x76838a,0x161616,0x6a4a2e,0x9fc4d0,0xcfc8b4,0x6b4a2a,0x2f3a1a];
+const HARD=[0,.18,.18,.55,.65,.85,.6,.55,.35,.4,.08,.6,1.5,1e9,1.2,.1,.3,1e9,.3];
+const DROP=[null,'dirt','dirt','stone','coal','iron','stone','stone','plank','wood',null,'stone','metal',null,null,null,'plank',null,'dirt'];
+const opaque=b=>b!==0&&b!==B.GLASS&&b!==B.DOOR&&b!==B.LADDER;
 const MATS=[['plank',B.PLANK],['stone',B.STONE],['dirt',B.DIRT],['metal',B.METAL]];
-const LABEL={ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
-const isRoad=(x,z)=>x>=T0&&x<=T1&&z>=T0&&z<=T1&&(((x-T0)%14)<3||((z-T0)%14)<3);
-const inTown=(x,z)=>x>=T0-2&&x<=T1+2&&z>=T0-2&&z<=T1+2;
-const crateSpots=[],carSpots=[],indoorSpots=[];
-function topY(x,z){x=Math.floor(x);z=Math.floor(z);for(let y=H-1;y>=0;y--)if(solid(x,y,z))return y;return -1}
+const LABEL={spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
+const roadOff=v=>(v-T0)%28;
+const isRoad=(x,z)=>x>=T0&&x<=T1&&z>=T0&&z<=T1&&(roadOff(x)<6||roadOff(z)<6);
+const isWalk=(x,z)=>x>=T0&&x<=T1&&z>=T0&&z<=T1&&!isRoad(x,z)&&([6,7,26,27].includes(roadOff(x))||[6,7,26,27].includes(roadOff(z)));
+const inTown=(x,z)=>x>=T0-4&&x<=T1+4&&z>=T0-4&&z<=T1+4;
+const crateSpots=[],carSpots=[],indoorSpots=[],doorSpecs=[],sewerSpots=[],manholes=[];
+const SY=G-11;
+function topY(x,z){for(let y=H-1;y>=0;y--)if(solid(x,y,z))return y;return -1}
+const topW=(x,z)=>(topY(vc(x),vc(z))+1)*VS;
 
 function gen(){
   for(let x=0;x<W;x++)for(let z=0;z<W;z++){
     let h=G;
-    if(!inTown(x,z)){const dx=Math.max(T0-2-x,x-T1-2,0),dz=Math.max(T0-2-z,z-T1-2,0);h=G+Math.round((fbm(x,z)-.42)*12*Math.min(1,Math.hypot(dx,dz)/8))}
-    h=clamp(h,7,H-10);hmap[z*W+x]=h;
+    if(!inTown(x,z)){const dx=Math.max(T0-4-x,x-T1-4,0),dz=Math.max(T0-4-z,z-T1-4,0);h=G+Math.round((fbm(x/2,z/2)-.42)*24*Math.min(1,Math.hypot(dx,dz)/16))}
+    h=clamp(h,14,H-22);
     for(let y=0;y<=h;y++){
       let b;
       if(y===0)b=B.BED;
-      else if(y<h-3){b=B.STONE;const r=h3(x,y,z);if(r<.055&&y<h-4)b=B.COAL;else if(r<.085&&y<h-6)b=B.IRON}
+      else if(y<h-7){b=B.STONE;const r=h3(x,y,z);if(r<.05&&y<h-8)b=B.COAL;else if(r<.08&&y<h-12)b=B.IRON}
       else if(y<h)b=B.DIRT;
-      else b=isRoad(x,z)?B.ASPH:(inTown(x,z)&&h3(x,99,z)<.45?B.DIRT:B.GRASS);
+      else b=isRoad(x,z)?B.ASPH:isWalk(x,z)?B.CONC:(inTown(x,z)&&h3(x>>1,99,z>>1)<.45?B.DIRT:B.GRASS);
       setv(x,y,z,b);
     }
+    if(isWalk(x,z)){h++;setv(x,h,z,B.CONC)}
+    hmap[z*W+x]=h;
   }
-  for(let lx=T0+3;lx+10<=T1-3;lx+=14)for(let lz=T0+3;lz+10<=T1-3;lz+=14){
-    if(lx===T0+31&&lz===T0+31){continue}
-    if(rng()<.85)building(lx,lz,11);
-    else for(let i=0;i<6;i++)setv(lx+RI(0,10),G+1,lz+RI(0,10),B.CONC);
+  sewers();
+  for(let lx=T0+8;lx+18<=T1;lx+=28)for(let lz=T0+8;lz+18<=T1;lz+=28){
+    if(rng()<.85)building(lx,lz,18);
+    else for(let i=0;i<10;i++)setv(lx+RI(0,17),G+1,lz+RI(0,17),B.CONC);
   }
-  for(let i=0;i<170;i++){const x=RI(3,W-4),z=RI(3,W-4);if(inTown(x,z))continue;tree(x,z)}
-  // vehicles
-  carSpots.push({x:49.5,z:42.5,yaw:Math.PI,type:'car',good:true});
-  const lanes=[T0+1.5,T0+15.5,T0+29.5,T0+43.5,T0+57.5];
+  for(let i=0;i<190;i++){const x=RI(6,W-7),z=RI(6,W-7);if(inTown(x,z))continue;tree(x,z)}
+  carSpots.push({x:49.5,z:39.5,yaw:Math.PI,type:'car',good:true});
+  const lanes=[21.5,35.5,49.5,63.5,77.5];
   for(let i=0,tries=0;i<7&&tries<80;tries++){
-    const alongZ=rng()<.5,lane=lanes[RI(0,4)],t=R(T0+4,T1-4);
+    const alongZ=rng()<.5,lane=lanes[RI(0,4)],t=R(T0/2+3,T1/2-3);
     const x=alongZ?lane:t,z=alongZ?t:lane;
     if(carSpots.some(c=>Math.hypot(c.x-x,c.z-z)<8))continue;
     if(Math.hypot(x-49.5,z-49.5)<5)continue;
     carSpots.push({x,z,yaw:(alongZ?0:Math.PI/2)+(rng()<.5?Math.PI:0)+R(-.15,.15),type:rng()<.35?'truck':'car'});i++;
   }
 }
+function sewers(){
+  const bands=[];for(let o=T0;o+5<=T1;o+=28)bands.push(o);
+  const both=(o,d,t,y,v)=>{setv(o+d,y,t,v);setv(t,y,o+d,v)};
+  for(const o of bands)for(let t=T0;t<=T1;t++)for(let d=0;d<6;d++)for(let y=SY;y<=SY+6;y++)both(o,d,t,y,B.BRICK);
+  for(const o of bands)for(let t=T0+1;t<=T1-1;t++)for(let d=1;d<5;d++){for(let y=SY+1;y<=SY+5;y++)both(o,d,t,y,0);if(d===2||d===3)both(o,d,t,SY,B.SLUDGE)}
+  for(const o of bands)for(let t=T0+16;t+2<=T1;t+=28){
+    for(const alongZ of[true,false]){
+      if(rng()<.35)continue;
+      const x=alongZ?o+2:t,z=alongZ?t:o+2;
+      for(let y=SY+1;y<=G;y++)for(let a=0;a<2;a++)for(let b=0;b<2;b++)setv(x+a,y,z+b,B.LADDER);
+      manholes.push({x,z,alongZ});
+    }
+    for(const alongZ of[true,false]){const tt=t+RI(-8,8),x=alongZ?o+1:tt,z=alongZ?tt:o+1;
+      if(rng()<.5)crateSpots.push([(x+.5)*VS+(alongZ?.15:0),(SY+1)*VS,(z+.5)*VS+(alongZ?0:.15),true]);
+      sewerSpots.push([(alongZ?o+3:tt)*VS,(SY+1)*VS,(alongZ?tt:o+3)*VS])}
+  }
+}
+function windowAt(cells){ // cells: function(dx,dy)->[x,y,z]; 4 wide x 4 tall frame, 2x2 pane
+  const kind=rng();
+  for(let dx=0;dx<4;dx++)for(let dy=0;dy<4;dy++){
+    const [x,y,z]=cells(dx,dy),inner=dx>0&&dx<3&&dy>0&&dy<3;
+    if(!inner)setv(x,y,z,B.FRAME);
+    else setv(x,y,z,kind<.6?B.GLASS:kind<.85?0:(dy===1?B.PLANK:(dx===1?0:B.PLANK)));
+  }
+}
+function doorAt(x,y,z,inward){ // 2 wide x 4 tall opening along x, frame around
+  for(let dy=0;dy<5;dy++){setv(x-1,y+dy,z,B.FRAME);setv(x+2,y+dy,z,B.FRAME)}
+  setv(x,y+4,z,B.FRAME);setv(x+1,y+4,z,B.FRAME);
+  const broken=rng()<.2;
+  for(let dx=0;dx<2;dx++)for(let dy=0;dy<4;dy++)setv(x+dx,y+dy,z,broken?0:B.DOOR);
+  if(!broken)doorSpecs.push({x,y,z,inward});
+}
 function building(lx,lz,S){
-  const w=RI(8,S),d=RI(8,S),x0=lx+RI(0,S-w),z0=lz+RI(0,S-d),x1=x0+w-1,z1=z0+d-1;
-  const floors=RI(1,3),g=G,mat=rng()<.5?B.CONC:B.BRICK,top=g+floors*4;
+  const w=RI(14,S),d=RI(14,S),x0=lx+RI(0,S-w),z0=lz+RI(0,S-d),x1=x0+w-1,z1=z0+d-1;
+  const floors=RI(1,3),g=G,mat=rng()<.5?B.CONC:B.BRICK,top=g+floors*FH;
   for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
     const edge=x===x0||x===x1||z===z0||z===z1;
-    for(let y=g+1;y<=top;y++){if(edge||(y-g)%4===0)setv(x,y,z,mat)}
+    for(let y=g+1;y<=top;y++){if(edge||(y-g)%FH===0)setv(x,y,z,mat)}
     if(!edge)setv(x,g,z,B.CONC);
   }
-  for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
-    const edge=x===x0||x===x1||z===z0||z===z1,corner=(x===x0||x===x1)&&(z===z0||z===z1);
-    if(!edge||corner)continue;
-    for(let k=0;k<floors;k++){const b=g+4*k;if((x+z)%3===0){setv(x,b+2,z,0);if(rng()<.3)setv(x,b+3,z,0)}
-      for(let y=b+1;y<=b+3;y++)if(rng()<.06)setv(x,y,z,0)}
-  }
-  const xm=Math.floor((x0+x1)/2);
-  for(const dx of[0,1]){setv(xm+dx,g+1,z0,0);setv(xm+dx,g+2,z0,0)}
-  if(rng()<.5){setv(x1,g+1,z0+3,0);setv(x1,g+2,z0+3,0)}
+  const xm=Math.floor((x0+x1)/2)-1;
   for(let k=0;k<floors;k++){
-    const fb=g+4*k;
-    for(let i=0;i<4;i++)setv(x0+2+i,fb+1+i,z1-1,B.PLANK);
-    for(let i=0;i<3;i++){setv(x0+2+i,fb+4,z1-1,0);setv(x0+2+i,fb+4,z1-2,0)}
-    const n=RI(1,2);
-    for(let c=0;c<n;c++){const cx=RI(x0+1,x1-1),cz=RI(z0+1,z1-3);if(get(cx,fb+1,cz)===0)crateSpots.push([cx+.5,fb+1,cz+.5])}
-    indoorSpots.push([RI(x0+2,x1-2)+.5,fb+1,RI(z0+2,z1-3)+.5]);
+    const b=g+FH*k;
+    for(let x=x0+2;x+3<=x1-2;x+=6){
+      if(!(k===0&&x+3>=xm-1&&x<=xm+2))windowAt((dx,dy)=>[x+dx,b+1+dy,z0]);
+      if(!(k===0&&x+3>=x1-6))windowAt((dx,dy)=>[x+dx,b+1+dy,z1]);
+    }
+    for(let z=z0+2;z+3<=z1-4;z+=6){windowAt((dz,dy)=>[x0,b+1+dy,z+dz]);windowAt((dz,dy)=>[x1,b+1+dy,z+dz])}
+    for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){if(!(x===x0||x===x1||z===z0||z===z1))continue;for(let y=b+1;y<b+FH;y++)if(get(x,y,z)===mat&&rng()<.03)setv(x,y,z,0)}
   }
-  if(rng()<.45){const hx=RI(x0+1,x1-4),hz=RI(z0+1,z1-4);
-    for(let x=hx;x<hx+3;x++)for(let z=hz;z<hz+3;z++){setv(x,top,z,0);if(rng()<.6&&get(x,top-3,z)===0&&floors>1)setv(x,top-3,z,mat)}}
-  for(let i=0;i<5;i++){const x=rng()<.5?x0-1:x1+1,z=RI(z0,z1);if(!isRoad(x,z))setv(x,g+1,z,mat)}
+  doorAt(xm,g+1,z0,1);
+  if(rng()<.5)doorAt(x1-4,g+1,z1,-1);
+  for(let k=0;k<floors;k++){
+    const fb=g+FH*k;
+    for(let i=0;i<FH;i++)for(const zz of[z1-1,z1-2])setv(x0+2+i,fb+1+i,zz,B.PLANK);
+    for(let i=0;i<FH-1;i++)for(const zz of[z1-1,z1-2])setv(x0+2+i,fb+FH,zz,0);
+    const n=RI(1,2);
+    for(let c=0;c<n;c++){const cx=RI(x0+2,x1-3),cz=RI(z0+3,z1-5);if(get(cx,fb+1,cz)===0)crateSpots.push([(cx+1)*VS,(fb+1)*VS,(cz+1)*VS])}
+    indoorSpots.push([(RI(x0+3,x1-3)+.5)*VS,(fb+1)*VS,(RI(z0+3,z1-5)+.5)*VS]);
+  }
+  if(rng()<.45){const hx=RI(x0+2,x1-8),hz=RI(z0+2,z1-8);
+    for(let x=hx;x<hx+6;x++)for(let z=hz;z<hz+6;z++){setv(x,top,z,0);if(rng()<.5&&floors>1&&get(x,top-FH+1,z)===0)setv(x,top-FH+1,z,mat)}}
+  for(let i=0;i<8;i++){const x=rng()<.5?x0-1:x1+1,z=RI(z0,z1);if(!isRoad(x,z)&&get(x,g+1,z)===0&&get(x,g,z))setv(x,g+1,z,mat)}
 }
 function tree(x,z){
-  const h=hmap[z*W+x],th=RI(4,6),dead=rng()<.35;
+  const h=topY(x,z),th=RI(8,12),dead=rng()<.35;
   for(let i=1;i<=th;i++)setv(x,h+i,z,B.LOG);
-  if(dead){setv(x+1,h+th-1,z,B.LOG);return}
-  for(let dx=-2;dx<=2;dx++)for(let dy=-1;dy<=2;dy++)for(let dz=-2;dz<=2;dz++){
-    if(dx*dx+dy*dy*1.5+dz*dz<6.5&&rng()<.85&&get(x+dx,h+th+dy,z+dz)===0)setv(x+dx,h+th+dy,z+dz,B.LEAF)}
+  if(dead){setv(x+1,h+th-2,z,B.LOG);setv(x+2,h+th-1,z,B.LOG);return}
+  for(let dx=-4;dx<=4;dx++)for(let dy=-2;dy<=4;dy++)for(let dz=-4;dz<=4;dz++){
+    if(dx*dx+dy*dy*1.6+dz*dz<20&&rng()<.85&&get(x+dx,h+th+dy,z+dz)===0)setv(x+dx,h+th+dy,z+dz,B.LEAF)}
 }
 
 // ---------------- renderer + scene
 const canvas=$('#c');
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+const isTouch=(window.matchMedia&&matchMedia('(pointer: coarse)').matches)||('ontouchstart' in window);
+const renderer=new THREE.WebGLRenderer({canvas,antialias:!isTouch});
+renderer.setPixelRatio(Math.min(devicePixelRatio,isTouch?1:1.5));
 renderer.setSize(innerWidth,innerHeight,false);
 const scene=new THREE.Scene();
 scene.fog=new THREE.Fog(0x8a8f86,18,85);scene.background=new THREE.Color(0x8a8f86);
@@ -251,34 +325,47 @@ for(const f of FACES){const c=f[3],a=[0,1,2].map(i=>c[1][i]-c[0][i]),b=[0,1,2].m
   const n=[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];if(n[0]*f[0]+n[1]*f[1]+n[2]*f[2]<0)c.reverse()}
 const BRGB=BCOL.map(c=>{const k=new THREE.Color(c);return[k.r,k.g,k.b]});
 const vmat=new THREE.MeshLambertMaterial({vertexColors:true});
-const chunkMeshes=[];
+const gmat=new THREE.MeshLambertMaterial({color:0xa8d0dc,transparent:true,opacity:.32,depthWrite:false});
+const chunkMeshes=[],glassMeshes=[];
+function mkGeo(P,N,C,I){const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));
+  if(C)g.setAttribute('color',new THREE.Float32BufferAttribute(C,3));g.setIndex(I);g.computeBoundingSphere();return g}
 function buildChunk(cx,cz){
-  const P=[],N=[],C=[],I=[];
+  const P=[],N=[],C=[],I=[],GP=[],GN=[],GI=[];
   for(let x=cx*CS;x<cx*CS+CS;x++)for(let z=cz*CS;z<cz*CS+CS;z++)for(let y=0;y<H;y++){
-    const b=vox[(y*W+z)*W+x];if(!b)continue;
+    const b=vox[(y*W+z)*W+x];if(!b||b===B.DOOR||b===B.LADDER)continue;
+    if(b===B.GLASS){
+      for(const f of FACES){const nb=get(x+f[0],y+f[1],z+f[2]);if(nb===B.GLASS||opaque(nb))continue;
+        const n=GP.length/3;for(const c of f[3]){GP.push(x+c[0],y+c[1],z+c[2]);GN.push(f[0],f[1],f[2])}GI.push(n,n+1,n+2,n,n+2,n+3)}
+      continue;
+    }
     let col=BRGB[b];const v=.8+.2*h3(x,y,z);
-    if((b===B.ASPH||b===B.CONC||b===B.DIRT)&&h3(x,y+7,z)<.035)col=[.32,.04,.03];
+    if((b===B.ASPH||b===B.CONC||b===B.DIRT)&&h3(x>>1,y+7,z>>1)<.035)col=[.32,.04,.03];
     for(const f of FACES){
-      if(solid(x+f[0],y+f[1],z+f[2]))continue;
+      if(opaque(get(x+f[0],y+f[1],z+f[2])))continue;
       const n=P.length/3,s=v*f[4];
       for(const c of f[3]){P.push(x+c[0],y+c[1],z+c[2]);N.push(f[0],f[1],f[2]);C.push(col[0]*s,col[1]*s,col[2]*s)}
       I.push(n,n+1,n+2,n,n+2,n+3);
     }
   }
-  const g=new THREE.BufferGeometry();
-  g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));
-  g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));
-  g.setAttribute('color',new THREE.Float32BufferAttribute(C,3));
-  g.setIndex(I);g.computeBoundingSphere();
   const k=cz*NC+cx;
-  if(chunkMeshes[k]){scene.remove(chunkMeshes[k]);chunkMeshes[k].geometry.dispose()}
-  const m=new THREE.Mesh(g,vmat);scene.add(m);chunkMeshes[k]=m;
+  for(const arr of[chunkMeshes,glassMeshes])if(arr[k]){scene.remove(arr[k]);arr[k].geometry.dispose();arr[k]=null}
+  const m=new THREE.Mesh(mkGeo(P,N,C,I),vmat);m.scale.setScalar(VS);scene.add(m);chunkMeshes[k]=m;
+  if(GP.length){const gm=new THREE.Mesh(mkGeo(GP,GN,null,GI),gmat);gm.scale.setScalar(VS);gm.renderOrder=2;scene.add(gm);glassMeshes[k]=gm}
 }
-function setBlock(x,y,z,v){
-  if(!inB(x,y,z))return;setv(x,y,z,v);
+function rebuildAt(x,z){
   const cx=Math.floor(x/CS),cz=Math.floor(z/CS);buildChunk(cx,cz);
   if(x%CS===0&&cx>0)buildChunk(cx-1,cz);if(x%CS===CS-1&&cx<NC-1)buildChunk(cx+1,cz);
   if(z%CS===0&&cz>0)buildChunk(cx,cz-1);if(z%CS===CS-1&&cz<NC-1)buildChunk(cx,cz+1);
+}
+function setBlock(x,y,z,v){if(!inB(x,y,z))return;setv(x,y,z,v);rebuildAt(x,z)}
+function breakGlass(x,y,z){
+  const st=[[x,y,z]],done=new Set();let n=0;
+  while(st.length&&n<16){const[a,b,c]=st.pop();if(get(a,b,c)!==B.GLASS)continue;setv(a,b,c,0);n++;
+    burst(new V3((a+.5)*VS,(b+.5)*VS,(c+.5)*VS),5,3,[.7,.85,.9],1);done.add(Math.floor(a/CS)+','+Math.floor(c/CS));
+    for(const f of FACES)st.push([a+f[0],b+f[1],c+f[2]])}
+  for(const key of done){const[cx,cz]=key.split(',').map(Number);buildChunk(cx,cz)}
+  rebuildAt(x,z);SND.glass();
 }
 
 // ---------------- model helpers
@@ -310,7 +397,8 @@ function makeVM(){
   const flash=part(gun,.1,.1,.1,0xffd36a,0,0,-.34);flash.material=new THREE.MeshBasicMaterial({color:0xffd36a});flash.visible=false;
   const pick=new THREE.Group();part(pick,.05,.05,.7,0x6b4a2a,0,0,-.25);part(pick,.06,.5,.07,0x7d7d7d,0,.05,-.58);pick.rotation.set(.3,0,0);
   const blk=new THREE.Mesh(box(.26,.26,.26),new THREE.MeshLambertMaterial({color:0x8b6a40}));blk.position.set(0,0,-.25);
-  g.add(bat,gun,pick,blk);return{g,items:[bat,gun,pick,blk],blk,flash};
+  const trap=new THREE.Group();part(trap,.3,.04,.3,0x5a4228,0,-.05,-.25);for(let i=0;i<3;i++)for(let j=0;j<3;j++)part(trap,.025,.1,.025,0x9a9a9a,-.09+i*.09,.02,-.34+j*.09);
+  g.add(bat,gun,pick,blk,trap);return{g,items:[bat,gun,pick,blk,trap],blk,flash};
 }
 
 // ---------------- blood + dust particles, decals
@@ -325,7 +413,7 @@ function burst(p,n,force,col,up=2){for(let k=0;k<n;k++){const j=pI;pI=(pI+1)%PN;
 function updParticles(dt){for(let j=0;j<PN;j++){if(pLife[j]<=0)continue;const o=j*3;pLife[j]-=dt;
   if(pLife[j]<=0){pPos[o+1]=-100;continue}
   if(pVel[o]||pVel[o+1]||pVel[o+2]){pVel[o+1]-=18*dt;const ny=pPos[o+1]+pVel[o+1]*dt;
-    if(solid(Math.floor(pPos[o]),Math.floor(ny),Math.floor(pPos[o+2]))){pVel[o]=pVel[o+1]=pVel[o+2]=0;pPos[o+1]=Math.floor(ny)+1.02}
+    if(solid(vc(pPos[o]),vc(ny),vc(pPos[o+2]))){pVel[o]=pVel[o+1]=pVel[o+2]=0;pPos[o+1]=(vc(ny)+1)*VS+.02}
     else{pPos[o]+=pVel[o]*dt;pPos[o+1]=ny;pPos[o+2]+=pVel[o+2]*dt}}}
   pGeo.attributes.position.needsUpdate=true;pGeo.attributes.color.needsUpdate=true}
 const bc=document.createElement('canvas');bc.width=bc.height=128;{const x=bc.getContext('2d');
@@ -333,8 +421,8 @@ const bc=document.createElement('canvas');bc.width=bc.height=128;{const x=bc.get
   for(let i=0;i<30;i++){x.fillStyle='rgba(110,0,0,.8)';x.beginPath();x.arc(Math.random()*128,Math.random()*128,1+Math.random()*3,0,7);x.fill()}}
 const decalMat=new THREE.MeshLambertMaterial({map:new THREE.CanvasTexture(bc),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2});
 const decalGeo=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2);const decals=[];
-function splat(p,s){const x=Math.floor(p.x),z=Math.floor(p.z);let y=Math.floor(p.y+.5);let n=0;while(y>0&&!solid(x,y-1,z)&&n++<6)y--;if(solid(x,y,z))return;
-  const m=new THREE.Mesh(decalGeo,decalMat);m.position.set(p.x,y+.02+decals.length*.0004%0.01,p.z);m.rotation.y=rng()*6.3;m.scale.set(s,1,s);scene.add(m);decals.push(m);
+function splat(p,s){const x=vc(p.x),z=vc(p.z);let y=vc(p.y+.25);let n=0;while(y>0&&!solid(x,y-1,z)&&n++<12)y--;if(solid(x,y,z))return;
+  const m=new THREE.Mesh(decalGeo,decalMat);m.position.set(p.x,y*VS+.02+(decals.length%10)*.001,p.z);m.rotation.y=rng()*6.3;m.scale.set(s,1,s);scene.add(m);decals.push(m);
   if(decals.length>90)scene.remove(decals.shift())}
 
 // ---------------- audio
@@ -348,43 +436,126 @@ function sTone(f0,f1,dur,vol,type='sawtooth'){if(!AC)return;const t=AC.currentTi
   g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(master);o.start(t);o.stop(t+dur)}
 const SND={shot:()=>{sNoise(.3,2200,1);sTone(160,40,.15,.35,'square')},hit:()=>sNoise(.12,500,.6),dig:()=>sNoise(.07,1100,.25,'bandpass'),
   place:()=>sNoise(.08,300,.4),hurt:()=>sTone(320,110,.25,.3,'square'),pick:()=>sTone(600,950,.14,.15,'triangle'),
-  groan:v=>sTone(R(70,115),R(45,70),R(.6,1.2),v*.22,'sawtooth'),crash:()=>sNoise(.5,700,.9),click:()=>sTone(900,800,.04,.1,'square')};
+  groan:v=>sTone(R(70,115),R(45,70),R(.6,1.2),v*.22,'sawtooth'),crash:()=>sNoise(.5,700,.9),boom:()=>{sNoise(1.2,400,1.4);sTone(90,30,.8,.6,'sine')},click:()=>sTone(900,800,.04,.1,'square'),
+  glass:()=>{sNoise(.35,5200,.5,'highpass');sTone(2400,1800,.2,.08,'triangle')},creak:()=>{sTone(190,140,.35,.1,'triangle');sNoise(.1,250,.3)}};
 
 // ---------------- game state
-let players=[],zombies=[],vehicles=[],crates=[];
+let players=[],zombies=[],vehicles=[],crates=[],doors=[];const doorMap=new Map(),dkey=(x,y,z)=>x+','+y+','+z;
 let running=false,paused=false,menuP=null,tDay=.08,day=1,kills=0,wasLocked=false;
-const spawn=new V3(49.5,G+1,49.5);
+const spawn=new V3(49.5,(G+1)*VS,49.5);
 const DAYLEN=360;
-const START_INV={ammo:12,scrap:0,cloth:0,fuel:0,food:2,bandage:1,wood:0,plank:12,dirt:0,stone:0,coal:0,iron:0,metal:0,kit:0};
+const START_INV={spikes:2,beartrap:1,mine:0,ammo:12,scrap:0,cloth:0,fuel:0,food:2,bandage:1,wood:0,plank:40,dirt:0,stone:0,coal:0,iron:0,metal:0,kit:0};
 const RECIPES=[
   {out:'plank',n:4,need:{wood:1},label:'Saw planks'},
   {out:'metal',n:1,need:{iron:2,coal:1},label:'Smelt a metal plate'},
   {out:'ammo',n:8,need:{scrap:1,coal:1},label:'Hand-load ammo'},
   {out:'bandage',n:1,need:{cloth:2},label:'Tie a bandage'},
   {out:'kit',n:1,need:{scrap:3,metal:1},label:'Build a repair kit'},
-  {out:'fuel',n:1,need:{coal:2,scrap:1},label:'Brew makeshift fuel'}];
-const LOOT=[['ammo',20,4,10],['scrap',18,1,3],['cloth',14,1,3],['food',16,1,2],['bandage',8,1,1],['fuel',10,1,1],['kit',3,1,1],['metal',4,1,2],['coal',7,1,3]];
-const TOOLS=['Bat','Pistol','Pickaxe','Build'];
+  {out:'fuel',n:1,need:{coal:2,scrap:1},label:'Brew makeshift fuel'},
+  {out:'spikes',n:1,need:{plank:6,scrap:2},label:'Hammer a spike trap'},
+  {out:'beartrap',n:1,need:{metal:2,scrap:1},label:'Forge a bear trap'},
+  {out:'mine',n:1,need:{scrap:2,coal:2,cloth:1},label:'Rig a tripwire bomb'}];
+const LOOT=[['ammo',20,4,10],['scrap',18,1,3],['cloth',14,1,3],['food',16,1,2],['bandage',8,1,1],['fuel',10,1,1],['kit',3,1,1],['metal',4,1,2],['coal',7,1,3],['beartrap',3,1,1],['mine',2,1,1],['spikes',3,1,1]];
+const TOOLS=['Bat','Pistol','Pickaxe','Build','Trap'];
+const TRAPS=[['spikes','Spike trap'],['beartrap','Bear trap'],['mine','Tripwire bomb']];
 
 // ---------------- crates & vehicles
-function makeCrate(x,y,z){const g=new THREE.Group();part(g,.9,.6,.6,0x6b5030,0,.3,0);part(g,.92,.07,.62,0x333333,0,.15,0);part(g,.92,.07,.62,0x333333,0,.45,0);
-  const lid=part(g,.92,.08,.62,0x5a4228,0,.64,0);g.position.set(x,y,z);g.rotation.y=rng()*Math.PI;scene.add(g);return{g,lid,looted:false,pos:g.position}}
-const wheelGeo=new THREE.CylinderGeometry(.38,.38,.3,12).rotateZ(Math.PI/2);
+function makeCrate(x,y,z,rich){const g=new THREE.Group();part(g,.9,.6,.6,rich?0x46543a:0x6b5030,0,.3,0);part(g,.92,.07,.62,0x333333,0,.15,0);part(g,.92,.07,.62,0x333333,0,.45,0);
+  const lid=part(g,.92,.08,.62,0x5a4228,0,.64,0);g.position.set(x,y,z);g.rotation.y=rich?(rng()<.5?0:Math.PI/2):rng()*Math.PI;scene.add(g);return{g,lid,looted:false,pos:g.position,rich}}
+const wheelGeo=new THREE.CylinderGeometry(.38,.38,.3,14).rotateZ(Math.PI/2),hubGeo=new THREE.CylinderGeometry(.2,.2,.32,10).rotateZ(Math.PI/2);
+const torusGeo=new THREE.TorusGeometry(.18,.024,6,20),circGeo=new THREE.CircleGeometry(1,20).rotateY(Math.PI),ringGeo=new THREE.RingGeometry(.86,1,24).rotateY(Math.PI);
+const glassMat=new THREE.MeshLambertMaterial({color:0x22313a,transparent:true,opacity:.42});
+const basic=c=>matC['b'+c]||(matC['b'+c]=new THREE.MeshBasicMaterial({color:c}));
+function dial(par,x,y,z,r,tick){
+  const g=new THREE.Group();g.position.set(x,y,z);par.add(g);
+  const f=new THREE.Mesh(circGeo,basic(0x0c0c0c));f.scale.setScalar(r);g.add(f);
+  const rg=new THREE.Mesh(ringGeo,basic(0xd8d2c0));rg.scale.setScalar(r);rg.position.z=-.002;g.add(rg);
+  for(let i=0;i<=tick;i++){const a=2.3-i/tick*4.6,t=new THREE.Mesh(box(r*.05,r*.22,.004),basic(0xd8d2c0));t.position.set(-Math.sin(a)*r*.72,Math.cos(a)*r*.72,-.003);t.rotation.z=-a;t.rotation.z=a;g.add(t)}
+  const n=new THREE.Group();n.position.z=-.006;g.add(n);const nm=new THREE.Mesh(box(r*.06,r*.8,.004),basic(0xff5530));nm.position.y=r*.38;n.add(nm);
+  return n;
+}
+function makeInterior(g,truck,Wd,col){
+  const I=truck?{zs:.6,zd:1.5,eye:1.7,roof:2.02,yf:1.15,zf:1.78,zb:.06}:{zs:-.32,zd:.66,eye:1.52,roof:1.74,yf:1.15,zf:.9,zb:-1.28};
+  const dashC=0x2b2723,dk=0x1b1916,seatC=truck?0x5a4632:0x3c3c44,trim=0x4e4a44,cl=I.zf-I.zb,mid=(I.zf+I.zb)/2,yf=I.yf;
+  part(g,Wd-.22,.2,.34,dashC,0,yf+.1,I.zd+.08);part(g,Wd-.22,.05,.26,dk,0,yf+.22,I.zd+.14);
+  part(g,.52,.09,.16,dk,.42,yf+.27,I.zd-.01);
+  part(g,.42,.13,.02,0x24201c,-.42,yf+.07,I.zd-.1);part(g,.06,.02,.02,0x777777,-.42,yf+.1,I.zd-.115);
+  for(const x of[-.7,-.15,.15]){if(Math.abs(x)<Wd/2-.2)part(g,.14,.05,.02,0x101010,x,yf+.19,I.zd-.1)}
+  part(g,.3,.13,.03,0x121212,0,yf+.13,I.zd-.1);const disp=part(g,.16,.04,.005,0x000000,0,yf+.16,I.zd-.117);disp.material=basic(0x5fd06a);
+  const speedN=dial(g,.53,yf+.25,I.zd-.1,.065,8),fuelN=dial(g,.31,yf+.25,I.zd-.1,.048,4);
+  const warnFuel=part(g,.025,.025,.004,0,.42,yf+.2,I.zd-.11);warnFuel.material=basic(0xffb020);
+  const warnEng=part(g,.025,.025,.004,0,.46,yf+.2,I.zd-.11);warnEng.material=basic(0xff2a20);
+  const colm=part(g,.06,.06,.34,0x202020,.42,yf+.2,I.zd-.14);colm.rotation.x=-.5;
+  const wheel=new THREE.Group();wheel.position.set(.42,yf+.3,I.zd-.32);wheel.rotation.x=.35;g.add(wheel);
+  const spin=new THREE.Group();wheel.add(spin);
+  spin.add(new THREE.Mesh(torusGeo,lam(0x161616)));part(spin,.09,.09,.05,0x1f1f1f,0,0,0);part(spin,.05,.03,.052,0x8a1a10,0,.01,0);
+  for(const a of[0,2.09,4.19]){const sp=part(spin,.17,.025,.02,0x2a2a2a,Math.cos(a)*.09,Math.sin(a)*.09-.0,0);sp.rotation.z=a}
+  const hands=new THREE.Group();spin.add(hands);
+  for(const sx of[-1,1]){const h=part(hands,.07,.1,.07,0xc9a07a,sx*.17,.06,-.02);h.rotation.z=sx*.4;part(hands,.08,.07,.22,0x5a3a26,sx*.21,.04,-.16)}
+  for(const dx of[-.1,0,.1])part(g,.05,.03,.08,0x333333,.42+dx,yf+.07,I.zd-.02);
+  const seat=(x,z,w)=>{part(g,w,.14,.5,seatC,x,yf+.12,z);const bk=part(g,w,.62,.12,seatC,x,yf+.5,z-.28);bk.rotation.x=-.18;
+    part(g,w*.98,.06,.44,0x2f2f36,x,yf+.2,z+.01);part(g,.3,.16,.1,seatC,x,yf+.9,z-.36)};
+  seat(.42,I.zs,.5);seat(-.42,I.zs,.5);if(!truck)seat(0,I.zs-.95,Wd-.4);
+  part(g,.22,.2,.74,dashC,0,yf+.1,I.zs+.18);const st=part(g,.03,.22,.03,0x222222,0,yf+.3,I.zs+.36);st.rotation.x=.2;part(g,.06,.06,.06,0x111111,0,yf+.42,I.zs+.38);
+  part(g,.06,.12,.12,0x111111,.12,yf+.25,I.zs);
+  for(const sx of[-1,1]){
+    part(g,.05,.36,cl-.1,trim,sx*(Wd/2-.13),yf+.2,mid);part(g,.08,.05,.5,dk,sx*(Wd/2-.17),yf+.3,I.zs+.1);part(g,.04,.03,.12,0x888888,sx*(Wd/2-.16),yf+.4,I.zs+.35);
+    const ap=part(g,.07,I.roof-yf,.08,col,sx*(Wd/2-.15),(yf+I.roof)/2,I.zf-.12);ap.rotation.x=-.32;
+    if(!truck)part(g,.07,I.roof-yf,.12,col,sx*(Wd/2-.14),(yf+I.roof)/2,I.zs-.55);
+    part(g,.08,I.roof-yf,.1,col,sx*(Wd/2-.14),(yf+I.roof)/2,I.zb+.08);
+    part(g,.38,.02,.18,0x6a655c,sx*.42,I.roof-.05,I.zf-.25);
+  }
+  part(g,Wd-.24,.03,cl,0x6a655c,0,I.roof-.02,mid);part(g,Wd-.24,.02,cl,0x1a1816,0,yf+.01,mid);
+  part(g,.25,.08,.03,0x202020,0,I.roof-.1,I.zf-.2);const mir=part(g,.22,.06,.005,0,0,I.roof-.1,I.zf-.217);mir.material=basic(0x6c7a86);
+  part(g,Wd-.2,.06,.06,col,0,I.roof-.04,I.zf-.06);
+  return{I,spin,hands,speedN,fuelN,warnFuel,warnEng};
+}
 function makeVehicle(s){
   const g=new THREE.Group(),truck=s.type==='truck',col=[0x6b4a3a,0x3d5a6b,0x7a7a6a,0x5a2a2a,0x4a5a3a][RI(0,4)];
-  const L=truck?5:4.2,Wd=truck?2.1:1.9,glass=0x1a2026;
+  const L=truck?5:4.2,Wd=truck?2.1:1.9,rust=0x5a3a22;
   part(g,Wd,.7,L,col,0,.8,0);
-  if(truck){part(g,Wd-.1,.9,1.8,glass,0,1.6,.9);part(g,Wd-.1,.1,1.8,col,0,2.08,.9);part(g,.1,.45,2.6,col,Wd/2-.05,1.37,-1.1);part(g,.1,.45,2.6,col,-Wd/2+.05,1.37,-1.1);part(g,Wd,.45,.1,col,0,1.37,-2.45)}
-  else{part(g,Wd-.2,.6,2.2,glass,0,1.45,-.2);part(g,Wd-.2,.1,2.2,col,0,1.8,-.2)}
-  part(g,.32,.15,.05,0xfff2b0,.6,.85,L/2);part(g,.32,.15,.05,0xfff2b0,-.6,.85,L/2);
+  if(truck){part(g,Wd-.1,.9,1.8,0,0,1.6,.9).material=glassMat;part(g,Wd-.1,.1,1.8,col,0,2.08,.9);part(g,.1,.45,2.6,col,Wd/2-.05,1.37,-1.1);part(g,.1,.45,2.6,col,-Wd/2+.05,1.37,-1.1);part(g,Wd,.45,.1,col,0,1.37,-2.45);part(g,Wd-.2,.05,2.5,0x2a2a2a,0,1.16,-1.15)}
+  else{part(g,Wd-.2,.6,2.2,0,0,1.45,-.2).material=glassMat;part(g,Wd-.2,.1,2.2,col,0,1.8,-.2);part(g,Wd-.25,.04,1.0,col,0,1.17,1.55)}
+  part(g,Wd+.06,.16,.14,0x3a3a3a,0,.55,L/2+.02);part(g,Wd+.06,.16,.14,0x3a3a3a,0,.55,-L/2-.02);
+  part(g,Wd*.45,.22,.03,0x141414,0,.86,L/2+.01);part(g,.36,.12,.02,0xd8d0b0,0,.62,-L/2-.1);
+  part(g,.32,.15,.05,0xfff2b0,.6,.86,L/2);part(g,.32,.15,.05,0xfff2b0,-.6,.86,L/2);
   part(g,.3,.12,.05,0x8a1010,.65,.9,-L/2);part(g,.3,.12,.05,0x8a1010,-.65,.9,-L/2);
-  part(g,.6,.35,.02,0x5a3a22,Wd/2+.005,.8,.4).rotation.y=Math.PI/2;
-  const wheels=[];for(const sx of[-1,1])for(const sz of[-1,1]){const w=new THREE.Mesh(wheelGeo,lam(0x151515));w.rotation.order='YXZ';w.position.set(sx*Wd/2,.38,sz*(L/2-.8));w.userData.front=sz>0;g.add(w);wheels.push(w)}
-  const gy=topY(s.x,s.z);g.position.set(s.x,gy+1,s.z);scene.add(g);
+  const zf=truck?1.78:.9;
+  for(const sx of[-1,1]){part(g,.06,.1,.18,col,sx*(Wd/2+.08),1.38,zf-.3);part(g,.012,.5,.02,0x222222,sx*(Wd/2+.003),.85,truck?0:-.2);
+    part(g,.012,.04,.12,0x888888,sx*(Wd/2+.006),1.02,truck?.5:.2);if(rng()<.6)part(g,.012,.28,.5,rust,sx*(Wd/2+.004),.75,R(-1.2,1.2))}
+  const IN=makeInterior(g,truck,Wd,col);
+  const wheels=[];for(const sx of[-1,1])for(const sz of[-1,1]){const w=new THREE.Group();w.rotation.order='YXZ';w.position.set(sx*Wd/2,.38,sz*(L/2-.8));
+    w.add(new THREE.Mesh(wheelGeo,lam(0x151515)));const hc=new THREE.Mesh(hubGeo,lam(0x8a8a8a));w.add(hc);part(w,.33,.06,.06,0x555555,0,0,0);w.userData.front=sz>0;g.add(w);wheels.push(w)}
+  let gy=H-1;while(gy>0&&get(vc(s.x),gy,vc(s.z))===0)gy--;g.position.set(s.x,(gy+1)*VS,s.z);scene.add(g);
   const broken=!s.good&&rng()<.4;
   return{type:s.type,name:truck?'Pickup truck':'Sedan',g,pos:g.position,yaw:s.yaw,speed:0,gy,fuel:s.good?30:(rng()<.5?0:RI(10,55)),hp:broken?0:RI(45,100),broken,
-    driver:null,pass:null,wheels,L,Wd,maxS:truck?13:17,acc:truck?6:9,steerA:0}
+    driver:null,pass:null,wheels,L,Wd,maxS:truck?13:17,acc:truck?6:9,steerA:0,IN}
 }
+
+// ---------------- doors
+function makeDoor(s){
+  const pivot=new THREE.Group();pivot.position.set(s.x*VS,s.y*VS,(s.z+.5)*VS);
+  const c=[0x6a4a2e,0x56665a,0x7a3a2a,0x4a4a5a][RI(0,3)],dk=new THREE.Color(c).multiplyScalar(.7).getHex();
+  part(pivot,1,2,.1,c,.5,1,0);
+  for(const sz of[-1,1]){part(pivot,.34,.7,.02,dk,.28,1.45,sz*.055);part(pivot,.34,.7,.02,dk,.72,1.45,sz*.055);part(pivot,.78,.6,.02,dk,.5,.5,sz*.055);
+    part(pivot,.06,.06,.05,0xb8a050,.88,1,sz*.07)}
+  scene.add(pivot);
+  const d={...s,pivot,open:false,ang:0,gone:false,cells:[]};
+  for(let dx=0;dx<2;dx++)for(let dy=0;dy<4;dy++){d.cells.push([s.x+dx,s.y+dy,s.z]);doorMap.set(dkey(s.x+dx,s.y+dy,s.z),d)}
+  doors.push(d);
+}
+function toggleDoor(d,p){
+  if(d.open){if(d.cells.some(c=>blockedByEntity(c[0],c[1],c[2]))){msg(p,'Something is in the doorway');return}for(const c of d.cells)setv(c[0],c[1],c[2],B.DOOR);d.open=false}
+  else{for(const c of d.cells)setv(c[0],c[1],c[2],0);d.open=true}
+  SND.creak();
+}
+function destroyDoor(d){
+  if(d.gone)return;d.gone=true;scene.remove(d.pivot);
+  for(const c of d.cells){if(get(c[0],c[1],c[2])===B.DOOR)setv(c[0],c[1],c[2],0);doorMap.delete(dkey(c[0],c[1],c[2]))}
+  burst(new V3((d.x+1)*VS,d.y*VS+1,(d.z+.5)*VS),24,4,BRGB[B.PLANK],1.5);sNoise(.4,500,.8);
+}
+function nearestDoor(p,r){let best=null,bd=r;for(const d of doors){if(d.gone)continue;const dd=Math.hypot((d.x+1)*VS-p.pos.x,d.y*VS+.9-(p.pos.y+.9),(d.z+.5)*VS-p.pos.z);if(dd<bd){bd=dd;best=d}}return best}
+function updateDoors(dt){for(const d of doors){if(d.gone)continue;const t=d.open?-d.inward*Math.PI/2:0;d.ang+=(t-d.ang)*Math.min(1,dt*8);d.pivot.rotation.y=d.ang}}
 
 // ---------------- players
 const P_KEYS=[{use:'E',act:'Click',menu:'Tab'},{use:'Y',act:'H',menu:'\\'}];
@@ -397,9 +568,9 @@ function makePlayer(i){
   const light=new THREE.SpotLight(0xfff1cc,0,34,.55,.5,1.1);scene.add(light,light.target);
   const outline=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.01,1.01,1.01)),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.7}));
   outline.layers.set(3+i);scene.add(outline);
-  const pos=spawn.clone();pos.x+=i*1.5;
+  const pos=spawn.clone();pos.x+=i*1.5;outline.scale.setScalar(VS);
   const p={i,cam,body,vm,light,outline,pos,vel:new V3(),yaw:Math.PI,pitch:-.05,hp:100,hunger:100,stamina:100,inv:{...START_INV},tool:0,mat:0,grounded:false,
-    vehicle:null,dig:null,cool:0,dead:0,swing:0,eye:pos.y+1.6,flash:0,kills:0,walk:0,torch:false,inp:{},k:P_KEYS[i],flashT:0,promptT:0};
+    trap:0,vehicle:null,carView:true,cyaw:0,cpitch:0,dig:null,cool:0,dead:0,swing:0,eye:pos.y+1.6,flash:0,kills:0,walk:0,torch:false,inp:{},k:P_KEYS[i],flashT:0,promptT:0};
   p.hud=makeHud(p);return p;
 }
 function makeHud(p){
@@ -428,11 +599,12 @@ function spawnZ(x,y,z){
 function spawnOpen(){
   for(let t=0;t<14;t++){
     const p=players[RI(0,players.length-1)],a=rng()*6.283,d=R(26,44);
-    const x=Math.floor(p.pos.x+Math.cos(a)*d),z=Math.floor(p.pos.z+Math.sin(a)*d);
-    if(x<2||z<2||x>W-3||z>W-3)continue;
+    const x=vc(p.pos.x+Math.cos(a)*d),z=vc(p.pos.z+Math.sin(a)*d);
+    if(x<4||z<4||x>W-5||z>W-5)continue;
     const ty=topY(x,z);if(ty!==hmap[z*W+x])continue;
-    if(players.some(q=>Math.hypot(q.pos.x-x,q.pos.z-z)<22))continue;
-    spawnZ(x+.5,ty+1,z+.5);return;
+    const wx=(x+.5)*VS,wz=(z+.5)*VS;
+    if(players.some(q=>Math.hypot(q.pos.x-wx,q.pos.z-wz)<22))continue;
+    spawnZ(wx,(ty+1)*VS,wz);return;
   }
 }
 function killZombie(z,by,big){
@@ -447,30 +619,31 @@ function hurtZombie(z,dmg,dir,by){
 
 // ---------------- physics
 function hit(x,y,z,hw,h){
-  const x0=Math.floor(x-hw),x1=Math.floor(x+hw-1e-4),y0=Math.floor(y),y1=Math.floor(y+h-1e-4),z0=Math.floor(z-hw),z1=Math.floor(z+hw-1e-4);
+  const x0=vc(x-hw),x1=vc(x+hw-1e-4),y0=vc(y),y1=vc(y+h-1e-4),z0=vc(z-hw),z1=vc(z+hw-1e-4);
   for(let ix=x0;ix<=x1;ix++)for(let iy=y0;iy<=y1;iy++)for(let iz=z0;iz<=z1;iz++)if(solid(ix,iy,iz))return true;
   return false;
 }
 function moveEnt(e,dt,hw,h){
   const p=e.pos;let blocked=false;
   const ny=p.y+e.vel.y*dt;
-  if(hit(p.x,ny,p.z,hw,h)){if(e.vel.y<0){p.y=Math.floor(ny)+1;e.grounded=true}else p.y=Math.floor(ny+h)-h-1e-3;e.vel.y=0}
+  if(hit(p.x,ny,p.z,hw,h)){if(e.vel.y<0){p.y=(vc(ny)+1)*VS;e.grounded=true}else p.y=vc(ny+h)*VS-h-1e-3;e.vel.y=0}
   else{p.y=ny;e.grounded=false}
   const step=(dx,dz)=>{const nx=p.x+dx,nz=p.z+dz;
     if(!hit(nx,p.y,nz,hw,h)){p.x=nx;p.z=nz;return}
-    if(e.grounded&&!hit(nx,p.y+1.02,nz,hw,h)&&!hit(p.x,p.y+1.02,p.z,hw,h)){p.y+=1.02;p.x=nx;p.z=nz;return}
+    if(e.grounded&&!hit(nx,p.y+VS+.02,nz,hw,h)&&!hit(p.x,p.y+VS+.02,p.z,hw,h)){p.y+=VS+.02;p.x=nx;p.z=nz;return}
     blocked=true};
   step(e.vel.x*dt,0);step(0,e.vel.z*dt);
   return blocked;
 }
-function rayVox(o,d,max){
+function rayVox(O,d,max){
+  const o={x:O.x/VS,y:O.y/VS,z:O.z/VS};max/=VS;
   let x=Math.floor(o.x),y=Math.floor(o.y),z=Math.floor(o.z);
   const sx=d.x>0?1:-1,sy=d.y>0?1:-1,sz=d.z>0?1:-1;
   const tdx=d.x?Math.abs(1/d.x):1e9,tdy=d.y?Math.abs(1/d.y):1e9,tdz=d.z?Math.abs(1/d.z):1e9;
   let tx=d.x?(d.x>0?x+1-o.x:o.x-x)*tdx:1e9,ty=d.y?(d.y>0?y+1-o.y:o.y-y)*tdy:1e9,tz=d.z?(d.z>0?z+1-o.z:o.z-z)*tdz:1e9;
   let px=x,py=y,pz=z,t=0;
   for(let i=0;i<300&&t<=max;i++){
-    if(inB(x,y,z)&&vox[(y*W+z)*W+x])return{x,y,z,px,py,pz,t};
+    if(inB(x,y,z)&&vox[(y*W+z)*W+x]&&vox[(y*W+z)*W+x]!==B.LADDER)return{x,y,z,px,py,pz,t:t*VS};
     px=x;py=y;pz=z;
     if(tx<ty&&tx<tz){x+=sx;t=tx;tx+=tdx}else if(ty<tz){y+=sy;t=ty;ty+=tdy}else{z+=sz;t=tz;tz+=tdz}
   }
@@ -493,16 +666,16 @@ function updSky(){
 
 // ---------------- input
 const keys={},pressed=new Set();let mouseL=false,mouseR=false,wheel=0;
-const PREVENT=new Set(['Tab','Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Backslash','BracketLeft','BracketRight','Slash','Quote']);
+const PREVENT=new Set(['Comma','Tab','Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Backslash','BracketLeft','BracketRight','Slash','Quote']);
 addEventListener('keydown',e=>{if(PREVENT.has(e.code))e.preventDefault();if(!e.repeat)pressed.add(e.code);keys[e.code]=true;if(e.code==='Escape'&&menuP)closeMenu()});
 addEventListener('keyup',e=>{keys[e.code]=false});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;mouseL=false});
-canvas.addEventListener('mousedown',e=>{if(!running)return;if(document.pointerLockElement!==canvas)lock();if(e.button===0)mouseL=true;if(e.button===2)mouseR=true});
+canvas.addEventListener('mousedown',e=>{if(!running||T.on)return;if(document.pointerLockElement!==canvas)lock();if(e.button===0)mouseL=true;if(e.button===2)mouseR=true});
 addEventListener('mouseup',e=>{if(e.button===0)mouseL=false});
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
 addEventListener('wheel',e=>{if(running)wheel+=Math.sign(e.deltaY)},{passive:true});
 addEventListener('mousemove',e=>{if(document.pointerLockElement===canvas&&players[0]&&!menuP){const p=players[0];
-  if(p.vehicle)return;p.yaw-=e.movementX*.0022;p.pitch=clamp(p.pitch-e.movementY*.0022,-1.5,1.5)}});
+  if(p.vehicle){if(p.carView){p.cyaw=clamp(p.cyaw-e.movementX*.0022,-2.4,2.4);p.cpitch=clamp(p.cpitch-e.movementY*.0022,-1,1)}return}p.yaw-=e.movementX*.0022;p.pitch=clamp(p.pitch-e.movementY*.0022,-1.5,1.5)}});
 function lock(){try{const r=canvas.requestPointerLock();if(r&&r.catch)r.catch(()=>{})}catch(e){}}
 document.addEventListener('pointerlockchange',()=>{const l=document.pointerLockElement===canvas;
   if(l){wasLocked=true;if(paused){paused=false;$('#pause').classList.add('hidden')}}
@@ -514,22 +687,24 @@ function gpRead(slot,inp){
   const dz=v=>Math.abs(v)<.18?0:v,b=n=>gp.buttons[n]&&gp.buttons[n].pressed,prev=gpPrev[slot];const edge=n=>b(n)&&!prev[n];
   inp.s+=dz(gp.axes[0]);inp.f+=-dz(gp.axes[1]);inp.turn+=dz(gp.axes[2]||0);inp.look+=-dz(gp.axes[3]||0);
   if(b(7))inp.primary=true;if(edge(6))inp.place=true;if(b(0))inp.jump=true;if(b(10))inp.sprint=true;
-  if(edge(2))inp.interact=true;if(edge(3))inp.toolNext=true;if(edge(5))inp.matNext=true;if(edge(4))inp.eat=true;if(edge(1))inp.bandage=true;if(edge(9))inp.menu=true;
+  if(edge(2))inp.interact=true;if(edge(3))inp.toolNext=true;if(edge(5))inp.matNext=true;if(edge(4))inp.eat=true;if(edge(1))inp.bandage=true;if(edge(9))inp.menu=true;if(edge(8)||edge(11))inp.view=true;
   for(let n=0;n<gp.buttons.length;n++)prev[n]=b(n);
 }
 function readInput(p){
-  const inp={f:0,s:0,turn:0,look:0,jump:false,sprint:false,primary:false,place:false,interact:false,toolNext:false,tool:null,matNext:false,eat:false,bandage:false,menu:false,torch:false};
+  const inp={f:0,s:0,turn:0,look:0,jump:false,sprint:false,primary:false,place:false,interact:false,toolNext:false,tool:null,matNext:false,eat:false,bandage:false,menu:false,torch:false,view:false};
   if(p.i===0){
     inp.f=k('KeyW')-k('KeyS');inp.s=k('KeyD')-k('KeyA');inp.turn=k('ArrowRight')-k('ArrowLeft');inp.look=k('ArrowUp')-k('ArrowDown');
     inp.jump=!!keys.Space;inp.sprint=!!(keys.ShiftLeft||keys.ShiftRight);inp.primary=mouseL;inp.place=mouseR;mouseR=false;
-    inp.interact=pr('KeyE')||pr('KeyF');inp.matNext=pr('KeyR');inp.eat=pr('KeyG');inp.bandage=pr('KeyX');inp.menu=pr('Tab')||pr('KeyC');inp.torch=pr('KeyT');
-    for(let n=1;n<=4;n++)if(pr('Digit'+n))inp.tool=n-1;
-    if(wheel){inp.tool=(p.tool+(wheel>0?1:3))%4;wheel=0}
+    inp.interact=pr('KeyE')||pr('KeyF');inp.matNext=pr('KeyR');inp.eat=pr('KeyG');inp.bandage=pr('KeyX');inp.menu=pr('Tab')||pr('KeyC');inp.torch=pr('KeyT');inp.view=pr('KeyV');
+    for(let n=1;n<=5;n++)if(pr('Digit'+n))inp.tool=n-1;
+    if(wheel){inp.tool=(p.tool+(wheel>0?1:4))%5;wheel=0}
     if(players.length===1)gpRead(0,inp);
+    if(T.on){inp.f+=-T.my;inp.s+=T.mx;if(T.held.act)inp.primary=true;if(T.held.jump)inp.jump=true;if(T.run)inp.sprint=true;
+      const q=T.pressed;if(q.has('use'))inp.interact=true;if(q.has('tool'))inp.toolNext=true;if(q.has('mat'))inp.matNext=true;if(q.has('place'))inp.place=true;if(q.has('bag'))inp.menu=true;if(q.has('view'))inp.view=true}
   }else{
     inp.f=k('KeyI')-k('KeyK');inp.turn=k('KeyL')-k('KeyJ');inp.look=k('KeyU')-k('KeyO');
     inp.jump=!!keys.KeyN;inp.sprint=!!keys.KeyP;inp.primary=!!keys.KeyH;
-    inp.interact=pr('KeyY');inp.toolNext=pr('KeyB');inp.matNext=pr('KeyM');inp.eat=pr('BracketLeft');inp.bandage=pr('BracketRight');inp.menu=pr('Backslash');
+    inp.interact=pr('KeyY');inp.toolNext=pr('KeyB');inp.matNext=pr('KeyM');inp.eat=pr('BracketLeft');inp.bandage=pr('BracketRight');inp.menu=pr('Backslash');inp.view=pr('Comma');
     gpRead(1,inp);
   }
   inp.f=clamp(inp.f,-1,1);inp.s=clamp(inp.s,-1,1);inp.turn=clamp(inp.turn,-1,1);inp.look=clamp(inp.look,-1,1);
@@ -560,11 +735,11 @@ function shoot(p,eye,dir){
   for(const z of zombies){if(z.dead)continue;
     for(const [oy,r,d] of[[1.75,.27,120],[1.15,.42,40],[.5,.3,25]]){const t=raySphere(eye,dir,{x:z.pos.x,y:z.pos.y+oy,z:z.pos.z},r);if(t>0&&t<bt){bt=t;best=z;dmg=d}}}
   if(best){hurtZombie(best,dmg,dir,p);if(dmg>100)msg(p,'Headshot')}
-  else if(vh)burst(new V3(eye.x+dir.x*vh.t,eye.y+dir.y*vh.t,eye.z+dir.z*vh.t),6,2,DUST,1);
+  else if(vh){if(get(vh.x,vh.y,vh.z)===B.GLASS)breakGlass(vh.x,vh.y,vh.z);else burst(new V3(eye.x+dir.x*vh.t,eye.y+dir.y*vh.t,eye.z+dir.z*vh.t),6,2,DUST,1)}
 }
 function blockedByEntity(x,y,z){
-  const ov=(e,hw,h)=>e.pos.x+hw>x&&e.pos.x-hw<x+1&&e.pos.z+hw>z&&e.pos.z-hw<z+1&&e.pos.y+h>y&&e.pos.y<y+1;
-  return players.some(p=>!p.vehicle&&!p.dead&&ov(p,.3,1.75))||zombies.some(q=>!q.dead&&ov(q,.3,1.8))||vehicles.some(v=>Math.hypot(v.pos.x-x-.5,v.pos.z-z-.5)<2.6&&Math.abs(v.pos.y-y)<3);
+  const X=x*VS,Y=y*VS,Z=z*VS,ov=(e,hw,h)=>e.pos.x+hw>X&&e.pos.x-hw<X+VS&&e.pos.z+hw>Z&&e.pos.z-hw<Z+VS&&e.pos.y+h>Y&&e.pos.y<Y+VS;
+  return players.some(p=>!p.vehicle&&!(p.dead>0)&&ov(p,.3,1.75))||zombies.some(q=>!q.dead&&ov(q,.3,1.8))||vehicles.some(v=>Math.hypot(v.pos.x-X-.25,v.pos.z-Z-.25)<2.6&&Math.abs(v.pos.y-Y)<3);
 }
 function placeBlock(p,vh){
   if(!vh)return;const{px:x,py:y,pz:z}=vh;if(!inB(x,y,z)||get(x,y,z))return;
@@ -572,7 +747,7 @@ function placeBlock(p,vh){
   if(blockedByEntity(x,y,z))return;setBlock(x,y,z,id);p.inv[name]--;SND.place();
 }
 function primary(p,eye,dir,vh,dt){
-  if(p.tool===0){if(p.cool<=0){p.cool=.55;p.swing=1;const z=nearestZombieInFront(p,dir,2.8);if(z)hurtZombie(z,36,dir,p);else sNoise(.08,300,.15)}}
+  if(p.tool===0){if(p.cool<=0){p.cool=.55;p.swing=1;const z=nearestZombieInFront(p,dir,2.8);if(z)hurtZombie(z,36,dir,p);else if(vh&&vh.t<2.8&&get(vh.x,vh.y,vh.z)===B.GLASS)breakGlass(vh.x,vh.y,vh.z);else sNoise(.08,300,.15)}}
   else if(p.tool===1){if(p.cool<=0){if(p.inv.ammo<=0){p.cool=.4;SND.click();msg(p,'Click. Out of ammo — craft more from scrap + coal');return}
     p.cool=.3;p.inv.ammo--;p.swing=.5;p.pitch=Math.min(1.5,p.pitch+.035);shoot(p,eye,dir)}}
   else if(p.tool===2){
@@ -581,16 +756,21 @@ function primary(p,eye,dir,vh,dt){
     if(!vh||vh.t>5){p.dig=null;return}
     const b=get(vh.x,vh.y,vh.z);if(b===B.BED){if(!p.dig)msg(p,'Bedrock. Nothing gets through that.');p.dig={x:-1};return}
     if(!p.dig||p.dig.x!==vh.x||p.dig.y!==vh.y||p.dig.z!==vh.z)p.dig={x:vh.x,y:vh.y,z:vh.z,t:0,s:0};
-    p.dig.t+=dt/HARD[b];p.dig.s-=dt;if(p.dig.s<=0){p.dig.s=.28;p.swing=1;SND.dig();burst(new V3(vh.x+.5,vh.y+.9,vh.z+.5),3,2,BRGB[b],1)}
-    if(p.dig.t>=1){setBlock(vh.x,vh.y,vh.z,0);burst(new V3(vh.x+.5,vh.y+.5,vh.z+.5),12,3,BRGB[b],1);const d=DROP[b];if(d){p.inv[d]++;SND.pick()}p.dig=null}
+    p.dig.t+=dt/HARD[b];p.dig.s-=dt;if(p.dig.s<=0){p.dig.s=.28;p.swing=1;SND.dig();burst(new V3((vh.x+.5)*VS,(vh.y+.9)*VS,(vh.z+.5)*VS),3,2,BRGB[b],1)}
+    if(p.dig.t>=1){
+      if(b===B.GLASS)breakGlass(vh.x,vh.y,vh.z);
+      else if(b===B.DOOR){const dr=doorMap.get(dkey(vh.x,vh.y,vh.z));if(dr)destroyDoor(dr);p.inv.plank+=3;SND.pick()}
+      else{setBlock(vh.x,vh.y,vh.z,0);burst(new V3((vh.x+.5)*VS,(vh.y+.5)*VS,(vh.z+.5)*VS),12,3,BRGB[b],1);const d=DROP[b];if(d){p.inv[d]++;SND.pick()}}
+      p.dig=null}
   }
-  else if(p.cool<=0){p.cool=.22;p.swing=.6;placeBlock(p,vh)}
+  else if(p.tool===3){if(p.cool<=0){p.cool=.22;p.swing=.6;placeBlock(p,vh)}}
+  else if(p.cool<=0){p.cool=.5;placeTrap(p,vh)}
 }
 function nearestCrate(p,r){let best=null,bd=r;for(const c of crates){if(c.looted)continue;const d=Math.hypot(c.pos.x-p.pos.x,c.pos.y+.3-(p.pos.y+.9),c.pos.z-p.pos.z);if(d<bd){bd=d;best=c}}return best}
 function nearestVehicle(p,r){let best=null,bd=r;for(const v of vehicles){const d=Math.hypot(v.pos.x-p.pos.x,v.pos.z-p.pos.z);if(d<bd&&Math.abs(v.pos.y-p.pos.y)<2.5){bd=d;best=v}}return best}
 function loot(p,c){
   c.looted=true;c.lid.position.set(.25,.75,0);c.lid.rotation.z=-.7;
-  const got={},n=RI(2,4),tot=LOOT.reduce((s,l)=>s+l[1],0);
+  const got={},n=RI(2,4)+(c.rich?2:0),tot=LOOT.reduce((s,l)=>s+l[1],0);
   for(let i=0;i<n;i++){let r=rng()*tot;for(const l of LOOT){r-=l[1];if(r<=0){const q=RI(l[2],l[3]);got[l[0]]=(got[l[0]]||0)+q;p.inv[l[0]]+=q;break}}}
   SND.pick();msg(p,'Found: '+Object.entries(got).map(([a,q])=>`${q} ${LABEL[a].toLowerCase()}`).join(', '));
 }
@@ -600,7 +780,7 @@ function useVehicle(p,v){
   if(v.fuel<60&&p.inv.fuel>0){p.inv.fuel--;v.fuel=Math.min(100,v.fuel+40);SND.pick();msg(p,`Poured a fuel can in (${Math.round(v.fuel)}%)`);return}
   if(!v.driver)v.driver=p;else if(!v.pass)v.pass=p;else{msg(p,'No seats left');return}
   p.vehicle=v;p.body.g.visible=false;p.vm.g.visible=false;p.outline.visible=false;p.dig=null;
-  msg(p,v.driver===p?(v.fuel<=0?'Tank is empty — find or craft a fuel can':`Driving. ${p.i?'I/K':'W/S'} gas, ${p.i?'J/L':'A/D'} steer, ${p.i?'N':'Space'} brake`):'Riding shotgun');
+  msg(p,v.driver===p?(v.fuel<=0?'Tank is empty — find or craft a fuel can':`Driving. ${p.i?'I/K':'W/S'} gas, ${p.i?'J/L':'A/D'} steer, ${p.i?'N':'Space'} brake, ${p.i?',':'V'} switch view`):`Riding shotgun · ${p.i?',':'V'} switch view`);p.cyaw=p.cpitch=0;
 }
 function exitVehicle(p){
   const v=p.vehicle;if(!v)return;
@@ -608,18 +788,23 @@ function exitVehicle(p){
   p.vehicle=null;p.body.g.visible=true;p.vm.g.visible=true;
   const side=p===v.driver?-1:1,rx=Math.cos(v.yaw)*side,rz=-Math.sin(v.yaw)*side;
   p.pos.set(v.pos.x+rx*(v.Wd/2+.7),v.pos.y,v.pos.z+rz*(v.Wd/2+.7));
-  let n=0;while(hit(p.pos.x,p.pos.y,p.pos.z,.3,1.75)&&n++<12)p.pos.y+=1;
+  let n=0;while(hit(p.pos.x,p.pos.y,p.pos.z,.3,1.75)&&n++<16)p.pos.y+=VS;
   p.vel.set(0,0,0);p.yaw=v.yaw+Math.PI;p.pitch=-.1;p.eye=p.pos.y+1.6;
 }
 function interact(p){
   if(p.vehicle){exitVehicle(p);return}
   const c=nearestCrate(p,2.6);if(c){loot(p,c);return}
+  const d=nearestDoor(p,1.9);if(d){toggleDoor(d,p);return}
+  const tr=nearestTrap(p,1.3);if(tr){pickTrap(p,tr);return}
   const v=nearestVehicle(p,3.6);if(v)useVehicle(p,v);
 }
 function promptFor(p){
   if(p.dead>0)return'';const K=p.k.use;
-  if(p.vehicle)return`${K} — get out`;
+  if(p.vehicle)return`${K} — get out · ${p.i?',':'V'} — ${p.carView?'outside view':'driver view'}`;
   if(nearestCrate(p,2.6))return`${K} — search supply crate`;
+  const dr=nearestDoor(p,1.9);if(dr)return`${K} — ${dr.open?'close':'open'} door`;
+  const tr=nearestTrap(p,1.3);if(tr)return`${K} — pick up ${tr.name.toLowerCase()}`;
+  if(ladderAt(p))return`On a ladder · ${p.i?'I/N':'W/Space'} climb, ${p.i?'K':'S'} down`;
   const v=nearestVehicle(p,3.6);
   if(v){if(v.broken)return`${v.name}: wrecked · ${K} — ${p.inv.kit?'repair with kit':'needs a repair kit'}`;
     if(v.fuel<60&&p.inv.fuel>0)return`${v.name}: fuel ${Math.round(v.fuel)}% · ${K} — pour fuel can`;
@@ -635,10 +820,11 @@ function updatePlayer(p,dt){
   p.hunger=Math.max(0,p.hunger-dt*.22);
   if(p.hunger<=0)damage(p,dt*1.2,true);else if(p.hunger>60&&p.hp<100)p.hp=Math.min(100,p.hp+dt*.5);
   p.cool-=dt;p.swing=Math.max(0,p.swing-dt*3.5);p.flash=Math.max(0,p.flash-dt);p.flashT-=dt;
-  if(inp.tool!=null)p.tool=inp.tool;if(inp.toolNext)p.tool=(p.tool+1)%4;if(inp.matNext)p.mat=(p.mat+1)%4;
+  if(inp.tool!=null)p.tool=inp.tool;if(inp.toolNext)p.tool=(p.tool+1)%5;if(inp.matNext){if(p.tool===4)p.trap=(p.trap+1)%3;else p.mat=(p.mat+1)%4}
   if(inp.eat)eat(p);if(inp.bandage)heal(p);if(inp.torch)p.torch=!p.torch;
   const night=dayLight()<.35;
-  if(p.vehicle){if(inp.interact)exitVehicle(p);p.light.intensity=0;return}
+  if(p.vehicle){if(inp.interact){exitVehicle(p);return}if(inp.view){p.carView=!p.carView;p.cyaw=p.cpitch=0}
+    p.cpitch=clamp(p.cpitch+inp.look*1.5*dt,-1,1);if(p.vehicle.driver!==p)p.cyaw=clamp(p.cyaw-inp.turn*1.8*dt,-2.4,2.4);p.light.intensity=0;return}
   p.yaw-=inp.turn*2.4*dt;p.pitch=clamp(p.pitch+inp.look*1.8*dt,-1.5,1.5);
   const fx=-Math.sin(p.yaw),fz=-Math.cos(p.yaw),rx=Math.cos(p.yaw),rz=-Math.sin(p.yaw);
   let mx=fx*inp.f+rx*inp.s,mz=fz*inp.f+rz*inp.s;const l=Math.hypot(mx,mz);if(l>1){mx/=l;mz/=l}
@@ -646,6 +832,7 @@ function updatePlayer(p,dt){
   p.stamina=clamp(p.stamina+(sprint?-20:13)*dt,0,100);
   const sp=sprint?7.2:4.4;p.vel.x=mx*sp;p.vel.z=mz*sp;p.vel.y=Math.max(-18,p.vel.y-24*dt);
   if(inp.jump&&p.grounded){p.vel.y=8.2;p.grounded=false}
+  if(ladderAt(p)){p.vel.y=(inp.jump||inp.f>0)?3.4:inp.f<0?-3.4:-.5;p.grounded=true}
   moveEnt(p,dt,.3,1.75);
   if(p.pos.y<-4)respawn(p);
   p.walk+=dt*l*sp*1.6;
@@ -653,13 +840,13 @@ function updatePlayer(p,dt){
   p.cam.position.set(p.pos.x,p.eye+(l>.1&&p.grounded?Math.sin(p.walk)*.04:0),p.pos.z);p.cam.rotation.set(p.pitch,p.yaw,0);
   const cp=Math.cos(p.pitch),dir=new V3(-Math.sin(p.yaw)*cp,Math.sin(p.pitch),-Math.cos(p.yaw)*cp),eye=p.cam.position;
   const vh=rayVox(eye,dir,6);
-  if(vh&&vh.t<5.5&&(p.tool>=2)){p.outline.visible=true;p.outline.position.set(vh.x+.5,vh.y+.5,vh.z+.5);
-    const s=p.dig&&p.dig.t?1.01-p.dig.t*.15:1.01;p.outline.scale.setScalar(s/1.01)}else p.outline.visible=false;
+  if(vh&&vh.t<5.5&&(p.tool===2||p.tool===3)){p.outline.visible=true;p.outline.position.set((vh.x+.5)*VS,(vh.y+.5)*VS,(vh.z+.5)*VS);
+    const s=p.dig&&p.dig.t?1-p.dig.t*.15:1;p.outline.scale.setScalar(s*VS)}else p.outline.visible=false;
   if(inp.primary)primary(p,eye,dir,vh&&vh.t<5.5?vh:null,dt);else p.dig=null;
   if(inp.place&&vh&&vh.t<5.5)placeBlock(p,vh);
   if(inp.interact)interact(p);
   // flashlight
-  p.light.intensity=(night||p.torch)?1.9:0;
+  p.light.intensity=(night||p.torch||p.pos.y<(G-3)*VS)?1.9:0;
   p.light.position.copy(eye).addScaledVector(dir,.3);p.light.target.position.copy(eye).addScaledVector(dir,10);
   // view model + body
   const vm=p.vm;vm.items.forEach((m,n)=>m.visible=n===p.tool);vm.blk.material.color.setHex(BCOL[MATS[p.mat][1]]);
@@ -670,9 +857,9 @@ function updatePlayer(p,dt){
 
 // ---------------- vehicles
 function groundUnder(x,z,gy){
-  const ix=Math.floor(x),iz=Math.floor(z);
-  if(solid(ix,gy+2,iz)||solid(ix,gy+3,iz))return 999;
-  for(let y=gy+1;y>=0;y--)if(solid(ix,y,iz))return y;return -1;
+  const ix=vc(x),iz=vc(z);
+  for(let y=gy+3;y<=gy+6;y++)if(solid(ix,y,iz))return 999;
+  for(let y=gy+2;y>=0;y--)if(get(ix,y,iz)!==0)return y;return -1;
 }
 function updateVehicle(v,dt){
   const d=v.driver;let thr=0,steer=0,brake=false;
@@ -690,22 +877,32 @@ function updateVehicle(v,dt){
     const g1=groundUnder(nx+fx*s*v.L*.48,nz+fz*s*v.L*.48,v.gy),g2=groundUnder(nx,nz,v.gy);
     const sx=Math.cos(v.yaw)*v.Wd*.45,sz=-Math.sin(v.yaw)*v.Wd*.45;
     const g3=groundUnder(nx+fx*s*v.L*.45+sx,nz+fz*s*v.L*.45+sz,v.gy),g4=groundUnder(nx+fx*s*v.L*.45-sx,nz+fz*s*v.L*.45-sz,v.gy);
-    if(Math.max(g1,g2,g3,g4)>v.gy+1){
+    if(Math.max(g1,g2,g3,g4)>v.gy+2){
       const imp=Math.abs(v.speed);if(imp>5){v.hp-=imp*2.2;SND.crash();if(d)d.flash=.3}v.speed*=-.25;
     }else{v.pos.x=nx;v.pos.z=nz;v.gy=Math.max(g1,g2)}
   }
-  v.pos.y+=(v.gy+1-v.pos.y)*Math.min(1,dt*10);
+  v.pos.y+=((v.gy+1)*VS-v.pos.y)*Math.min(1,dt*10);
   v.g.rotation.y=v.yaw;
   for(const w of v.wheels){w.rotation.x+=v.speed*dt/.38;w.rotation.y=w.userData.front?v.steerA:0}
   if(Math.abs(v.speed)>3)for(const z of zombies){if(z.dead)continue;
     if(Math.hypot(z.pos.x-v.pos.x,z.pos.z-v.pos.z)<v.L*.5&&Math.abs(z.pos.y-v.pos.y)<2){killZombie(z,d,true);v.hp-=1.5;v.speed*=.9;if(d)d.flash=.15}}
   if(v.hp<=0&&!v.broken){v.broken=true;v.hp=0;burst(new V3(v.pos.x,v.pos.y+1.5,v.pos.z),30,3,DUST,3);if(d)msg(d,'The engine died — it needs a repair kit')}
   if(v.broken&&rng()<dt*6)burst(new V3(v.pos.x+Math.sin(v.yaw)*v.L*.4,v.pos.y+1.3,v.pos.z+Math.cos(v.yaw)*v.L*.4),1,.5,[.15,.15,.15],2);
-  const fx=Math.sin(v.yaw),fz=Math.cos(v.yaw);
+  const fx=Math.sin(v.yaw),fz=Math.cos(v.yaw),IN=v.IN,I=IN.I;
+  IN.spin.rotation.z=v.steerA*2.6;IN.hands.visible=!!v.driver;
+  IN.speedN.rotation.z=2.3-Math.min(1,Math.abs(v.speed)/v.maxS)*4.6;IN.fuelN.rotation.z=2.3-v.fuel/100*4.6;
+  IN.warnFuel.visible=v.fuel<15&&(performance.now()%800<400);IN.warnEng.visible=v.broken||v.hp<25;
   for(const o of[v.driver,v.pass]){if(!o)continue;o.pos.set(v.pos.x,v.pos.y+.3,v.pos.z);o.vel.set(0,0,0);
-    const cx=v.pos.x-fx*7.5,cz=v.pos.z-fz*7.5,cy=v.pos.y+3.4;
-    o.cam.position.x+=(cx-o.cam.position.x)*Math.min(1,dt*6);o.cam.position.y+=(cy-o.cam.position.y)*Math.min(1,dt*6);o.cam.position.z+=(cz-o.cam.position.z)*Math.min(1,dt*6);
-    o.cam.lookAt(v.pos.x,v.pos.y+1.2,v.pos.z);o.yaw=v.yaw+Math.PI;
+    if(o.carView){
+      const lx=(o===v.driver?.42:-.42),lz=I.zs-.06,c=Math.cos(v.yaw),sn=Math.sin(v.yaw),bump=Math.abs(v.speed)>1?Math.sin(performance.now()*.03)*.006:0;
+      o.cam.position.set(v.pos.x+lx*c+lz*sn,v.pos.y+I.eye+bump,v.pos.z-lx*sn+lz*c);
+      o.cam.rotation.set(o.cpitch-.08,v.yaw+Math.PI+o.cyaw,0);
+    }else{
+      const cx=v.pos.x-fx*7.5,cz=v.pos.z-fz*7.5,cy=v.pos.y+3.4;
+      o.cam.position.x+=(cx-o.cam.position.x)*Math.min(1,dt*6);o.cam.position.y+=(cy-o.cam.position.y)*Math.min(1,dt*6);o.cam.position.z+=(cz-o.cam.position.z)*Math.min(1,dt*6);
+      o.cam.lookAt(v.pos.x,v.pos.y+1.2,v.pos.z);
+    }
+    o.yaw=v.yaw+Math.PI;
     if(o===v.driver&&(dayLight()<.35||o.torch)){o.light.intensity=2.4;o.light.position.set(v.pos.x+fx*v.L*.5,v.pos.y+1,v.pos.z+fz*v.L*.5);o.light.target.position.set(v.pos.x+fx*14,v.pos.y-.5,v.pos.z+fz*14)}
   }
 }
@@ -715,11 +912,12 @@ const BREAK_EASY=new Set([B.PLANK,B.DIRT,B.GRASS,B.LEAF,B.LOG]),BREAK_HARD=new S
 function updateZombie(z,dt,night){
   if(z.dead){z.dead+=dt;z.g.rotation.x=-Math.min(1,z.dead*3)*Math.PI/2;if(z.dead>7)z.pos.y-=dt*.4;if(z.dead>10){scene.remove(z.g);z.gone=true}return}
   let tgt=null,bd=1e9;
-  for(const p of players){if(p.dead>0)continue;const d=Math.hypot(p.pos.x-z.pos.x,p.pos.y-z.pos.y,p.pos.z-z.pos.z);if(d<bd){bd=d;tgt=p}}
+  for(const p of players){if(p.dead>0||Math.abs(p.pos.y-z.pos.y)>4)continue;const d=Math.hypot(p.pos.x-z.pos.x,p.pos.y-z.pos.y,p.pos.z-z.pos.z);if(d<bd){bd=d;tgt=p}}
   const sight=night?55:30;let wx=0,wz=0;
   if(tgt&&(bd<sight||z.chasing&&bd<sight*1.5)){const dx=tgt.pos.x-z.pos.x,dz=tgt.pos.z-z.pos.z,l=Math.hypot(dx,dz)||1;wx=dx/l;wz=dz/l;z.chasing=true}
   else{z.chasing=false;z.wT-=dt;if(z.wT<=0){z.wT=R(2,6);z.wD=rng()*6.283}wx=Math.cos(z.wD)*.4;wz=Math.sin(z.wD)*.4}
-  const sp=z.chasing?(night?z.spd*1.7:z.spd):.8;
+  let sp=z.chasing?(night?z.spd*1.7:z.spd):.8;
+  if(z.held>0){z.held-=dt;sp=0}else if(z.slow>0){z.slow-=dt;sp*=.35}
   let vx=wx*sp+z.kx,vz=wz*sp+z.kz;z.kx*=Math.pow(.02,dt);z.kz*=Math.pow(.02,dt);
   for(const o of zombies){if(o===z||o.dead)continue;const dx=z.pos.x-o.pos.x,dz=z.pos.z-o.pos.z,d2=dx*dx+dz*dz;if(d2<.5&&d2>1e-4){vx+=dx/d2*.3;vz+=dz/d2*.3}}
   if(tgt&&bd<1.1){vx*=.2;vz*=.2}
@@ -727,8 +925,15 @@ function updateZombie(z,dt,night){
   const blocked=moveEnt(z,dt,.3,1.8);
   if(blocked&&z.chasing){if(z.grounded)z.vel.y=7.6;z.stuck+=dt}else z.stuck=Math.max(0,z.stuck-dt*.5);
   if(z.stuck>2){
-    const fx=Math.floor(z.pos.x+wx*.75),fz=Math.floor(z.pos.z+wz*.75),fy=Math.floor(z.pos.y);
-    for(const yy of[fy+1,fy]){const b=get(fx,yy,fz);if(BREAK_EASY.has(b)||(night&&z.stuck>6&&BREAK_HARD.has(b))){setBlock(fx,yy,fz,0);burst(new V3(fx+.5,yy+.5,fz+.5),10,3,BRGB[b],1);SND.dig();z.stuck=0;break}}
+    const fy=vc(z.pos.y),cols=new Set();let broke=false;
+    for(const o of[-.25,.25])cols.add(vc(z.pos.x+wx*.6-wz*o)+','+vc(z.pos.z+wz*.6+wx*o));
+    for(const key of cols){const[fx,fz]=key.split(',').map(Number);
+      for(let yy=fy;yy<fy+4;yy++){const b=get(fx,yy,fz);
+        if(b===B.DOOR){if(z.stuck>3.5){const d=doorMap.get(dkey(fx,yy,fz));if(d)destroyDoor(d);broke=true}continue}
+        if(b===B.GLASS){breakGlass(fx,yy,fz);broke=true;continue}
+        if(BREAK_EASY.has(b)||b===B.FRAME||(night&&z.stuck>6&&BREAK_HARD.has(b))){setv(fx,yy,fz,0);burst(new V3((fx+.5)*VS,(yy+.5)*VS,(fz+.5)*VS),6,3,BRGB[b],1);broke=true}}
+      if(broke)rebuildAt(fx,fz)}
+    if(broke){SND.dig();z.stuck=0}
   }
   if(tgt&&bd<1.5&&Math.abs(tgt.pos.y-z.pos.y)<1.6){z.atk-=dt;if(z.atk<=0){z.atk=1.1;z.lunge=1;
     if(tgt.vehicle)tgt.vehicle.hp-=3;else damage(tgt,(night?13:8)+day)}}
@@ -749,8 +954,8 @@ function updHud(p){
   h.hp.style.width=p.hp+'%';h.fd.style.width=p.hunger+'%';h.st.style.width=p.stamina+'%';
   h.hurt.style.opacity=Math.min(.9,p.flash*1.5+(p.hp<25?.35:0));
   h.slots.forEach((s,k)=>{s.classList.toggle('on',k===p.tool);
-    s.lastChild.textContent=k===1?`${p.inv.ammo} rounds`:k===3?`${LABEL[MATS[p.mat][0]]} ×${p.inv[MATS[p.mat][0]]}`:k===2?'dig':'melee'});
-  const show=['ammo','food','bandage','scrap','cloth','fuel','kit','wood','plank','stone','dirt','coal','iron','metal'].filter(x=>p.inv[x]>0||x==='ammo'||x==='food');
+    s.lastChild.textContent=k===4?`${TRAPS[p.trap][1]} ×${p.inv[TRAPS[p.trap][0]]}`:k===1?`${p.inv.ammo} rounds`:k===3?`${LABEL[MATS[p.mat][0]]} ×${p.inv[MATS[p.mat][0]]}`:k===2?'dig':'melee'});
+  const show=['spikes','beartrap','mine','ammo','food','bandage','scrap','cloth','fuel','kit','wood','plank','stone','dirt','coal','iron','metal'].filter(x=>p.inv[x]>0||x==='ammo'||x==='food');
   h.inv.innerHTML=show.map(x=>`<span>${LABEL[x]}</span><b>${p.inv[x]}</b>`).join('');
   h.prompt.textContent=promptFor(p);
   h.cross.style.display=p.vehicle||p.dead>0?'none':'';
@@ -789,6 +994,94 @@ $('#mBand').onclick=()=>{if(menuP){heal(menuP);renderMenu()}};
 $('#mClose').onclick=closeMenu;
 $('#bResume').onclick=()=>{paused=false;$('#pause').classList.add('hidden');lock()};
 
+// ---------------- ladders + manholes
+function ladderAt(e){
+  const x0=vc(e.pos.x-.3),x1=vc(e.pos.x+.3-1e-4),y0=vc(e.pos.y),y1=vc(e.pos.y+1.7),z0=vc(e.pos.z-.3),z1=vc(e.pos.z+.3-1e-4);
+  for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)if(get(x,y,z)===B.LADDER)return true;return false;
+}
+const manGeo=new THREE.CylinderGeometry(.48,.48,.06,16);
+function makeManhole(m){
+  const g=new THREE.Group(),bot=(SY+1)*VS,top=(G+1)*VS,hgt=top-bot;
+  g.position.set(m.x*VS,0,m.z*VS);
+  for(const sx of[.18,.82])part(g,.05,hgt+.4,.05,0x5a5a5a,sx,bot+hgt/2+.2,.07);
+  for(let y=bot+.25;y<top+.3;y+=.3)part(g,.66,.04,.04,0x6a6a6a,.5,y,.07);
+  scene.add(g);
+  const c=new THREE.Mesh(manGeo,lam(0x3a3430));c.position.set(m.x*VS+(m.alongZ?1.55:.5),top+.03,m.z*VS+(m.alongZ?.5:1.55));c.rotation.z=.05;scene.add(c);
+  for(let i=0;i<4;i++)part(c,.7,.02,.04,0x2a2622,0,.035,-.24+i*.16);
+}
+
+// ---------------- traps
+let traps=[];
+const coneGeo=new THREE.ConeGeometry(.045,.32,5),pipeGeo=new THREE.CylinderGeometry(.07,.07,.42,10).rotateZ(Math.PI/2);
+function makeTrapMesh(t){
+  const g=new THREE.Group();
+  if(t.type==='spikes'){part(g,.95,.06,.95,0x5a4228,0,.03,0);
+    for(let i=0;i<4;i++)for(let j=0;j<4;j++){const c=new THREE.Mesh(coneGeo,lam((i*j)%3===1?0x6a1515:0x8f8f8f));c.position.set(-.33+i*.22,.2,-.33+j*.22);g.add(c)}}
+  else if(t.type==='beartrap'){part(g,.52,.03,.52,0x2e2e2e,0,.02,0);part(g,.12,.06,.12,0x444444,0,.05,0);
+    t.jaws=[];for(const sz of[-1,1]){const j=new THREE.Group();j.position.y=.05;g.add(j);part(j,.48,.02,.03,0x555555,0,0,sz*.22);
+      for(let i=0;i<6;i++)part(j,.03,.02,.06,0x777777,-.2+i*.08,0,sz*.19);t.jaws.push(j)}}
+  else{const st=(x)=>{part(g,.04,.3,.04,0x6b4a2a,x,.15,0)};st(-.7);st(.7);
+    const wire=part(g,1.4,.008,.008,0xbbbbbb,0,.12,0);
+    const pipe=new THREE.Mesh(pipeGeo,lam(0x4a4f4a));pipe.position.set(-.55,.08,.12);g.add(pipe);part(g,.12,.15,.15,0x7a6a3a,-.55,.08,.12);
+    t.light=part(g,.04,.04,.04,0,-.55,.17,.12);t.light.material=basic(0xff2a20)}
+  return g;
+}
+function placeTrap(p,vh){
+  if(!vh)return;const{px:x,py:y,pz:z}=vh;const[key,name]=TRAPS[p.trap];
+  if(get(x,y,z)!==0||!solid(x,y-1,z)){msg(p,'Aim at the ground to set a trap');return}
+  if(!(p.inv[key]>0)){msg(p,`No ${name.toLowerCase()} — craft one in the backpack`);return}
+  const wx=(x+.5)*VS,wy=y*VS,wz=(z+.5)*VS;
+  if(traps.some(t=>Math.hypot(t.pos.x-wx,t.pos.z-wz)<.9&&Math.abs(t.pos.y-wy)<1))return;
+  p.inv[key]--;const t={type:key,name,armed:true,cd:0,uses:key==='spikes'?8:1,gone:false};
+  t.g=makeTrapMesh(t);t.g.position.set(wx,wy,wz);t.g.rotation.y=p.yaw;scene.add(t.g);t.pos=t.g.position;traps.push(t);
+  SND.place();msg(p,`${name} set${key==='mine'?' — keep clear of the blast':''}`);
+}
+function nearestTrap(p,r){let best=null,bd=r;for(const t of traps){const d=Math.hypot(t.pos.x-p.pos.x,t.pos.y-p.pos.y,t.pos.z-p.pos.z);if(d<bd){bd=d;best=t}}return best}
+function pickTrap(p,t){t.gone=true;scene.remove(t.g);traps=traps.filter(x=>x!==t);p.inv[t.type]++;SND.pick();msg(p,`Picked up the ${t.name.toLowerCase()}`)}
+function explode(pos){
+  SND.boom();const c=new V3(pos.x,pos.y+.4,pos.z);burst(c,60,9,[1,.55,.1],3);burst(c,40,6,DUST,4);
+  for(const z of zombies){if(z.dead)continue;const d=z.pos.distanceTo(pos);if(d<4.2){const dx=(z.pos.x-pos.x)/(d||1),dz=(z.pos.z-pos.z)/(d||1);hurtZombie(z,190*(1-d/4.6),{x:dx*2,z:dz*2},null)}}
+  for(const p of players){if(p.dead>0||p.vehicle)continue;const d=p.pos.distanceTo(pos);if(d<3.6)damage(p,48*(1-d/4))}
+  for(let i=0;i<4;i++)splat({x:pos.x+R(-1.5,1.5),y:pos.y,z:pos.z+R(-1.5,1.5)},R(1,2));
+  const bx=vc(pos.x),by=vc(pos.y),bz=vc(pos.z);
+  for(let dx=-3;dx<=3;dx++)for(let dy=0;dy<=3;dy++)for(let dz=-3;dz<=3;dz++)if(get(bx+dx,by+dy,bz+dz)===B.GLASS)breakGlass(bx+dx,by+dy,bz+dz);
+}
+function updateTraps(dt){
+  for(const t of traps){if(t.gone)continue;t.cd-=dt;
+    if(t.light)t.light.visible=performance.now()%1000<160;
+    if(!t.armed)continue;
+    for(const z of zombies){if(z.dead||Math.abs(z.pos.y-t.pos.y)>.8)continue;const d=Math.hypot(z.pos.x-t.pos.x,z.pos.z-t.pos.z);
+      if(t.type==='spikes'&&d<.62&&t.cd<=0){t.cd=.55;z.slow=1.4;hurtZombie(z,30,{x:0,z:0},null);if(--t.uses<=0){t.gone=true;scene.remove(t.g);burst(new V3(t.pos.x,t.pos.y+.2,t.pos.z),14,3,BRGB[B.PLANK],1)}break}
+      if(t.type==='beartrap'&&d<.5){t.armed=false;z.held=7;hurtZombie(z,45,{x:0,z:0},null);t.jaws[0].rotation.x=-1.45;t.jaws[1].rotation.x=1.45;sNoise(.15,2500,.7);sTone(500,200,.1,.2,'square');break}
+      if(t.type==='mine'&&d<1.4){t.gone=true;scene.remove(t.g);explode(t.pos);break}
+    }
+  }
+  traps=traps.filter(t=>!t.gone);
+}
+
+// ---------------- touch controls
+const T={on:false,mx:0,my:0,held:{},pressed:new Set(),stick:null,look:null,run:false,sx:0,sy:0,lx:0,ly:0};
+{
+  const stickEl=$('#stick'),knob=$('#stick i');
+  if(isTouch)document.body.classList.add('touch');
+  document.querySelectorAll('.tb').forEach(b=>{const k=b.dataset.b;
+    b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();T.on=true;T.held[k]=true;T.pressed.add(k);
+      if(k==='run'){T.run=!T.run;b.classList.toggle('on',T.run)}else b.classList.add('on')});
+    const up=()=>{T.held[k]=false;if(k!=='run')b.classList.remove('on')};
+    for(const ev of['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,up);
+    b.addEventListener('contextmenu',e=>e.preventDefault());});
+  canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'||!running)return;T.on=true;e.preventDefault();
+    try{canvas.setPointerCapture(e.pointerId)}catch(_){}
+    if(e.clientX<innerWidth*.42&&T.stick==null){T.stick=e.pointerId;T.sx=e.clientX;T.sy=e.clientY;stickEl.style.left=(e.clientX-65)+'px';stickEl.style.top=(e.clientY-65)+'px';stickEl.style.bottom='auto';stickEl.classList.add('on')}
+    else if(T.look==null){T.look=e.pointerId;T.lx=e.clientX;T.ly=e.clientY}});
+  canvas.addEventListener('pointermove',e=>{
+    if(e.pointerId===T.stick){let dx=(e.clientX-T.sx)/55,dy=(e.clientY-T.sy)/55;const l=Math.hypot(dx,dy);if(l>1){dx/=l;dy/=l}T.mx=dx;T.my=dy;knob.style.transform=`translate(${dx*42}px,${dy*42}px)`}
+    else if(e.pointerId===T.look){const dx=e.clientX-T.lx,dy=e.clientY-T.ly;T.lx=e.clientX;T.ly=e.clientY;const p=players[0];if(!p||menuP)return;const k=.0065;
+      if(p.vehicle){if(p.carView){p.cyaw=clamp(p.cyaw-dx*k,-2.4,2.4);p.cpitch=clamp(p.cpitch-dy*k,-1,1)}}else{p.yaw-=dx*k;p.pitch=clamp(p.pitch-dy*k,-1.5,1.5)}}});
+  const endP=e=>{if(e.pointerId===T.stick){T.stick=null;T.mx=T.my=0;knob.style.transform='';stickEl.style.left='';stickEl.style.top='';stickEl.style.bottom='';stickEl.classList.remove('on')}if(e.pointerId===T.look)T.look=null};
+  canvas.addEventListener('pointerup',endP);canvas.addEventListener('pointercancel',endP);
+}
+
 // ---------------- main loop
 const introCam=new THREE.PerspectiveCamera(60,1,.1,200);
 let spawnT=2,hudT=0,lastDl=1,clockT=performance.now();
@@ -799,6 +1092,7 @@ function update(dt){
   updSky();
   for(const p of players)updatePlayer(p,dt);
   for(const v of vehicles)updateVehicle(v,dt);
+  updateDoors(dt);updateTraps(dt);
   for(const z of zombies)updateZombie(z,dt,night);
   zombies=zombies.filter(z=>!z.gone);
   spawnT-=dt;const maxZ=Math.min(48,(night?26:10)+day*3);
@@ -807,18 +1101,24 @@ function update(dt){
   let es=0;for(const v of vehicles)if(v.driver)es=Math.max(es,Math.abs(v.speed)+1);
   if(engG){engG.gain.value=es?.07:0;eng.frequency.value=38+es*7}
   hudT-=dt;if(hudT<=0){hudT=.1;players.forEach(updHud);updTop()}else players.forEach(p=>{p.hud.hurt.style.opacity=Math.min(.9,p.flash*1.5+(p.hp<25?.35:0))});
-  pressed.clear();
+  pressed.clear();T.pressed.clear();
 }
 function render(){
   const w=innerWidth,h=innerHeight;renderer.setScissorTest(true);
   if(!running){const t=performance.now()/1000*.05;introCam.position.set(49+Math.cos(t)*48,32,49+Math.sin(t)*48);introCam.lookAt(49,12,49);
     introCam.aspect=w/h;introCam.updateProjectionMatrix();renderer.setViewport(0,0,w,h);renderer.setScissor(0,0,w,h);renderer.render(scene,introCam);return}
   const n=players.length,vw=w/n;
-  players.forEach((p,i)=>{p.cam.aspect=vw/h;p.cam.updateProjectionMatrix();renderer.setViewport(i*vw,0,vw,h);renderer.setScissor(i*vw,0,vw,h);renderer.render(scene,p.cam)});
+  const sv=[hemi.intensity,sun.intensity,scene.fog.near,scene.fog.far,scene.fog.color.getHex()];
+  players.forEach((p,i)=>{p.cam.aspect=vw/h;p.cam.updateProjectionMatrix();renderer.setViewport(i*vw,0,vw,h);renderer.setScissor(i*vw,0,vw,h);
+    const under=p.cam.position.y<(G-2)*VS;
+    if(under){hemi.intensity=.05;sun.intensity=0;scene.fog.near=1;scene.fog.far=22;scene.fog.color.setHex(0x040504);scene.background.setHex(0x040504)}
+    else{hemi.intensity=sv[0];sun.intensity=sv[1];scene.fog.near=sv[2];scene.fog.far=sv[3];scene.fog.color.setHex(sv[4]);scene.background.setHex(sv[4])}
+    renderer.render(scene,p.cam)});
+  hemi.intensity=sv[0];sun.intensity=sv[1];scene.fog.near=sv[2];scene.fog.far=sv[3];scene.fog.color.setHex(sv[4]);scene.background.setHex(sv[4]);
 }
 function frame(){
   const now=performance.now(),dt=Math.min(.05,(now-clockT)/1000);clockT=now;
-  if(running&&!paused)update(dt);else pressed.clear();
+  if(running&&!paused)update(dt);else{pressed.clear();T.pressed.clear()}
   if(!running){tDay+=dt/DAYLEN*.3;updSky()}
   render();requestAnimationFrame(frame);
 }
@@ -828,19 +1128,22 @@ function startGame(n){
   initAudio();if(AC&&AC.resume)AC.resume();
   for(let i=0;i<n;i++)players.push(makePlayer(i));
   $('#start').classList.add('hidden');$('#top').classList.remove('hidden');$('#split').classList.toggle('hidden',n<2);
-  running=true;tDay=.08;
+  running=true;tDay=.08;if(isTouch)$('#touch').classList.remove('hidden');
   msg(null,'Check the crates in the buildings. A sedan sits just up the road.');
   if(n>1)msg(players[1],'Player 2: I K J L to move, H to act, Y to use');
   lock();
 }
 gen();
 for(let cx=0;cx<NC;cx++)for(let cz=0;cz<NC;cz++)buildChunk(cx,cz);
-for(const c of crateSpots)crates.push(makeCrate(c[0],c[1],c[2]));
+for(const c of crateSpots)crates.push(makeCrate(c[0],c[1],c[2],c[3]));
+for(const d of doorSpecs)makeDoor(d);
 for(const s of carSpots)vehicles.push(makeVehicle(s));
-for(let i=0;i<14;i++){const x=RI(T0,T1),z=RI(T0,T1);if(Math.hypot(x-49.5,z-49.5)<18)continue;const ty=topY(x,z);if(ty===hmap[z*W+x])spawnZ(x+.5,ty+1,z+.5)}
+for(let i=0;i<14;i++){const x=RI(T0,T1),z=RI(T0,T1);if(Math.hypot(x*VS-49.5,z*VS-49.5)<18)continue;const ty=topY(x,z);if(ty===hmap[z*W+x])spawnZ((x+.5)*VS,(ty+1)*VS,(z+.5)*VS)}
 for(const s of indoorSpots)if(rng()<.4)spawnZ(s[0],s[1],s[2]);
-for(let i=0;i<25;i++){const x=R(T0,T1),z=R(T0,T1);splat({x,y:G+1,z},R(.8,2))}
-$('#genMsg').textContent=`${crates.length} crates · ${vehicles.length} vehicles · ${zombies.length} walkers`;
+for(const s of sewerSpots)if(rng()<.45)spawnZ(s[0],s[1],s[2]);
+for(const m of manholes)makeManhole(m);
+for(let i=0;i<25;i++){const x=R(T0,T1)*VS,z=R(T0,T1)*VS;splat({x,y:topW(x,z),z},R(.8,2))}
+$('#genMsg').textContent=`${crates.length} crates · ${doors.length} doors · ${vehicles.length} vehicles · ${zombies.length} walkers`;
 $('#bSolo').onclick=()=>startGame(1);
 $('#bCoop').onclick=()=>startGame(2);
 updSky();requestAnimationFrame(frame);
