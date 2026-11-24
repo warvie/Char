@@ -26,7 +26,10 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 - **Every block breaks in stages:** dirt, grass, stone, ore, concrete, brick, drywall, roof, asphalt, planks, logs, metal, tile and window frames all go through three broken stages (chipped, heavily damaged, crumbled stub) before they give way. That happens under your pickaxe, zombie claws and explosions, and the broken pieces land as rubble. A block that is already damaged breaks faster.
 - **Doors** get the same treatment: the jambs and head are the surrounding wall, with side casings, plinth blocks and a head casing of trim on both faces.
 - **Windows** sit in ordinary wall (brick or concrete outside, painted drywall inside) with a proper casing of trim round the opening on both faces: side and head casings, a deeper sill and an apron under it.
+- **Blood that coats things:** every droplet falls, and where it lands it leaves a stain on the face it hit, one texture-pixel square (6 cm) at a time. That covers tops of blocks, walls, ceilings and the sides of things, and it runs down over edges. Your bat and chainsaw get bloodier with every hit, and cars that run zombies down get stained across the body.
 - **Blood:** pixel-art splatters with flung droplets where things die, spatter on nearby walls, and old dark pools in the streets where people fell months ago. No more red-tinted blocks.
+- **Overgrowth:** about 1 in 5 houses (more of the damaged ones) is being taken back by nature: ivy climbing the outside walls and in through open windows, trailing down inside, weeds across the floors, and sometimes a sapling breaking through the boards.
+- **Trees** have thin branches and twigs (14 cm and 8 cm thick) reaching off the trunk, ending in leaf clusters, or bare on dead trees.
 - **Furnished rooms:** each floor is split into rooms joined by doorways and doors.
   - Living rooms: couch facing a flat-screen or an old CRT TV (rabbit ears, VCR) on a TV stand, coffee table, rug, armchair, bookcase.
   - Kitchens: fridge, counters, sink and stove, plus a table and chairs.
@@ -81,6 +84,7 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
   - Materials: planks, metal plates, ammo (from scrap or bone), bandages, repair kits, fuel.
   - Placeables: spike traps, bear traps, tripwire bombs, beds, campfires.
   - Wearables: helmets, armor, coats, pants.
+- **Pick up what you break:** blocks you dig or cut, doors you smash and explosion debris drop as small spinning items. Walk near them and they're pulled into your case, unless it's full.
 - **Building and digging:** place plank, stone, dirt, metal or stair blocks (stairs face the way you're looking) and dig anything except bedrock. Build walls 3 high in stone or metal.
 - **Seasons:** spring, summer, autumn and winter turn every 3 days.
   - Seasonal grass and leaves, and in winter snow on the ground, roads, roofs and trees.
@@ -93,7 +97,7 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
   - About half the houses still have a survivor living in them. By day they forage (raid crates, hunt, pick up carcasses) and carry food back to a stash. They board up open windows and set spike traps at the door.
   - At night they go home, open the door, close it behind them and sleep. About 1 in 4 are night owls who keep scavenging.
   - They shoot zombies and trade with you. Raid a stash while its owner sees you and they turn hostile.
-  - Bandit gangs of 2–4 camp around fires and tents in the wilds and shoot on sight.
+  - About 4 in 10 armed groups camping in the wilds are **drifters**: they carry guns but are friendly unless you attack them, and will trade or travel with you. The rest are bandit gangs of 2–4 who camp around fires and tents in the wilds and shoot on sight.
 - **Leaderboard:** hold **Z** (or open your case) to see zombies killed, people killed and nights survived for you and everyone still alive. Click a column to sort. Your nights count resets when you die.
 - **Attaché case (Tab):** a grid inventory like Resident Evil 4. Every item has a size (a fuel can is 2×2, a jacket 2×3, the bat 4×1) and stacks up to a limit. Drag items to arrange them, rotate them with R or right-click while dragging, or tap *Organize*. Select an item to use, wear, rotate or drop it. If you pick up more than fits, the extra drops in a bag at your feet.
 - **Tents:** abandoned campsites dot the countryside, bandits camp in them, and you can sew your own (5 cloth + 3 wood). Sleep in one like a bed.

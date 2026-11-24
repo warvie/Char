@@ -195,7 +195,7 @@ body.touch .slot img.pi{width:24px;height:24px}
 .board th button{font:20px DGPixel,'VT323',monospace;padding:2px 6px;min-height:0;background:none;box-shadow:none;border:0;color:var(--dim)}
 .board th button.on{color:var(--olive);text-decoration:underline}
 .board tr.you td{color:#e8d860;background:rgba(232,216,96,.08)}
-.board tr.bandit td:nth-child(2){color:#e08a70}
+.board tr.bandit td:nth-child(2){color:#e08a70}.board tr.friendly td:nth-child(2){color:#c8b880}
 .board small{font-size:20px;color:var(--dim)}
 #menu h2{font-size:40px}@media(max-width:560px){#menu h2{font-size:30px}}
 @media(max-width:560px){.board{font-size:20px}.board th,.board td{padding:2px 3px}.board th button{font-size:20px;padding:0 2px}.board small{display:none}.board tr.bandit td:nth-child(2)::after{content:' †';color:var(--dim)}}
@@ -404,6 +404,10 @@ function gridBoxes(g,N){ // greedy-merge filled cells into boxes; [6] = mask of 
     if(v>0){const b0=bx[0];bx.push([b0[0]+.125,b0[4],b0[2],Math.min(1,b0[0]+.375),b0[4]+.125,Math.min(1,b0[2]+.25),0])}
     SH[RUB0+m*3+v]=bx;BASE_OF[RUB0+m*3+v]=RUBM[m]}
   for(let id=CHIP0;id<RUB0+RUBN;id++){const b=BASE_OF[id];BCOL[id]=BCOL[b];HARD[id]=HARD[b]*(isRub(id)?.25:1);DROP[id]=DROP[b]}}
+// thin tree branches (14 cm) and twigs (8 cm) along x, z and y: wood you can walk past and cut
+const BRANCH=[230,231,232,233,234,235];{const a=.36,b=.64,c=.42,d=.58;
+  SH[230]=[[0,a,a,1,b,b]];SH[231]=[[a,a,0,b,b,1]];SH[232]=[[a,0,a,b,1,b]];SH[233]=[[0,c,c,1,d,d]];SH[234]=[[c,c,0,d,d,1]];SH[235]=[[c,0,c,d,1,d]];
+  for(const id of BRANCH){BCOL[id]=BCOL[B.LOG];HARD[id]=.12;DROP[id]='wood'}}
 // pick a damaged variant of stage lvl (1-3) that faces outward: walls running along x show their ±z faces, walls along z their ±x faces
 function chipOf(b,x,y,z,lvl=1){const base=BASE_OF[b]||b,m=CHIPM.indexOf(base);if(m<0||isRub(b))return 0;const h=h3(x,y*7+3,z),alongX=solid(x+1,y,z)||solid(x-1,y,z),alongZ=solid(x,y,z+1)||solid(x,y,z-1);
   const set=lvl>=3?[9]:lvl===2?(base===B.ROOF?[8]:alongX&&!alongZ?[6,6,8]:alongZ&&!alongX?[7,7,8]:[6,7,8]):base===B.ROOF?[0,5,1,4]:alongX&&!alongZ?[0,1,2,5]:alongZ&&!alongX?[0,4,3,5]:[0,5];
@@ -607,6 +611,9 @@ function placeAt(type,cx,cz,fb,yaw,soft,opt){ // centred at voxel coords cx,cz
   if(soft){furnSpecs.push([type,(fx0+fw/2)*VS,(fb+1)*VS,(fz0+fd/2)*VS,yaw]);return true}
   if(!fpFree(fx0,fz0,fw,fd,fb,h))return false;occupy(type,fx0,fz0,fw,fd,fb,yaw);if(opt)furnSpecs[furnSpecs.length-1].push(opt);return true;
 }
+// place only if the whole footprint lies inside room r (leaving a 1-cell aisle against the walls)
+function fitAt(type,r,cx,cz,fb,yaw){const[w,d]=FD[type],rot=Math.abs(Math.sin(yaw))>.5,fw=rot?d:w,fd=rot?w:d,fx0=Math.round(cx-fw/2),fz0=Math.round(cz-fd/2);
+  if(fx0<r.x0||fz0<r.z0||fx0+fw-1>r.x1||fz0+fd-1>r.z1)return false;return placeAt(type,cx,cz,fb,yaw)}
 function floorMat(r,fb,m){for(let x=r.x0;x<=r.x1;x++)for(let z=r.z0;z<=r.z1;z++){const b=get(x,fb,z);if(b!==0&&b!==B.LADDER)setv(x,fb,z,m)}}
 function living(r,fb){
   const c=placeF('couch',r,fb);
@@ -641,6 +648,23 @@ function stairs(x0,z1,b,k,rail,n=FH){
   if(!odd){reserve(x0+1,sx0+n+1,z1-3,z1-1,b);reserve(sx0+n-1,sx0+n+2,z1-4,z1-1,b+n)}
   else{reserve(sx0-1,sx0+n+2,z1-5,z1-3,b);reserve(sx0-3,sx0,z1-5,z1-2,b+n)}
 }
+// ---- overgrowth: nature taking abandoned houses back - ivy up the walls and in through open windows, weeds across the floors, the odd sapling through the boards
+function overgrow(x0,x1,z0,z1,g,floors,w0,xm){
+  const top=g+floors*FH,faces=[[x0,x1,z0,0,Math.PI],[x0,x1,z1,0,0],[z0,z1,x0,1,-Math.PI/2],[z0,z1,x1,1,Math.PI/2]];
+  for(const[a0,a1,c,side,yaw]of faces)for(let i=0,n=RI(2,6);i<n;i++){const t=RI(a0+1,a1-1);if(!side&&c===z0&&t>=xm-2&&t<=xm+3)continue;
+    const x=side?c:t,z=side?t:c,out=yaw===Math.PI?-1:yaw===0?1:0,ox=yaw===-Math.PI/2?-1:yaw===Math.PI/2?1:0;
+    const wx=(x+.5+ox*.5)*VS+ox*.01,wz=(z+.5+out*.5)*VS+out*.01,h=R(1.2,(top-g)*VS*.9);furnSpecs.push(['vine',wx,(g+1)*VS,wz,yaw,{h,w:R(.5,1.3)}])}
+  // ivy in through open windows, trailing down inside
+  for(let i=w0;i<winSpecs.length;i++){const[x,y,z,ax]=winSpecs[i];if(winSpecs[i][5])continue;
+    for(let du=1;du<3;du++)for(let dv=1;dv<4;dv++){const cx=ax?x+du:x,cz=ax?z:z+du,cy=y+dv;if(get(cx,cy,cz)===0&&rng()<.45)setv(cx,cy,cz,B.LEAF)}
+    if(rng()<.6){const inz=ax?(z===z0?1:-1):0,inx=ax?0:(x===x0?1:-1);furnSpecs.push(['vine',(x+(ax?2:.5)+inx*.5)*VS+inx*.01,y*VS,(z+(ax?.5:2)+inz*.5)*VS+inz*.01,ax?(inz>0?0:Math.PI):(inx>0?Math.PI/2:-Math.PI/2),{h:R(.7,1.05),w:R(.5,.9),hang:1}])}}
+  // weeds pushing up through the ground floor, thickest near the walls
+  for(let i=0,n=RI(6,16);i<n;i++){const x=RI(x0+1,x1-1),z=RI(z0+1,z1-1);if(get(x,g+1,z)!==0||resv.has(rk(x,z,g)))continue;furnSpecs.push(['weeds',(x+.5)*VS,(g+1)*VS,(z+.5)*VS,rng()*6.28,{n:RI(4,9)}])}
+  // a sapling broke through the floor
+  if(rng()<.45)for(let t=0;t<20;t++){const x=RI(x0+3,x1-3),z=RI(z0+3,z1-3);let ok=true;for(let dx=-1;dx<=1&&ok;dx++)for(let dz=-1;dz<=1&&ok;dz++)for(let y=g+1;y<=g+5;y++)if(get(x+dx,y,z+dz)!==0){ok=false;break}
+    if(!ok)continue;setv(x,g,z,B.DIRT);setv(x+1,g,z,rng()<.5?B.DIRT:get(x+1,g,z));furnSpecs.push(['sapling',(x+.5)*VS,(g+1)*VS,(z+.5)*VS,rng()*6.28,{h:R(1.6,2.4)}]);
+    for(let k=0;k<3;k++)furnSpecs.push(['weeds',(x+.5+R(-1.5,1.5))*VS,(g+1)*VS,(z+.5+R(-1.5,1.5))*VS,rng()*6.28,{n:RI(3,6)}]);break}
+}
 // ---- weathering: most damage is chunks bitten out of blocks with the pieces lying below; only a few blocks are knocked clean through
 function rubbleAt(x,y,z,b){const v=get(x,y,z),u=get(x,y-1,z);if(v!==0||!u||SH[u]||u===B.GLASS||u===B.LADDER||u===B.FURN||u===B.DOOR||resv.has(rk(x,z,y-1)))return false;setv(x,y,z,rubOf(b,x,z));return true}
 function wreck(x0,x1,z0,z1,g,floors,lvl,fh=FH){
@@ -660,7 +684,7 @@ function wreck(x0,x1,z0,z1,g,floors,lvl,fh=FH){
       else if(d<rad+1.4&&rng()<.8)setv(x,top,z,chipOf(B.ROOF,x,top,z))}}
 }
 function building(lx,lz,S){
-  resv=new Set();const hurt=rng()<.3;WB=hurt?.5:.08;
+  resv=new Set();const hurt=rng()<.3;WB=hurt?.5:.08;const w0=winSpecs.length,wild=rng()<(hurt?.55:.18);if(wild)WB=Math.max(WB,.35);
   const w=RI(22,S),d=RI(22,S),x0=lx+RI(0,S-w),z0=lz+RI(0,S-d),x1=x0+w-1,z1=z0+d-1;
   const rail=['wood','metal','none','wood','metal'][RI(0,4)],trimC=rng()<.6?0:RI(1,2);
   const floors=RI(1,3),g=G+1,mat=rng()<.5?B.CONC:B.BRICK,top=g+floors*FH,BD=7;WMAT=mat;WTRIM=trimC;
@@ -710,6 +734,7 @@ function building(lx,lz,S){
   if(hasBase){const fb=g-BD-1,r={x0:x0+1,x1:x1-1,z0:z0+1,z1:z1-1};basementRoom(r,fb);spotsIn(r,fb,true);spotsIn(r,fb,true)}
   // most buildings came through intact; about 3 in 10 took real damage
   if(hurt)wreck(x0,x1,z0,z1,g,floors,Math.pow(rng(),1.2));
+  if(wild)overgrow(x0,x1,z0,z1,g,floors,w0,xm);
   if(hurt)for(let i=0;i<10;i++){const x=rng()<.5?x0-1:x1+1,z=RI(z0,z1);if(!isRoad(x,z)&&get(x,g+1,z)===0&&get(x,g,z)){if(rng()<.2)setv(x,g+1,z,chipOf(mat,x,g+1,z));else rubbleAt(x,g+1,z,mat)}}
 }
 // ---- commercial buildings: hospitals, grocery stores, hardware stores and schools fill a whole lot
@@ -801,16 +826,23 @@ function ward(r,fb){floorMat(r,fb,B.TILEF);for(let i=0;i<3;i++)placeF('hbed',r,f
 function pharmacy(r,fb){floorMat(r,fb,B.TILEF);for(let i=0;i<3;i++)placeF('cabinet',r,fb);placeF('shelf',r,fb);placeF('shelf',r,fb);crateAt(r,fb,2,'hospital',true)}
 function classroom(r,fb){
   const sd=rng()<.5?'W':'E',yb=sd==='W'?Math.PI/2:-Math.PI/2,dir=sd==='W'?1:-1,bx=sd==='W'?r.x0:r.x1,zc=(r.z0+r.z1+1)/2;
-  placeF('chalk',r,fb,sd,Math.max(0,Math.floor((r.z1-r.z0+1-6)/2)));placeAt('tdesk',bx+dir*2.5,zc,fb,yb);
-  for(let c=0;c<3;c++)for(let q=-1;q<=1;q++)placeAt('desk',bx+dir*(4.5+c*2.3),zc+q*2.8,fb,yb+Math.PI);
+  placeF('chalk',r,fb,sd,Math.max(0,Math.floor((r.z1-r.z0+1-6)/2)));fitAt('tdesk',r,bx+dir*2.5,zc,fb,yb);
+  // as many rows and columns of desks as actually fit inside the room
+  for(let c=0;c<4;c++)for(let q=-2;q<=2;q++)fitAt('desk',r,bx+dir*(4.5+c*2.3),zc+q*2.8,fb,yb+Math.PI);
   if(rng()<.5)placeF('bookcase',r,fb,OPP[sd]);
 }
-function cafeteria(r,fb){floorMat(r,fb,B.TILEF);for(let i=0;i<2;i++)for(let j=0;j<2;j++)placeAt('lunch',r.x0+4+i*6,r.z0+3+j*5,fb,0);placeF('counter',r,fb,'E');placeF('fridge',r,fb,'E');placeF('stove',r,fb,'E');crateAt(r,fb,2,'school',true)}
+function cafeteria(r,fb){floorMat(r,fb,B.TILEF);for(let i=0;i<3;i++)for(let j=0;j<3;j++)fitAt('lunch',r,r.x0+4+i*6,r.z0+3+j*5,fb,0);placeF('counter',r,fb,'E');placeF('fridge',r,fb,'E');placeF('stove',r,fb,'E');crateAt(r,fb,2,'school',true)}
 function tree(x,z){
   {const t=topY(x,z),tb=get(x,t,z);if(tb>=23&&tb<=25)setv(x,t,z,B.GRASS)}
   const h=topY(x,z),th=RI(8,12),dead=rng()<.35;
   for(let i=1;i<=th;i++)setv(x,h+i,z,B.LOG);
-  if(dead){setv(x+1,h+th-2,z,B.LOG);setv(x+2,h+th-1,z,B.LOG);return}
+  // branches: thin limbs off the trunk, rising a little as they go, ending in leaf clusters (or bare twigs on dead trees)
+  const put=(a,b,c,v)=>{if(get(a,b,c)===0)setv(a,b,c,v)};
+  for(let n=0,N=dead?RI(3,5):RI(2,4);n<N;n++){const k=RI(0,3),dx=[1,-1,0,0][k],dz=[0,0,1,-1][k],L=RI(2,dead?3:4);let y=h+RI(Math.max(3,th-6),th-1),cx=x,cz=z;
+    for(let i=1;i<=L;i++){cx+=dx;cz+=dz;const thin=i>=L-(dead?1:0)&&i>1;put(cx,y,cz,dx?(thin?233:230):(thin?234:231));if(i<L&&rng()<.4){y++;put(cx,y,cz,thin?235:232)}}
+    if(!dead)for(let a=-1;a<=1;a++)for(let b=0;b<=1;b++)for(let c=-1;c<=1;c++)if(rng()<.7)put(cx+a,y+b,cz+c,B.LEAF);
+    else if(rng()<.6)put(cx,y+1,cz,235)}
+  if(dead){put(x,h+th+1,z,232);put(x,h+th+2,z,235);return}
   for(let dx=-4;dx<=4;dx++)for(let dy=-2;dy<=4;dy++)for(let dz=-4;dz<=4;dz++){
     if(dx*dx+dy*dy*1.6+dz*dz<20&&rng()<.85&&get(x+dx,h+th+dy,z+dz)===0)setv(x+dx,h+th+dy,z+dz,B.LEAF)}
 }
@@ -1194,7 +1226,7 @@ const TILE_OF=[];{const T=TILE,all=t=>[t,t,t,t,t,t],top=(s,t)=>[s,s,t,s,s,s];
   TILE_OF[B.LOG]=[T.bark,T.bark,T.logTop,T.logTop,T.bark,T.bark];TILE_OF[B.LEAF]=all(T.leaf);TILE_OF[B.BRICK]=all(T.brick);TILE_OF[B.METAL]=all(T.metal);
   TILE_OF[B.BED]=all(T.bed);TILE_OF[B.GLASS]=all(T.glass);TILE_OF[B.FRAME]=all(T.frame);TILE_OF[B.SLUDGE]=all(T.sludge);TILE_OF[B.DOOR]=all(T.plank);TILE_OF[B.LADDER]=all(T.plank);
   TILE_OF[B.WALL]=all(T.wall);TILE_OF[B.TILEF]=[T.tilef,T.tilef,T.tilef,T.plank,T.tilef,T.tilef];TILE_OF[B.ROOF]=[T.roofSide,T.roofSide,T.roofTop,T.conc,T.roofSide,T.roofSide];
-  for(let b=23;b<=25;b++)TILE_OF[b]=TILE_OF[B.GRASS];for(let b=26;b<=29;b++)TILE_OF[b]=all(T.plank);for(let b=CHIP0;b<RUB0+RUBN;b++)TILE_OF[b]=TILE_OF[BASE_OF[b]]}
+  for(let b=23;b<=25;b++)TILE_OF[b]=TILE_OF[B.GRASS];for(let b=26;b<=29;b++)TILE_OF[b]=all(T.plank);for(let b=CHIP0;b<RUB0+RUBN;b++)TILE_OF[b]=TILE_OF[BASE_OF[b]];for(const b of BRANCH)TILE_OF[b]=all(T.bark)}
 const FACE_UV=[[2,1],[2,1],[0,2],[0,2],[0,1],[0,1]]; // which axes give (u,v) on each face
 // uv for corner c of a face on voxel (x,y,z): pick the quarter of the 1 m tile from the voxel's parity
 function quv(tile,fi,c,x,y,z){const a=FACE_UV[fi],P=[x,y,z],u=((P[a[0]]&1)+c[a[0]])/2,v=((P[a[1]]&1)+c[a[1]])/2,tx=tile%ACOLS,ty=(tile/ACOLS)|0;
@@ -1397,6 +1429,15 @@ function buildFurn(sp){
   case'bench':F(W_*.95,.08,D_*.85,0x6a4a2a,0,.85,0);for(const sx of[-1,1])for(const sz of[-1,1])F(.08,.82,.08,0x4a3a2a,sx*W_*.43,.41,sz*D_*.36);F(W_*.9,.04,D_*.7,0x4a3a2a,0,.25,0);
     F(.18,.14,.16,0x3a4a5a,-W_*.35,.96,D_*.2);F(.4,.04,.08,0x888888,.2,.91,0,.4);F(.25,.06,.06,0xa03a2a,-.1,.91,.15,-.3);break;
   case'heater':F(D_*.8,1.7,D_*.8,0xcfccc0,0,.85,0);F(.06,.3,.06,0xaaaaaa,0,1.85,0);F(.2,.1,.02,0x2a2a2a,0,.5,D_*.4);break;
+  case'vine':{const{h,w,hang}=sp[5],G=[0x3f6a2a,0x4f7a30,0x5a8a3a,0x35602a,0x6a9a40],stem=0x5a5a2a;let x=R(-w*.2,w*.2);
+    for(let y=hang?h:0;hang?y>0:y<h;y+=hang?-R(.08,.16):R(.08,.16)){x+=R(-.06,.06);const sp2=w*(hang?.6+.4*y/h:.4+.6*(1-y/h))*.5;F(.025,.14,.02,stem,x,(hang?0:0)+y,.015);
+      for(let k=0;k<3;k++)F(R(.05,.11),R(.05,.1),.025,pick(G),x+R(-sp2,sp2),y+R(-.05,.05),.03+R(0,.03))}
+    if(!hang)for(let k=0;k<6;k++)F(R(.06,.12),R(.05,.09),.03,pick(G),R(-w*.5,w*.5),R(0,.4),.04);break}
+  case'weeds':{const n=sp[5].n,G=[0x4a7a2a,0x5a8a34,0x6a8a3a,0x7a8a40,0x3a6a28];for(let i=0;i<n;i++){const x=R(-.22,.22),z=R(-.22,.22),hh=R(.12,.45);F(.03,hh,.03,pick(G),x,hh/2,z,R(0,3),R(-.25,.25));
+      if(rng()<.35)F(.07,.05,.07,pick([0xd8d060,0xd8a0c0,0xe8e8d8]),x,hh,z)}F(.36,.02,.36,0x4a4a2a,0,.01,0);break}
+  case'sapling':{const h=sp[5].h,G=[0x3f6a2a,0x4f7a30,0x5a8a3a];F(.09,h,.09,0x5a4228,0,h/2,0);F(.05,.4,.05,0x5a4228,.08,h*.6,0,0,-.6);F(.05,.35,.05,0x5a4228,-.07,h*.75,0,0,.6);
+    for(let i=0;i<18;i++){const a=rng()*6.28,r=R(0,.45),y=h*.55+R(0,h*.5);F(R(.12,.22),R(.1,.18),R(.12,.22),pick(G),Math.cos(a)*r,y,Math.sin(a)*r)}
+    for(let i=0;i<5;i++)F(R(.12,.25),.03,R(.08,.15),0x6a5034,R(-.5,.5),.015,R(-.5,.5),R(0,3));break}
   case'aisle':{const gro=!sp[5]||sp[5].k!=='hardware',P_=gro?[0xc8302a,0xe0b030,0x3a8a3a,0xe07a20,0x2a5aa0,0xd8d0b8,0x8a3a6a]:[0x5a5f64,0xd8761e,0xe0c030,0x2a2a2a,0xa02a22,0x3a6a9a,0x8a8a80];
     F(W_*.98,.12,D_*.9,0x3a3e42,0,.06,0);F(W_*.98,1.45,.04,0x6a7076,0,.8,0);for(const ex of[-1,0,1])F(.05,1.6,D_*.9,0x4a4e52,ex*W_*.48,.8,0);
     for(let i=0;i<4;i++){const y=.14+i*.38;for(const sd of[-1,1]){F(W_*.96,.025,D_*.42,0x8a9096,0,y,sd*D_*.24);F(W_*.96,.06,.01,i===0?0xd8d0b8:0xf0e8d0,0,y+.02,sd*D_*.45);
@@ -1493,20 +1534,47 @@ function makeVM(){
 }
 
 // ---------------- blood + dust particles, decals
-const PN=700,pPos=new Float32Array(PN*3).fill(-100),pVel=new Float32Array(PN*3),pCol=new Float32Array(PN*3),pLife=new Float32Array(PN);let pI=0;
+const PN=900,pPos=new Float32Array(PN*3).fill(-100),pVel=new Float32Array(PN*3),pCol=new Float32Array(PN*3),pLife=new Float32Array(PN),pBlood=new Uint8Array(PN);let pI=0;
 const pGeo=new THREE.BufferGeometry();
 pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));pGeo.setAttribute('color',new THREE.BufferAttribute(pCol,3));
 const pts=new THREE.Points(pGeo,new THREE.PointsMaterial({size:.14,vertexColors:true}));pts.frustumCulled=false;scene.add(pts);
 const RED=[.55,.02,.02],DUST=[.5,.47,.42];
-function burst(p,n,force,col,up=2){for(let k=0;k<n;k++){const j=pI;pI=(pI+1)%PN;const o=j*3,s=.7+rng()*.5;
+function burst(p,n,force,col,up=2){for(let k=0;k<n;k++){const j=pI;pI=(pI+1)%PN;const o=j*3,s=.7+rng()*.5;pBlood[j]=col===RED?1:0;
   pPos[o]=p.x;pPos[o+1]=p.y;pPos[o+2]=p.z;pVel[o]=(rng()-.5)*force;pVel[o+1]=rng()*force*.6+up;pVel[o+2]=(rng()-.5)*force;
   pLife[j]=R(.6,1.6);pCol[o]=col[0]*s;pCol[o+1]=col[1]*s;pCol[o+2]=col[2]*s}}
 function updParticles(dt){for(let j=0;j<PN;j++){if(pLife[j]<=0)continue;const o=j*3;pLife[j]-=dt;
   if(pLife[j]<=0){pPos[o+1]=-100;continue}
-  if(pVel[o]||pVel[o+1]||pVel[o+2]){pVel[o+1]-=18*dt;const ny=pPos[o+1]+pVel[o+1]*dt;
-    if(solid(vc(pPos[o]),vc(ny),vc(pPos[o+2]))){pVel[o]=pVel[o+1]=pVel[o+2]=0;pPos[o+1]=(vc(ny)+1)*VS+.02}
-    else{pPos[o]+=pVel[o]*dt;pPos[o+1]=ny;pPos[o+2]+=pVel[o+2]*dt}}}
+  if(pVel[o]||pVel[o+1]||pVel[o+2]){pVel[o+1]-=18*dt;const ox=pPos[o],oy=pPos[o+1],oz=pPos[o+2],nx=ox+pVel[o]*dt,ny=oy+pVel[o+1]*dt,nz=oz+pVel[o+2]*dt;
+    if(solid(vc(nx),vc(ny),vc(nz))){
+      // which face did it hit? blood leaves a pixel stain there (and may run down the side)
+      let f;if(solid(vc(ox),vc(ny),vc(oz)))f=pVel[o+1]<0?2:3;else if(solid(vc(nx),vc(oy),vc(oz)))f=pVel[o]>0?1:0;else f=pVel[o+2]>0?5:4;
+      if(pBlood[j]&&rng()<.7)stain(f,f<2?nx:ox,f===2||f===3?ny:oy,f>3?nz:oz,pVel[o]>0,pVel[o+2]>0);
+      pVel[o]=pVel[o+1]=pVel[o+2]=0;if(f===2)pPos[o+1]=(vc(ny)+1)*VS+.02;else pLife[j]=Math.min(pLife[j],.05)}
+    else{pPos[o]=nx;pPos[o+1]=ny;pPos[o+2]=nz}}}
   pGeo.attributes.position.needsUpdate=true;pGeo.attributes.color.needsUpdate=true}
+// blood coats surfaces: every droplet that lands leaves a pixel (1/16 m, the block texture's pixel) on the face it hit
+const PXM=VS/8,SN=9000;let stainIM=null,stainN=0;
+if(THREE.InstancedMesh){stainIM=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1),new THREE.MeshLambertMaterial({color:0xffffff,polygonOffset:true,polygonOffsetFactor:-3}),SN);
+  stainIM.count=0;stainIM.frustumCulled=false;stainIM.receiveShadow=true;scene.add(stainIM)}
+const _so=new THREE.Group(),_sc=new THREE.Color();
+function stainPx(x,y,z,f,sz){if(!stainIM||!_so.position)return;const k=stainN%SN;stainN++;stainIM.count=Math.min(SN,stainN);
+  _so.position.set(x,y,z);_so.rotation.set(f===2?-Math.PI/2:f===3?Math.PI/2:0,f===0?Math.PI/2:f===1?-Math.PI/2:f===5?Math.PI:0,0);_so.scale.set(PXM*sz,PXM*sz,1);_so.updateMatrix();
+  stainIM.setMatrixAt(k,_so.matrix);if(stainIM.setColorAt){_sc.setRGB(.32+rng()*.18,.01,.02);stainIM.setColorAt(k,_sc);if(stainIM.instanceColor)stainIM.instanceColor.needsUpdate=true}stainIM.instanceMatrix.needsUpdate=true}
+const snapPx=v=>(Math.floor(v/PXM)+.5)*PXM;
+function stain(f,x,y,z){const cx=vc(x),cy=vc(y),cz=vc(z),sz=rng()<.25?2:1;
+  if(f===2){const ty=(cy+1)*VS+.004,px=snapPx(x),pz=snapPx(z);stainPx(px,ty,pz,2,sz);
+    // near an edge with open air beside it: a few pixels run down the side
+    const ex=px-cx*VS,ez=pz-cz*VS;if(rng()<.35)for(const[dx,dz,ff,fx,fz]of[[-1,0,1,cx*VS-.004,pz],[1,0,0,(cx+1)*VS+.004,pz],[0,-1,5,px,cz*VS-.004],[0,1,4,px,(cz+1)*VS+.004]]){
+      const near=dx<0?ex<PXM*1.5:dx>0?ex>VS-PXM*1.5:dz<0?ez<PXM*1.5:ez>VS-PXM*1.5;if(!near||solid(cx+dx,cy,cz+dz))continue;
+      for(let i=0,n=RI(2,6);i<n;i++)stainPx(fx,ty-PXM*(i+.5),fz,ff,1);break}}
+  else if(f===3)stainPx(snapPx(x),cy*VS-.004,snapPx(z),3,sz);
+  else if(f<2){const fx=f===1?cx*VS-.004:(cx+1)*VS+.004,py=snapPx(y),pz=snapPx(z);for(let i=0,n=rng()<.5?RI(2,5):1;i<n;i++)stainPx(fx,py-PXM*i,pz,f,i?1:sz)}
+  else{const fz=f===5?cz*VS-.004:(cz+1)*VS+.004,py=snapPx(y),px=snapPx(x);for(let i=0,n=rng()<.5?RI(2,5):1;i<n;i++)stainPx(px,py-PXM*i,fz,f,i?1:sz)}}
+// things get bloody too: your bat and chainsaw, cars that hit zombies. Pixel stains stuck onto the parts' own surfaces
+function bloody(item,n=1,cap=60){if(!item||!item.traverse)return;const parts=[];item.traverse(o=>{if(o.isMesh&&o.geometry&&o.geometry.parameters&&o.geometry.parameters.width&&!o.userData.stain)parts.push(o)});if(!parts.length)return;
+  for(let i=0;i<n;i++){if((item.userData.stains|0)>=cap)return;item.userData.stains=(item.userData.stains|0)+1;const m=pick(parts),P=m.geometry.parameters,ax=RI(0,2),sg=rng()<.5?-1:1,s=Math.min(.03,Math.max(.008,Math.min(P.width,P.height,P.depth)*.6));
+    const st=new THREE.Mesh(box(1,1,1),lam(pick([0x5a0606,0x6e0808,0x420404])));st.userData.stain=1;const d=[P.width,P.height,P.depth];
+    const pos=[R(-.5,.5)*d[0],R(-.5,.5)*d[1],R(-.5,.5)*d[2]];pos[ax]=sg*(d[ax]/2+.002);st.position.set(...pos);const sc=[s,s*R(1,2.2),s];sc[ax]=.003;st.scale.set(...sc);m.add(st)}}
 // blood: pixel-art decals (32 px, nearest filtering) - splatters with flung droplets, glossy puddles, and spatter on walls
 function bloodTex(kind,sd){const c=document.createElement('canvas');c.width=c.height=32;const x=c.getContext('2d'),r=mulberry(sd);
   const px=(a,b,R,G,B,A)=>{if(a<0||b<0||a>31||b>31)return;x.fillStyle=`rgba(${R|0},${G|0},${B|0},${A})`;x.fillRect(a,b,1,1)};
@@ -2070,7 +2138,7 @@ function sawTick(p,eye,dir,vh,dt){
       side=(dir.x*dz-dir.z*dx)/hd,c=z.cut,face=Math.sin(z.g.rotation.y)*dx+Math.cos(z.g.rotation.y)*dz<0;
     let pn=hy>1.55?'head':hy>.95?(Math.abs(side)>.28?((side>0)!==face?'armR':'armL'):'torso'):((side>0)!==face?'legR':'legL');if((pn==='legL'||pn==='legR')&&Math.abs(side)<.12)pn=z.sawLeg||(z.sawLeg=c.legL?'legR':c.legR?'legL':pick(['legL','legR']));if(c[pn])pn='torso';
     zh={z,part:pn,point:new V3(z.pos.x,z.pos.y+Math.max(.3,Math.min(1.8,hy)),z.pos.z)}}}
-  if(zh){const z=zh.z,pn=zh.part;z.chasing=true;z.kx+=dir.x*.5;z.kz+=dir.z*.5;burstDir(zh.point,dir,10);burst(zh.point,4,3,RED,1);z.hp-=5;
+  if(zh){if(rng()<.4)bloody(p.vm.saw,1,90);const z=zh.z,pn=zh.part;z.chasing=true;z.kx+=dir.x*.5;z.kz+=dir.z*.5;burstDir(zh.point,dir,10);burst(zh.point,4,3,RED,1);z.hp-=5;
     z.saw=z.saw||{};z.saw[pn]=(z.saw[pn]||0)+.1;if(rng()<.15)wallSplat(z.pos);
     if(pn==='torso'){if(z.saw.torso>=.6){bisect(z,dir,p);return}}
     else if(z.saw[pn]>=.3){sever(z,pn,dir);if(pn==='head'){killZombie(z,p);msg(p,'Decapitated');return}}
@@ -2079,7 +2147,7 @@ function sawTick(p,eye,dir,vh,dt){
   const a=nearestAnimalInFront(p,dir,2.4);if(a){hurtAnimal(a,12,dir,p);return}
   // it cuts wood: logs, planks, leaves, stairs
   if(vh&&vh.t<2.4){const b=get(vh.x,vh.y,vh.z),base=BASE_OF[b]||b;if(base===B.LOG||base===B.PLANK||base===B.LEAF||(b>=26&&b<=29)){p.sawW=(p.sawW||0)+.1;burst(new V3((vh.x+.5)*VS,(vh.y+.5)*VS,(vh.z+.5)*VS),4,2,BRGB[B.PLANK],1);
-    if(p.sawW>=.35){p.sawW=0;setBlock(vh.x,vh.y,vh.z,0);const d=DROP[b];if(d)p.inv[d]++}}}}
+    if(p.sawW>=.35){p.sawW=0;setBlock(vh.x,vh.y,vh.z,0);const d=DROP[b];if(d&&!p.creative)dropBlock(vh.x,vh.y,vh.z,b)}}}}
 // cut a zombie in two at the waist: the upper body flies off as a gib, the legs fold
 function bisect(z,dir,by){if(z.halved||z.dead)return;z.halved=true;z.g.updateMatrixWorld(true);
   const cut=z.pos.y+1.0,up=new THREE.Group();up.position.set(z.pos.x,cut,z.pos.z);up.rotation.y=z.g.rotation.y;scene.add(up);up.updateMatrixWorld(true);
@@ -2108,7 +2176,7 @@ function placeBlock(p,vh){
 }
 function primary(p,eye,dir,vh,dt){
   if(p.tool===0&&p.useSaw){sawTick(p,eye,dir,vh,dt);return}
-  if(p.tool===0){if(p.cool<=0){p.cool=.55;p.swing=1;if(melee(p,eye,dir,2.8,36)){}else if(vh&&vh.t<2.8&&get(vh.x,vh.y,vh.z)===B.GLASS)breakGlass(vh.x,vh.y,vh.z);else sNoise(.08,300,.15)}}
+  if(p.tool===0){if(p.cool<=0){p.cool=.55;p.swing=1;if(melee(p,eye,dir,2.8,36)){bloody(p.vm.items[0],2)}else if(vh&&vh.t<2.8&&get(vh.x,vh.y,vh.z)===B.GLASS)breakGlass(vh.x,vh.y,vh.z);else sNoise(.08,300,.15)}}
   else if(p.tool===1){if(p.cool<=0){if(p.inv.ammo<=0){p.cool=.4;SND.click();msg(p,'Click. Out of ammo — craft more from scrap + coal');return}
     p.cool=.3;p.inv.ammo--;p.swing=p.aim?.25:.5;p.pitch=Math.min(1.5,p.pitch+(p.aim?.018:.035));shoot(p,eye,dir)}}
   else if(p.tool===2){
@@ -2120,8 +2188,8 @@ function primary(p,eye,dir,vh,dt){
     p.dig.t+=p.creative?1:dt/HARD[b];p.dig.s-=dt;{const lv=Math.min(3,Math.floor(p.dig.t*4));if(lv>LVL[b]&&!isRub(b)){const c=worsen(b,vh.x,vh.y,vh.z,lv);if(c!==b){setBlock(vh.x,vh.y,vh.z,c);if(lv>=2&&rng()<.5)dropRubble(vh.x,vh.y+(get(vh.x,vh.y-1,vh.z)?1:0),vh.z,b)}}}if(p.dig.s<=0){p.dig.s=.28;p.swing=1;SND.dig();burst(new V3((vh.x+.5)*VS,(vh.y+.9)*VS,(vh.z+.5)*VS),3,2,BRGB[b],1)}
     if(p.dig.t>=1){
       if(b===B.GLASS)breakGlass(vh.x,vh.y,vh.z);
-      else if(b===B.DOOR){const dr=doorMap.get(dkey(vh.x,vh.y,vh.z));if(dr)destroyDoor(dr);p.inv.plank+=3;SND.pick()}
-      else{setBlock(vh.x,vh.y,vh.z,0);burst(new V3((vh.x+.5)*VS,(vh.y+.5)*VS,(vh.z+.5)*VS),12,3,BRGB[b],1);const d=DROP[b];if(d){p.inv[d]++;SND.pick()}if(BASE_OF[b]&&!isRub(b)&&rng()<.4)dropRubble(vh.x,vh.y,vh.z,b)}
+      else if(b===B.DOOR){const dr=doorMap.get(dkey(vh.x,vh.y,vh.z));if(dr)destroyDoor(dr);dropItem((vh.x+.5)*VS,(vh.y+.5)*VS,(vh.z+.5)*VS,'plank',3,BCOL[B.PLANK])}
+      else{setBlock(vh.x,vh.y,vh.z,0);burst(new V3((vh.x+.5)*VS,(vh.y+.5)*VS,(vh.z+.5)*VS),12,3,BRGB[b],1);const d=DROP[b];if(d){if(p.creative){}else dropBlock(vh.x,vh.y,vh.z,b)}if(BASE_OF[b]&&!isRub(b)&&rng()<.4)dropRubble(vh.x,vh.y,vh.z,b)}
       p.dig=null}
   }
   else if(p.tool===3){if(p.cool<=0){p.cool=.22;p.swing=.6;placeBlock(p,vh)}}
@@ -2171,7 +2239,7 @@ function promptFor(p){
   if(nearestCrate(p,2.6))return`${K} — search supply crate`;
   const bg=nearestBag(p,1.8);if(bg)return`${K} — take ${bg.label}`;
   const sh0=nearestStash(p,1.8);if(sh0&&!nearestNPC(p,2.4))return`${K} — raid ${sh0.owner?sh0.owner.name+"'s":'a'} stash (${Object.values(sh0.items).reduce((a,b)=>a+b,0)} items)`;
-  const np=nearestNPC(p,2.4);if(np)return npcHostileTo(np,p)?`${np.name} (hostile)`:`${K} — talk to ${np.name} (${np.infected!=null?'bitten':np.kind==='family'?(np.role==='kid'?'child':np.role==='wife'?'mother':'father'):np.follow?'with you':'survivor'})`;
+  const np=nearestNPC(p,2.4);if(np)return npcHostileTo(np,p)?`${np.name} (hostile)`:`${K} — talk to ${np.name} (${np.infected!=null?'bitten':np.kind==='family'?(np.role==='kid'?'child':np.role==='wife'?'mother':'father'):np.follow?'with you':np.kind==='bandit'?'drifter':'survivor'})`;
   if(nearestBed(p,1.8))return dayLight()<.35?`${K} — sleep until dawn`:`Bed · sleep here at night (sets respawn)`;
   {const f=nearestFire(p,1.9);if(f)return f.cook?`Cooking ${LABEL[f.cook.r.out].toLowerCase()} · ${Math.ceil(f.cook.t)}s`:`${K} — cook at the fire`}
   const dr=nearestDoor(p,1.9);if(dr)return`${K} — ${dr.open?'close':'open'} door`;
@@ -2290,7 +2358,7 @@ function updateVehicle(v,dt){
   for(const w of v.wheels){w.rotation.x+=v.speed*dt/.38;w.rotation.y=w.userData.front?v.steerA:0}
   if(v.pedal&&Math.abs(v.speed)>1)for(const z of zombies){if(z.dead)continue;if(Math.hypot(z.pos.x-v.pos.x,z.pos.z-v.pos.z)<.9&&Math.abs(z.pos.y-v.pos.y)<2){z.kx+=Math.sin(v.yaw)*v.speed*.6;z.kz+=Math.cos(v.yaw)*v.speed*.6;v.speed*=-.2;if(d){d.flash=.2;damage(d,3,true)}SND.hit();break}}
   if(!v.pedal&&Math.abs(v.speed)>3)for(const z of zombies){if(z.dead)continue;
-    if(Math.hypot(z.pos.x-v.pos.x,z.pos.z-v.pos.z)<v.L*.5&&Math.abs(z.pos.y-v.pos.y)<2){dismember(z,RI(1,2),{x:Math.sin(v.yaw)*2,z:Math.cos(v.yaw)*2});killZombie(z,d,true);v.hp-=1.5;v.speed*=.9;if(d)d.flash=.15}}
+    if(Math.hypot(z.pos.x-v.pos.x,z.pos.z-v.pos.z)<v.L*.5&&Math.abs(z.pos.y-v.pos.y)<2){dismember(z,RI(1,2),{x:Math.sin(v.yaw)*2,z:Math.cos(v.yaw)*2});bloody(v.g,6,120);killZombie(z,d,true);v.hp-=1.5;v.speed*=.9;if(d)d.flash=.15}}
   if(!v.pedal&&Math.abs(v.speed)>3.5)for(const p of players){if(p.vehicle||p.dead>0||(p.vhit||0)>performance.now())continue;
     const dx=p.pos.x-v.pos.x,dz=p.pos.z-v.pos.z,c=Math.cos(v.yaw),sn=Math.sin(v.yaw),lx=dx*c-dz*sn,lz=dx*sn+dz*c;
     if(Math.abs(lx)<v.Wd/2+.45&&Math.abs(lz)<v.L/2+.45&&Math.abs(p.pos.y-v.pos.y)<1.5){damage(p,Math.abs(v.speed)*2.2);p.vhit=performance.now()+700;p.vel.y=5;msg(p,'Hit by a vehicle!')}}
@@ -2377,7 +2445,7 @@ function canSee(z,p){
 }
 function alertZombies(pos,r){for(const z of zombies){if(z.dead||z.chasing)continue;if(z.pos.distanceTo(pos)<r){z.alert=pos.clone();z.alertT=10}}}
 // toughness in zombie hits (about 1 per second each)
-const TOUGH={[B.STPX]:7,[B.STNX]:7,[B.STPZ]:7,[B.STNZ]:7,[B.G25]:3,[B.G50]:3,[B.G75]:3,[B.GLASS]:1,[B.LEAF]:1,[B.DIRT]:4,[B.GRASS]:4,[B.PLANK]:7,[B.LOG]:9,[B.FRAME]:5,[B.WALL]:14,[B.TILEF]:14,[B.CONC]:45,[B.BRICK]:40,[B.STONE]:50,[B.ASPH]:40,[B.COAL]:50,[B.ROOF]:30,[B.IRON]:60,[B.METAL]:140};
+const TOUGH={230:3,231:3,232:3,233:2,234:2,235:2,[B.STPX]:7,[B.STNX]:7,[B.STPZ]:7,[B.STNZ]:7,[B.G25]:3,[B.G50]:3,[B.G75]:3,[B.GLASS]:1,[B.LEAF]:1,[B.DIRT]:4,[B.GRASS]:4,[B.PLANK]:7,[B.LOG]:9,[B.FRAME]:5,[B.WALL]:14,[B.TILEF]:14,[B.CONC]:45,[B.BRICK]:40,[B.STONE]:50,[B.ASPH]:40,[B.COAL]:50,[B.ROOF]:30,[B.IRON]:60,[B.METAL]:140};
 for(let id=CHIP0;id<RUB0+RUBN;id++)TOUGH[id]=isRub(id)?Math.max(2,Math.round(TOUGH[BASE_OF[id]]*.1)):TOUGH[BASE_OF[id]];
 const blockDmg=new Map();
 function breakTarget(z,wx,wz){
@@ -2702,12 +2770,12 @@ $('#cAct').addEventListener('click',e=>{const b=e.target.closest('button');const
 // ---------------- leaderboard: players and every named survivor and bandit still alive
 let boardSort='kills';
 function boardRows(){const R=players.map(p=>({name:`Player ${p.i+1}`,kind:'you',kills:p.kills|0,pk:p.pk|0,nights:p.nights|0,dead:p.dead>0}));
-  for(const r of roster)if(r.alive&&r.kind!=='family')R.push({name:r.name,kind:r.kind,kills:r.kills,pk:r.pk,nights:r.nights});
+  for(const r of roster)if(r.alive&&r.kind!=='family')R.push({name:r.name,kind:r.kind,friendly:r.friendly,kills:r.kills,pk:r.pk,nights:r.nights});
   return R.sort((a,b)=>b[boardSort]-a[boardSort]||b.kills-a.kills||a.name.localeCompare(b.name)).map((r,i)=>({...r,rank:i+1}))}
 function boardHTML(n=12){const R=boardRows(),top=R.slice(0,n);for(const r of R)if(r.kind==='you'&&!top.includes(r))top.push(r);
   const al=roster.filter(r=>r.alive),H=(k,t)=>`<th><button data-s="${k}" class="${boardSort===k?'on':''}">${t}</button></th>`;
   return`<table class="board"><thead><tr><th>#</th><th>Name</th>${H('kills','Zombies')}${H('pk','People')}${H('nights','Nights')}</tr></thead><tbody>${
-    top.map(r=>`<tr class="${r.kind}"><td>${r.rank}</td><td>${r.name}${r.kind==='bandit'?' <small>bandit</small>':r.kind==='you'?(r.dead?' <small>dead</small>':' <small>you</small>'):''}</td><td>${r.kills}</td><td>${r.pk}</td><td>${r.nights}</td></tr>`).join('')
+    top.map(r=>`<tr class="${r.kind}${r.friendly?' friendly':''}"><td>${r.rank}</td><td>${r.name}${r.kind==='bandit'?(r.friendly?' <small>drifter</small>':' <small>bandit</small>'):r.kind==='you'?(r.dead?' <small>dead</small>':' <small>you</small>'):''}</td><td>${r.kills}</td><td>${r.pk}</td><td>${r.nights}</td></tr>`).join('')
   }</tbody></table><p class="note" style="margin:6px 0 0">${al.filter(r=>r.kind==='survivor').length} survivors and ${al.filter(r=>r.kind==='bandit').length} bandits still alive, plus ${al.filter(r=>r.kind==='family').length} family members sheltering at home. Nobody comes back; the dead drop off the board.</p>`}
 function renderBoard(){for(const id of['#mBoard','#board'])$(id).innerHTML=(id==='#board'?'<h2>Leaderboard</h2>':'')+boardHTML(id==='#board'?10:12)}
 for(const id of['#mBoard','#board'])$(id).addEventListener('click',e=>{const b=e.target.closest('button[data-s]');if(!b)return;boardSort=b.dataset.s;renderBoard()});
@@ -2813,6 +2881,7 @@ function explode(pos,pw=1){
     const d=Math.hypot(dx,dy*1.2,dz)*(.85+.3*h3(x,y,z));
     if(d<(1.4+(tg<20?1:0))*pw){setv(x,y,z,0);gone.push([x,y,z,b]);ch.add(x+','+z)}
     else if(d<3.2*pw&&!isRub(b)){const c=worsen(b,x,y,z,Math.min(3,LVL[b]+(d<2*pw?2:1)));if(c!==b){setv(x,y,z,c);ch.add(x+','+z)}}}
+  for(const[x,y,z,b]of gone)if(rng()<.25&&DROP[b])dropBlock(x,y,z,b);
   for(const[x,y,z,b]of gone)if(rng()<.35){let yy=y;while(yy>0&&get(x,yy-1,z)===0)yy--;const u=get(x,yy-1,z);if(u&&!SH[u]&&u!==B.GLASS&&get(x,yy,z)===0)setv(x,yy,z,rubOf(b,x,z))}
   for(const k of ch){const[x,z]=k.split(',').map(Number);rebuildAt(x,z)}
   if(ch.size)for(const p of players)if(p.dig)p.dig=null;
@@ -2826,6 +2895,24 @@ function updateBombs(dt){for(const b of bombs){b.fuse-=dt;b.vel.y-=18*dt;const n
     if(solid(vc(n.x),vc(n.y),vc(n.z))){if(solid(vc(n.x),vc(b.pos.y),vc(b.pos.z)))b.vel.x*=-.4;if(solid(vc(b.pos.x),vc(n.y),vc(b.pos.z)))b.vel.y*=-.3;if(solid(vc(b.pos.x),vc(b.pos.y),vc(n.z)))b.vel.z*=-.4;b.vel.x*=.7;b.vel.z*=.7}
     else b.pos.copy(n);b.g.rotation.x+=dt*8;if(rng()<dt*30)burst(new V3(b.pos.x,b.pos.y+.12,b.pos.z),1,.4,[1,.8,.3],1);
     if(b.fuse<=0){scene.remove(b.g);b.gone=true;explode(b.pos,1.1)}}bombs=bombs.filter(b=>!b.gone)}
+// ---- dropped items: what you break falls as a little spinning block; walk near it to pick it up (if your case has room)
+let drops=[];
+function dropBlock(x,y,z,b){const d=DROP[b];if(d)dropItem((x+.5)*VS,(y+.5)*VS,(z+.5)*VS,d,1,BCOL[BASE_OF[b]||b]||0x888888)}
+function dropItem(x,y,z,key,n,col){const m=new THREE.Mesh(box(.2,.2,.2),lam(col||0x8a7a5a));m.position.set(x,y,z);m.castShadow=true;scene.add(m);
+  drops.push({m,pos:m.position,key,n,vy:R(1.5,3),vx:R(-1,1),vz:R(-1,1),t:0,rest:false});if(drops.length>220){const o=drops.shift();scene.remove(o.m)}}
+function roomFor(p,key,n){if(p.creative||!p.case)return true;const max=(ITEM[key]||[1,1,10])[2];if(p.case.some(s=>s.k===key&&s.n+n<=max))return true;
+  for(const r of[0,1])for(let y=0;y<CH;y++)for(let x=0;x<CW;x++)if(caseFits(p,{k:key},x,y,r))return true;return false}
+function updateDrops(dt){for(const d of drops){d.t+=dt;const P=d.pos;
+    if(!d.rest){d.vy-=18*dt;const ny=P.y+d.vy*dt;if(solid(vc(P.x),vc(ny-.1),vc(P.z))){d.rest=true;P.y=(vc(ny-.1)+1)*VS+.12}else{P.y=ny;const nx=P.x+d.vx*dt,nz=P.z+d.vz*dt;if(!solid(vc(nx),vc(P.y),vc(nz))){P.x=nx;P.z=nz}}}
+    else if(!solid(vc(P.x),vc(P.y-.2),vc(P.z))){d.rest=false;d.vy=0}
+    d.m.rotation.y+=dt*2;d.m.position.y+=Math.sin(d.t*3)*.003;
+    for(const p of players){if(p.dead>0||p.vehicle||d.t<.5)continue;const dd=Math.hypot(p.pos.x-P.x,p.pos.y+.6-P.y,p.pos.z-P.z);if(dd>2.2)continue;
+      if(!roomFor(p,d.key,d.n)){if(!d.full){d.full=1;msg(p,`No room in your case for ${LABEL[d.key].toLowerCase()}`)}continue}
+      const k=Math.min(1,dt*9);P.x+=(p.pos.x-P.x)*k;P.y+=(p.pos.y+.6-P.y)*k;P.z+=(p.pos.z-P.z)*k;d.rest=true;
+      if(dd<.75){p.inv[d.key]+=d.n;d.gone=true;scene.remove(d.m);SND.pick();p.got=p.got||{};p.got[d.key]=(p.got[d.key]||0)+d.n;p.gotT=.7}break}
+    if(d.t>300){d.gone=true;scene.remove(d.m)}}
+  drops=drops.filter(d=>!d.gone);
+  for(const p of players)if(p.got){p.gotT-=dt;if(p.gotT<=0){msg(p,'+ '+Object.entries(p.got).map(([k,q])=>`${q} ${LABEL[k].toLowerCase()}`).join(', '));p.got=null}}}
 function updateTraps(dt){
   for(const t of traps){if(t.gone)continue;t.cd-=dt;
     if(t.type==='tnt'){t.fuse-=dt;t.light.visible=performance.now()%(t.fuse<1.5?120:300)<70;if(rng()<dt*25)burst(new V3(t.pos.x,t.pos.y+.6,t.pos.z),1,.6,[1,.8,.3],1.5);
@@ -2882,7 +2969,7 @@ function addHole(mesh,point,normal){
   const h=new THREE.Mesh(box(.085,.085,.02),lam(0x5a0707)),c=new THREE.Mesh(box(.045,.045,.024),lam(0x140202));h.add(c);
   const lp=mesh.worldToLocal(point.clone());h.position.copy(lp).addScaledVector(normal,.006);h.quaternion.setFromUnitVectors(Z_AXIS,normal);h.rotation.z+=rng()*3;mesh.add(h);
 }
-function burstDir(p,dir,n){for(let k=0;k<n;k++){const j=pI;pI=(pI+1)%PN;const o=j*3,s=.7+rng()*.5;
+function burstDir(p,dir,n){for(let k=0;k<n;k++){const j=pI;pI=(pI+1)%PN;const o=j*3,s=.7+rng()*.5;pBlood[j]=1;
   pPos[o]=p.x;pPos[o+1]=p.y;pPos[o+2]=p.z;pVel[o]=dir.x*R(3,7)+R(-1,1);pVel[o+1]=(dir.y||0)*4+R(0,2.5);pVel[o+2]=dir.z*R(3,7)+R(-1,1);
   pLife[j]=R(.5,1.3);pCol[o]=RED[0]*s;pCol[o+1]=RED[1]*s;pCol[o+2]=RED[2]*s}}
 function hitPart(h,dir,dmg,by,bullet){
@@ -3173,7 +3260,8 @@ function rosterForRegion(Rg){
   Rg.zpop=zInit(Rg);
   const X0=Rg.rx*RS,Z0=Rg.rz*RS;
   for(let g=0,t=0,ng=rng()<.45?0:rng()<.85?1:2;g<ng&&t<80;t++){const x=RI(X0+30,X0+RS-31),z=RI(Z0+30,Z0+RS-31);if(inTown(x,z)||townDist(x,z)<40)continue;const ty=topY(x,z);if(ty!==hm(x,z)||get(x,ty,z)===B.LEAF)continue;
-    g++;campSpecs.push([x,z,1,0]);for(let i=0,n=RI(2,4);i<n;i++){const nights=RI(6,60);roster.push({name:makeName(used),kind:'bandit',reg:Rg.key,camp:[x,z,ty],alive:true,out:null,hp:70,kills:RI(nights>>2,nights),pk:RI(0,6),nights})}}
+    g++;campSpecs.push([x,z,1,0]);const fr=rng()<.4; // some armed groups are drifters who mean no harm
+    for(let i=0,n=RI(2,4);i<n;i++){const nights=RI(6,60);roster.push({name:makeName(used),kind:'bandit',friendly:fr,reg:Rg.key,camp:[x,z,ty],alive:true,out:null,hp:70,kills:RI(nights>>2,nights),pk:fr?RI(0,1):RI(0,6),nights})}}
 }
 // each dawn: everyone alive has survived another night; people out of sight fight on (and some don't make it)
 function nightPassed(){for(const p of players)if(p.dead<=0)p.nights=(p.nights|0)+1;
@@ -3183,7 +3271,7 @@ const TRADES=[{give:{scrap:4},get:{ammo:10},t:'10 ammo for 4 scrap'},{give:{meat
   {give:{cooked:2},get:{ammo:8},t:'8 ammo for 2 cooked meat'},{give:{wood:4},get:{coal:3},t:'3 coal for 4 wood'},{give:{food:2},get:{beartrap:1},t:'a bear trap for 2 cans of food'},{give:{ammo:20},get:{helmet:1},t:'a metal helmet for 20 ammo'}];
 function spawnNPC(x,y,z,kind,rec){
   rec=rec||{name:makeName(new Set()),kind,alive:true,hp:kind==='bandit'?70:85,kills:0,pk:0,nights:0};
-  const bandit=kind==='bandit',fam=kind==='family',kid=fam&&rec.role==='kid';
+  const bandit=kind==='bandit'&&!rec.friendly,fam=kind==='family',kid=fam&&rec.role==='kid';
   const shirt=bandit?[0x2a2a2a,0x3a2418,0x4a1a1a][RI(0,2)]:fam?[0x8a4a5a,0x4a6a8a,0xb08a3a,0x5a8a5a,0x9a5a3a,0x6a5a8a][RI(0,5)]:[0x5a6a4a,0x6a5a3a,0x3a5a6a,0x7a6a5a,0x5a3a5a][RI(0,4)];
   const m=makeHuman({skin:[0xc9a07a,0x8a5a3a,0xe0b894,0x6a4028,0xb07a50][RI(0,4)],shirt,pants:[0x2a3242,0x3a3328,0x262626,0x4a4a6a][RI(0,3)],hat:fam?null:bandit?0x1a1a1a:[0x5a2a1a,0x3b3b2b,0x2a3a4a][RI(0,2)],arm:shirt});
   m.g.rotation.order='YXZ';if(!fam)part(m.armR,.07,.1,.3,0x1a1a1a,0,-.62,.12);if(bandit)part(m.head,.4,.14,.06,0x2a2a2a,0,-.08,.2);
@@ -3258,13 +3346,13 @@ function survivorAI(n,dt,night){ // returns [wx,wz,speed,faceTarget]
   return[0,0,0];
 }
 
-function npcHostileTo(n,p){return n.kind==='bandit'||n.hostileTo===p}
+function npcHostileTo(n,p){return(n.kind==='bandit'&&!(n.rec&&n.rec.friendly))||n.hostileTo===p}
 function npcShot(n,tx,ty,tz){const d=Math.hypot(tx-n.pos.x,tz-n.pos.z);const near=players.some(p=>p.pos.distanceTo(n.pos)<60);
   if(near){const v=Math.max(.05,1-Math.min(...players.map(p=>p.pos.distanceTo(n.pos)))/60);sNoise(.25,2000,.8*v);sTone(150,40,.12,.3*v,'square')}
   burst(new V3(n.pos.x+Math.sin(n.g.rotation.y)*.5,n.pos.y+1.35,n.pos.z+Math.cos(n.g.rotation.y)*.5),3,1,[1,.8,.3],.5);alertZombies(n.pos,30);n.aimT=.4}
 function hurtNPC(n,dmg,dir,by){
   if(n.dead||n.kid)return;n.hp-=dmg;burst(new V3(n.pos.x,n.pos.y+1.2,n.pos.z),14,3,RED,1.5);SND.hit();
-  if(by&&n.kind==='survivor'&&!n.hostileTo){n.hostileTo=by;msg(by,`${n.name} turns on you!`)}
+  if(by&&players.includes(by)&&(n.kind==='survivor'||n.rec&&n.rec.friendly)&&!n.hostileTo){n.hostileTo=by;msg(by,`${n.name} turns on you!`)}
   if(n.hp<=0){n.dead=.001;splat(n.pos,R(1.2,2),true);n.rec.alive=false;n.rec.out=null;if(by&&players.includes(by))by.pk=(by.pk|0)+1;const it={ammo:RI(3,10)};if(rng()<.5)it.food=1;if(rng()<.4)it.bandage=1;if(rng()<.4)it.scrap=RI(1,3);if(rng()<.25)it[['jacket','vest','cargo','hardhat'][RI(0,3)]]=1;
     dropBag(n.pos,it);if(by)msg(by,n.kind==='bandit'?`Bandit down — search the bag`:`${n.name} is dead`);if(!by&&(n.unarmed||n.infected))n.rise=R(5,9)}
 }
@@ -3289,9 +3377,9 @@ function openTalk(p,n){talkP=p;talkN=n;$('#talk').classList.remove('hidden');if(
   n.face=p.pos;renderTalk(n.kind==='family'?famLine(n):n.follow?pick(["Right behind you.","Lead the way.","Got your back."]):pick(["What do you need?","Make it quick. They hear voices.","You look like you've been through it.","Still breathing? Good."]))}
 function closeTalk(){if(!talkP)return;const p=talkP;talkP=talkN=null;$('#talk').classList.add('hidden');if(players.length===1)paused=false;if(p.i===0)lock()}
 function renderTalk(line){const p=talkP,n=talkN;if(!p||!n)return;const r=n.rec||{},food=Object.keys(FOODS).find(k=>k!=='meat'&&p.inv[k]>0);
-  $('#talkName').innerHTML=`${n.name} <small>${n.kind==='family'?ROLE[n.role]:n.follow?'travelling with you':'survivor'}${n.infected!=null?' · bitten':''}</small>`;$('#talkLine').textContent=`"${line}"`;
+  $('#talkName').innerHTML=`${n.name} <small>${n.kind==='family'?ROLE[n.role]:n.follow?'travelling with you':n.kind==='bandit'?'drifter (armed, friendly)':'survivor'}${n.infected!=null?' · bitten':''}</small>`;$('#talkLine').textContent=`"${line}"`;
   const O=[];
-  if(n.kind==='survivor'){O.push(['trade',`Trade: ${n.trade.t}`]);O.push(n.follow?['stay','Wait here']:['follow','Come with me']);if(n.follow)O.push(['home','Go home'])}
+  if(n.kind==='survivor'||n.rec&&n.rec.friendly){O.push(['trade',`Trade: ${n.trade.t}`]);O.push(n.follow?['stay','Wait here']:['follow','Come with me']);if(n.follow)O.push(['home','Go home'])}
   O.push(['food',food?`Give ${LABEL[food].toLowerCase()}`:'Give food (you have none)',!food]);
   if(n.role!=='kid')O.push(['band',p.inv.bandage?'Give a bandage':'Give a bandage (you have none)',!p.inv.bandage]);
   if(n.role==='kid')O.push(['hi',pick(['Ask what their name is','Ask if they are okay','Tell them a joke'])]);else O.push(['ask','Ask about the area']);
@@ -3351,6 +3439,7 @@ function updateNPC(n,dt,night){
     if(n.lie>0)wx=wz=0;
     for(const p of players)if(p.pos.distanceTo(n.pos)<5&&n.st!=='sleep'){face=p.pos;if(n.st!=='forage'&&n.st!=='return'){wx=wz=0}if(n.greet<=0){n.greet=60;msg(p,`${n.name}: "Easy. I'm friendly — ${p.k.use} to talk."`)}}}
   else{if(n.kid)n.g.scale.y=.6;const hx=n.home.x-n.pos.x,hz=n.home.z-n.pos.z,hd=Math.hypot(hx,hz);
+    for(const p of players)if(n.kind==='bandit'&&n.rec&&n.rec.friendly&&!n.hostileTo&&p.pos.distanceTo(n.pos)<6&&n.greet<=0){n.greet=80;msg(p,`${n.name}: "${pick(['Easy, friend. We just want to get by.','Guns are for the dead, not you. Need something?','Passing through? Stay close to the fire.'])}" (${p.k.use} to talk)`)}
     for(const p of players)if(n.kind==='family'&&p.pos.distanceTo(n.pos)<5&&n.greet<=0){n.greet=90;msg(p,`${n.name}: "${famLine(n)}" (${p.k.use} to talk)`)}
     if(hd>(night?4:n.kind==='family'?5:14)){wx=hx/hd;wz=hz/hd}else{n.wT-=dt;if(n.wT<=0){n.wT=R(3,8);n.wD=night||rng()<.4?-1:rng()*6.283}if(n.wD>=0){wx=Math.cos(n.wD)*.6;wz=Math.sin(n.wD)*.6}}
     }
@@ -3385,7 +3474,7 @@ function update(dt){
   updSky();
   for(const p of players)updatePlayer(p,dt);
   for(const v of vehicles)updateVehicle(v,dt);
-  flashT=Math.max(0,flashT-dt);$('#flash').style.opacity=Math.min(.85,flashT*3.5);updateDoors(dt);updateTraps(dt);updateCooking(dt);updateBombs(dt);for(const p of players)p.shake=Math.max(0,(p.shake||0)-dt*1.5);updateGibs(dt);updateFires(dt);updateBags(dt);
+  flashT=Math.max(0,flashT-dt);$('#flash').style.opacity=Math.min(.85,flashT*3.5);updateDoors(dt);updateTraps(dt);updateCooking(dt);updateBombs(dt);updateDrops(dt);for(const p of players)p.shake=Math.max(0,(p.shake||0)-dt*1.5);updateGibs(dt);updateFires(dt);updateBags(dt);
   for(const a of animals)updateAnimal(a,dt,night);animals=animals.filter(a=>!a.gone);
   for(const n of npcs)updateNPC(n,dt,night);npcs=npcs.filter(n=>!n.gone);npcT-=dt;if(npcT<=0){npcT=3;spawnNPCsNear()}
   animT-=dt;if(animT<=0){animT=6;if(animals.filter(a=>!a.dead).length<14)spawnAnimal(true)}
@@ -3538,6 +3627,7 @@ function unloadRegion(R,keep=true){
   for(const n of npcs)if(inReg(R,n.pos.x,n.pos.z)){gone(n.g);n.gone=true;if(n.bld)n.bld.claimed=null;if(n.stash)gone(n.stash.g);if(n.rec&&!n.dead){n.rec.out=null;n.rec.hp=Math.max(30,n.hp)}}npcs=npcs.filter(n=>!n.gone);
   stashes=stashes.filter(s=>!s.owner||!s.owner.gone);
   bags=bags.filter(b=>{if(inReg(R,b.pos.x,b.pos.z)){gone(b.g);return false}return true});
+  drops=drops.filter(d=>{if(inReg(R,d.pos.x,d.pos.z)){gone(d.m);return false}return true});
   for(let i=decals.length-1;i>=0;i--)if(out(decals[i])){gone(decals[i]);decals.splice(i,1)}
   // chunk meshes + furniture in the region's slots
   const cx0=R.rx*RS/CS,cz0=R.rz*RS/CS,n=RS/CS;
@@ -3582,7 +3672,7 @@ function resetWorld(ns){
   worldReady=false;REC=false;
   for(const arr of[chunkMeshes,glassMeshes,furnMeshes,grassMeshes]){for(const m of arr)if(m)m.geometry.dispose();arr.length=0}loaded.fill(0);dirtyC.clear();
   for(const o of[...scene.children])if(!baseObjs.has(o))scene.remove(o);
-  zombies=[];npcs=[];vehicles=[];crates=[];doors=[];doorMap.clear();traps=[];gibs=[];bags=[];animals=[];fires=[];beds=[];decals.length=0;manObjs.length=0;miscObjs.length=0;
+  zombies=[];npcs=[];vehicles=[];crates=[];doors=[];doorMap.clear();traps=[];gibs=[];bags=[];drops=[];animals=[];fires=[];beds=[];decals.length=0;manObjs.length=0;miscObjs.length=0;
   clearScratch();for(const k in KIND)KIND[k].used=null;stashes=[];roomIdx.clear();regions.clear();planCache.clear();roster.length=0;rosterNames.clear();
   pLife.fill(0);pPos.fill(-100);blockDmg.clear();vox.fill(0);hmap.fill(0);
   seed=ns|0;rng=mulberry(seed);kills=0;day=1;tDay=.08;
@@ -3603,7 +3693,7 @@ function collectState(){
       i:Object.fromEntries(Object.entries(p.inv).filter(e=>e[1]>0)),s:p.spawnPt?[r2(p.spawnPt.x),r2(p.spawnPt.y),r2(p.spawnPt.z)]:0})),
     // only regions you changed or met people in are stored; everything else regrows from the seed
     r:[...regions.values()].filter(R=>R.edits.size||!emptySt(R.st)||R.rosterDone).map(R=>[R.rx,R.rz,R.edits.size?packEdits(R.edits):'',emptySt(R.st)?(R.zpop!=null?{zp:R.zpop}:0):R.st,R.rosterDone?1:0]),
-    ro:roster.map(r=>[r.reg,r.kind==='bandit'?1:r.kind==='family'?2:0,r.kind==='bandit'?r.camp:r.homeI,r.name,r.alive?1:0,r.kills,r.pk,r.nights,Math.round(r.out?r.out.hp:r.hp),r.role||0,r.fam||0,r.need||0,r.helped|0])};
+    ro:roster.map(r=>[r.reg,r.kind==='bandit'?1:r.kind==='family'?2:0,r.kind==='bandit'?r.camp:r.homeI,r.name,r.alive?1:0,r.kills,r.pk,r.nights,Math.round(r.out?r.out.hp:r.hp),r.role||0,r.fam||0,r.need||0,r.helped|0,r.friendly?1:0])};
 }
 async function zip(u,mode){if(!window.CompressionStream)return null;try{const st=new Blob([u]).stream().pipeThrough(mode?new DecompressionStream('deflate-raw'):new CompressionStream('deflate-raw'));return new Uint8Array(await new Response(st).arrayBuffer())}catch(e){return null}}
 async function encodeSave(){const raw=new TextEncoder().encode(JSON.stringify(collectState()));const z=await zip(raw,0);return z?'DG1z'+b64(z):'DG1r'+b64(raw)}
@@ -3618,7 +3708,7 @@ function applyState(st){
   else{
     for(const R of regions.values())if(R.live)unloadRegion(R,false);regions.clear();roster.length=0;rosterNames.clear();
     for(const[rx,rz,e,rst,rd]of st.r||[]){const R=reg(rx,rz);if(e)R.edits=unpackEdits(e);if(rst){R.st=Object.assign({c:[],d:'',vh:[],b:[],f:[],tr:[]},rst);if(rst.zp!=null)R.zpop=rst.zp}R.rosterDone=!!rd;R.visited=true}
-    for(const a of st.ro||[]){const r={reg:a[0],kind:['survivor','bandit','family'][a[1]],name:a[3],alive:!!a[4],out:null,kills:a[5],pk:a[6],nights:a[7],hp:a[8]};if(a[9])r.role=a[9];if(a[10])r.fam=a[10];if(a[11])r.need=a[11];if(a[12])r.helped=a[12];if(a[1]===1)r.camp=a[2];else r.homeI=a[2];roster.push(r);rosterNames.add(r.name)}
+    for(const a of st.ro||[]){const r={reg:a[0],kind:['survivor','bandit','family'][a[1]],name:a[3],alive:!!a[4],out:null,kills:a[5],pk:a[6],nights:a[7],hp:a[8]};if(a[9])r.role=a[9];if(a[10])r.fam=a[10];if(a[11])r.need=a[11];if(a[12])r.helped=a[12];if(a[13])r.friendly=true;if(a[1]===1)r.camp=a[2];else r.homeI=a[2];roster.push(r);rosterNames.add(r.name)}
   }
   day=st.day;tDay=st.t;kills=st.k||0;
   st.p.forEach((s,i)=>{const p=players[i];if(!p)return;p.pos.set(s.x,s.y+.05,s.z);p.yaw=s.a;p.hp=s.hp;p.hunger=s.hu;p.kills=s.k||0;p.pk=s.pk|0;p.nights=s.n|0;p.eye=p.pos.y+1.6;
