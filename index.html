@@ -34,6 +34,12 @@ h1,h2,h3{font-family:'Bebas Neue',sans-serif;font-weight:400;letter-spacing:.03e
 .ctl dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0;font-size:14px}
 .ctl dt{font-weight:700;white-space:nowrap}.ctl dd{margin:0;color:var(--dim)}
 .note{font-size:13px;color:var(--dim);margin-top:16px}
+.opts{margin-top:14px}.opts label,#menu label{display:flex;align-items:center;gap:8px;font-weight:600}
+input,select,textarea{font:16px Barlow,sans-serif;color:var(--ink);background:#1d1a14;border:1px solid #4a4334;border-radius:4px;padding:9px 10px;min-height:44px}
+input{width:9.5em}textarea{width:100%;min-width:0;flex:1 1 260px;resize:vertical;font:12px/1.4 ui-monospace,monospace}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--olive);outline-offset:1px}
+details summary{cursor:pointer;color:var(--dim);font-weight:600;padding:6px 0}
+#mCodeOut{margin-top:8px}
 /* HUD */
 .phud{position:fixed;top:0;bottom:0;pointer-events:none;overflow:hidden;z-index:5}
 .cross{position:absolute;left:50%;top:50%;width:20px;height:20px;transform:translate(-50%,-50%)}
@@ -45,6 +51,8 @@ h1,h2,h3{font-family:'Bebas Neue',sans-serif;font-weight:400;letter-spacing:.03e
 .bar{height:12px;background:rgba(0,0,0,.6);border:1px solid #000;margin-top:5px;position:relative;border-radius:2px;overflow:hidden}
 .bar i{position:absolute;inset:0 auto 0 0;display:block}
 .bar span{position:absolute;left:6px;top:-1px;font-size:10px;font-weight:700;text-shadow:0 1px 1px #000;letter-spacing:.04em}
+.arm{font:600 12px Barlow,sans-serif;margin-top:4px;text-shadow:0 1px 2px #000}.arm:empty{display:none}
+#fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:15;transition:opacity 1s}
 .hp i{background:#b3261e}.fd i{background:#b08a3a}.st i{background:#6f8a9a}
 .hot{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:4px}
 .slot{width:74px;padding:6px 4px;background:rgba(0,0,0,.6);border:2px solid #333;border-radius:3px;text-align:center;font-size:12px;line-height:1.2}
@@ -99,7 +107,7 @@ body.touch .prompt{top:calc(50% + 34px);font-size:13px}
 <canvas id="c"></canvas>
 <div id="huds"></div>
 <div id="top" class="hidden"></div>
-<div id="split" class="hidden"></div>
+<div id="split" class="hidden"></div><div id="fade"></div>
 <div id="touch" class="hidden"><div id="stick"><i></i></div>
   <button class="tb big" data-b="act">Act</button><button class="tb" data-b="jump">Jump</button><button class="tb" data-b="use">Use</button><button class="tb" data-b="place">Place</button>
   <button class="tb sm" data-b="bag">Bag</button><button class="tb sm" data-b="tool">Tool</button><button class="tb sm" data-b="mat">Type</button><button class="tb sm" data-b="view">View</button><button class="tb sm" data-b="run">Run</button></div>
@@ -110,15 +118,22 @@ body.touch .prompt{top:calc(50% + 34px);font-size:13px}
   <div class="row">
     <button class="go" id="bSolo">Play solo</button>
     <button class="go" id="bCoop">2-player split-screen</button>
-    <span id="genMsg" class="note" style="margin:0">Generating world…</span>
+    <button class="go hidden" id="bCont">Continue saved game</button>
   </div>
+  <p id="genMsg" class="note" style="margin:10px 0 0">Generating world…</p>
+  <div class="row opts">
+    <label>World seed <input id="seedIn" inputmode="numeric" autocomplete="off"></label>
+    <button id="bRand" type="button">Random seed</button>
+    <label>Render distance <select id="rdSel"></select></label>
+  </div>
+  <details class="opts"><summary>Load a save code</summary><div class="row"><textarea id="codeIn" rows="2" placeholder="Paste a DG1… save code"></textarea><button id="bLoad" type="button">Load</button></div></details>
   <div class="ctl">
     <div><h3>Player 1 — keyboard + mouse</h3><dl>
       <dt>WASD / Mouse</dt><dd>Move / look (arrow keys also look)</dd>
       <dt>Click</dt><dd>Attack, shoot, dig or build</dd>
       <dt>Right-click</dt><dd>Place a block</dd>
-      <dt>1–5 / wheel</dt><dd>Bat, pistol, pickaxe, build, trap</dd>
-      <dt>R</dt><dd>Change block material or trap type</dd>
+      <dt>1–5 / wheel</dt><dd>Bat, pistol, pickaxe, build, place (traps, bed, campfire)</dd>
+      <dt>R</dt><dd>Change block material or item to place</dd>
       <dt>E</dt><dd>Search, open doors, refuel, repair, enter/exit car</dd>
       <dt>V</dt><dd>Driver view / outside view in a car</dd>
       <dt>Space / Shift</dt><dd>Jump (brake in car) / sprint</dd>
@@ -143,10 +158,13 @@ body.touch .prompt{top:calc(50% + 34px);font-size:13px}
       <dt>Cars</dt><dd>Need fuel cans; wrecks need a repair kit</dd>
       <dt>Traps</dt><dd>Spikes wound and slow, bear traps pin a walker, tripwire bombs blow up a crowd (and you)</dd>
       <dt>Sewers</dt><dd>Climb down open manholes in the roads. Dark, crawling with dead, better loot</dd>
+      <dt>Night</dt><dd>Sleep in a bed to skip to dawn (sets your respawn). In co-op both players must lie down</dd>
+      <dt>Caves</dt><dd>Openings in the hills lead down into dark tunnels with ore and stashes. Some houses have basements</dd>
+      <dt>Hunting</dt><dd>Deer and rabbits flee, wolves and boars fight back. Cook meat at a campfire; wear armor from crates, zombies and the workbench</dd>
       <dt>Phone / tablet</dt><dd>Drag left side to move, right side to look; on-screen buttons for the rest</dd>
     </dl></div>
   </div>
-  <p class="note">Split-screen co-op runs on one computer. Online play would need a game server, which this page can't host. Each run makes a new random world.</p>
+  <p class="note">The whole world is rebuilt from its seed, so a save only stores the seed plus what you changed, packed into a short code. The game also saves itself in this browser every 90 seconds. Split-screen co-op runs on one computer. Online play would need a game server, which this page can't host. Each run makes a new random world.</p>
 </div></div>
 
 <div id="pause" class="screen hidden" style="background:rgba(0,0,0,.6)"><div class="kit" style="max-width:420px;text-align:center">
@@ -156,9 +174,15 @@ body.touch .prompt{top:calc(50% + 34px);font-size:13px}
 <div id="menu" class="screen hidden" style="background:rgba(0,0,0,.55)"><div class="kit">
   <h2 id="mTitle">Backpack</h2>
   <div id="mInv" class="grid"></div>
+  <h3>Clothing</h3>
+  <div id="mWear"></div>
   <h3>Workbench</h3>
   <div id="mRec"></div>
-  <div class="row" style="margin-top:14px"><button id="mEat">Eat canned food</button><button id="mBand">Use bandage</button><button id="mClose" class="go" style="margin-left:auto">Close</button></div>
+  <h3>World</h3>
+  <div class="row"><button id="mSave">Save now</button><button id="mCode">Copy save code</button><label>Render distance <select id="rdSel2"></select></label></div>
+  <textarea id="mCodeOut" class="hidden" rows="2" readonly></textarea>
+  <p class="note" id="mSaveNote" style="margin:6px 0 0"></p>
+  <div class="row" style="margin-top:14px"><button id="mEat">Eat</button><button id="mBand">Use bandage</button><button id="mClose" class="go" style="margin-left:auto">Close</button></div>
 </div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -168,9 +192,10 @@ const $=s=>document.querySelector(s);
 const V3=THREE.Vector3;
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 // ---------------- random + noise
-const seed=(Math.random()*1e9)|0;
+let seed=(Math.random()*1e9)|0;
+try{const sv=localStorage.getItem('deadground-seed');if(sv)seed=+sv|0}catch(e){}
 function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-const rng=mulberry(seed);
+let rng=mulberry(seed);
 const R=(a,b)=>a+rng()*(b-a), RI=(a,b)=>Math.floor(R(a,b+1));
 function h3(x,y,z){let h=Math.imul(x|0,374761393)+Math.imul(y|0,668265263)+Math.imul(z|0,1103515245)+seed;h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967296}
 function vnoise(x,z){const xi=Math.floor(x),zi=Math.floor(z),s=t=>t*t*(3-2*t),u=s(x-xi),v=s(z-zi);
@@ -179,102 +204,221 @@ const fbm=(x,z)=>vnoise(x/16,z/16)*.6+vnoise(x/7,z/7)*.3+vnoise(x/3,z/3)*.1;
 
 // ---------------- world data
 // VS = size of one voxel in world units (0.5 = half-size blocks). The world is 96x96 units.
-const VS=.5,W=192,H=68,CS=16,NC=W/CS,G=24,T0=40,T1=159,FH=6;
+const VS=.5,W=640,H=68,CS=16,NC=W/CS,G=24,FH=7,P=48;
 const vox=new Uint8Array(W*H*W), hmap=new Int16Array(W*W);
 const inB=(x,y,z)=>x>=0&&z>=0&&x<W&&z<W&&y>=0&&y<H;
 function get(x,y,z){if(y>=H&&x>=0&&z>=0&&x<W&&z<W)return 0;if(!inB(x,y,z))return 13;return vox[(y*W+z)*W+x]}
-function setv(x,y,z,v){if(inB(x,y,z))vox[(y*W+z)*W+x]=v}
+let REC=false;const edits=new Map();
+function setv(x,y,z,v){if(inB(x,y,z)){const i=(y*W+z)*W+x;vox[i]=v;if(REC)edits.set(i,v)}}
 const solid=(x,y,z)=>{const b=get(x,y,z);return b!==0&&b!==17};
 const vc=a=>Math.floor(a/VS);
-const B={GRASS:1,DIRT:2,STONE:3,COAL:4,IRON:5,CONC:6,ASPH:7,PLANK:8,LOG:9,LEAF:10,BRICK:11,METAL:12,BED:13,DOOR:14,GLASS:15,FRAME:16,LADDER:17,SLUDGE:18};
-const BCOL=[0,0x56613a,0x5a4632,0x6a6a68,0x2a2a2c,0x8f6a52,0x8a8780,0x2e2e32,0x8b6a40,0x4a3826,0x3c4728,0x7a3a2c,0x76838a,0x161616,0x6a4a2e,0x9fc4d0,0xcfc8b4,0x6b4a2a,0x2f3a1a];
-const HARD=[0,.18,.18,.55,.65,.85,.6,.55,.35,.4,.08,.6,1.5,1e9,1.2,.1,.3,1e9,.3];
-const DROP=[null,'dirt','dirt','stone','coal','iron','stone','stone','plank','wood',null,'stone','metal',null,null,null,'plank',null,'dirt'];
-const opaque=b=>b!==0&&b!==B.GLASS&&b!==B.DOOR&&b!==B.LADDER;
+const B={GRASS:1,DIRT:2,STONE:3,COAL:4,IRON:5,CONC:6,ASPH:7,PLANK:8,LOG:9,LEAF:10,BRICK:11,METAL:12,BED:13,DOOR:14,GLASS:15,FRAME:16,LADDER:17,SLUDGE:18,WALL:19,FURN:20,TILEF:21};
+const BCOL=[0,0x56613a,0x5a4632,0x6a6a68,0x2a2a2c,0x8f6a52,0x8a8780,0x2e2e32,0x8b6a40,0x4a3826,0x3c4728,0x7a3a2c,0x76838a,0x161616,0x6a4a2e,0x9fc4d0,0xcfc8b4,0x6b4a2a,0x2f3a1a,0xb8b0a0,0x6a5040,0xd0d0c8];
+const HARD=[0,.18,.18,.55,.65,.85,.6,.55,.35,.4,.08,.6,1.5,1e9,1.2,.1,.3,1e9,.3,.5,1e9,.5];
+const DROP=[null,'dirt','dirt','stone','coal','iron','stone','stone','plank','wood',null,'stone','metal',null,null,null,'plank',null,'dirt','stone',null,'stone'];
+const opaque=b=>b!==0&&b!==B.GLASS&&b!==B.DOOR&&b!==B.LADDER&&b!==B.FURN;
 const MATS=[['plank',B.PLANK],['stone',B.STONE],['dirt',B.DIRT],['metal',B.METAL]];
-const LABEL={spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
-const roadOff=v=>(v-T0)%28;
-const isRoad=(x,z)=>x>=T0&&x<=T1&&z>=T0&&z<=T1&&(roadOff(x)<6||roadOff(z)<6);
-const isWalk=(x,z)=>x>=T0&&x<=T1&&z>=T0&&z<=T1&&!isRoad(x,z)&&([6,7,26,27].includes(roadOff(x))||[6,7,26,27].includes(roadOff(z)));
-const inTown=(x,z)=>x>=T0-4&&x<=T1+4&&z>=T0-4&&z<=T1+4;
+const LABEL={bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
+// towns: a large one in the middle, smaller ones scattered through the wilds
+const towns=[];
+function townAt(x,z,m){for(const t of towns)if(x>=t.x0-m&&x<=t.x1+m&&z>=t.z0-m&&z<=t.z1+m)return t;return null}
+const isRoad=(x,z)=>{const t=townAt(x,z,0);return!!t&&((x-t.x0)%P<12||(z-t.z0)%P<12)};
+const WALK=new Uint8Array(P);WALK[12]=WALK[13]=WALK[14]=WALK[P-3]=WALK[P-2]=WALK[P-1]=1;
+const isWalk=(x,z)=>{const t=townAt(x,z,0);if(!t)return false;const a=(x-t.x0)%P,b=(z-t.z0)%P;return!(a<12||b<12)&&(WALK[a]||WALK[b])===1};
+const inTown=(x,z)=>!!townAt(x,z,4);
+function townDist(x,z){let m=1e9;for(const t of towns){const dx=Math.max(t.x0-4-x,x-t.x1-4,0),dz=Math.max(t.z0-4-z,z-t.z1-4,0),d=Math.hypot(dx,dz);if(d<m)m=d}return m}
+const TSZ=n=>P*n+15,MAIN=Math.floor((W-TSZ(4))/2);
+function planTowns(){
+  towns.length=0;const mk=(x0,z0,n)=>towns.push({x0,z0,n,x1:x0+TSZ(n)-1,z1:z0+TSZ(n)-1});
+  mk(MAIN,MAIN,4);
+  const c=[[0,0],[1,0],[0,1],[1,1],[.5,0],[0,.5],[1,.5],[.5,1]];shuf(c);
+  for(const[fx,fz]of c.slice(0,5)){const n=rng()<.35?3:2,S=TSZ(n),x=Math.round(24+fx*(W-48-S)),z=Math.round(24+fz*(W-48-S));mk(clamp(x+RI(-10,10),16,W-16-S),clamp(z+RI(-10,10),16,W-16-S),n)}
+  for(let i=towns.length-1;i>0;i--){const t=towns[i];if(towns.some(o=>o!==t&&t.x0<o.x1+30&&t.x1>o.x0-30&&t.z0<o.z1+30&&t.z1>o.z0-30))towns.splice(i,1)}
+}
 const crateSpots=[],carSpots=[],indoorSpots=[],doorSpecs=[],sewerSpots=[],manholes=[];
 const SY=G-11;
+const caveSpots=[],bedSpecs=[];
 function topY(x,z){for(let y=H-1;y>=0;y--)if(solid(x,y,z))return y;return -1}
 const topW=(x,z)=>(topY(vc(x),vc(z))+1)*VS;
 
 function gen(){
-  for(let x=0;x<W;x++)for(let z=0;z<W;z++){
-    let h=G;
-    if(!inTown(x,z)){const dx=Math.max(T0-4-x,x-T1-4,0),dz=Math.max(T0-4-z,z-T1-4,0);h=G+Math.round((fbm(x/2,z/2)-.42)*24*Math.min(1,Math.hypot(dx,dz)/16))}
-    h=clamp(h,14,H-22);
-    for(let y=0;y<=h;y++){
-      let b;
-      if(y===0)b=B.BED;
-      else if(y<h-7){b=B.STONE;const r=h3(x,y,z);if(r<.05&&y<h-8)b=B.COAL;else if(r<.08&&y<h-12)b=B.IRON}
-      else if(y<h)b=B.DIRT;
-      else b=isRoad(x,z)?B.ASPH:isWalk(x,z)?B.CONC:(inTown(x,z)&&h3(x>>1,99,z>>1)<.45?B.DIRT:B.GRASS);
-      setv(x,y,z,b);
-    }
-    if(isWalk(x,z)){h++;setv(x,h,z,B.CONC)}
-    hmap[z*W+x]=h;
+  // pass 1: per-column height + surface block; pass 2: fill layer by layer so writes stay sequential in memory
+  const WW=W*W,topB=new Uint8Array(WW),walkF=new Uint8Array(WW);let maxH=0;
+  for(let z=0;z<W;z++)for(let x=0;x<W;x++){
+    const col=z*W+x,town=inTown(x,z);let h=G;
+    if(!town){const d=townDist(x,z);h=G+Math.round((fbm(x/2,z/2)-.42)*26*Math.min(1,d/16)+(vnoise(x/110,z/110)-.38)*34*Math.min(1,d/50))}
+    h=h<14?14:h>H-22?H-22:h;
+    const road=town&&isRoad(x,z),walk=town&&!road&&isWalk(x,z);
+    topB[col]=road?7:walk?6:(town&&h3(x>>1,99,z>>1)<.45?2:1);walkF[col]=walk?1:0;hmap[col]=h;if(h>maxH)maxH=h;
   }
+  for(let y=0;y<=maxH+1;y++){let i=y*WW;for(let z=0;z<W;z++)for(let x=0;x<W;x++,i++){
+    const col=i-y*WW,h=hmap[col];let b=0;
+    if(y===0)b=13;else if(y<h-7){b=3;if(y<h-8){const r=h3(x,y,z);if(r<.05)b=4;else if(r<.08&&y<h-12)b=5}}else if(y<h)b=2;else if(y===h)b=topB[col];else if(y===h+1&&walkF[col])b=6;
+    if(b)vox[i]=b}}
+  for(let c=0;c<WW;c++)if(walkF[c])hmap[c]++;
+  caves();
   sewers();
-  for(let lx=T0+8;lx+18<=T1;lx+=28)for(let lz=T0+8;lz+18<=T1;lz+=28){
-    if(rng()<.85)building(lx,lz,18);
-    else for(let i=0;i<10;i++)setv(lx+RI(0,17),G+1,lz+RI(0,17),B.CONC);
+  for(const t of towns)for(let lx=t.x0+15;lx+30<=t.x1;lx+=P)for(let lz=t.z0+15;lz+30<=t.z1;lz+=P){
+    if(rng()<(t.n>3?.88:.78))building(lx,lz,30);
+    else for(let i=0;i<16;i++)setv(lx+RI(0,29),G+1,lz+RI(0,29),B.CONC);
   }
-  for(let i=0;i<190;i++){const x=RI(6,W-7),z=RI(6,W-7);if(inTown(x,z))continue;tree(x,z)}
-  carSpots.push({x:49.5,z:39.5,yaw:Math.PI,type:'car',good:true});
-  const lanes=[21.5,35.5,49.5,63.5,77.5];
-  for(let i=0,tries=0;i<7&&tries<80;tries++){
-    const alongZ=rng()<.5,lane=lanes[RI(0,4)],t=R(T0/2+3,T1/2-3);
-    const x=alongZ?lane:t,z=alongZ?t:lane;
+  for(let i=0;i<1400;i++){const x=RI(6,W-7),z=RI(6,W-7);if(inTown(x,z))continue;tree(x,z)}
+  decorateCaves();
+  carSpots.push({x:(MAIN+2*P+3)*VS,z:(MAIN+P+32)*VS,yaw:Math.PI,type:'car',good:true});
+  for(const T of towns)for(let i=0,tries=0;i<T.n*2&&tries<80;tries++){
+    const alongZ=rng()<.5,k=RI(0,T.n),ln=rng()<.5?3:9,x=alongZ?(T.x0+P*k+ln)*VS:R((T.x0+8)*VS,(T.x1-8)*VS),z=alongZ?R((T.z0+8)*VS,(T.z1-8)*VS):(T.z0+P*k+ln)*VS;
     if(carSpots.some(c=>Math.hypot(c.x-x,c.z-z)<8))continue;
-    if(Math.hypot(x-49.5,z-49.5)<5)continue;
+    if(Math.hypot(x-spawn.x,z-spawn.z)<5)continue;
     carSpots.push({x,z,yaw:(alongZ?0:Math.PI/2)+(rng()<.5?Math.PI:0)+R(-.15,.15),type:rng()<.35?'truck':'car'});i++;
   }
 }
-function sewers(){
-  const bands=[];for(let o=T0;o+5<=T1;o+=28)bands.push(o);
-  const both=(o,d,t,y,v)=>{setv(o+d,y,t,v);setv(t,y,o+d,v)};
-  for(const o of bands)for(let t=T0;t<=T1;t++)for(let d=0;d<6;d++)for(let y=SY;y<=SY+6;y++)both(o,d,t,y,B.BRICK);
-  for(const o of bands)for(let t=T0+1;t<=T1-1;t++)for(let d=1;d<5;d++){for(let y=SY+1;y<=SY+5;y++)both(o,d,t,y,0);if(d===2||d===3)both(o,d,t,SY,B.SLUDGE)}
-  for(const o of bands)for(let t=T0+16;t+2<=T1;t+=28){
-    for(const alongZ of[true,false]){
-      if(rng()<.35)continue;
-      const x=alongZ?o+2:t,z=alongZ?t:o+2;
+function sewers(){for(const T of towns)sewerTown(T)}
+function sewerTown(T){
+  // bands of x-roads (run along z) and z-roads (run along x)
+  const put=(alongZ,o,d,t,y,v)=>alongZ?setv(o+d,y,t,v):setv(t,y,o+d,v);
+  const runs=[];for(let o=T.x0;o+11<=T.x1;o+=P)runs.push([true,o+3,T.z0,T.z1]);for(let o=T.z0;o+11<=T.z1;o+=P)runs.push([false,o+3,T.x0,T.x1]);
+  for(const[aZ,o,a0,a1]of runs)for(let t=a0;t<=a1;t++)for(let d=0;d<6;d++)for(let y=SY;y<=SY+6;y++)put(aZ,o,d,t,y,B.BRICK);
+  for(const[aZ,o,a0,a1]of runs)for(let t=a0+1;t<=a1-1;t++)for(let d=1;d<5;d++){for(let y=SY+1;y<=SY+5;y++)put(aZ,o,d,t,y,0);if(d===2||d===3)put(aZ,o,d,t,SY,B.SLUDGE)}
+  for(const[aZ,o,a0,a1]of runs)for(let t=a0+P/2;t+2<=a1;t+=P){
+    if(rng()>=.35){const x=aZ?o+2:t,z=aZ?t:o+2;
       for(let y=SY+1;y<=G;y++)for(let a=0;a<2;a++)for(let b=0;b<2;b++)setv(x+a,y,z+b,B.LADDER);
-      manholes.push({x,z,alongZ});
+      manholes.push({x,z,alongZ:aZ})}
+    const tt=t+RI(-8,8),x=aZ?o+1:tt,z=aZ?tt:o+1;
+    if(rng()<.5)crateSpots.push([(x+.5)*VS+(aZ?.15:0),(SY+1)*VS,(z+.5)*VS+(aZ?0:.15),true]);
+    sewerSpots.push([(aZ?o+3:tt)*VS,(SY+1)*VS,(aZ?tt:o+3)*VS]);
+  }
+}
+function carveSphere(cx,cy,cz,r,surf){
+  const R2=r*r;for(let x=Math.floor(cx-r);x<=cx+r;x++)for(let z=Math.floor(cz-r);z<=cz+r;z++){
+    if(x<3||z<3||x>W-4||z>W-4)continue;const top=hmap[z*W+x];
+    for(let y=Math.floor(cy-r);y<=cy+r;y++){if(y<1)continue;if(!surf&&y>top-4)continue;
+      if((x-cx)**2+((y-cy)*1.3)**2+(z-cz)**2<=R2)setv(x,y,z,0)}}
+}
+function caves(){
+  for(let i=0;i<180;i++){
+    const ent=i<30;let x,z,y;
+    for(let t=0;t<60;t++){x=RI(10,W-11);z=RI(10,W-11);if(!ent||!inTown(x,z))break}
+    y=ent?hmap[z*W+x]+1:RI(5,inTown(x,z)?9:G-6);
+    let yaw=rng()*6.283,pitch=ent?-.55:R(-.2,.2);const len=RI(80,160),r0=R(1.8,3.2);
+    for(let st=0;st<len;st++){
+      const sf=ent&&st<26;carveSphere(x,y,z,r0+Math.sin(st*.23)*.7,sf);
+      x+=Math.cos(yaw)*Math.cos(pitch);z+=Math.sin(yaw)*Math.cos(pitch);y+=Math.sin(pitch);
+      yaw+=R(-.28,.28);pitch=clamp(pitch+R(-.12,.12),-.6,.6)*.96;if(sf)pitch=Math.min(pitch,-.4);
+      if(x<6||z<6||x>W-7||z>W-7)break;
+      const xi=x|0,zi=z|0,maxY=inTown(xi,zi)?10:hmap[zi*W+xi]-6;
+      if(y<4){y=4;pitch=.15}if(!sf&&y>maxY){y=maxY;pitch=-.12}
     }
-    for(const alongZ of[true,false]){const tt=t+RI(-8,8),x=alongZ?o+1:tt,z=alongZ?tt:o+1;
-      if(rng()<.5)crateSpots.push([(x+.5)*VS+(alongZ?.15:0),(SY+1)*VS,(z+.5)*VS+(alongZ?0:.15),true]);
-      sewerSpots.push([(alongZ?o+3:tt)*VS,(SY+1)*VS,(alongZ?tt:o+3)*VS])}
   }
 }
-function windowAt(cells){ // cells: function(dx,dy)->[x,y,z]; 4 wide x 4 tall frame, 2x2 pane
+function decorateCaves(){
+  for(let n=0;n<36000;n++){const x=RI(4,W-5),z=RI(4,W-5),y=RI(3,G-4);
+    if(get(x,y,z)===0&&solid(x,y+1,z)&&get(x,y-1,z)===0&&get(x,y-2,z)===0&&get(x,y-3,z)===0&&y<hmap[z*W+x]-5){setv(x,y,z,B.STONE);if(rng()<.5)setv(x,y-1,z,B.STONE)}}
+  for(let n=0;n<40000&&caveSpots.length<160;n++){const x=RI(4,W-5),z=RI(4,W-5),y=RI(2,G-8);
+    if(inTown(x,z)&&y>11)continue;
+    if(get(x,y,z)===0&&solid(x,y-1,z)&&get(x,y+1,z)===0&&get(x,y+2,z)===0&&get(x,y+3,z)===0&&get(x+1,y,z)===0&&get(x,y,z+1)===0&&y<hmap[z*W+x]-6)
+      caveSpots.push([(x+.5)*VS,y*VS,(z+.5)*VS])}
+}
+function windowAt(cells){ // 4 wide x 5 tall frame, 2x3 pane (sill at 0.5 m, glass 1–2.5 m)
   const kind=rng();
-  for(let dx=0;dx<4;dx++)for(let dy=0;dy<4;dy++){
-    const [x,y,z]=cells(dx,dy),inner=dx>0&&dx<3&&dy>0&&dy<3;
+  for(let dx=0;dx<4;dx++)for(let dy=0;dy<5;dy++){
+    const [x,y,z]=cells(dx,dy),inner=dx>0&&dx<3&&dy>0&&dy<4;
     if(!inner)setv(x,y,z,B.FRAME);
-    else setv(x,y,z,kind<.6?B.GLASS:kind<.85?0:(dy===1?B.PLANK:(dx===1?0:B.PLANK)));
+    else setv(x,y,z,kind<.6?B.GLASS:kind<.85?0:(dy===2?0:B.PLANK));
   }
 }
-function doorAt(x,y,z,inward){ // 2 wide x 4 tall opening along x, frame around
+function doorAt(x,y,z,inward,chance=.8){ // 2 wide x 4 tall opening along x, frame around
   for(let dy=0;dy<5;dy++){setv(x-1,y+dy,z,B.FRAME);setv(x+2,y+dy,z,B.FRAME)}
   setv(x,y+4,z,B.FRAME);setv(x+1,y+4,z,B.FRAME);
-  const broken=rng()<.2;
-  for(let dx=0;dx<2;dx++)for(let dy=0;dy<4;dy++)setv(x+dx,y+dy,z,broken?0:B.DOOR);
-  if(!broken)doorSpecs.push({x,y,z,inward});
+  const real=rng()<chance;
+  for(let dx=0;dx<2;dx++)for(let dy=0;dy<4;dy++)setv(x+dx,y+dy,z,real?B.DOOR:0);
+  if(real)doorSpecs.push({x,y,z,inward});
+}
+// ---- furniture: footprint w (along wall) x d (depth) x h (collision height) in voxels
+const FD={couch:[5,2,2],tvstand:[4,1,2],ctable:[3,2,1],armchair:[2,2,2],bookcase:[3,1,4],plant:[1,1,2],rug:[5,4,0],
+  counter:[2,2,2],sink:[2,2,2],stove:[2,2,2],fridge:[2,2,4],ktable:[3,3,2],
+  toilet:[1,2,2],bsink:[2,1,2],tub:[5,2,1],
+  bed:[2,4,1],nightstand:[1,1,1],wardrobe:[3,1,4],dresser:[3,1,2],
+  shelf:[4,1,4],bench:[4,2,2],heater:[2,2,4]};
+const furnSpecs=[];let resv=new Set();
+const rk=(x,z,fb)=>x+','+z+','+fb;
+function reserve(x0,x1,z0,z1,fb){for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++)resv.add(rk(x,z,fb))}
+function fpFree(fx0,fz0,fw,fd,fb,h){
+  for(let x=fx0;x<fx0+fw;x++)for(let z=fz0;z<fz0+fd;z++){
+    if(resv.has(rk(x,z,fb)))return false;const fl=get(x,fb,z);if(fl===0||fl===B.LADDER||fl===B.FURN)return false;
+    for(let y=fb+1;y<=fb+Math.max(1,h);y++)if(get(x,y,z)!==0)return false}
+  return true;
+}
+function occupy(type,fx0,fz0,fw,fd,fb,yaw){
+  const h=FD[type][2];
+  for(let x=fx0;x<fx0+fw;x++)for(let z=fz0;z<fz0+fd;z++){resv.add(rk(x,z,fb));for(let y=fb+1;y<=fb+h;y++)setv(x,y,z,B.FURN)}
+  const sp=[type,(fx0+fw/2)*VS,(fb+1)*VS,(fz0+fd/2)*VS,yaw];
+  if(type==='bed')bedSpecs.push(sp.slice(1));else furnSpecs.push(sp);
+}
+const SIDES=['N','S','W','E'],OPP={N:'S',S:'N',W:'E',E:'W'};
+function shuf(a){for(let i=a.length-1;i>0;i--){const j=RI(0,i);[a[i],a[j]]=[a[j],a[i]]}return a}
+// place against a wall of room r; returns {sd,o,fx0,fz0,fw,fd}
+function placeF(type,r,fb,side,at){
+  const[w,d,h]=FD[type];
+  for(const sd of side?[side]:shuf(SIDES.slice())){
+    const ax=sd==='N'||sd==='S',len=ax?r.x1-r.x0+1:r.z1-r.z0+1;if(len<w)continue;
+    const os=[];for(let o=0;o<=len-w;o++)os.push(o);
+    if(at!=null)os.sort((a,b)=>Math.abs(a-at)-Math.abs(b-at));else shuf(os);
+    for(const o of os){let fx0,fz0,fw,fd,yaw;
+      if(sd==='N'){fx0=r.x0+o;fz0=r.z0;fw=w;fd=d;yaw=0}else if(sd==='S'){fx0=r.x0+o;fz0=r.z1-d+1;fw=w;fd=d;yaw=Math.PI}
+      else if(sd==='W'){fx0=r.x0;fz0=r.z0+o;fw=d;fd=w;yaw=Math.PI/2}else{fx0=r.x1-d+1;fz0=r.z0+o;fw=d;fd=w;yaw=-Math.PI/2}
+      if(!fpFree(fx0,fz0,fw,fd,fb,h))continue;occupy(type,fx0,fz0,fw,fd,fb,yaw);return{sd,o,fx0,fz0,fw,fd}}
+  }
+  return null;
+}
+function placeAt(type,cx,cz,fb,yaw,soft){ // centred at voxel coords cx,cz
+  const[w,d,h]=FD[type],rot=Math.abs(Math.sin(yaw))>.5,fw=rot?d:w,fd=rot?w:d,fx0=Math.round(cx-fw/2),fz0=Math.round(cz-fd/2);
+  if(soft){furnSpecs.push([type,(fx0+fw/2)*VS,(fb+1)*VS,(fz0+fd/2)*VS,yaw]);return true}
+  if(!fpFree(fx0,fz0,fw,fd,fb,h))return false;occupy(type,fx0,fz0,fw,fd,fb,yaw);return true;
+}
+function floorMat(r,fb,m){for(let x=r.x0;x<=r.x1;x++)for(let z=r.z0;z<=r.z1;z++){const b=get(x,fb,z);if(b!==0&&b!==B.LADDER)setv(x,fb,z,m)}}
+function living(r,fb){
+  const c=placeF('couch',r,fb);
+  if(c){const ax=c.sd==='N'||c.sd==='S',mid=ax?(r.z0+r.z1+1)/2:(r.x0+r.x1+1)/2,cen=ax?c.fx0+2.5:c.fz0+2.5;
+    placeF('tvstand',r,fb,OPP[c.sd],c.o+.5);
+    const yaw=c.sd==='N'?0:c.sd==='S'?Math.PI:c.sd==='W'?Math.PI/2:-Math.PI/2;
+    if(ax){placeAt('rug',cen,mid,fb,0,true);placeAt('ctable',cen,mid,fb,yaw)}else{placeAt('rug',mid,cen,fb,Math.PI/2,true);placeAt('ctable',mid,cen,fb,yaw)}}
+  placeF('armchair',r,fb);placeF('bookcase',r,fb);if(rng()<.6)placeF('plant',r,fb);
+}
+function kitchen(r,fb){
+  const row=['fridge','counter','sink','counter','stove','counter'];
+  for(const sd of shuf(SIDES.slice())){let first=placeF(row[0],r,fb,sd,0);if(!first)continue;
+    let o=first.o+2;for(const t of row.slice(1)){const q=placeF(t,r,fb,sd,o);if(!q||Math.abs(q.o-o)>0)break;o+=2}break}
+  placeAt('ktable',(r.x0+r.x1+1)/2,(r.z0+r.z1+1)/2,fb,0);
+}
+function bathroom(r,fb){floorMat(r,fb,B.TILEF);placeF('tub',r,fb);placeF('toilet',r,fb);placeF('bsink',r,fb);if(rng()<.4)placeF('shelf',r,fb)}
+function bedroom(r,fb){const b=placeF('bed',r,fb);if(b)placeF('nightstand',r,fb,b.sd,b.o+(rng()<.5?-1:2));placeF('wardrobe',r,fb);placeF('dresser',r,fb);if(rng()<.4)placeF('plant',r,fb)}
+function hall(r,fb){placeF('bookcase',r,fb);placeF('plant',r,fb);if(rng()<.5)placeF('dresser',r,fb)}
+function basementRoom(r,fb){placeF('shelf',r,fb);placeF('shelf',r,fb);placeF('bench',r,fb);placeF('heater',r,fb);if(rng()<.5)placeF('shelf',r,fb)}
+function spotsIn(r,fb,base){
+  for(let c=0,t=0;c<(base?2:1)&&t<20;t++){const cx=RI(r.x0,r.x1),cz=RI(r.z0,r.z1);
+    if(fpFree(cx,cz,1,1,fb,2)){crateSpots.push([(cx+.5)*VS,(fb+1)*VS,(cz+.5)*VS,base&&rng()<.5]);resv.add(rk(cx,cz,fb));c++}}
+  for(let t=0;t<20;t++){const cx=RI(r.x0+1,r.x1-1),cz=RI(r.z0+1,r.z1-1);if(fpFree(cx,cz,2,2,fb,4)){indoorSpots.push([(cx+1)*VS,(fb+1)*VS,(cz+1)*VS]);break}}
 }
 function building(lx,lz,S){
-  const w=RI(14,S),d=RI(14,S),x0=lx+RI(0,S-w),z0=lz+RI(0,S-d),x1=x0+w-1,z1=z0+d-1;
-  const floors=RI(1,3),g=G,mat=rng()<.5?B.CONC:B.BRICK,top=g+floors*FH;
+  resv=new Set();
+  const w=RI(22,S),d=RI(22,S),x0=lx+RI(0,S-w),z0=lz+RI(0,S-d),x1=x0+w-1,z1=z0+d-1;
+  const floors=RI(1,3),g=G,mat=rng()<.5?B.CONC:B.BRICK,top=g+floors*FH,BD=7;
   for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
     const edge=x===x0||x===x1||z===z0||z===z1;
     for(let y=g+1;y<=top;y++){if(edge||(y-g)%FH===0)setv(x,y,z,mat)}
-    if(!edge)setv(x,g,z,B.CONC);
+    if(!edge)setv(x,g,z,B.PLANK);
   }
-  const xm=Math.floor((x0+x1)/2)-1;
+  const hasBase=rng()<.45;
+  if(hasBase){
+    for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){const edge=x===x0||x===x1||z===z0||z===z1;for(let y=g-BD-1;y<g;y++)setv(x,y,z,(edge||y===g-BD-1)?B.CONC:0)}
+    for(let i=1;i<=BD;i++)for(const xx of[x0+1,x0+2]){setv(xx,g,z0+3+i,0);setv(xx,g-i,z0+3+i,B.PLANK)}
+    for(let z=z0+4;z<=z0+3+BD;z++)setv(x0+3,g+1,z,B.FRAME);
+    reserve(x0+1,x0+3,z0+2,z0+4+BD,g);reserve(x0+1,x0+3,z0+3+BD,z0+6+BD,g-BD-1);
+  }
+  // room split: xs (wall along z), zs (wall along x)
+  const xs=x0+RI(10,w-9),zs=z0+RI(12,d-9);
+  const rooms=(fb)=>({A:{x0:x0+1,x1:xs-1,z0:z0+1,z1:zs-1},Bk:{x0:xs+1,x1:x1-1,z0:z0+1,z1:zs-1},C:{x0:x0+1,x1:xs-1,z0:zs+1,z1:z1-1},D:{x0:xs+1,x1:x1-1,z0:zs+1,z1:z1-1}});
+  const xm=Math.floor((x0+xs)/2)-1;
   for(let k=0;k<floors;k++){
     const b=g+FH*k;
     for(let x=x0+2;x+3<=x1-2;x+=6){
@@ -282,21 +426,31 @@ function building(lx,lz,S){
       if(!(k===0&&x+3>=x1-6))windowAt((dx,dy)=>[x+dx,b+1+dy,z1]);
     }
     for(let z=z0+2;z+3<=z1-4;z+=6){windowAt((dz,dy)=>[x0,b+1+dy,z+dz]);windowAt((dz,dy)=>[x1,b+1+dy,z+dz])}
-    for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){if(!(x===x0||x===x1||z===z0||z===z1))continue;for(let y=b+1;y<b+FH;y++)if(get(x,y,z)===mat&&rng()<.03)setv(x,y,z,0)}
+    for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){if(!(x===x0||x===x1||z===z0||z===z1))continue;for(let y=b+1;y<b+FH;y++)if(get(x,y,z)===mat&&rng()<.025)setv(x,y,z,0)}
+    // interior walls
+    for(let y=b+1;y<b+FH;y++){for(let z=z0+1;z<z1;z++)setv(xs,y,z,B.WALL);for(let x=x0+1;x<x1;x++)setv(x,y,zs,B.WALL)}
+    // doorways: A<->B (wide opening), C<->D, A<->C (opening), B<->D (door)
+    const o1=RI(z0+3,zs-5);for(let z=o1;z<o1+3;z++)for(let y=b+1;y<=b+4;y++)setv(xs,y,z,0);reserve(xs-2,xs+2,o1,o1+2,b);
+    const o2=RI(zs+3,z1-4);for(let z=o2;z<o2+2;z++)for(let y=b+1;y<=b+4;y++)setv(xs,y,z,0);reserve(xs-2,xs+2,o2,o2+1,b);
+    const o3=RI(x0+3,Math.min(xs-4,x0+12));for(let x=o3;x<o3+3;x++)for(let y=b+1;y<=b+4;y++)setv(x,y,zs,0);reserve(o3,o3+2,zs-2,zs+2,b);
+    const o4=RI(xs+3,x1-4);doorAt(o4,b+1,zs,1,.7);reserve(o4-1,o4+2,zs-2,zs+3,b);
+    // stairs to the next floor / roof
+    for(let i=0;i<FH;i++)for(const zz of[z1-1,z1-2])setv(x0+2+i,b+1+i,zz,B.PLANK);
+    for(let i=0;i<FH-1;i++)for(const zz of[z1-1,z1-2])setv(x0+2+i,b+FH,zz,0);
+    reserve(x0+1,x0+3+FH,z1-3,z1-1,b);
   }
-  doorAt(xm,g+1,z0,1);
-  if(rng()<.5)doorAt(x1-4,g+1,z1,-1);
+  doorAt(xm,g+1,z0,1);reserve(xm-1,xm+2,z0+1,z0+3,g);
+  if(rng()<.5){doorAt(x1-4,g+1,z1,-1);reserve(x1-5,x1-2,z1-3,z1-1,g)}
   for(let k=0;k<floors;k++){
-    const fb=g+FH*k;
-    for(let i=0;i<FH;i++)for(const zz of[z1-1,z1-2])setv(x0+2+i,fb+1+i,zz,B.PLANK);
-    for(let i=0;i<FH-1;i++)for(const zz of[z1-1,z1-2])setv(x0+2+i,fb+FH,zz,0);
-    const n=RI(1,2);
-    for(let c=0;c<n;c++){const cx=RI(x0+2,x1-3),cz=RI(z0+3,z1-5);if(get(cx,fb+1,cz)===0)crateSpots.push([(cx+1)*VS,(fb+1)*VS,(cz+1)*VS])}
-    indoorSpots.push([(RI(x0+3,x1-3)+.5)*VS,(fb+1)*VS,(RI(z0+3,z1-5)+.5)*VS]);
+    const fb=g+FH*k,R=rooms(fb);
+    if(k===0){floorMat(R.Bk,fb,B.TILEF);living(R.A,fb);kitchen(R.Bk,fb);bathroom(R.D,fb);if(floors===1)bedroom(R.C,fb);else hall(R.C,fb)}
+    else{bedroom(R.A,fb);if(rng()<.6)bedroom(R.Bk,fb);else living(R.Bk,fb);hall(R.C,fb);if(k===1)bathroom(R.D,fb);else bedroom(R.D,fb)}
+    for(const r of Object.values(R))spotsIn(r,fb,false);
   }
-  if(rng()<.45){const hx=RI(x0+2,x1-8),hz=RI(z0+2,z1-8);
+  if(hasBase){const fb=g-BD-1,r={x0:x0+1,x1:x1-1,z0:z0+1,z1:z1-1};basementRoom(r,fb);spotsIn(r,fb,true);spotsIn(r,fb,true)}
+  if(rng()<.4){const hx=RI(x0+2,x1-8),hz=RI(z0+2,z1-8);
     for(let x=hx;x<hx+6;x++)for(let z=hz;z<hz+6;z++){setv(x,top,z,0);if(rng()<.5&&floors>1&&get(x,top-FH+1,z)===0)setv(x,top-FH+1,z,mat)}}
-  for(let i=0;i<8;i++){const x=rng()<.5?x0-1:x1+1,z=RI(z0,z1);if(!isRoad(x,z)&&get(x,g+1,z)===0&&get(x,g,z))setv(x,g+1,z,mat)}
+  for(let i=0;i<10;i++){const x=rng()<.5?x0-1:x1+1,z=RI(z0,z1);if(!isRoad(x,z)&&get(x,g+1,z)===0&&get(x,g,z))setv(x,g+1,z,mat)}
 }
 function tree(x,z){
   const h=topY(x,z),th=RI(8,12),dead=rng()<.35;
@@ -327,7 +481,7 @@ const BRGB=BCOL.map(c=>{const k=new THREE.Color(c);return[k.r,k.g,k.b]});
 // ---------------- procedural texture atlas (16px tiles, drawn at load)
 const TS=16,ACOLS=8,AROWS=4,AW=TS*ACOLS,AH=TS*AROWS;
 const atlasC=document.createElement('canvas');atlasC.width=AW;atlasC.height=AH;
-const TILE={grassTop:0,grassSide:1,dirt:2,stone:3,coal:4,iron:5,conc:6,asph:7,plank:8,bark:9,logTop:10,leaf:11,brick:12,metal:13,bed:14,glass:15,frame:16,sludge:17};
+const TILE={grassTop:0,grassSide:1,dirt:2,stone:3,coal:4,iron:5,conc:6,asph:7,plank:8,bark:9,logTop:10,leaf:11,brick:12,metal:13,bed:14,glass:15,frame:16,sludge:17,wall:18,tilef:19};
 {
   const ctx=atlasC.getContext('2d'),tr=mulberry(seed^0x5eed),rr=()=>tr();
   const px=(t,x,y,r,g,b,a=1)=>{ctx.fillStyle=`rgba(${r|0},${g|0},${b|0},${a})`;ctx.fillRect((t%ACOLS)*TS+x,((t/ACOLS)|0)*TS+y,1,1)};
@@ -380,6 +534,10 @@ const TILE={grassTop:0,grassSide:1,dirt:2,stone:3,coal:4,iron:5,conc:6,asph:7,pl
   // window/door frame: off-white paint peeling to wood
   noise(TILE.frame,210,203,184,.1);blob(TILE.frame,4,6,120,90,58);for(let x=0;x<TS;x++)px(TILE.frame,x,0,170,164,148);
   // sludge
+  // interior plaster with faded wallpaper stripes and damp stains
+  for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const k=(x%4===0?.93:1)*(1+(rr()-.5)*.06);px(TILE.wall,x,y,196*k,186*k,166*k)}blob(TILE.wall,2,8,150,140,112);for(let x=0;x<TS;x++)px(TILE.wall,x,TS-1,120,104,84);
+  // floor tiles: 4 squares with grout and grime
+  for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const gr=(x&7)===7||(y&7)===7,ch=((x>>3)+(y>>3))&1,k=1+(rr()-.5)*.08;if(gr)px(TILE.tilef,x,y,120*k,118*k,110*k);else{const v=ch?214:188;px(TILE.tilef,x,y,v*k,v*k,(v-8)*k)}}specks(TILE.tilef,6,140,120,90,.2);
   noise(TILE.sludge,48,58,28,.35);specks(TILE.sludge,16,70,80,36,.2);specks(TILE.sludge,6,120,128,70,.2);
 }
 const atlas=new THREE.CanvasTexture(atlasC);atlas.magFilter=THREE.NearestFilter;atlas.minFilter=THREE.NearestFilter;atlas.generateMipmaps=false;
@@ -388,7 +546,7 @@ const TILE_OF=[];{const T=TILE,all=t=>[t,t,t,t,t,t];
   TILE_OF[B.GRASS]=[T.grassSide,T.grassSide,T.grassTop,T.dirt,T.grassSide,T.grassSide];TILE_OF[B.DIRT]=all(T.dirt);TILE_OF[B.STONE]=all(T.stone);
   TILE_OF[B.COAL]=all(T.coal);TILE_OF[B.IRON]=all(T.iron);TILE_OF[B.CONC]=all(T.conc);TILE_OF[B.ASPH]=all(T.asph);TILE_OF[B.PLANK]=all(T.plank);
   TILE_OF[B.LOG]=[T.bark,T.bark,T.logTop,T.logTop,T.bark,T.bark];TILE_OF[B.LEAF]=all(T.leaf);TILE_OF[B.BRICK]=all(T.brick);TILE_OF[B.METAL]=all(T.metal);
-  TILE_OF[B.BED]=all(T.bed);TILE_OF[B.GLASS]=all(T.glass);TILE_OF[B.FRAME]=all(T.frame);TILE_OF[B.SLUDGE]=all(T.sludge);TILE_OF[B.DOOR]=all(T.plank);TILE_OF[B.LADDER]=all(T.plank)}
+  TILE_OF[B.BED]=all(T.bed);TILE_OF[B.GLASS]=all(T.glass);TILE_OF[B.FRAME]=all(T.frame);TILE_OF[B.SLUDGE]=all(T.sludge);TILE_OF[B.DOOR]=all(T.plank);TILE_OF[B.LADDER]=all(T.plank);TILE_OF[B.WALL]=all(T.wall);TILE_OF[B.TILEF]=[T.tilef,T.tilef,T.tilef,T.plank,T.tilef,T.tilef]}
 const FACE_UV=[[2,1],[2,1],[0,2],[0,2],[0,1],[0,1]]; // which corner axes give (u,v)
 function pushUV(UV,tile,fi,c){const a=FACE_UV[fi],u=c[a[0]],v=c[a[1]],tx=tile%ACOLS,ty=(tile/ACOLS)|0;
   UV.push((tx*TS+.02+u*(TS-.04))/AW,1-(ty*TS+.02+(1-v)*(TS-.04))/AH)}
@@ -401,42 +559,128 @@ const chunkMeshes=[],glassMeshes=[];
 function mkGeo(P,N,C,I,UV){const g=new THREE.BufferGeometry();if(UV)g.setAttribute('uv',new THREE.Float32BufferAttribute(UV,2));
   g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));
   if(C)g.setAttribute('color',new THREE.Float32BufferAttribute(C,3));g.setIndex(I);g.computeBoundingSphere();return g}
+// typed-array mesher: one pass per chunk, direct index neighbour lookups, buffers reused between chunks
+let mCap=1<<15,mP=new Float32Array(mCap*3),mN=new Float32Array(mCap*3),mC=new Float32Array(mCap*3),mU=new Float32Array(mCap*2),mI=new Uint32Array(mCap*1.5);
+function mGrow(){mCap*=2;const g=(a,n)=>{const b=new a.constructor(n);b.set(a);return b};mP=g(mP,mCap*3);mN=g(mN,mCap*3);mC=g(mC,mCap*3);mU=g(mU,mCap*2);mI=g(mI,mCap*1.5)}
+const FUV=FACES.map((f,fi)=>f[3].map(c=>[c[FACE_UV[fi][0]],c[FACE_UV[fi][1]]]));
+const isOpq=b=>b!==0&&b!==14&&b!==15&&b!==17&&b!==20;
+const loaded=new Uint8Array(NC*NC);
 function buildChunk(cx,cz){
-  const P=[],N=[],C=[],I=[],UV=[],GP=[],GN=[],GI=[],GUV=[];
-  for(let x=cx*CS;x<cx*CS+CS;x++)for(let z=cz*CS;z<cz*CS+CS;z++)for(let y=0;y<H;y++){
-    const b=vox[(y*W+z)*W+x];if(!b||b===B.DOOR||b===B.LADDER)continue;
-    if(b===B.GLASS){
-      for(const f of FACES){const nb=get(x+f[0],y+f[1],z+f[2]);if(nb===B.GLASS||opaque(nb))continue;
-        const n=GP.length/3,fi=FACES.indexOf(f);for(const c of f[3]){GP.push(x+c[0],y+c[1],z+c[2]);GN.push(f[0],f[1],f[2]);pushUV(GUV,TILE.glass,fi,c)}GI.push(n,n+1,n+2,n,n+2,n+3)}
-      continue;
-    }
-    let col=[1,1,1];const v=.88+.12*h3(x,y,z),tiles=TILE_OF[b];
-    if((b===B.ASPH||b===B.CONC||b===B.DIRT)&&h3(x>>1,y+7,z>>1)<.035)col=[.75,.16,.13];
-    for(let fi=0;fi<6;fi++){const f=FACES[fi];
-      if(opaque(get(x+f[0],y+f[1],z+f[2])))continue;
-      const n=P.length/3,s=v*f[4];
-      for(const c of f[3]){P.push(x+c[0],y+c[1],z+c[2]);N.push(f[0],f[1],f[2]);C.push(col[0]*s,col[1]*s,col[2]*s);pushUV(UV,tiles[fi],fi,c)}
-      I.push(n,n+1,n+2,n,n+2,n+3);
-    }
-  }
+  const WW=W*W,x0=cx*CS,z0=cz*CS,nb=[0,0,0,0,0,0];let nv=0,ni=0;const GP=[],GN=[],GI=[],GUV=[];
+  for(let y=0;y<H;y++)for(let z=z0;z<z0+CS;z++){let i=(y*W+z)*W+x0;for(let x=x0;x<x0+CS;x++,i++){
+    const b=vox[i];if(!b||b===14||b===17||b===20)continue;
+    nb[0]=x<W-1?vox[i+1]:13;nb[1]=x>0?vox[i-1]:13;nb[2]=y<H-1?vox[i+WW]:0;nb[3]=y>0?vox[i-WW]:13;nb[4]=z<W-1?vox[i+W]:13;nb[5]=z>0?vox[i-W]:13;
+    if(b===15){for(let fi=0;fi<6;fi++){const o=nb[fi];if(o===15||isOpq(o))continue;const f=FACES[fi],n=GP.length/3;
+      for(const c of f[3]){GP.push(x+c[0],y+c[1],z+c[2]);GN.push(f[0],f[1],f[2]);pushUV(GUV,TILE.glass,fi,c)}GI.push(n,n+1,n+2,n,n+2,n+3)}continue}
+    let cr=1,cg=1,cb=1;const v=.88+.12*h3(x,y,z),tiles=TILE_OF[b];
+    if((b===7||b===6||b===2)&&h3(x>>1,y+7,z>>1)<.035){cr=.75;cg=.16;cb=.13}
+    for(let fi=0;fi<6;fi++){if(isOpq(nb[fi]))continue;
+      if(nv+4>mCap)mGrow();const f=FACES[fi],s=v*f[4],t=tiles[fi],tx=t%ACOLS,ty=(t/ACOLS)|0,uv=FUV[fi];
+      for(let c=0;c<4;c++){const q=f[3][c],o3=(nv+c)*3,o2=(nv+c)*2;
+        mP[o3]=x+q[0];mP[o3+1]=y+q[1];mP[o3+2]=z+q[2];mN[o3]=f[0];mN[o3+1]=f[1];mN[o3+2]=f[2];mC[o3]=cr*s;mC[o3+1]=cg*s;mC[o3+2]=cb*s;
+        mU[o2]=(tx*TS+.02+uv[c][0]*(TS-.04))/AW;mU[o2+1]=1-(ty*TS+.02+(1-uv[c][1])*(TS-.04))/AH}
+      mI[ni]=nv;mI[ni+1]=nv+1;mI[ni+2]=nv+2;mI[ni+3]=nv;mI[ni+4]=nv+2;mI[ni+5]=nv+3;ni+=6;nv+=4}
+  }}
   const k=cz*NC+cx;
   for(const arr of[chunkMeshes,glassMeshes])if(arr[k]){scene.remove(arr[k]);arr[k].geometry.dispose();arr[k]=null}
-  const m=new THREE.Mesh(mkGeo(P,N,C,I,UV),vmat);m.scale.setScalar(VS);scene.add(m);chunkMeshes[k]=m;
+  if(nv){const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.BufferAttribute(mP.slice(0,nv*3),3));g.setAttribute('normal',new THREE.BufferAttribute(mN.slice(0,nv*3),3));
+    g.setAttribute('color',new THREE.BufferAttribute(mC.slice(0,nv*3),3));g.setAttribute('uv',new THREE.BufferAttribute(mU.slice(0,nv*2),2));
+    g.setIndex(new THREE.BufferAttribute(nv>65535?mI.slice(0,ni):Uint16Array.from(mI.subarray(0,ni)),1));g.computeBoundingSphere();
+    const m=new THREE.Mesh(g,vmat);m.scale.setScalar(VS);scene.add(m);chunkMeshes[k]=m}
   if(GP.length){const gm=new THREE.Mesh(mkGeo(GP,GN,null,GI,GUV),gmat);gm.scale.setScalar(VS);gm.renderOrder=2;scene.add(gm);glassMeshes[k]=gm}
+  loaded[k]=1;if(furnMeshes[k])furnMeshes[k].visible=true;
 }
+function unloadChunk(k){for(const arr of[chunkMeshes,glassMeshes])if(arr[k]){scene.remove(arr[k]);arr[k].geometry.dispose();arr[k]=null}loaded[k]=0;if(furnMeshes[k])furnMeshes[k].visible=false}
+const rb=(cx,cz)=>{if(cx>=0&&cz>=0&&cx<NC&&cz<NC&&loaded[cz*NC+cx])buildChunk(cx,cz)};
 function rebuildAt(x,z){
-  const cx=Math.floor(x/CS),cz=Math.floor(z/CS);buildChunk(cx,cz);
-  if(x%CS===0&&cx>0)buildChunk(cx-1,cz);if(x%CS===CS-1&&cx<NC-1)buildChunk(cx+1,cz);
-  if(z%CS===0&&cz>0)buildChunk(cx,cz-1);if(z%CS===CS-1&&cz<NC-1)buildChunk(cx,cz+1);
+  const cx=Math.floor(x/CS),cz=Math.floor(z/CS);rb(cx,cz);
+  if(x%CS===0)rb(cx-1,cz);if(x%CS===CS-1)rb(cx+1,cz);if(z%CS===0)rb(cx,cz-1);if(z%CS===CS-1)rb(cx,cz+1);
 }
+let RD=isTouch?6:8;try{const r=+localStorage.getItem('deadground-rd');if(r>=3&&r<=20)RD=r}catch(e){}
+const want=[];
+function streamChunks(centers,budget){
+  const r2=RD*RD,cs=centers.map(c=>[Math.floor(c.x/VS/CS),Math.floor(c.z/VS/CS)]);want.length=0;
+  for(const[ccx,ccz]of cs)for(let dz=-RD;dz<=RD;dz++)for(let dx=-RD;dx<=RD;dx++){const d=dx*dx+dz*dz;if(d>r2)continue;const x=ccx+dx,z=ccz+dz;
+    if(x<0||z<0||x>=NC||z>=NC||loaded[z*NC+x])continue;want.push(d*4096+z*NC+x)}
+  if(want.length){want.sort((a,b)=>a-b);let n=0;for(const w of want){if(n>=budget)break;const k=w%4096;if(!loaded[k]){buildChunk(k%NC,(k/NC)|0);n++}}}
+  const r2u=(RD+2)*(RD+2);
+  for(let k=0;k<NC*NC;k++){if(!loaded[k])continue;const x=k%NC,z=(k/NC)|0;let keep=false;
+    for(const[ccx,ccz]of cs){const dx=x-ccx,dz=z-ccz;if(dx*dx+dz*dz<=r2u){keep=true;break}}if(!keep)unloadChunk(k)}
+  return want.length;
+}
+const viewUnits=()=>RD*CS*VS;
 function setBlock(x,y,z,v){if(!inB(x,y,z))return;setv(x,y,z,v);rebuildAt(x,z)}
 function breakGlass(x,y,z){
   const st=[[x,y,z]],done=new Set();let n=0;
   while(st.length&&n<16){const[a,b,c]=st.pop();if(get(a,b,c)!==B.GLASS)continue;setv(a,b,c,0);n++;
     burst(new V3((a+.5)*VS,(b+.5)*VS,(c+.5)*VS),5,3,[.7,.85,.9],1);done.add(Math.floor(a/CS)+','+Math.floor(c/CS));
     for(const f of FACES)st.push([a+f[0],b+f[1],c+f[2]])}
-  for(const key of done){const[cx,cz]=key.split(',').map(Number);buildChunk(cx,cz)}
+  for(const key of done){const[cx,cz]=key.split(',').map(Number);rb(cx,cz)}
   rebuildAt(x,z);SND.glass();
+}
+
+// ---------------- furniture meshes: every piece in a chunk is merged into one vertex-coloured mesh
+const furnMeshes=[],FBUF=new Map(),furnMat=new THREE.MeshLambertMaterial({vertexColors:true});
+const WOODS=[0x6b4a2e,0x8a6a44,0x4a3424,0x5a4030],FABRIC=[0x5a3a3a,0x3a4a5a,0x4a5a3a,0x6a5a48,0x3a3a42,0x6a4a30];
+const tmpCol=new THREE.Color();
+function fbuf(k){let b=FBUF.get(k);if(!b){b={P:[],N:[],C:[],I:[]};FBUF.set(k,b)}return b}
+function furnBuilder(wx,wy,wz,yaw){
+  const k=Math.floor(vc(wz)/CS)*NC+Math.floor(vc(wx)/CS),b=fbuf(k),c=Math.cos(yaw),s=Math.sin(yaw);
+  return(w,h,d,col,x,y,z,ry=0)=>{ // box in local metres, origin at footprint floor centre, front = +z
+    tmpCol.setHex(col);const v=.88+rng()*.16,cr=tmpCol.r*v,cg=tmpCol.g*v,cb=tmpCol.b*v,c2=Math.cos(ry),s2=Math.sin(ry);
+    for(const f of FACES){const n=b.P.length/3,sh=.75+f[4]*.25;
+      const nx0=f[0]*c2+f[2]*s2,nz0=-f[0]*s2+f[2]*c2,nx=nx0*c+nz0*s,nz=-nx0*s+nz0*c;
+      for(const q of f[3]){let lx=(q[0]-.5)*w,ly=(q[1]-.5)*h+y,lz=(q[2]-.5)*d;const rx=lx*c2+lz*s2+x,rz=-lx*s2+lz*c2+z;
+        b.P.push(wx+rx*c+rz*s,wy+ly,wz-rx*s+rz*c);b.N.push(nx,f[1],nz);b.C.push(cr*sh,cg*sh,cb*sh)}
+      b.I.push(n,n+1,n+2,n,n+2,n+3)}};
+}
+const pick=a=>a[RI(0,a.length-1)];
+function buildFurn(sp){
+  const[type,wx,wy,wz,yaw]=sp,F=furnBuilder(wx,wy,wz,yaw),[fw,fd]=FD[type],W_=fw*VS,D_=fd*VS;
+  const wood=pick(WOODS),fab=pick(FABRIC),dk=0x1a1814,white=0xd8d4c8;
+  switch(type){
+  case'couch':case'armchair':{F(W_,.22,D_*.95,dk,0,.2,0);const n=type==='couch'?3:1,cw=(W_-.4)/n;for(let i=0;i<n;i++)F(cw-.03,.16,D_*.66,fab,-W_/2+.2+cw*(i+.5),.39,D_*.12);
+    F(W_,.58,.22,fab,0,.6,-D_/2+.13);F(.2,.42,D_*.95,fab,-W_/2+.1,.46,0);F(.2,.42,D_*.95,fab,W_/2-.1,.46,0);for(const sx of[-1,1])for(const sz of[-1,1])F(.06,.08,.06,dk,sx*(W_/2-.08),.04,sz*(D_/2-.08));break}
+  case'tvstand':{F(W_*.92,.52,D_*.85,wood,0,.26,0);F(.02,.4,.01,dk,0,.27,D_*.43);F(W_*.4,.06,.2,dk,0,.55,-.02);F(.08,.14,.06,dk,0,.62,-.04);
+    const tw=Math.min(1.5,W_*.8);F(tw,.82,.07,0x0e0e10,0,.68+.41,-.05);F(tw-.08,.72,.01,rng()<.3?0x223040:0x141a20,0,1.09,-.012);
+    if(rng()<.4){F(.5,.012,.012,0x8a9aa0,-.1,1.15,-.005,.6);F(.3,.012,.012,0x8a9aa0,.1,1.0,-.005,-.4)}break}
+  case'ctable':F(W_*.9,.05,D_*.75,wood,0,.42,0);for(const sx of[-1,1])for(const sz of[-1,1])F(.05,.4,.05,wood,sx*(W_*.42),.2,sz*(D_*.33));if(rng()<.5)F(.12,.1,.12,0xd8d0b0,R(-.3,.3),.5,0);break;
+  case'rug':F(W_*.95,.012,D_*.95,pick([0x6a2a22,0x2a3a5a,0x5a4a2a,0x3a2a3a]),0,.006,0);F(W_*.8,.014,D_*.8,pick([0x8a6a3a,0x9a8a6a,0x5a3a2a]),0,.007,0);break;
+  case'bookcase':{F(W_*.95,1.9,D_*.9,wood,0,.95,0);for(let i=0;i<4;i++){F(W_*.85,.03,D_*.7,dk,0,.25+i*.45,.04);let x=-W_*.4;while(x<W_*.4){const bw=R(.05,.1);if(rng()<.8)F(bw,R(.22,.34),D_*.55,pick([0x7a2a22,0x2a4a6a,0x4a6a3a,0x8a7a4a,0x3a3a3a]),x+bw/2,.42+i*.45,.05);x+=bw+.01}}break}
+  case'plant':F(.32,.32,.32,0x7a4a2a,0,.16,0);for(let i=0;i<4;i++)F(.03,R(.4,.8),.03,0x5a4a2a,R(-.08,.08),.55,R(-.08,.08),R(0,3));break;
+  case'counter':case'sink':case'stove':{
+    if(type==='stove'){F(W_*.96,.9,D_*.9,white,0,.45,0);F(W_*.8,.4,.02,0x1a1a1a,0,.35,D_*.45);F(W_*.96,.03,D_*.9,0x111111,0,.915,0);
+      for(const sx of[-1,1])for(const sz of[-1,1])F(.2,.015,.2,0x2a2a2a,sx*.22,.935,sz*.2);F(W_*.96,.18,.05,white,0,1.0,-D_*.43)}
+    else{F(W_*.98,.85,D_*.88,pick([0x6a5a48,0x4a5a5a,0xa09a88]),0,.43,-D_*.04);F(W_*.99,.05,D_*.98,0xcfc8b8,0,.875,0);F(.02,.6,.01,0x2a2a2a,0,.45,D_*.41);
+      F(.12,.02,.02,0x888888,-.15,.7,D_*.42);F(.12,.02,.02,0x888888,.15,.7,D_*.42);
+      if(type==='sink'){F(.55,.04,.42,0x777b7e,0,.89,.02);F(.04,.25,.04,0xaaaaaa,0,1.0,-.27);F(.04,.04,.18,0xaaaaaa,0,1.12,-.19)}
+      else if(rng()<.4)F(.2,.25,.15,pick([0xb83a2a,0xd8d0b0,0x3a6a8a]),R(-.2,.2),1.02,0)}
+    break}
+  case'fridge':F(W_*.9,1.85,D_*.85,white,0,.925,0);F(W_*.9,.015,.01,0x8a8a8a,0,1.3,D_*.43);F(.04,.4,.04,0x9a9a9a,W_*.36,1.55,D_*.44);F(.04,.6,.04,0x9a9a9a,W_*.36,.8,D_*.44);
+    if(rng()<.4)F(.08,.08,.01,pick([0xd83a2a,0x2a8a3a,0xe0c030]),-.15,1.45,D_*.43);break;
+  case'ktable':{F(W_*.85,.05,D_*.85,wood,0,.74,0);for(const sx of[-1,1])for(const sz of[-1,1])F(.06,.72,.06,wood,sx*W_*.38,.36,sz*D_*.38);
+    for(const[a,dd] of[[0,1],[Math.PI,1],[Math.PI/2,1],[-Math.PI/2,1]]){if(rng()<.2)continue;const cx=Math.sin(a)*(D_*.62),cz=Math.cos(a)*(D_*.62);
+      F(.42,.04,.42,wood,cx,.45,cz,a);F(.42,.45,.04,wood,cx+Math.sin(a)*.2,.68,cz+Math.cos(a)*.2,a);for(const sx of[-1,1])for(const sz of[-1,1])F(.04,.44,.04,wood,cx+sx*.17,.22,cz+sz*.17)}break}
+  case'toilet':F(.36,.36,.48,white,0,.18,.05);F(.42,.05,.46,0xe8e4da,0,.39,.06);F(.42,.38,.18,white,0,.6,-D_/2+.12);F(.44,.04,.2,0xe8e4da,0,.8,-D_/2+.12);F(.06,.02,.04,0xaaaaaa,.12,.83,-D_/2+.12);break;
+  case'bsink':F(.14,.75,.14,white,0,.375,0);F(.58,.16,.42,white,0,.8,.02);F(.44,.04,.3,0x9aa4a8,0,.87,.03);F(.04,.18,.04,0xaaaaaa,0,.95,-.15);
+    F(.55,.72,.03,0x8a969e,0,1.5,-D_/2+.02);F(.6,.77,.02,wood,0,1.5,-D_/2+.005);break;
+  case'tub':F(W_*.96,.55,D_*.9,white,0,.275,0);F(W_*.86,.05,D_*.66,rng()<.3?0x4a1410:0x8a8a80,0,.5,0);F(.05,.2,.05,0xaaaaaa,-W_/2+.15,.65,0);F(.14,.04,.04,0xaaaaaa,-W_/2+.2,.74,0);break;
+  case'nightstand':F(W_*.9,.5,D_*.9,wood,0,.25,0);F(.12,.02,.12,0x2a2a2a,0,.51,0);F(.04,.25,.04,0x2a2a2a,0,.64,0);F(.24,.18,.24,0xd8c8a0,0,.82,0);break;
+  case'wardrobe':F(W_*.95,1.95,D_*.95,wood,0,.975,0);F(.02,1.8,.01,dk,0,.97,D_*.48);F(.03,.18,.03,0xb8a060,-.08,1.0,D_*.49);F(.03,.18,.03,0xb8a060,.08,1.0,D_*.49);break;
+  case'dresser':F(W_*.95,.85,D_*.9,wood,0,.425,0);for(let i=0;i<3;i++){F(W_*.85,.015,.01,dk,0,.25+i*.25,D_*.45);F(.14,.03,.03,0xb8a060,0,.15+i*.25,D_*.46)}if(rng()<.6)F(.5,.6,.03,0x8a969e,0,1.2,-D_/2+.03);break;
+  case'shelf':{for(const sx of[-1,1])for(const sz of[-1,1])F(.05,1.9,.05,0x5a5f62,sx*W_*.46,.95,sz*D_*.4);for(let i=0;i<4;i++){F(W_*.95,.03,D_*.85,0x6a6f72,0,.3+i*.5,0);
+      for(let j=0;j<4;j++)if(rng()<.6)F(R(.15,.3),R(.15,.3),R(.15,.3),pick([0x8a7a5a,0x6a4a2a,0x3a5a3a,0xa03a2a,0xc8c0a0]),R(-W_*.38,W_*.38),.3+i*.5+.12,0)}break}
+  case'bench':F(W_*.95,.08,D_*.85,0x6a4a2a,0,.85,0);for(const sx of[-1,1])for(const sz of[-1,1])F(.08,.82,.08,0x4a3a2a,sx*W_*.43,.41,sz*D_*.36);F(W_*.9,.04,D_*.7,0x4a3a2a,0,.25,0);
+    F(.18,.14,.16,0x3a4a5a,-W_*.35,.96,D_*.2);F(.4,.04,.08,0x888888,.2,.91,0,.4);F(.25,.06,.06,0xa03a2a,-.1,.91,.15,-.3);break;
+  case'heater':F(D_*.8,1.7,D_*.8,0xcfccc0,0,.85,0);F(.06,.3,.06,0xaaaaaa,0,1.85,0);F(.2,.1,.02,0x2a2a2a,0,.5,D_*.4);break;
+  }
+}
+function buildFurnMeshes(){
+  for(const sp of furnSpecs)buildFurn(sp);
+  for(const[k,b]of FBUF){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(b.P,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(b.N,3));
+    g.setAttribute('color',new THREE.Float32BufferAttribute(b.C,3));g.setIndex(b.I);g.computeBoundingSphere();const m=new THREE.Mesh(g,furnMat);m.visible=!!loaded[k];scene.add(m);furnMeshes[k]=m}
+  FBUF.clear();
 }
 
 // ---------------- model helpers
@@ -448,7 +692,7 @@ function limb(par,w,h,d,c,x,y,z){const g=new THREE.Group();g.position.set(x,y,z)
 function makeHuman(o){
   const g=new THREE.Group();
   const legL=limb(g,.22,.85,.24,o.pants,-.13,.85,0),legR=limb(g,.22,.85,.24,o.pants,.13,.85,0);
-  part(g,.55,.7,.32,o.shirt,0,1.2,0);
+  const torso=part(g,.55,.7,.32,o.shirt,0,1.2,0);
   const head=part(g,.38,.38,.38,o.skin,0,1.75,0);
   const armL=limb(g,.16,.66,.18,o.arm||o.skin,-.37,1.5,0),armR=limb(g,.16,.66,.18,o.arm||o.skin,.37,1.5,0);
   if(o.zombie){
@@ -459,7 +703,7 @@ function makeHuman(o){
     part(head,.06,.06,.02,0x111111,-.09,.03,.2);part(head,.06,.06,.02,0x111111,.09,.03,.2);
     part(head,.42,.12,.42,o.hat,0,.2,0);part(g,.42,.5,.2,0x3a3a2a,0,1.2,-.25);
   }
-  return{g,legL,legR,armL,armR,head};
+  return{g,legL,legR,armL,armR,head,torso};
 }
 function makeVM(){
   const g=new THREE.Group();g.position.set(.38,-.36,-.7);
@@ -513,9 +757,12 @@ const SND={shot:()=>{sNoise(.3,2200,1);sTone(160,40,.15,.35,'square')},hit:()=>s
 // ---------------- game state
 let players=[],zombies=[],vehicles=[],crates=[],doors=[];const doorMap=new Map(),dkey=(x,y,z)=>x+','+y+','+z;
 let running=false,paused=false,menuP=null,tDay=.08,day=1,kills=0,wasLocked=false;
-const spawn=new V3(49.5,(G+1)*VS,49.5);
+const spawn=new V3((MAIN+2*P+6)*VS,(G+1)*VS,(MAIN+2*P+6)*VS);
 const DAYLEN=360;
-const START_INV={spikes:2,beartrap:1,mine:0,ammo:12,scrap:0,cloth:0,fuel:0,food:2,bandage:1,wood:0,plank:40,dirt:0,stone:0,coal:0,iron:0,metal:0,kit:0};
+const START_INV=Object.assign(Object.fromEntries(Object.keys(LABEL).map(k=>[k,0])),{spikes:2,beartrap:1,ammo:12,food:2,bandage:1,plank:40});
+const CLOTHES={hardhat:{slot:'head',armor:.12,col:0xd8a820},helmet:{slot:'head',armor:.25,col:0x5f6466},jacket:{slot:'body',armor:.18,col:0x3a2416},vest:{slot:'body',armor:.32,col:0x1c2430},
+  hidecoat:{slot:'body',armor:.2,col:0x7a5a3a},scrapvest:{slot:'body',armor:.38,col:0x7c8184},cargo:{slot:'legs',armor:.1,col:0x5a5a3a},riot:{slot:'legs',armor:.2,col:0x18181c}};
+const armorOf=p=>Math.min(.7,['head','body','legs'].reduce((s,k)=>s+(p.wear[k]?CLOTHES[p.wear[k]].armor:0),0));
 const RECIPES=[
   {out:'plank',n:4,need:{wood:1},label:'Saw planks'},
   {out:'metal',n:1,need:{iron:2,coal:1},label:'Smelt a metal plate'},
@@ -525,10 +772,18 @@ const RECIPES=[
   {out:'fuel',n:1,need:{coal:2,scrap:1},label:'Brew makeshift fuel'},
   {out:'spikes',n:1,need:{plank:6,scrap:2},label:'Hammer a spike trap'},
   {out:'beartrap',n:1,need:{metal:2,scrap:1},label:'Forge a bear trap'},
-  {out:'mine',n:1,need:{scrap:2,coal:2,cloth:1},label:'Rig a tripwire bomb'}];
-const LOOT=[['ammo',20,4,10],['scrap',18,1,3],['cloth',14,1,3],['food',16,1,2],['bandage',8,1,1],['fuel',10,1,1],['kit',3,1,1],['metal',4,1,2],['coal',7,1,3],['beartrap',3,1,1],['mine',2,1,1],['spikes',3,1,1]];
-const TOOLS=['Bat','Pistol','Pickaxe','Build','Trap'];
-const TRAPS=[['spikes','Spike trap'],['beartrap','Bear trap'],['mine','Tripwire bomb']];
+  {out:'mine',n:1,need:{scrap:2,coal:2,cloth:1},label:'Rig a tripwire bomb'},
+  {out:'bed',n:1,need:{plank:6,cloth:3},label:'Build a bed'},
+  {out:'fire',n:1,need:{wood:3,stone:4},label:'Stack a campfire'},
+  {out:'helmet',n:1,need:{metal:2,cloth:1},label:'Beat out a metal helmet'},
+  {out:'scrapvest',n:1,need:{metal:3,scrap:2,cloth:2},label:'Rivet scrap armor'},
+  {out:'hidecoat',n:1,need:{hide:4,cloth:1},label:'Stitch a hide coat'},
+  {out:'cargo',n:1,need:{cloth:4,hide:1},label:'Sew padded pants'},
+  {out:'bandage',n:2,need:{hide:1,cloth:1},label:'Hide-and-rag dressings'},
+  {out:'ammo',n:5,need:{bone:2,scrap:1},label:'Bone-tipped rounds'}];
+const LOOT=[['ammo',20,4,10],['scrap',18,1,3],['cloth',14,1,3],['food',16,1,2],['bandage',8,1,1],['fuel',10,1,1],['kit',3,1,1],['metal',4,1,2],['coal',7,1,3],['beartrap',3,1,1],['mine',2,1,1],['spikes',3,1,1],['hardhat',3,1,1],['jacket',3,1,1],['vest',2,1,1],['riot',2,1,1],['cargo',2,1,1],['helmet',1,1,1]];
+const TOOLS=['Bat','Pistol','Pickaxe','Build','Place'];
+const TRAPS=[['spikes','Spike trap'],['beartrap','Bear trap'],['mine','Tripwire bomb'],['bed','Bed'],['fire','Campfire']];
 
 // ---------------- crates & vehicles
 const crateMat=new THREE.MeshLambertMaterial({map:tileTex(TILE.plank),color:0xb08a60}),stashMat=new THREE.MeshLambertMaterial({map:tileTex(TILE.metal),color:0x7a8a60});
@@ -636,6 +891,9 @@ function makePlayer(i){
   const cam=new THREE.PerspectiveCamera(72,1,.05,150);cam.rotation.order='YXZ';scene.add(cam);
   cam.layers.enable(3+i);cam.layers.enable(i===0?2:1);
   const body=makeHuman({skin:0xc9a07a,shirt:i?0x2f6b6b:0x8a4b2a,pants:0x2a3242,hat:i?0x3b3b2b:0x5a2a1a,arm:i?0x2f6b6b:0x8a4b2a});
+  const cm=()=>new THREE.MeshLambertMaterial({color:0xffffff});
+  const cl={head:part(body.head,.45,.17,.45,0,0,.22,0),body:part(body.g,.61,.62,.38,0,0,1.24,0),legs:[part(body.legL,.25,.62,.27,0,0,-.34,0),part(body.legR,.25,.62,.27,0,0,-.34,0)]};
+  for(const m of[cl.head,cl.body,...cl.legs]){m.material=cm();m.visible=false}
   body.g.traverse(o=>o.layers.set(1+i));scene.add(body.g);
   const vm=makeVM();cam.add(vm.g);vm.g.traverse(o=>o.layers.set(3+i));
   const light=new THREE.SpotLight(0xfff1cc,0,34,.55,.5,1.1);scene.add(light,light.target);
@@ -643,33 +901,53 @@ function makePlayer(i){
   outline.layers.set(3+i);scene.add(outline);
   const pos=spawn.clone();pos.x+=i*1.5;outline.scale.setScalar(VS);
   const p={i,cam,body,vm,light,outline,pos,vel:new V3(),yaw:Math.PI,pitch:-.05,hp:100,hunger:100,stamina:100,inv:{...START_INV},tool:0,mat:0,grounded:false,
-    trap:0,vehicle:null,carView:true,cyaw:0,cpitch:0,dig:null,cool:0,dead:0,swing:0,eye:pos.y+1.6,flash:0,kills:0,walk:0,torch:false,inp:{},k:P_KEYS[i],flashT:0,promptT:0};
+    trap:0,cl,wear:{head:null,body:null,legs:null},sleeping:null,spawnPt:null,vehicle:null,carView:true,cyaw:0,cpitch:0,dig:null,cool:0,dead:0,swing:0,eye:pos.y+1.6,flash:0,kills:0,walk:0,torch:false,inp:{},k:P_KEYS[i],flashT:0,promptT:0};
   p.hud=makeHud(p);return p;
 }
 function makeHud(p){
   const el=document.createElement('div');el.className='phud';
   el.innerHTML=`<div class="hurt"></div><div class="cross"></div><div class="prompt"></div>
   <div class="inv"></div><div class="feed"></div>
-  <div class="stats"><div class="bar hp"><i></i><span>HEALTH</span></div><div class="bar fd"><i></i><span>FOOD</span></div><div class="bar st"><i></i><span>STAMINA</span></div></div>
+  <div class="stats"><div class="bar hp"><i></i><span>HEALTH</span></div><div class="bar fd"><i></i><span>FOOD</span></div><div class="bar st"><i></i><span>STAMINA</span></div><div class="arm"></div></div>
   <div class="hot">${TOOLS.map((t,k)=>`<div class="slot"><b>${k+1} ${t}</b><span></span></div>`).join('')}</div>
   <div class="veh hidden"><h3></h3><div class="bar fd"><i></i><span>FUEL</span></div><div class="bar hp"><i></i><span>CONDITION</span></div><div class="vs" style="margin-top:6px"></div></div>
   <div class="dead hidden">You died<small></small></div>`;
   $('#huds').appendChild(el);
   const q=s=>el.querySelector(s);
-  return{el,hurt:q('.hurt'),prompt:q('.prompt'),inv:q('.inv'),feed:q('.feed'),hp:q('.stats .hp i'),fd:q('.stats .fd i'),st:q('.stats .st i'),
+  return{el,hurt:q('.hurt'),prompt:q('.prompt'),inv:q('.inv'),feed:q('.feed'),hp:q('.stats .hp i'),arm:q('.arm'),fd:q('.stats .fd i'),st:q('.stats .st i'),
     slots:[...el.querySelectorAll('.slot')],veh:q('.veh'),vt:q('.veh h3'),vf:q('.veh .fd i'),vh:q('.veh .hp i'),vs:q('.vs'),dead:q('.dead'),deadS:q('.dead small'),cross:q('.cross')};
 }
 function msg(p,t){for(const q of(p?[p]:players)){const d=document.createElement('div');d.textContent=t;q.hud.feed.appendChild(d);
   while(q.hud.feed.children.length>4)q.hud.feed.firstChild.remove();setTimeout(()=>d.remove(),5600)}}
 
 // ---------------- zombies
+const OUTFITS=[['hardhat',3],['helmet',1],['jacket',3],['vest',2],['riot',1],['cargo',2]];
 function spawnZ(x,y,z){
   const night=dayLight()<.25;
   const m=makeHuman({zombie:true,skin:[0x7d8f5a,0x8a9a6a,0x6f7d52,0x9a9a78][RI(0,3)],shirt:[0x4a3b34,0x34404a,0x5a2a26,0x3d3d3d,0x6a6250][RI(0,4)],pants:[0x2a2f3a,0x3b3328,0x262626][RI(0,2)]});
+  m.g.rotation.order='YXZ';
+  let outfit=null;
+  if(rng()<.32){let r=rng()*12;for(const[o,w]of OUTFITS){r-=w;if(r<=0){outfit=o;break}}outfit=outfit||'jacket';
+    const C=CLOTHES[outfit],c=C.col;
+    if(C.slot==='head'){part(m.head,.45,.16,.45,c,0,.22,0);if(outfit==='hardhat')part(m.head,.56,.03,.56,c,0,.15,0)}
+    else if(C.slot==='body'){part(m.g,.61,.6,.38,c,0,1.24,0);if(outfit==='vest')part(m.g,.2,.08,.02,0xd8d0a0,0,1.38,.2)}
+    else{part(m.legL,.25,.62,.27,c,0,-.34,0);part(m.legR,.25,.62,.27,c,0,-.34,0)}}
   m.g.position.set(x,y,z);scene.add(m.g);
-  zombies.push({...m,pos:m.g.position,vel:new V3(),hp:RI(55,85)+day*4,spd:R(1.3,2.2)+(night?.4:0),kx:0,kz:0,dead:0,atk:0,walk:R(0,6),gro:R(1,8),stuck:0,wT:0,wD:0,grounded:false,chasing:false,lunge:0});
+  const zo={...m,pos:m.g.position,vel:new V3(),hp:RI(55,85)+day*4,spd:R(1.3,2.2)+(night?.4:0),kx:0,kz:0,dead:0,atk:0,walk:R(0,6),gro:R(1,8),stuck:0,wT:0,wD:0,grounded:false,chasing:false,lunge:0,
+    outfit,cut:{},crawl:false,noArms:false,lhp:{head:60,armL:35,armR:35,legL:45,legR:45}};
+  m.g.traverse(o=>{if(o.isMesh){o.userData.part='torso';o.userData.zo=zo}});
+  for(const k of['legL','legR','armL','armR','head'])m[k].traverse(o=>{if(o.isMesh)o.userData.part=k});
+  zombies.push(zo);
+}
+function spawnUnder(){
+  const all=[indoorSpots,sewerSpots,caveSpots];
+  for(let t=0;t<16;t++){const L=all[RI(0,2)];if(!L.length)continue;const s=L[RI(0,L.length-1)];
+    let near=false,close=false;for(const p of players){const d=Math.hypot(p.pos.x-s[0],p.pos.z-s[2]);if(d<10)close=true;if(d<40)near=true}
+    if(near&&!close&&!hit(s[0],s[1]+.05,s[2],.3,1.8)){spawnZ(s[0],s[1],s[2]);return true}}
+  return false;
 }
 function spawnOpen(){
+  if(rng()<.4&&spawnUnder())return;
   for(let t=0;t<14;t++){
     const p=players[RI(0,players.length-1)],a=rng()*6.283,d=R(26,44);
     const x=vc(p.pos.x+Math.cos(a)*d),z=vc(p.pos.z+Math.sin(a)*d);
@@ -682,7 +960,8 @@ function spawnOpen(){
 }
 function killZombie(z,by,big){
   z.dead=.001;burst(new V3(z.pos.x,z.pos.y+1.1,z.pos.z),big?60:35,6,RED,2.5);splat(z.pos,R(1.4,2.4));SND.hit();kills++;
-  if(by){by.kills++;if(rng()<.3){const it=rng()<.5?'cloth':'scrap';by.inv[it]++;msg(by,`Scavenged 1 ${LABEL[it].toLowerCase()} from the body`)}}
+  if(by)by.kills++;
+  dropBag(z.pos,rollZLoot(z));
 }
 function hurtZombie(z,dmg,dir,by){
   if(z.dead)return;z.hp-=dmg;z.kx+=dir.x*5;z.kz+=dir.z*5;z.chasing=true;
@@ -716,7 +995,7 @@ function rayVox(O,d,max){
   let tx=d.x?(d.x>0?x+1-o.x:o.x-x)*tdx:1e9,ty=d.y?(d.y>0?y+1-o.y:o.y-y)*tdy:1e9,tz=d.z?(d.z>0?z+1-o.z:o.z-z)*tdz:1e9;
   let px=x,py=y,pz=z,t=0;
   for(let i=0;i<300&&t<=max;i++){
-    if(inB(x,y,z)&&vox[(y*W+z)*W+x]&&vox[(y*W+z)*W+x]!==B.LADDER)return{x,y,z,px,py,pz,t:t*VS};
+    if(inB(x,y,z)&&vox[(y*W+z)*W+x]&&vox[(y*W+z)*W+x]!==B.LADDER&&vox[(y*W+z)*W+x]!==B.FURN)return{x,y,z,px,py,pz,t:t*VS};
     px=x;py=y;pz=z;
     if(tx<ty&&tx<tz){x+=sx;t=tx;tx+=tdx}else if(ty<tz){y+=sy;t=ty;ty+=tdy}else{z+=sz;t=tz;tz+=tdz}
   }
@@ -732,7 +1011,7 @@ function updSky(){
   const dl=dayLight(),dusk=Math.max(0,1-Math.abs(dl-.35)*4)*.6;
   tmpC.copy(FOG_N).lerp(FOG_D,dl).lerp(FOG_S,dusk*(dl>.05?1:0));
   scene.fog.color.copy(tmpC);scene.background.copy(tmpC);
-  scene.fog.near=6+12*dl;scene.fog.far=36+50*dl;
+  const F=viewUnits();scene.fog.near=6+(F*.3-6)*dl;scene.fog.far=Math.min(36,F*.9)+(F*.95-Math.min(36,F*.9))*dl;
   hemi.intensity=.08+.62*dl;sun.intensity=.85*dl;
   const a=tDay*6.283;sun.position.set(48+Math.cos(a)*60,Math.sin(a)*60,48+20);sun.target.position.set(48,0,48);
 }
@@ -785,17 +1064,22 @@ function readInput(p){
 }
 
 // ---------------- player actions
-function eat(p){if(p.inv.food>0){p.inv.food--;p.hunger=Math.min(100,p.hunger+38);SND.pick();msg(p,'Ate a can of beans (+food)')}else msg(p,'No canned food — search crates')}
+function eat(p){
+  if(p.inv.food>0){p.inv.food--;p.hunger=Math.min(100,p.hunger+38);SND.pick();msg(p,'Ate a can of beans (+food)')}
+  else if(p.inv.cooked>0){p.inv.cooked--;p.hunger=Math.min(100,p.hunger+45);p.hp=Math.min(100,p.hp+5);SND.pick();msg(p,'Ate cooked meat (+food)')}
+  else if(p.inv.meat>0){p.inv.meat--;p.hunger=Math.min(100,p.hunger+15);if(rng()<.4){damage(p,8,true);msg(p,'Raw meat. Your stomach turns (−health) — cook it at a campfire')}else msg(p,'Choked down raw meat')}
+  else msg(p,'Nothing to eat — search crates or hunt')}
 function heal(p){if(p.inv.bandage>0){p.inv.bandage--;p.hp=Math.min(100,p.hp+40);SND.pick();msg(p,'Wrapped a bandage (+health)')}else msg(p,'No bandages — craft one from 2 cloth')}
 function damage(p,a,silent){
-  if(p.dead>0)return;p.hp-=a;
+  if(p.dead>0)return;if(!silent)a*=1-armorOf(p);p.hp-=a;
+  if(p.sleeping&&!silent){p.sleeping=null;p.body.g.rotation.x=0;msg(p,'Something woke you!')}
   if(!silent){SND.hurt();p.flash=.6;burst(new V3(p.pos.x,p.pos.y+1.2,p.pos.z),10,3,RED)}
   if(p.hp<=0){p.hp=0;p.dead=5;if(p.vehicle)exitVehicle(p);
     for(const key in p.inv)p.inv[key]=Math.floor(p.inv[key]/2);
     splat(p.pos,2.2);burst(new V3(p.pos.x,p.pos.y+1,p.pos.z),50,5,RED);p.body.g.rotation.x=-Math.PI/2;
     msg(p,'You died and dropped half your supplies');}
 }
-function respawn(p){p.pos.copy(spawn);p.pos.x+=p.i*1.5;p.vel.set(0,0,0);p.hp=100;p.hunger=Math.max(p.hunger,60);p.body.g.rotation.x=0;p.eye=p.pos.y+1.6;p.dead=0;msg(p,'Back on your feet at the crossroads')}
+function respawn(p){p.pos.copy(p.spawnPt||spawn);if(!p.spawnPt)p.pos.x+=p.i*1.5;p.vel.set(0,0,0);p.hp=100;p.hunger=Math.max(p.hunger,60);p.body.g.rotation.x=0;p.eye=p.pos.y+1.6;p.dead=0;msg(p,p.spawnPt?'Back on your feet by your bed':'Back on your feet at the crossroads')}
 function nearestZombieInFront(p,dir,range){
   let best=null,bd=range;
   for(const z of zombies){if(z.dead)continue;const dx=z.pos.x-p.pos.x,dy=z.pos.y+1-(p.pos.y+1),dz=z.pos.z-p.pos.z,d=Math.hypot(dx,dy,dz);
@@ -804,11 +1088,17 @@ function nearestZombieInFront(p,dir,range){
 }
 function shoot(p,eye,dir){
   SND.shot();p.flashT=.06;
-  const vh=rayVox(eye,dir,60),maxT=vh?vh.t:60;let best=null,bt=maxT,dmg=0;
-  for(const z of zombies){if(z.dead)continue;
-    for(const [oy,r,d] of[[1.75,.27,120],[1.15,.42,40],[.5,.3,25]]){const t=raySphere(eye,dir,{x:z.pos.x,y:z.pos.y+oy,z:z.pos.z},r);if(t>0&&t<bt){bt=t;best=z;dmg=d}}}
-  if(best){hurtZombie(best,dmg,dir,p);if(dmg>100)msg(p,'Headshot')}
-  else if(vh){if(get(vh.x,vh.y,vh.z)===B.GLASS)breakGlass(vh.x,vh.y,vh.z);else burst(new V3(eye.x+dir.x*vh.t,eye.y+dir.y*vh.t,eye.z+dir.z*vh.t),6,2,DUST,1)}
+  const vh=rayVox(eye,dir,60),maxT=vh?vh.t:60;
+  const zh=zombieRay(eye,dir,maxT),ah=animalRay(eye,dir,maxT);
+  if(zh&&(!ah||zh.t<ah.t)){hitPart(zh,dir,40,p,true);return}
+  if(ah){hurtAnimal(ah.a,40,dir,p);return}
+  if(vh){if(get(vh.x,vh.y,vh.z)===B.GLASS)breakGlass(vh.x,vh.y,vh.z);else burst(new V3(eye.x+dir.x*vh.t,eye.y+dir.y*vh.t,eye.z+dir.z*vh.t),6,2,DUST,1)}
+}
+function melee(p,eye,dir,range,dmg){
+  const zh=zombieRay(eye,dir,range);if(zh){hitPart(zh,dir,dmg,p,false);return true}
+  const z=nearestZombieInFront(p,dir,range);if(z){hurtZombie(z,dmg,dir,p);return true}
+  const a=nearestAnimalInFront(p,dir,range);if(a){hurtAnimal(a,dmg,dir,p);return true}
+  return false;
 }
 function blockedByEntity(x,y,z){
   const X=x*VS,Y=y*VS,Z=z*VS,ov=(e,hw,h)=>e.pos.x+hw>X&&e.pos.x-hw<X+VS&&e.pos.z+hw>Z&&e.pos.z-hw<Z+VS&&e.pos.y+h>Y&&e.pos.y<Y+VS;
@@ -820,12 +1110,12 @@ function placeBlock(p,vh){
   if(blockedByEntity(x,y,z))return;setBlock(x,y,z,id);p.inv[name]--;SND.place();
 }
 function primary(p,eye,dir,vh,dt){
-  if(p.tool===0){if(p.cool<=0){p.cool=.55;p.swing=1;const z=nearestZombieInFront(p,dir,2.8);if(z)hurtZombie(z,36,dir,p);else if(vh&&vh.t<2.8&&get(vh.x,vh.y,vh.z)===B.GLASS)breakGlass(vh.x,vh.y,vh.z);else sNoise(.08,300,.15)}}
+  if(p.tool===0){if(p.cool<=0){p.cool=.55;p.swing=1;if(melee(p,eye,dir,2.8,36)){}else if(vh&&vh.t<2.8&&get(vh.x,vh.y,vh.z)===B.GLASS)breakGlass(vh.x,vh.y,vh.z);else sNoise(.08,300,.15)}}
   else if(p.tool===1){if(p.cool<=0){if(p.inv.ammo<=0){p.cool=.4;SND.click();msg(p,'Click. Out of ammo — craft more from scrap + coal');return}
     p.cool=.3;p.inv.ammo--;p.swing=.5;p.pitch=Math.min(1.5,p.pitch+.035);shoot(p,eye,dir)}}
   else if(p.tool===2){
-    const z=nearestZombieInFront(p,dir,2.4);
-    if(z){if(p.cool<=0){p.cool=.6;p.swing=1;hurtZombie(z,26,dir,p)}p.dig=null;return}
+    const z=zombieRay(eye,dir,2.4)||nearestZombieInFront(p,dir,2.4)||nearestAnimalInFront(p,dir,2.4);
+    if(z){if(p.cool<=0){p.cool=.6;p.swing=1;melee(p,eye,dir,2.4,26)}p.dig=null;return}
     if(!vh||vh.t>5){p.dig=null;return}
     const b=get(vh.x,vh.y,vh.z);if(b===B.BED){if(!p.dig)msg(p,'Bedrock. Nothing gets through that.');p.dig={x:-1};return}
     if(!p.dig||p.dig.x!==vh.x||p.dig.y!==vh.y||p.dig.z!==vh.z)p.dig={x:vh.x,y:vh.y,z:vh.z,t:0,s:0};
@@ -867,6 +1157,9 @@ function exitVehicle(p){
 function interact(p){
   if(p.vehicle){exitVehicle(p);return}
   const c=nearestCrate(p,2.6);if(c){loot(p,c);return}
+  const bg=nearestBag(p,1.8);if(bg){takeBag(p,bg);return}
+  const bd=nearestBed(p,1.8);if(bd){trySleep(p,bd);return}
+  const fi=nearestFire(p,1.9);if(fi){cook(p);return}
   const d=nearestDoor(p,1.9);if(d){toggleDoor(d,p);return}
   const tr=nearestTrap(p,1.3);if(tr){pickTrap(p,tr);return}
   const v=nearestVehicle(p,3.6);if(v)useVehicle(p,v);
@@ -874,7 +1167,11 @@ function interact(p){
 function promptFor(p){
   if(p.dead>0)return'';const K=p.k.use;
   if(p.vehicle)return`${K} — get out · ${p.i?',':'V'} — ${p.carView?'outside view':'driver view'}`;
+  if(p.sleeping)return sleepT?'':players.length>1?`Sleeping · waiting for the other player to lie down · ${K} — get up`:`Sleeping · ${K} — get up`;
   if(nearestCrate(p,2.6))return`${K} — search supply crate`;
+  const bg=nearestBag(p,1.8);if(bg)return`${K} — take ${bg.label}`;
+  if(nearestBed(p,1.8))return dayLight()<.35?`${K} — sleep until dawn`:`Bed · sleep here at night (sets respawn)`;
+  if(nearestFire(p,1.9))return p.inv.meat?`${K} — cook ${p.inv.meat} raw meat`:'Campfire · bring raw meat to cook';
   const dr=nearestDoor(p,1.9);if(dr)return`${K} — ${dr.open?'close':'open'} door`;
   const tr=nearestTrap(p,1.3);if(tr)return`${K} — pick up ${tr.name.toLowerCase()}`;
   if(ladderAt(p))return`On a ladder · ${p.i?'I/N':'W/Space'} climb, ${p.i?'K':'S'} down`;
@@ -889,11 +1186,16 @@ function promptFor(p){
 function updatePlayer(p,dt){
   const inp=p.inp=(menuP===p)?{f:0,s:0,turn:0,look:0}:readInput(p);
   if(p.dead>0){p.dead-=dt;if(p.dead<=0)respawn(p);p.cam.position.set(p.pos.x,p.pos.y+.4,p.pos.z);p.body.g.position.copy(p.pos);return}
+  if(p.sleeping){const b=p.sleeping;
+    if(inp.interact||(dayLight()>=.35&&!sleepT)){p.sleeping=null;p.body.g.rotation.x=0;p.body.g.rotation.order='XYZ';msg(p,'You get up')}
+    else{const c=Math.cos(b.yaw),sn=Math.sin(b.yaw);p.cam.position.set(b.pos.x-.65*sn,b.pos.y+.8,b.pos.z-.65*c);p.cam.rotation.set(.45,b.yaw+Math.PI,0);
+      p.body.g.rotation.order='YXZ';p.body.g.rotation.set(-Math.PI/2,b.yaw,0);p.body.g.position.set(b.pos.x+.9*sn,b.pos.y+.5,b.pos.z+.9*c);
+      p.vm.g.visible=false;p.outline.visible=false;p.light.intensity=0;p.hunger=Math.max(0,p.hunger-dt*.1);return}}
   if(inp.menu){openMenu(p);return}
   p.hunger=Math.max(0,p.hunger-dt*.22);
   if(p.hunger<=0)damage(p,dt*1.2,true);else if(p.hunger>60&&p.hp<100)p.hp=Math.min(100,p.hp+dt*.5);
   p.cool-=dt;p.swing=Math.max(0,p.swing-dt*3.5);p.flash=Math.max(0,p.flash-dt);p.flashT-=dt;
-  if(inp.tool!=null)p.tool=inp.tool;if(inp.toolNext)p.tool=(p.tool+1)%5;if(inp.matNext){if(p.tool===4)p.trap=(p.trap+1)%3;else p.mat=(p.mat+1)%4}
+  if(inp.tool!=null)p.tool=inp.tool;if(inp.toolNext)p.tool=(p.tool+1)%5;if(inp.matNext){if(p.tool===4)p.trap=(p.trap+1)%TRAPS.length;else p.mat=(p.mat+1)%4}
   if(inp.eat)eat(p);if(inp.bandage)heal(p);if(inp.torch)p.torch=!p.torch;
   const night=dayLight()<.35;
   if(p.vehicle){if(inp.interact){exitVehicle(p);return}if(inp.view){p.carView=!p.carView;p.cyaw=p.cpitch=0}
@@ -919,7 +1221,7 @@ function updatePlayer(p,dt){
   if(inp.place&&vh&&vh.t<5.5)placeBlock(p,vh);
   if(inp.interact)interact(p);
   // flashlight
-  p.light.intensity=(night||p.torch||p.pos.y<(G-3)*VS)?1.9:0;
+  p.light.intensity=(night||p.torch||underground(p.pos))?1.9:0;p.vm.g.visible=true;
   p.light.position.copy(eye).addScaledVector(dir,.3);p.light.target.position.copy(eye).addScaledVector(dir,10);
   // view model + body
   const vm=p.vm;vm.items.forEach((m,n)=>m.visible=n===p.tool);vm.blk.material.color.setHex(BCOL[MATS[p.mat][1]]);
@@ -958,7 +1260,8 @@ function updateVehicle(v,dt){
   v.g.rotation.y=v.yaw;
   for(const w of v.wheels){w.rotation.x+=v.speed*dt/.38;w.rotation.y=w.userData.front?v.steerA:0}
   if(Math.abs(v.speed)>3)for(const z of zombies){if(z.dead)continue;
-    if(Math.hypot(z.pos.x-v.pos.x,z.pos.z-v.pos.z)<v.L*.5&&Math.abs(z.pos.y-v.pos.y)<2){killZombie(z,d,true);v.hp-=1.5;v.speed*=.9;if(d)d.flash=.15}}
+    if(Math.hypot(z.pos.x-v.pos.x,z.pos.z-v.pos.z)<v.L*.5&&Math.abs(z.pos.y-v.pos.y)<2){dismember(z,RI(1,2),{x:Math.sin(v.yaw)*2,z:Math.cos(v.yaw)*2});killZombie(z,d,true);v.hp-=1.5;v.speed*=.9;if(d)d.flash=.15}}
+  if(Math.abs(v.speed)>3)for(const a of animals){if(a.dead)continue;if(Math.hypot(a.pos.x-v.pos.x,a.pos.z-v.pos.z)<v.L*.5&&Math.abs(a.pos.y-v.pos.y)<2){hurtAnimal(a,999,{x:0,z:0},d);v.speed*=.9}}
   if(v.hp<=0&&!v.broken){v.broken=true;v.hp=0;burst(new V3(v.pos.x,v.pos.y+1.5,v.pos.z),30,3,DUST,3);if(d)msg(d,'The engine died — it needs a repair kit')}
   if(v.broken&&rng()<dt*6)burst(new V3(v.pos.x+Math.sin(v.yaw)*v.L*.4,v.pos.y+1.3,v.pos.z+Math.cos(v.yaw)*v.L*.4),1,.5,[.15,.15,.15],2);
   const fx=Math.sin(v.yaw),fz=Math.cos(v.yaw),IN=v.IN,I=IN.I;
@@ -981,9 +1284,9 @@ function updateVehicle(v,dt){
 }
 
 // ---------------- zombie AI
-const BREAK_EASY=new Set([B.PLANK,B.DIRT,B.GRASS,B.LEAF,B.LOG]),BREAK_HARD=new Set([B.STONE,B.CONC,B.BRICK,B.ASPH,B.COAL]);
+const BREAK_EASY=new Set([B.PLANK,B.DIRT,B.GRASS,B.LEAF,B.LOG]),BREAK_HARD=new Set([B.STONE,B.CONC,B.BRICK,B.ASPH,B.COAL,B.WALL,B.TILEF]);
 function updateZombie(z,dt,night){
-  if(z.dead){z.dead+=dt;z.g.rotation.x=-Math.min(1,z.dead*3)*Math.PI/2;if(z.dead>7)z.pos.y-=dt*.4;if(z.dead>10){scene.remove(z.g);z.gone=true}return}
+  if(z.dead){z.dead+=dt;z.g.rotation.x=z.crawl?1.45:-Math.min(1,z.dead*3)*Math.PI/2;if(z.dead>7)z.pos.y-=dt*.4;if(z.dead>10){scene.remove(z.g);z.gone=true}return}
   let tgt=null,bd=1e9;
   for(const p of players){if(p.dead>0||Math.abs(p.pos.y-z.pos.y)>4)continue;const d=Math.hypot(p.pos.x-z.pos.x,p.pos.y-z.pos.y,p.pos.z-z.pos.z);if(d<bd){bd=d;tgt=p}}
   const sight=night?55:30;let wx=0,wz=0;
@@ -991,6 +1294,7 @@ function updateZombie(z,dt,night){
   else{z.chasing=false;z.wT-=dt;if(z.wT<=0){z.wT=R(2,6);z.wD=rng()*6.283}wx=Math.cos(z.wD)*.4;wz=Math.sin(z.wD)*.4}
   let sp=z.chasing?(night?z.spd*1.7:z.spd):.8;
   if(z.held>0){z.held-=dt;sp=0}else if(z.slow>0){z.slow-=dt;sp*=.35}
+  if(z.crawl){sp*=.35;z.g.rotation.x+=(1.45-z.g.rotation.x)*Math.min(1,dt*5)}
   let vx=wx*sp+z.kx,vz=wz*sp+z.kz;z.kx*=Math.pow(.02,dt);z.kz*=Math.pow(.02,dt);
   for(const o of zombies){if(o===z||o.dead)continue;const dx=z.pos.x-o.pos.x,dz=z.pos.z-o.pos.z,d2=dx*dx+dz*dz;if(d2<.5&&d2>1e-4){vx+=dx/d2*.3;vz+=dz/d2*.3}}
   if(tgt&&bd<1.1){vx*=.2;vz*=.2}
@@ -1009,22 +1313,24 @@ function updateZombie(z,dt,night){
     if(broke){SND.dig();z.stuck=0}
   }
   if(tgt&&bd<1.5&&Math.abs(tgt.pos.y-z.pos.y)<1.6){z.atk-=dt;if(z.atk<=0){z.atk=1.1;z.lunge=1;
-    if(tgt.vehicle)tgt.vehicle.hp-=3;else damage(tgt,(night?13:8)+day)}}
+    if(tgt.vehicle)tgt.vehicle.hp-=3;else damage(tgt,((night?13:8)+day)*(z.noArms?.6:1))}}
   else z.atk=Math.max(z.atk,.35);
   z.lunge=Math.max(0,z.lunge-dt*3);
   if(Math.abs(vx)+Math.abs(vz)>.05){const ty=Math.atan2(vx,vz);let d=ty-z.g.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));z.g.rotation.y+=d*Math.min(1,dt*6)}
   z.walk+=dt*Math.hypot(vx,vz)*2.4;const s=Math.sin(z.walk);
-  z.legL.rotation.x=s*.6;z.legR.rotation.x=-s*.6;z.armL.rotation.x=-1.4+Math.sin(z.walk*.5)*.15-z.lunge*.5;z.armR.rotation.x=-1.4-Math.sin(z.walk*.5)*.15-z.lunge*.5;
-  z.head.rotation.z=Math.sin(z.walk*.3)*.2;
+  const cu=z.cut;
+  if(!cu.legL)z.legL.rotation.x=z.crawl?0:s*.6;if(!cu.legR)z.legR.rotation.x=z.crawl?0:-s*.6;
+  if(!cu.armL)z.armL.rotation.x=-1.4+Math.sin(z.walk*(z.crawl?2:.5))*(z.crawl?.5:.15)-z.lunge*.5;if(!cu.armR)z.armR.rotation.x=-1.4-Math.sin(z.walk*(z.crawl?2:.5))*(z.crawl?.5:.15)-z.lunge*.5;
+  if(!cu.head)z.head.rotation.z=Math.sin(z.walk*.3)*.2;
   z.gro-=dt;if(z.gro<=0){z.gro=R(4,11);if(bd<26)SND.groan(1-bd/26)}
-  if(bd>75&&!z.chasing)z.dead=9.9;
+  if(bd>75&&!z.chasing&&players.every(p=>z.pos.distanceTo(p.pos)>75)){scene.remove(z.g);z.gone=true}
 }
 
 // ---------------- HUD
 function updHud(p){
   const h=p.hud,n=players.length;
   h.el.style.left=(p.i*100/n)+'%';h.el.style.width=(100/n)+'%';
-  h.hp.style.width=p.hp+'%';h.fd.style.width=p.hunger+'%';h.st.style.width=p.stamina+'%';
+  h.arm.textContent=armorOf(p)>0?`Armor ${Math.round(armorOf(p)*100)}%`:'';h.hp.style.width=p.hp+'%';h.fd.style.width=p.hunger+'%';h.st.style.width=p.stamina+'%';
   h.hurt.style.opacity=Math.min(.9,p.flash*1.5+(p.hp<25?.35:0));
   h.slots.forEach((s,k)=>{s.classList.toggle('on',k===p.tool);
     s.lastChild.textContent=k===4?`${TRAPS[p.trap][1]} ×${p.inv[TRAPS[p.trap][0]]}`:k===1?`${p.inv.ammo} rounds`:k===3?`${LABEL[MATS[p.mat][0]]} ×${p.inv[MATS[p.mat][0]]}`:k===2?'dig':'melee'});
@@ -1055,13 +1361,21 @@ function closeMenu(){
 function renderMenu(){
   const p=menuP;if(!p)return;
   $('#mTitle').textContent=`Backpack — Player ${p.i+1}`;
-  $('#mInv').innerHTML=Object.keys(LABEL).map(x=>`<div><span>${LABEL[x]}</span><b>${p.inv[x]}</b></div>`).join('');
+  $('#mInv').innerHTML=Object.keys(LABEL).filter(x=>p.inv[x]>0).map(x=>`<div><span>${LABEL[x]}</span><b>${p.inv[x]}</b></div>`).join('');
   $('#mRec').innerHTML=RECIPES.map((r,n)=>{const ok=Object.entries(r.need).every(([a,q])=>p.inv[a]>=q);
     return`<div class="rec"><div><b>${r.label}</b> → ${r.n} ${LABEL[r.out].toLowerCase()}<small>Needs ${Object.entries(r.need).map(([a,q])=>`${q} ${LABEL[a].toLowerCase()}`).join(' + ')}</small></div><button data-r="${n}" ${ok?'':'disabled'}>Craft</button></div>`}).join('');
-  $('#mEat').disabled=!p.inv.food;$('#mBand').disabled=!p.inv.bandage;
+  const ar=Math.round(armorOf(p)*100);
+  $('#mWear').innerHTML=`<p class="note" style="margin:0 0 6px">Armor ${ar}% — blocks that share of incoming damage (max 70%)</p>`+
+    ['head','body','legs'].map(sl=>{const w=p.wear[sl];return`<div class="rec"><div><b>${sl[0].toUpperCase()+sl.slice(1)}</b> · ${w?`${LABEL[w]} (${Math.round(CLOTHES[w].armor*100)}%)`:'nothing'}</div>${w?`<button data-u="${sl}">Take off</button>`:'<span></span>'}</div>`}).join('')+
+    Object.keys(CLOTHES).filter(k=>p.inv[k]>0).map(k=>`<div class="rec"><div>${LABEL[k]} ×${p.inv[k]}<small>${CLOTHES[k].slot} · ${Math.round(CLOTHES[k].armor*100)}% armor</small></div><button data-w="${k}">Wear</button></div>`).join('');
+  $('#mEat').disabled=!(p.inv.food||p.inv.cooked||p.inv.meat);$('#mBand').disabled=!p.inv.bandage;
 }
 $('#mRec').addEventListener('click',e=>{const b=e.target.closest('button[data-r]');if(!b||!menuP)return;const r=RECIPES[+b.dataset.r],p=menuP;
   if(!Object.entries(r.need).every(([a,q])=>p.inv[a]>=q))return;for(const[a,q]of Object.entries(r.need))p.inv[a]-=q;p.inv[r.out]+=r.n;SND.pick();renderMenu()});
+$('#mWear').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!menuP)return;const p=menuP;
+  if(b.dataset.w){const k=b.dataset.w,sl=CLOTHES[k].slot;if(!(p.inv[k]>0))return;if(p.wear[sl])p.inv[p.wear[sl]]++;p.inv[k]--;p.wear[sl]=k;SND.pick()}
+  if(b.dataset.u){const sl=b.dataset.u;if(p.wear[sl]){p.inv[p.wear[sl]]++;p.wear[sl]=null}}
+  updateClothes(p);renderMenu()});
 $('#mEat').onclick=()=>{if(menuP){eat(menuP);renderMenu()}};
 $('#mBand').onclick=()=>{if(menuP){heal(menuP);renderMenu()}};
 $('#mClose').onclick=closeMenu;
@@ -1073,13 +1387,14 @@ function ladderAt(e){
   for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)if(get(x,y,z)===B.LADDER)return true;return false;
 }
 const manGeo=new THREE.CylinderGeometry(.48,.48,.06,16);
+const manObjs=[];
 function makeManhole(m){
   const g=new THREE.Group(),bot=(SY+1)*VS,top=(G+1)*VS,hgt=top-bot;
   g.position.set(m.x*VS,0,m.z*VS);
   for(const sx of[.18,.82])part(g,.05,hgt+.4,.05,0x5a5a5a,sx,bot+hgt/2+.2,.07);
   for(let y=bot+.25;y<top+.3;y+=.3)part(g,.66,.04,.04,0x6a6a6a,.5,y,.07);
   scene.add(g);
-  const c=new THREE.Mesh(manGeo,lam(0x3a3430));c.position.set(m.x*VS+(m.alongZ?1.55:.5),top+.03,m.z*VS+(m.alongZ?.5:1.55));c.rotation.z=.05;scene.add(c);
+  const c=new THREE.Mesh(manGeo,lam(0x3a3430));c.position.set(m.x*VS+(m.alongZ?1.55:.5),top+.03,m.z*VS+(m.alongZ?.5:1.55));c.rotation.z=.05;scene.add(c);manObjs.push(c);g.position.y=0;g.userData.c=[m.x*VS+.5,m.z*VS+.5];manObjs.push(g);
   for(let i=0;i<4;i++)part(c,.7,.02,.04,0x2a2622,0,.035,-.24+i*.16);
 }
 
@@ -1101,9 +1416,11 @@ function makeTrapMesh(t){
 }
 function placeTrap(p,vh){
   if(!vh)return;const{px:x,py:y,pz:z}=vh;const[key,name]=TRAPS[p.trap];
-  if(get(x,y,z)!==0||!solid(x,y-1,z)){msg(p,'Aim at the ground to set a trap');return}
+  if(get(x,y,z)!==0||!solid(x,y-1,z)){msg(p,'Aim at open ground to place it');return}
   if(!(p.inv[key]>0)){msg(p,`No ${name.toLowerCase()} — craft one in the backpack`);return}
   const wx=(x+.5)*VS,wy=y*VS,wz=(z+.5)*VS;
+  if(key==='bed'){p.inv.bed--;makeBed(wx,wy,wz,p.yaw+Math.PI);SND.place();msg(p,'Bed set down — sleep in it at night');return}
+  if(key==='fire'){p.inv.fire--;makeFire(wx,wy,wz);SND.place();msg(p,'Campfire lit — cook raw meat here');return}
   if(traps.some(t=>Math.hypot(t.pos.x-wx,t.pos.z-wz)<.9&&Math.abs(t.pos.y-wy)<1))return;
   p.inv[key]--;const t={type:key,name,armed:true,cd:0,uses:key==='spikes'?8:1,gone:false};
   t.g=makeTrapMesh(t);t.g.position.set(wx,wy,wz);t.g.rotation.y=p.yaw;scene.add(t.g);t.pos=t.g.position;traps.push(t);
@@ -1113,7 +1430,8 @@ function nearestTrap(p,r){let best=null,bd=r;for(const t of traps){const d=Math.
 function pickTrap(p,t){t.gone=true;scene.remove(t.g);traps=traps.filter(x=>x!==t);p.inv[t.type]++;SND.pick();msg(p,`Picked up the ${t.name.toLowerCase()}`)}
 function explode(pos){
   SND.boom();const c=new V3(pos.x,pos.y+.4,pos.z);burst(c,60,9,[1,.55,.1],3);burst(c,40,6,DUST,4);
-  for(const z of zombies){if(z.dead)continue;const d=z.pos.distanceTo(pos);if(d<4.2){const dx=(z.pos.x-pos.x)/(d||1),dz=(z.pos.z-pos.z)/(d||1);hurtZombie(z,190*(1-d/4.6),{x:dx*2,z:dz*2},null)}}
+  for(const z of zombies){if(z.dead)continue;const d=z.pos.distanceTo(pos);if(d<4.2){const dx=(z.pos.x-pos.x)/(d||1),dz=(z.pos.z-pos.z)/(d||1);if(d<3.2)dismember(z,RI(1,3),{x:dx*3,z:dz*3});hurtZombie(z,190*(1-d/4.6),{x:dx*2,z:dz*2},null)}}
+  for(const a of animals){if(a.dead)continue;const d=a.pos.distanceTo(pos);if(d<4)hurtAnimal(a,150*(1-d/4.6),{x:0,z:0},null)}
   for(const p of players){if(p.dead>0||p.vehicle)continue;const d=p.pos.distanceTo(pos);if(d<3.6)damage(p,48*(1-d/4))}
   for(let i=0;i<4;i++)splat({x:pos.x+R(-1.5,1.5),y:pos.y,z:pos.z+R(-1.5,1.5)},R(1,2));
   const bx=vc(pos.x),by=vc(pos.y),bz=vc(pos.z);
@@ -1155,9 +1473,199 @@ const T={on:false,mx:0,my:0,held:{},pressed:new Set(),stick:null,look:null,run:f
   canvas.addEventListener('pointerup',endP);canvas.addEventListener('pointercancel',endP);
 }
 
+// ---------------- underground check (caves, sewers, basements go dark)
+function underground(pos){const x=vc(pos.x),z=vc(pos.z);if(x<0||z<0||x>=W||z>=W)return false;return pos.y<(hmap[z*W+x]-2)*VS}
+
+// ---------------- zombie hit detection, bullet holes, dismemberment
+const RC=new THREE.Raycaster();
+function zombieRay(eye,dir,far){
+  const objs=[];
+  for(const z of zombies){if(z.dead||z.pos.distanceTo(eye)>far+2.5)continue;z.g.updateMatrixWorld(true);z.g.traverse(o=>{if(o.isMesh&&o.userData.part&&o.userData.zo)objs.push(o)})}
+  if(!objs.length)return null;RC.set(eye,dir);RC.far=far;
+  const h=RC.intersectObjects(objs,false)[0];if(!h)return null;
+  return{z:h.object.userData.zo,part:h.object.userData.part,point:h.point,normal:h.face?h.face.normal:new V3(0,0,1),mesh:h.object,t:h.distance};
+}
+const Z_AXIS=new V3(0,0,1);
+function addHole(mesh,point,normal){
+  if((mesh.userData.holes|0)>=10)return;mesh.userData.holes=(mesh.userData.holes|0)+1;
+  const h=new THREE.Mesh(box(.085,.085,.02),lam(0x5a0707)),c=new THREE.Mesh(box(.045,.045,.024),lam(0x140202));h.add(c);
+  const lp=mesh.worldToLocal(point.clone());h.position.copy(lp).addScaledVector(normal,.006);h.quaternion.setFromUnitVectors(Z_AXIS,normal);h.rotation.z+=rng()*3;mesh.add(h);
+}
+function burstDir(p,dir,n){for(let k=0;k<n;k++){const j=pI;pI=(pI+1)%PN;const o=j*3,s=.7+rng()*.5;
+  pPos[o]=p.x;pPos[o+1]=p.y;pPos[o+2]=p.z;pVel[o]=dir.x*R(3,7)+R(-1,1);pVel[o+1]=(dir.y||0)*4+R(0,2.5);pVel[o+2]=dir.z*R(3,7)+R(-1,1);
+  pLife[j]=R(.5,1.3);pCol[o]=RED[0]*s;pCol[o+1]=RED[1]*s;pCol[o+2]=RED[2]*s}}
+function hitPart(h,dir,dmg,by,bullet){
+  const z=h.z;if(z.dead)return;
+  if(bullet)addHole(h.mesh,h.point,h.normal);
+  burstDir(h.point,dir,bullet?16:10);burst(h.point,6,2,RED,1);SND.hit();z.chasing=true;z.kx+=dir.x*2;z.kz+=dir.z*2;
+  const pn=h.part;
+  if(pn==='head'){const d=dmg*3*(z.outfit==='helmet'?.45:z.outfit==='hardhat'?.75:1);z.lhp.head-=d;z.hp-=d*.5;
+    if(z.lhp.head<=0){sever(z,'head',dir);killZombie(z,by);if(by)msg(by,'Headshot');return}}
+  else if(pn==='torso'){z.hp-=dmg*(z.outfit==='vest'||z.outfit==='scrapvest'?.65:z.outfit==='jacket'?.85:1);if(rng()<.3)splat(z.pos,R(.5,1))}
+  else{z.lhp[pn]-=dmg;z.hp-=dmg*.35;if(z.lhp[pn]<=0)sever(z,pn,dir)}
+  if(z.hp<=0)killZombie(z,by);
+}
+const STUMP={legL:[-.13,.85,0,.2,.05,.22],legR:[.13,.85,0,.2,.05,.22],armL:[-.37,1.5,0,.15,.06,.17],armR:[.37,1.5,0,.15,.06,.17],head:[0,1.58,0,.24,.05,.24]};
+let gibs=[];
+function sever(z,pn,dir){
+  if(z.cut[pn])return;const o=z[pn];if(!o||!o.parent)return;z.cut[pn]=true;
+  z.g.updateMatrixWorld(true);scene.attach(o);o.traverse(c=>{c.userData.part=null;c.userData.zo=null});
+  const wp=o.getWorldPosition(new V3());
+  gibs.push({o,vel:new V3((dir.x||0)*2.5+R(-1.5,1.5),R(2.5,5),(dir.z||0)*2.5+R(-1.5,1.5)),spin:new V3(R(-9,9),R(-9,9),R(-9,9)),t:0,rest:false});
+  if(gibs.length>50){const g=gibs.shift();scene.remove(g.o)}
+  const st=STUMP[pn];part(z.g,st[3],st[4],st[5],0x6a0808,st[0],st[1],st[2]);
+  burst(wp,30,4,RED,2.5);splat(z.pos,R(.6,1.2));sNoise(.2,900,.5);
+  if(pn==='legL'||pn==='legR')z.crawl=true;
+  if(z.cut.armL&&z.cut.armR)z.noArms=true;
+}
+function dismember(z,n,dir){const ks=['armL','armR','legL','legR','head'].filter(k=>!z.cut[k]&&(k!=='head'||rng()<.3));
+  for(let i=0;i<n&&ks.length;i++)sever(z,ks.splice(RI(0,ks.length-1),1)[0],dir)}
+function updateGibs(dt){
+  for(const g of gibs){g.t+=dt;const p=g.o.position;
+    if(!g.rest){g.vel.y-=18*dt;const nx=p.x+g.vel.x*dt,ny=p.y+g.vel.y*dt,nz=p.z+g.vel.z*dt;
+      if(solid(vc(nx),vc(ny-.06),vc(nz))){if(Math.abs(g.vel.y)<3){g.rest=true;p.y=(vc(ny-.06)+1)*VS+.08;g.o.rotation.set(Math.PI/2,rng()*6,0);splat(p,R(.3,.6))}else{g.vel.y*=-.3;g.vel.x*=.5;g.vel.z*=.5}}
+      else p.set(nx,ny,nz);
+      g.o.rotation.x+=g.spin.x*dt;g.o.rotation.y+=g.spin.y*dt;g.o.rotation.z+=g.spin.z*dt;if(rng()<dt*25)burst(p,1,.5,RED,0)}
+    if(g.t>30){scene.remove(g.o);g.gone=true}}
+  gibs=gibs.filter(g=>!g.gone);
+}
+
+// ---------------- loot bags (zombie + animal drops)
+let bags=[];
+const ZLOOT=[['cloth',28,1,2],['scrap',24,1,2],['ammo',18,2,6],['food',10,1,1],['bandage',9,1,1],['fuel',3,1,1],['mine',1,1,1]];
+function rollZLoot(z){const items={},tot=ZLOOT.reduce((s,l)=>s+l[1],0),n=rng()<.3?0:RI(1,2);
+  for(let i=0;i<n;i++){let r=rng()*tot;for(const l of ZLOOT){r-=l[1];if(r<=0){items[l[0]]=(items[l[0]]||0)+RI(l[2],l[3]);break}}}
+  if(z.outfit&&rng()<.6)items[z.outfit]=1;return items}
+function dropBag(pos,items,hide){
+  if(!Object.keys(items).length)return;
+  const g=new THREE.Group();
+  if(hide){part(g,.5,.12,.4,0x7a5a3a,0,.06,0);part(g,.24,.14,.2,0x7a1a14,0,.12,0)}
+  else{part(g,.36,.3,.28,0x5e4c32,0,.15,0);part(g,.13,.09,.13,0x4a3a26,0,.34,0);part(g,.38,.04,.3,0x2a2018,0,.21,0)}
+  g.position.set(pos.x+R(-.2,.2),pos.y,pos.z+R(-.2,.2));g.rotation.y=rng()*6;scene.add(g);
+  const n=Object.values(items).reduce((a,b)=>a+b,0);
+  bags.push({g,pos:g.position,items,t:0,label:hide?`the carcass (${n} items)`:`loot bag (${n} items)`});
+  if(bags.length>60){const b=bags.shift();scene.remove(b.g)}
+}
+function nearestBag(p,r){let best=null,bd=r;for(const b of bags){const d=Math.hypot(b.pos.x-p.pos.x,b.pos.y-p.pos.y,b.pos.z-p.pos.z);if(d<bd){bd=d;best=b}}return best}
+function takeBag(p,b){for(const[k,q]of Object.entries(b.items))p.inv[k]+=q;scene.remove(b.g);bags=bags.filter(x=>x!==b);SND.pick();
+  msg(p,'Took: '+Object.entries(b.items).map(([a,q])=>`${q} ${LABEL[a].toLowerCase()}`).join(', '))}
+function updateBags(dt){for(const b of bags){b.t+=dt;const sx=vc(b.pos.x),sz=vc(b.pos.z);if(!solid(sx,vc(b.pos.y-.05),sz))b.pos.y-=dt*3;if(b.t>400){scene.remove(b.g);b.gone=true}}bags=bags.filter(b=>!b.gone)}
+
+// ---------------- wild animals
+let animals=[];
+const ANIM={
+  deer:{hp:40,spd:1.3,run:7.5,hw:.4,h:1.4,col:0x7a5a3a,belly:0xc0a27a,size:[.5,.6,1.3],leg:.78,hostile:false,drops:{meat:[2,3],hide:[1,2],bone:[0,1]}},
+  rabbit:{hp:8,spd:1,run:6,hw:.15,h:.4,col:0x8a7a68,belly:0xd8ccb8,size:[.24,.24,.38],leg:.12,hostile:false,drops:{meat:[1,1],hide:[0,1]}},
+  wolf:{hp:50,spd:1.8,run:6.6,hw:.3,h:.95,col:0x5c5c60,belly:0x9a9a96,size:[.38,.42,1.0],leg:.46,hostile:true,dmg:11,drops:{meat:[1,2],hide:[2,2],bone:[1,2]}},
+  boar:{hp:70,spd:1.2,run:5.6,hw:.38,h:.95,col:0x3e2e24,belly:0x5a4434,size:[.52,.56,1.05],leg:.36,hostile:'near',dmg:14,drops:{meat:[3,4],hide:[1,2],bone:[1,1]}}};
+function makeAnimal(type,x,y,z){
+  const A=ANIM[type],g=new THREE.Group();g.rotation.order='YXZ';const[bw,bh,bl]=A.size,L=A.leg;
+  part(g,bw,bh,bl,A.col,0,L+bh/2,0);part(g,bw*.92,bh*.3,bl*.8,A.belly,0,L+bh*.15,0);
+  const head=new THREE.Group();head.position.set(0,L+bh*.85+(type==='deer'?.32:0),bl/2);g.add(head);
+  if(type==='deer'){const nk=part(g,bw*.4,.5,bw*.45,A.col,0,L+bh+.12,bl/2-.05);nk.rotation.x=.4}
+  part(head,bw*.62,bh*.6,bl*.32,A.col,0,0,bl*.12);part(head,bw*.42,bh*.36,bl*.22,A.belly,0,-bh*.1,bl*.36);
+  part(head,.04,.04,.02,0x0a0a0a,-bw*.22,bh*.08,bl*.29);part(head,.04,.04,.02,0x0a0a0a,bw*.22,bh*.08,bl*.29);
+  if(type==='deer'){part(head,.06,.14,.04,A.col,-.16,.2,0);part(head,.06,.14,.04,A.col,.16,.2,0);
+    if(rng()<.55)for(const sx of[-1,1]){part(head,.04,.32,.04,0xcfc0a0,sx*.12,.36,0);part(head,.18,.04,.04,0xcfc0a0,sx*.18,.46,.04);part(head,.04,.16,.04,0xcfc0a0,sx*.24,.55,.06)}}
+  if(type==='rabbit'){part(head,.05,.22,.04,A.col,-.05,.2,-.02);part(head,.05,.22,.04,A.col,.05,.2,-.02)}
+  if(type==='wolf'){part(head,.07,.12,.05,A.col,-.1,.18,0);part(head,.07,.12,.05,A.col,.1,.18,0);part(head,.18,.05,.1,0xd8d0c0,0,-.12,.22)}
+  if(type==='boar'){part(head,.03,.09,.03,0xeee8d0,-.12,-.08,.3);part(head,.03,.09,.03,0xeee8d0,.12,-.08,.3);part(g,.08,.14,bl*.7,0x1a120c,0,L+bh+.06,0)}
+  const tl=part(g,type==='rabbit'?.1:.08,type==='rabbit'?.1:.22,.08,type==='rabbit'?0xeeeeee:A.col,0,L+bh*.7,-bl/2-.04);tl.rotation.x=-.5;
+  const legs=[];for(const sx of[-1,1])for(const sz of[-1,1])legs.push(limb(g,bw*.24,L,bw*.24,sz>0?A.col:A.belly,sx*bw*.32,L,sz*bl*.36));
+  g.position.set(x,y,z);g.rotation.y=rng()*6;scene.add(g);
+  return{type,A,g,pos:g.position,vel:new V3(),hp:A.hp,legs,head,dead:0,wT:0,wD:rng()*6.28,atk:0,walk:0,grounded:false,flee:0,angry:0};
+}
+function spawnAnimal(near){
+  for(let t=0;t<30;t++){
+    const c=near&&players.length?players[RI(0,players.length-1)].pos:spawn,a=rng()*6.283,d=near?R(28,55):R(20,70);
+    const x=vc(c.x+Math.cos(a)*d),z=vc(c.z+Math.sin(a)*d);if(x<6||z<6||x>W-7||z>W-7||inTown(x,z))continue;
+    const ty=topY(x,z);if(ty!==hmap[z*W+x])continue;const wx=(x+.5)*VS,wz=(z+.5)*VS;
+    if(near&&players.some(q=>Math.hypot(q.pos.x-wx,q.pos.z-wz)<24))continue;
+    const night=dayLight()<.3,r=rng(),type=night?(r<.45?'wolf':r<.65?'boar':r<.85?'deer':'rabbit'):(r<.35?'deer':r<.65?'rabbit':r<.82?'boar':'wolf');
+    const n=type==='wolf'?RI(2,3):type==='rabbit'?RI(1,2):1;
+    for(let i=0;i<n;i++)animals.push(makeAnimal(type,wx+R(-1.2,1.2),(ty+1)*VS+.3,wz+R(-1.2,1.2)));return;
+  }
+}
+function animalRay(eye,dir,far){let best=null,bt=far;for(const a of animals){if(a.dead)continue;const A=a.A,c={x:a.pos.x,y:a.pos.y+A.leg+A.size[1]/2,z:a.pos.z},r=Math.max(A.size[0],A.size[1],A.size[2]*.55)*.62;
+  const t=raySphere(eye,dir,c,r);if(t>0&&t<bt){bt=t;best=a}}return best?{a:best,t:bt}:null}
+function nearestAnimalInFront(p,dir,range){let best=null,bd=range;for(const a of animals){if(a.dead)continue;const dx=a.pos.x-p.pos.x,dz=a.pos.z-p.pos.z,d=Math.hypot(dx,dz);
+  if(d>bd||Math.abs(a.pos.y-p.pos.y)>1.6)continue;const fl=Math.hypot(dir.x,dir.z)||1;if((dx*dir.x+dz*dir.z)/((d||1)*fl)<.65)continue;best=a;bd=d}return best}
+function hurtAnimal(a,dmg,dir,by){
+  if(a.dead)return;a.hp-=dmg;a.flee=7;a.angry=10;a.vel.x+=dir.x*3;a.vel.z+=dir.z*3;
+  burst(new V3(a.pos.x,a.pos.y+a.A.leg+a.A.size[1]/2,a.pos.z),14,3,RED,1.5);SND.hit();
+  if(a.hp<=0){a.dead=.001;splat(a.pos,R(.8,1.6));const it={};for(const[k,[lo,hi]]of Object.entries(a.A.drops)){const q=RI(lo,hi);if(q)it[k]=q}
+    dropBag(a.pos,it,true);if(by)msg(by,`Killed a ${a.type} — search the carcass`)}
+}
+function updateAnimal(a,dt,night){
+  if(a.dead){a.dead+=dt;a.g.rotation.z=Math.min(1,a.dead*4)*Math.PI/2;if(a.dead>20){scene.remove(a.g);a.gone=true}return}
+  const A=a.A;let tgt=null,bd=1e9;
+  for(const p of players){if(p.dead>0||Math.abs(p.pos.y-a.pos.y)>4)continue;const d=Math.hypot(p.pos.x-a.pos.x,p.pos.z-a.pos.z);if(d<bd){bd=d;tgt=p}}
+  a.flee-=dt;a.angry-=dt;
+  const hostile=tgt&&!tgt.sleeping&&((A.hostile===true&&bd<(night?26:15))||(A.hostile==='near'&&(bd<6||a.angry>0)&&bd<20));
+  let wx=0,wz=0,sp=A.spd;
+  if(hostile){const dx=tgt.pos.x-a.pos.x,dz=tgt.pos.z-a.pos.z,l=Math.hypot(dx,dz)||1;wx=dx/l;wz=dz/l;sp=A.run;
+    if(bd<1.3){sp=0;a.atk-=dt;if(a.atk<=0){a.atk=1;if(tgt.vehicle)tgt.vehicle.hp-=2;else damage(tgt,A.dmg);sTone(240,120,.15,.15,'sawtooth')}}else a.atk=Math.max(a.atk,.3)}
+  else if(tgt&&!A.hostile&&(bd<13||a.flee>0)){const dx=a.pos.x-tgt.pos.x,dz=a.pos.z-tgt.pos.z,l=Math.hypot(dx,dz)||1;wx=dx/l;wz=dz/l;sp=A.run}
+  else{a.wT-=dt;if(a.wT<=0){a.wT=R(2,7);a.wD=rng()<.3?-1:rng()*6.283}if(a.wD>=0){wx=Math.cos(a.wD);wz=Math.sin(a.wD)}}
+  a.vel.x+=(wx*sp-a.vel.x)*Math.min(1,dt*6);a.vel.z+=(wz*sp-a.vel.z)*Math.min(1,dt*6);a.vel.y=Math.max(-18,a.vel.y-24*dt);
+  const blocked=moveEnt(a,dt,A.hw,A.h);if(blocked&&a.grounded){a.vel.y=7;if(!hostile)a.wD=rng()*6.283}
+  const v=Math.hypot(a.vel.x,a.vel.z);
+  if(v>.1){const ty=Math.atan2(a.vel.x,a.vel.z);let d=ty-a.g.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));a.g.rotation.y+=d*Math.min(1,dt*8)}
+  a.walk+=dt*v*(a.type==='rabbit'?5:2.6);const s=Math.sin(a.walk);a.legs.forEach((l,i)=>l.rotation.x=(i%2?s:-s)*Math.min(.8,v*.25));
+  if(a.type==='rabbit'&&v>1)a.g.position.y+=Math.abs(Math.sin(a.walk))*.02;
+  if(bd>90)a.gone=true,scene.remove(a.g);
+}
+
+// ---------------- campfires
+let fires=[];const fireLights=[0,1].map(()=>{const l=new THREE.PointLight(0xff8a30,0,11,1.4);scene.add(l);return l});
+const flameGeo=new THREE.ConeGeometry(.16,.5,6);
+function makeFire(x,y,z){const g=new THREE.Group();
+  for(let i=0;i<8;i++){const a=i/8*6.283;part(g,.16,.12,.16,0x6a6a66,Math.cos(a)*.38,.06,Math.sin(a)*.38)}
+  const l1=part(g,.62,.09,.09,0x3a2a1a,0,.1,0);l1.rotation.y=.6;const l2=part(g,.62,.09,.09,0x3a2a1a,0,.15,0);l2.rotation.y=-.6;
+  const fl=[];for(const[c,sc,ox]of[[0xff5a10,1,0],[0xffa020,.7,.06],[0xffe080,.42,-.05]]){const f=new THREE.Mesh(flameGeo,basic(c));f.scale.setScalar(sc);f.position.set(ox,.25*sc+.12,0);g.add(f);fl.push(f)}
+  g.position.set(x,y,z);scene.add(g);fires.push({g,pos:g.position,fl})}
+function nearestFire(p,r){let best=null,bd=r;for(const f of fires){const d=f.pos.distanceTo(p.pos);if(d<bd){bd=d;best=f}}return best}
+function cook(p){if(p.inv.meat>0){const n=p.inv.meat;p.inv.cooked+=n;p.inv.meat=0;sNoise(.8,2400,.25,'bandpass');msg(p,`Cooked ${n} meat over the fire`)}else msg(p,'The fire crackles. Hunt something to cook.')}
+function updateFires(dt){
+  const t=performance.now()*.01;
+  for(const f of fires)f.fl.forEach((m,i)=>{m.scale.y=(i?.7-.28*(i-1):1)*(.8+Math.sin(t*(1.3+i*.4)+i)*.15+rng()*.08)});
+  const ranked=fires.map(f=>({f,d:Math.min(...players.map(p=>p.pos.distanceTo(f.pos)))})).filter(o=>o.d<40).sort((a,b)=>a.d-b.d);
+  fireLights.forEach((l,i)=>{const o=ranked[i];if(o){l.position.set(o.f.pos.x,o.f.pos.y+.8,o.f.pos.z);l.intensity=1.5+rng()*.3}else l.intensity=0});
+}
+
+// ---------------- beds + sleeping through the night
+let beds=[];
+const bedMat=new THREE.MeshLambertMaterial({map:tileTex(TILE.plank),color:0x9a7a58});
+function makeBed(x,y,z,yaw){const g=new THREE.Group();
+  part(g,1,.22,2,0,0,.2,0).material=bedMat;for(const sx of[-1,1])for(const sz of[-1,1])part(g,.08,.1,.08,0x3a2a1a,sx*.45,.05,sz*.95);
+  part(g,1,.75,.08,0,0,.45,-.98).material=bedMat;part(g,.92,.14,1.86,0xb3a990,0,.38,0);part(g,.6,.1,.32,0xd2cab8,0,.5,-.72);
+  const bl=[0x5a3a3a,0x3a4a5a,0x4a5a3a,0x6a5a3a][RI(0,3)];part(g,.96,.06,1.15,bl,0,.48,.32);part(g,.96,.3,.04,bl,0,.33,.9);
+  if(rng()<.5)part(g,.3,.006,.25,0x4a0606,R(-.2,.2),.455,R(-.45,0));
+  g.position.set(x,y,z);g.rotation.y=yaw;scene.add(g);const b={g,pos:g.position,yaw};beds.push(b);return b}
+function nearestBed(p,r){let best=null,bd=r;for(const b of beds){const d=b.pos.distanceTo(p.pos);if(d<bd){bd=d;best=b}}return best}
+function trySleep(p,b){
+  if(dayLight()>=.35){p.spawnPt=new V3(b.pos.x+Math.cos(b.yaw)*.9,b.pos.y,b.pos.z-Math.sin(b.yaw)*.9);msg(p,'Respawn point set. You can only sleep once night falls');return}
+  if(zombies.some(z=>!z.dead&&z.pos.distanceTo(p.pos)<10)||animals.some(a=>!a.dead&&a.A.hostile===true&&a.pos.distanceTo(p.pos)<10)){msg(p,"You can't sleep with something hunting this close");return}
+  if(players.some(q=>q!==p&&q.sleeping===b)){msg(p,'Someone is already in this bed');return}
+  p.sleeping=b;p.spawnPt=new V3(b.pos.x+Math.cos(b.yaw)*.9,b.pos.y,b.pos.z-Math.sin(b.yaw)*.9);p.dig=null;msg(p,'Respawn point set. You lie down…');
+}
+function updateSleep(dt){
+  const alive=players.filter(p=>!(p.dead>0));
+  if(!sleepT&&alive.length&&alive.every(p=>p.sleeping)){sleepT=2.4;$('#fade').style.opacity=1}
+  if(sleepT){const prev=sleepT;sleepT=Math.max(0,sleepT-dt);
+    if(prev>1.2&&sleepT<=1.2){if(tDay>.5)day++;tDay=.03;
+      for(const p of players){if(p.sleeping){p.sleeping=null;p.body.g.rotation.x=0;p.body.g.rotation.order='XYZ'}p.hunger=Math.max(5,p.hunger-30);p.hp=Math.min(100,p.hp+50)}
+      for(const z of zombies)if(!z.dead&&players.every(p=>z.pos.distanceTo(p.pos)>22)){scene.remove(z.g);z.gone=true}
+      msg(null,`You wake at dawn. Day ${day}.`);$('#fade').style.opacity=0}}
+}
+
+// ---------------- clothing on the player model
+function updateClothes(p){const c=p.cl,set=(m,k)=>{m.visible=!!k;if(k)m.material.color.setHex(CLOTHES[k].col)};
+  set(c.head,p.wear.head);set(c.body,p.wear.body);c.legs.forEach(m=>set(m,p.wear.legs))}
+
 // ---------------- main loop
 const introCam=new THREE.PerspectiveCamera(60,1,.1,200);
-let spawnT=2,hudT=0,lastDl=1,clockT=performance.now();
+let spawnT=2,animT=3,sleepT=0,hudT=0,lastDl=1,clockT=performance.now();
 function update(dt){
   const dlPrev=dayLight();tDay+=dt/DAYLEN;if(tDay>=1){tDay-=1;day++;msg(null,`Dawn of day ${day}. The dead slow down.`)}
   const dl=dayLight(),night=dl<.25;
@@ -1165,7 +1673,10 @@ function update(dt){
   updSky();
   for(const p of players)updatePlayer(p,dt);
   for(const v of vehicles)updateVehicle(v,dt);
-  updateDoors(dt);updateTraps(dt);
+  updateDoors(dt);updateTraps(dt);updateGibs(dt);updateFires(dt);updateBags(dt);
+  for(const a of animals)updateAnimal(a,dt,night);animals=animals.filter(a=>!a.gone);
+  animT-=dt;if(animT<=0){animT=6;if(animals.filter(a=>!a.dead).length<14)spawnAnimal(true)}
+  updateSleep(dt);
   for(const z of zombies)updateZombie(z,dt,night);
   zombies=zombies.filter(z=>!z.gone);
   spawnT-=dt;const maxZ=Math.min(48,(night?26:10)+day*3);
@@ -1178,19 +1689,25 @@ function update(dt){
 }
 function render(){
   const w=innerWidth,h=innerHeight;renderer.setScissorTest(true);
-  if(!running){const t=performance.now()/1000*.05;introCam.position.set(49+Math.cos(t)*48,32,49+Math.sin(t)*48);introCam.lookAt(49,12,49);
+  if(!running){const t=performance.now()/1000*.05;introCam.position.set(spawn.x+Math.cos(t)*48,32,spawn.z+Math.sin(t)*48);introCam.lookAt(spawn.x,12,spawn.z);introCam.far=viewUnits()+60;
     introCam.aspect=w/h;introCam.updateProjectionMatrix();renderer.setViewport(0,0,w,h);renderer.setScissor(0,0,w,h);renderer.render(scene,introCam);return}
   const n=players.length,vw=w/n;
   const sv=[hemi.intensity,sun.intensity,scene.fog.near,scene.fog.far,scene.fog.color.getHex()];
-  players.forEach((p,i)=>{p.cam.aspect=vw/h;p.cam.updateProjectionMatrix();renderer.setViewport(i*vw,0,vw,h);renderer.setScissor(i*vw,0,vw,h);
-    const under=p.cam.position.y<(G-2)*VS;
+  players.forEach((p,i)=>{p.cam.aspect=vw/h;p.cam.far=viewUnits()+30;p.cam.updateProjectionMatrix();renderer.setViewport(i*vw,0,vw,h);renderer.setScissor(i*vw,0,vw,h);
+    const under=underground(p.cam.position);
     if(under){hemi.intensity=.05;sun.intensity=0;scene.fog.near=1;scene.fog.far=22;scene.fog.color.setHex(0x040504);scene.background.setHex(0x040504)}
     else{hemi.intensity=sv[0];sun.intensity=sv[1];scene.fog.near=sv[2];scene.fog.far=sv[3];scene.fog.color.setHex(sv[4]);scene.background.setHex(sv[4])}
     renderer.render(scene,p.cam)});
   hemi.intensity=sv[0];sun.intensity=sv[1];scene.fog.near=sv[2];scene.fog.far=sv[3];scene.fog.color.setHex(sv[4]);scene.background.setHex(sv[4]);
 }
+let cullT=0;
+function cullEntities(cs){const F=(viewUnits()+6)**2,vis=(o,px,pz)=>{let m=1e9;for(const c of cs){const dx=(px??o.position.x)-c.x,dz=(pz??o.position.z)-c.z,d=dx*dx+dz*dz;if(d<m)m=d}o.visible=m<F};
+  crates.forEach(c=>vis(c.g));doors.forEach(d=>{if(!d.gone)vis(d.pivot)});beds.forEach(b=>vis(b.g));fires.forEach(f=>vis(f.g));traps.forEach(t=>vis(t.g));bags.forEach(b=>vis(b.g));decals.forEach(o=>vis(o));
+  vehicles.forEach(v=>{if(!v.driver&&!v.pass)vis(v.g)});manObjs.forEach(o=>o.userData.c?vis(o,o.userData.c[0],o.userData.c[1]):vis(o))}
 function frame(){
   const now=performance.now(),dt=Math.min(.05,(now-clockT)/1000);clockT=now;
+  if(worldReady){const cs=running?players.map(p=>p.vehicle?p.vehicle.pos:p.pos):[spawn];streamChunks(cs,isTouch?2:4);cullT-=dt;if(cullT<=0){cullT=.5;cullEntities(cs)}
+    if(running){saveT-=dt;if(saveT<=0){saveT=90;autoSave()}}}
   if(running&&!paused)update(dt);else{pressed.clear();T.pressed.clear()}
   if(!running){tDay+=dt/DAYLEN*.3;updSky()}
   render();requestAnimationFrame(frame);
@@ -1201,24 +1718,102 @@ function startGame(n){
   initAudio();if(AC&&AC.resume)AC.resume();
   for(let i=0;i<n;i++)players.push(makePlayer(i));
   $('#start').classList.add('hidden');$('#top').classList.remove('hidden');$('#split').classList.toggle('hidden',n<2);
-  running=true;tDay=.08;if(isTouch)$('#touch').classList.remove('hidden');
-  msg(null,'Check the crates in the buildings. A sedan sits just up the road.');
+  running=true;REC=true;if(!loadingSave)tDay=.08;if(isTouch)$('#touch').classList.remove('hidden');
+  if(!loadingSave)msg(null,'Check the crates in the buildings. A sedan sits just up the road.');
   if(n>1)msg(players[1],'Player 2: I K J L to move, H to act, Y to use');
   lock();
 }
-gen();
-for(let cx=0;cx<NC;cx++)for(let cz=0;cz<NC;cz++)buildChunk(cx,cz);
-for(const c of crateSpots)crates.push(makeCrate(c[0],c[1],c[2],c[3]));
-for(const d of doorSpecs)makeDoor(d);
-for(const s of carSpots)vehicles.push(makeVehicle(s));
-for(let i=0;i<14;i++){const x=RI(T0,T1),z=RI(T0,T1);if(Math.hypot(x*VS-49.5,z*VS-49.5)<18)continue;const ty=topY(x,z);if(ty===hmap[z*W+x])spawnZ((x+.5)*VS,(ty+1)*VS,(z+.5)*VS)}
-for(const s of indoorSpots)if(rng()<.4)spawnZ(s[0],s[1],s[2]);
-for(const s of sewerSpots)if(rng()<.45)spawnZ(s[0],s[1],s[2]);
-for(const m of manholes)makeManhole(m);
-for(let i=0;i<25;i++){const x=R(T0,T1)*VS,z=R(T0,T1)*VS;splat({x,y:topW(x,z),z},R(.8,2))}
-$('#genMsg').textContent=`${crates.length} crates · ${doors.length} doors · ${vehicles.length} vehicles · ${zombies.length} walkers`;
-$('#bSolo').onclick=()=>startGame(1);
-$('#bCoop').onclick=()=>startGame(2);
+// ---------------- world setup, reset, save + load
+let worldReady=false,loadingSave=false,saveT=90,initBeds=0;
+const baseObjs=new Set();
+function worldInit(){
+  planTowns();spawn.set((MAIN+2*P+6)*VS,(G+1)*VS,(MAIN+2*P+6)*VS);
+  gen();buildFurnMeshes();
+  for(const c of crateSpots)crates.push(makeCrate(c[0],c[1],c[2],c[3]));
+  for(const d of doorSpecs)makeDoor(d);
+  for(const s of carSpots)vehicles.push(makeVehicle(s));
+  const T=towns[0];
+  for(let i=0;i<16;i++){const x=RI(T.x0,T.x1),z=RI(T.z0,T.z1);if(Math.hypot(x*VS-spawn.x,z*VS-spawn.z)<18)continue;const ty=topY(x,z);if(ty===hmap[z*W+x])spawnZ((x+.5)*VS,(ty+1)*VS,(z+.5)*VS)}
+  for(const m of manholes)makeManhole(m);
+  for(const s of caveSpots.slice(0,40))crates.push(makeCrate(s[0],s[1],s[2],true));
+  for(const b of bedSpecs)makeBed(b[0],b[1],b[2],b[3]);initBeds=beds.length;
+  for(let i=0;i<14;i++)spawnAnimal(false);
+  for(const t of towns)for(let i=0;i<6*t.n;i++){const x=R(t.x0,t.x1)*VS,z=R(t.z0,t.z1)*VS;splat({x,y:topW(x,z),z},R(.8,2))}
+  worldReady=true;
+}
+function resetWorld(ns){
+  worldReady=false;REC=false;edits.clear();
+  for(const arr of[chunkMeshes,glassMeshes,furnMeshes])for(const m of arr)if(m)m.geometry.dispose();chunkMeshes.length=0;glassMeshes.length=0;furnMeshes.length=0;loaded.fill(0);
+  for(const o of[...scene.children])if(!baseObjs.has(o))scene.remove(o);
+  zombies=[];vehicles=[];crates=[];doors=[];doorMap.clear();traps=[];gibs=[];bags=[];animals=[];fires=[];beds=[];decals.length=0;manObjs.length=0;
+  for(const a of[crateSpots,carSpots,indoorSpots,doorSpecs,sewerSpots,manholes,caveSpots,bedSpecs,furnSpecs])a.length=0;
+  pLife.fill(0);pPos.fill(-100);vox.fill(0);hmap.fill(0);
+  seed=ns|0;rng=mulberry(seed);kills=0;day=1;tDay=.08;
+  worldInit();
+}
+// --- compact save codes: seed + changed voxels (delta+varint) + small state, deflated, base64
+const b64=u=>{let s='';for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+const unb64=t=>{t=t.replace(/-/g,'+').replace(/_/g,'/');const s=atob(t);const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
+function packEdits(){const idx=[...edits.keys()].sort((a,b)=>a-b),out=[];let prev=0;
+  for(const i of idx){let d=i-prev;prev=i;while(d>127){out.push((d&127)|128);d=Math.floor(d/128)}out.push(d);out.push(edits.get(i))}return b64(Uint8Array.from(out))}
+function unpackEdits(t){const u=unb64(t);let p=0,cur=0;const m=new Map();while(p<u.length){let d=0,sh=1,b;do{b=u[p++];d+=(b&127)*sh;sh*=128}while(b&128);cur+=d;m.set(cur,u[p++])}return m}
+const r2=v=>Math.round(v*100)/100;
+function collectState(){
+  return{v:1,seed,day,t:r2(tDay),k:kills,e:packEdits(),
+    p:players.map(p=>({x:r2(p.pos.x),y:r2(p.pos.y),z:r2(p.pos.z),a:r2(p.yaw),hp:Math.round(p.hp),hu:Math.round(p.hunger),k:p.kills,w:p.wear,
+      i:Object.fromEntries(Object.entries(p.inv).filter(e=>e[1]>0)),s:p.spawnPt?[r2(p.spawnPt.x),r2(p.spawnPt.y),r2(p.spawnPt.z)]:0})),
+    c:crates.map((c,i)=>c.looted?i:-1).filter(i=>i>=0),d:doors.map(d=>d.gone?2:d.open?1:0).join(''),
+    vh:vehicles.map(v=>[r2(v.pos.x),r2(v.pos.z),r2(v.yaw),Math.round(v.fuel),Math.round(v.hp),v.broken?1:0]),
+    b:beds.slice(initBeds).map(b=>[r2(b.pos.x),r2(b.pos.y),r2(b.pos.z),r2(b.yaw)]),f:fires.map(f=>[r2(f.pos.x),r2(f.pos.y),r2(f.pos.z)]),
+    tr:traps.map(t=>[t.type,r2(t.pos.x),r2(t.pos.y),r2(t.pos.z),t.armed?1:0,t.uses])};
+}
+async function zip(u,mode){if(!window.CompressionStream)return null;try{const st=new Blob([u]).stream().pipeThrough(mode?new DecompressionStream('deflate-raw'):new CompressionStream('deflate-raw'));return new Uint8Array(await new Response(st).arrayBuffer())}catch(e){return null}}
+async function encodeSave(){const raw=new TextEncoder().encode(JSON.stringify(collectState()));const z=await zip(raw,0);return z?'DG1z'+b64(z):'DG1r'+b64(raw)}
+async function decodeSave(code){code=(code||'').trim();if(!/^DG1[zr]/.test(code))throw new Error('Not a Dead Ground save code');
+  let u=unb64(code.slice(4));if(code[3]==='z'){u=await zip(u,1);if(!u)throw new Error('This browser cannot unpack compressed saves')}
+  const st=JSON.parse(new TextDecoder().decode(u));if(st.v!==1)throw new Error('Unknown save version');return st}
+async function autoSave(){if(!running)return;try{localStorage.setItem('deadground-save',await encodeSave())}catch(e){}}
+function applyState(st){
+  const em=unpackEdits(st.e);for(const[i,v]of em){vox[i]=v;edits.set(i,v)}
+  (st.c||[]).forEach(i=>{const c=crates[i];if(c){c.looted=true;c.lid.position.set(.25,.75,0);c.lid.rotation.z=-.7}});
+  [...(st.d||'')].forEach((ch,i)=>{const d=doors[i];if(!d)return;if(ch==='2'){d.gone=true;scene.remove(d.pivot);for(const c of d.cells){if(get(...c)===B.DOOR)setv(...c,0);doorMap.delete(dkey(...c))}}
+    else if(ch==='1'){d.open=true;d.ang=-d.inward*Math.PI/2;for(const c of d.cells)setv(...c,0)}});
+  (st.vh||[]).forEach((a,i)=>{const v=vehicles[i];if(!v)return;v.pos.x=a[0];v.pos.z=a[1];v.yaw=a[2];v.fuel=a[3];v.hp=a[4];v.broken=!!a[5];
+    let gy=H-1;while(gy>0&&get(vc(a[0]),gy,vc(a[1]))===0)gy--;v.gy=gy;v.pos.y=(gy+1)*VS});
+  (st.b||[]).forEach(a=>makeBed(a[0],a[1],a[2],a[3]));(st.f||[]).forEach(a=>makeFire(a[0],a[1],a[2]));
+  (st.tr||[]).forEach(a=>{const t={type:a[0],name:(TRAPS.find(x=>x[0]===a[0])||[0,'Trap'])[1],armed:!!a[4],cd:0,uses:a[5],gone:false};t.g=makeTrapMesh(t);t.g.position.set(a[1],a[2],a[3]);scene.add(t.g);t.pos=t.g.position;
+    if(t.type==='beartrap'&&!t.armed){t.jaws[0].rotation.x=-1.45;t.jaws[1].rotation.x=1.45}traps.push(t)});
+  day=st.day;tDay=st.t;kills=st.k||0;
+  st.p.forEach((s,i)=>{const p=players[i];if(!p)return;p.pos.set(s.x,s.y+.05,s.z);p.yaw=s.a;p.hp=s.hp;p.hunger=s.hu;p.kills=s.k||0;p.eye=p.pos.y+1.6;
+    for(const k in p.inv)p.inv[k]=0;Object.assign(p.inv,s.i);p.wear=Object.assign({head:null,body:null,legs:null},s.w);updateClothes(p);
+    p.spawnPt=s.s?new V3(s.s[0],s.s[1],s.s[2]):null});
+}
+function setMsg(t){$('#genMsg').textContent=t}
+function worldSummary(){return`Seed ${seed} · ${towns.length} towns · ${crates.length} crates · ${doors.length} doors · ${vehicles.length} vehicles · ${beds.length} beds`}
+function preload(){streamChunks([spawn],1e9)}
+function withSeed(ns,then){const btns=document.querySelectorAll('#start button');btns.forEach(b=>b.disabled=true);
+  if(ns===seed&&worldReady){btns.forEach(b=>b.disabled=false);then();return}
+  setMsg('Generating world…');setTimeout(()=>{resetWorld(ns);preload();setMsg(worldSummary());btns.forEach(b=>b.disabled=false);then()},40)}
+function readSeed(){const v=$('#seedIn').value.trim();if(!v)return seed;if(/^-?\d+$/.test(v))return +v|0;let h=2166136261;for(const c of v)h=Math.imul(h^c.charCodeAt(0),16777619);return h|0}
+function play(n){const ns=readSeed();try{localStorage.setItem('deadground-seed',String(ns))}catch(e){}withSeed(ns,()=>{loadingSave=false;startGame(n)})}
+async function loadCode(code){
+  let st;try{st=await decodeSave(code)}catch(e){setMsg(e.message);return}
+  withSeed(st.seed,()=>{loadingSave=true;startGame(Math.max(1,st.p.length));applyState(st);for(let k=0;k<NC*NC;k++)if(loaded[k])buildChunk(k%NC,(k/NC)|0);msg(null,`Save loaded — day ${day}`)})}
+// render distance pickers
+for(const id of['#rdSel','#rdSel2']){const el=$(id);el.innerHTML=[4,6,8,10,12,16].map(v=>`<option value="${v}">${v} chunks (${v*CS*VS} m)</option>`).join('');el.value=String(RD);
+  el.addEventListener('change',()=>{RD=+el.value;$('#rdSel').value=$('#rdSel2').value=String(RD);try{localStorage.setItem('deadground-rd',String(RD))}catch(e){}})}
+$('#bSolo').onclick=()=>play(1);
+$('#bCoop').onclick=()=>play(2);
+$('#bRand').onclick=()=>{$('#seedIn').value=String((Math.random()*1e9)|0)};
+$('#bLoad').onclick=()=>loadCode($('#codeIn').value);
+$('#bCont').onclick=()=>{try{loadCode(localStorage.getItem('deadground-save'))}catch(e){}};
+$('#mSave').onclick=async()=>{await autoSave();$('#mSaveNote').textContent='Saved in this browser.'};
+$('#mCode').onclick=async()=>{const c=await encodeSave();const o=$('#mCodeOut');o.value=c;o.classList.remove('hidden');o.select();
+  let ok=false;try{await navigator.clipboard.writeText(c);ok=true}catch(e){}$('#mSaveNote').textContent=`${ok?'Copied':'Select and copy the code above'} — ${c.length.toLocaleString()} characters for the whole world.`};
+try{if(localStorage.getItem('deadground-save'))$('#bCont').classList.remove('hidden')}catch(e){}
+for(const o of scene.children)baseObjs.add(o);
+document.querySelectorAll('#start button').forEach(b=>b.disabled=true);
+setTimeout(()=>{worldInit();preload();$('#seedIn').placeholder=String(seed);setMsg(worldSummary());document.querySelectorAll('#start button').forEach(b=>b.disabled=false)},40);
 updSky();requestAnimationFrame(frame);
 }
 </script>
