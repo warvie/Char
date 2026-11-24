@@ -326,6 +326,10 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>Pixel size <select id="pixSel"></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
+    <h4>v14.1 · Nov 24, 2026 — smoother</h4><ul>
+      <li>No more freezes when you cross into a new area: the world swaps regions one at a time over several frames, keeps each region's terrain heights cached, and skips re-packing regions you didn't change.</li>
+      <li>Fixed a leak that piled up copies of the passing airliner.</li>
+      <li>Clouds, airliners and birds now always show when you look up, at any render distance, and the fog no longer greys them out.</li></ul>
     <h4>v14 · Nov 24, 2026 — realism</h4><ul>
       <li>Thirst: a water bar. Bottled water and soda in stores; fill bottles at rivers and ponds (boil at a fire or risk getting sick); rain fills empty bottles.</li>
       <li>Injuries: bites and gunshots can make you bleed (bandage it, or it gets infected), or hurt an arm (weaker swings, shaky aim) or a leg (limp, no sprinting). Splints speed healing; antibiotics cure infection.</li>
@@ -569,7 +573,7 @@ const rkey=(rx,rz)=>rx+','+rz;
 function rhash(rx,rz,salt){let h=Math.imul(rx|0,0x27d4eb2d)^Math.imul(rz|0,0x165667b1)^Math.imul(salt|0,0x9e3779b1)^seed;h=Math.imul(h^h>>>15,0x85ebca6b);h=Math.imul(h^h>>>13,0xc2b2ae35);return(h^h>>>16)|0}
 function reg(rx,rz){const k=rkey(rx,rz);let R=regions.get(k);if(!R){R={rx,rz,key:k,edits:new Map(),st:null,live:false,spec:null,rle:null,hm:null,lru:0,rosterDone:false};regions.set(k,R)}return R}
 const regAt=(x,z)=>reg(Math.floor(x/RS),Math.floor(z/RS));
-function recEdit(x,y,z,v){const rx=Math.floor(x/RS),rz=Math.floor(z/RS);reg(rx,rz).edits.set((y*RS+(z-rz*RS))*RS+(x-rx*RS),v)}
+function recEdit(x,y,z,v){const rx=Math.floor(x/RS),rz=Math.floor(z/RS),Rr=reg(rx,rz);Rr.vdirty=true;Rr.edits.set((y*RS+(z-rz*RS))*RS+(x-rx*RS),v)}
 // towns: a big one at the origin, about 3 in 4 regions elsewhere get a small town (sometimes two)
 function planRegion(rx,rz){const k=rkey(rx,rz);let L=planCache.get(k);if(L)return L;L=[];const r=mulberry(rhash(rx,rz,1)),X0=rx*RS,Z0=rz*RS;
   const mk=(x0,z0,n)=>L.push({x0,z0,n,x1:x0+TSZ(n)-1,z1:z0+TSZ(n)-1,rk:k});
@@ -596,7 +600,7 @@ const topW=(x,z)=>(topY(vc(x),vc(z))+1)*VS;
 const AREA=RS*RS/(640*640); // this region's share of the old fixed-size world, to scale feature counts
 function genRegion(Rg){
   const X0=Rg.rx*RS,Z0=Rg.rz*RS,X1=X0+RS,Z1=Z0+RS,RR=RS*RS,topB=new Uint8Array(RR),capQ=new Uint8Array(RR),hh=new Int16Array(RR);
-  regionHeights(Rg,topB,capQ,hh);
+  regionHeights(Rg,topB,capQ,hh);{const hc=new Int16Array(RR);for(let z=0;z<RS;z++){const o=md(Z0+z)*W;for(let x=0;x<RS;x++)hc[z*RS+x]=hmap[o+md(X0+x)]}Rg.base=[topB,capQ,hh,hc]}
   // pass 2: fill every cell of the region's slot in the ring buffer (clearing whatever was there)
   genFill(Rg,topB,capQ,hh);
   restOfRegion(Rg);
@@ -4942,20 +4946,22 @@ function updLamps(){const cp=viewPos(),near=[];
   lampLights.forEach((l,i)=>{const n=near[i];if(n&&n[0]<45){l.position.set(n[1],n[2]-.1,n[3]);l.intensity=.6+dk*1.4}else l.intensity=0})}
 // ---------------- an airliner crossing the sky now and then, with the long roar trailing behind it
 let flyer=null,flyT=90;
-function makeFlyer(){const g=new THREE.Group(),wh=0xe4e6ea,gr=0xa8acb2,MC={},part=(g,w,h,d,c,x,y,z)=>{const m=new THREE.Mesh(box(w,h,d),MC[c]||(MC[c]=new THREE.MeshLambertMaterial({color:c,fog:false})));m.position.set(x,y,z);g.add(m);return m};part(g,2.6,2.6,24,wh,0,0,0);part(g,2.62,.4,24,pick([0x2a5aa0,0xc0282a,0x2a7a4a]),0,-.6,0);part(g,1.7,1.7,2,wh,0,-.1,13);part(g,1.2,1.2,3,wh,0,.4,-13.5);
+function makeFlyer(){const g=new THREE.Group(),wh=0xe4e6ea,gr=0xa8acb2,MC={},part=(g,w,h,d,c,x,y,z)=>{const m=new THREE.Mesh(box(w,h,d),MC[c]||(MC[c]=new THREE.MeshLambertMaterial({color:c,fog:false,depthWrite:false})));m.renderOrder=6;m.frustumCulled=false;m.position.set(x,y,z);g.add(m);return m};part(g,2.6,2.6,24,wh,0,0,0);part(g,2.62,.4,24,pick([0x2a5aa0,0xc0282a,0x2a7a4a]),0,-.6,0);part(g,1.7,1.7,2,wh,0,-.1,13);part(g,1.2,1.2,3,wh,0,.4,-13.5);
   part(g,26,.3,3.6,gr,0,-.8,1);part(g,.3,4,3,wh,0,2.8,-13);part(g,8,.2,1.8,gr,0,.5,-13.5);for(const sx of[-1,1])part(g,1.2,1.2,3,gr,sx*5,-1.6,2);
-  const lt=(c,x,y,z)=>{const m=part(g,.35,.35,.35,0,x,y,z);m.material=new THREE.MeshBasicMaterial({color:c,fog:false});return m};g.userData.blink=[lt(0xff2020,-13,-.8,1),lt(0x20ff40,13,-.8,1),lt(0xffffff,0,-1.4,0)];
+  const lt=(c,x,y,z)=>{const m=part(g,.35,.35,.35,0,x,y,z);m.material=new THREE.MeshBasicMaterial({color:c,fog:false,depthWrite:false});return m};g.userData.blink=[lt(0xff2020,-13,-.8,1),lt(0x20ff40,13,-.8,1),lt(0xffffff,0,-1.4,0)];
   scene.add(g);return g}
 function updFlyer(dt){flyT-=dt;const cp=viewPos();
   if(!flyer&&flyT<=0){const a=rng()*6.28,dir=new V3(Math.sin(a),0,Math.cos(a)),side=new V3(dir.z,0,-dir.x).multiplyScalar(R(-250,250));
-    const g=makeFlyer(),start=cp.clone().addScaledVector(dir,-1400).add(side);start.y=R(150,230);g.rotation.y=a;flyer={g,dir,t:0,p:start}}
+    const start=new V3(cp.x+dir.x*-1400+side.x,R(150,230),cp.z+dir.z*-1400+side.z),g=makeFlyer();flyer={g,dir,t:0,p:start};g.rotation.y=a}
   if(!flyer){if(amb.jet)amb.jet.g.gain.setTargetAtTime(0,AC.currentTime,.5);return}
   // the camera only sees ~150 m, so the plane is drawn closer and smaller along the same line of sight (same apparent size)
-  flyer.t+=dt;flyer.p.addScaledVector(flyer.dir,75*dt);{const dd=flyer.p.distanceTo(cp),k=Math.min(1,110/dd);flyer.g.position.copy(cp).lerp(flyer.p,k);flyer.g.scale.setScalar(k)}const bl=flyer.g.userData.blink;for(let i=0;i<3;i++)bl[i].visible=((flyer.t*(i===2?1.3:1))%1.2)<.15||i<2&&dayLight()<.3;
+  flyer.t+=dt;flyer.p.addScaledVector(flyer.dir,75*dt);fitSky(flyer.g,flyer.p);const bl=flyer.g.userData.blink;for(let i=0;i<3;i++)bl[i].visible=((flyer.t*(i===2?1.3:1))%1.2)<.15||i<2&&dayLight()<.3;
   const d=flyer.p.distanceTo(cp);
   if(amb.jet&&AC){const t=AC.currentTime,v=Math.max(0,1-d/1500);amb.jet.g.gain.setTargetAtTime(v*v*.5,t,.6);amb.jet.f.frequency.setTargetAtTime(120+v*380,t,.6)}
   if(flyer.t>40){scene.remove(flyer.g);flyer=null;flyT=R(140,320)}}
 // ---------------- clouds, birds and the eerie soundscape
+const _skyP=new V3();
+function fitSky(o,P,base=1){const c=players[0]&&players[0].cam;if(!c){o.position.copy(P);return}const lim=c.far*.78,d=P.distanceTo(c.position),k=Math.min(1,lim/Math.max(d,1e-3));o.position.copy(c.position).lerp(P,k);o.scale.setScalar(k*base)}
 // clouds: slabs of chunky pixel cloud high overhead, drifting with the wind and tiled around the viewer; greyer and darker in storms and at night
 const cloudG=new THREE.Group(),cloudMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.86,fog:false,depthWrite:false});cloudG.renderOrder=-1;scene.add(cloudG);
 const CLT=320;{const r=mulberry(9137);for(let n=0;n<22;n++){const cx=(r()-.5)*CLT,cz=(r()-.5)*CLT,cy=r()*8,P=[];
@@ -4968,8 +4974,7 @@ let cloudOff=0;
 function updClouds(dt){const cp=viewPos();cloudOff+=dt*(1.2+Math.abs(WX.wind)*2.5);const dl=dayLight(),storm=WX.type==='storm'||WX.type==='rain'?WX.amt:0;
   cloudMat.color.setRGB(Math.max(.08,.25+.75*dl-.35*storm),Math.max(.08,.27+.73*dl-.35*storm),Math.max(.1,.3+.7*dl-.3*storm));cloudMat.side=THREE.DoubleSide;cloudMat.opacity=.55+.3*(1-dl*.3)+storm*.12;
   for(const m of cloudG.children){if(m.userData.bx==null){m.userData.bx=m.position.x;m.userData.bz=m.position.z}
-    const wrap=v=>((v%CLT)+CLT*1.5)%CLT-CLT/2;m.position.x=cp.x+wrap(m.userData.bx+cloudOff-cp.x);m.position.z=cp.z+wrap(m.userData.bz-cp.z)}
-  cloudG.position.y=0;for(const m of cloudG.children)m.position.y=(m.userData.by??(m.userData.by=m.position.y))+Math.max(95,cp.y+80)}
+    const wrap=v=>((v%CLT)+CLT*1.5)%CLT-CLT/2;_skyP.set(cp.x+wrap(m.userData.bx+cloudOff-cp.x),(m.userData.by??(m.userData.by=m.position.y))+Math.max(95,cp.y+80),cp.z+wrap(m.userData.bz-cp.z));fitSky(m,_skyP)}}
 // birds: small flocks crossing in loose V's by day, wings flapping; crows hang about over the ruins
 const flocks=[];let flockT=8;
 function makeBird(dark){const g=new THREE.Group(),c=dark?0x1a1a1c:0x4a4038,mat=new THREE.MeshLambertMaterial({color:c,fog:false});const b=new THREE.Mesh(box(.12,.1,.34),mat);g.add(b);
@@ -4978,7 +4983,7 @@ function updBirds(dt){const cp=viewPos(),dl=dayLight();flockT-=dt;
   if(flockT<=0&&flocks.length<2&&dl>.35){flockT=R(25,70);const a=rng()*6.28,dir=new V3(Math.sin(a),0,Math.cos(a)),n=RI(4,11),dark=rng()<.5,start=cp.clone().addScaledVector(dir,-90).add(new V3(dir.z,0,-dir.x).multiplyScalar(R(-40,40)));start.y=cp.y+R(18,40);
     const F={dir,pos:start,t:0,birds:[],sp:R(7,11)};for(let i=0;i<n;i++){const b=makeBird(dark),row=Math.ceil(i/2),side=i%2?1:-1;b.userData.off=new V3(side*row*1.4+R(-.3,.3),R(-.6,.6),-row*1.6);F.birds.push(b)}flocks.push(F);if(rng()<.5)try{for(let k=0;k<3;k++)sTone(R(2400,3200),R(1800,2600),.09,.03,'sine',.4,.15*k+R(0,.1))}catch(e){}}
   for(let i=flocks.length-1;i>=0;i--){const F=flocks[i];F.t+=dt;F.pos.addScaledVector(F.dir,F.sp*dt);F.pos.y+=Math.sin(F.t*.6)*.05;const yaw=Math.atan2(F.dir.x,F.dir.z),c=Math.cos(yaw),s=Math.sin(yaw);
-    for(const b of F.birds){const o=b.userData.off;b.position.set(F.pos.x+o.x*c+o.z*s,F.pos.y+o.y,F.pos.z-o.x*s+o.z*c);b.rotation.y=yaw;const f=Math.sin(F.t*13+b.userData.ph)*.7;b.userData.wl.rotation.z=f;b.userData.wr.rotation.z=-f}
+    for(const b of F.birds){const o=b.userData.off;_skyP.set(F.pos.x+o.x*c+o.z*s,F.pos.y+o.y,F.pos.z-o.x*s+o.z*c);fitSky(b,_skyP);b.rotation.y=yaw;const f=Math.sin(F.t*13+b.userData.ph)*.7;b.userData.wl.rotation.z=f;b.userData.wr.rotation.z=-f}
     if(F.t>30){for(const b of F.birds)scene.remove(b);flocks.splice(i,1)}}}
 // eerie ambience: far-off moans carried on the wind, metal groaning, a door banging somewhere, a dog howling, the wind whistling through broken windows
 let eerieT=12;
@@ -5028,7 +5033,7 @@ function dailyDecay(){const ROT={meat:.6,cooked:.4,veg:.3,roast:.3,stew:.3,broth
   const pc=players[0]&&players[0].pos;if(!pc)return;const cx=vc(pc.x),cz=vc(pc.z);let n=0;
   for(let t=0;t<900&&n<60;t++){const x=cx+RI(-120,120),z=cz+RI(-120,120),y=topY(x,z);if(get(x,y,z)!==B.ASPH||get(x,y+1,z))continue;let g=0;for(const[dx,dz]of[[1,0],[-1,0],[0,1],[0,-1]]){const nb=get(x+dx,topY(x+dx,z+dz),z+dz);if(nb===B.GRASS||nb===B.DIRT||(nb>=23&&nb<=25))g++};
     if(g&&rng()<.6){{const sp=['weeds',(x+.5)*VS,(y+1)*VS,(z+.5)*VS,rng()*6.28,{n:RI(4,9)}];sp.user=true;const R=reg(Math.floor(x/RS),Math.floor(z/RS));if(R.spec)R.spec.furnSpecs.push(sp);furnSpecs.push(sp)}n++}}
-  if(n){FBUF.clear();buildFurnMeshes(furnSpecs)}
+  if(n){const ks=new Set();for(const sp of furnSpecs.slice(-n)){FBUF.clear();buildOne(sp);ks.add(sp.k)}FBUF.clear();for(const k of ks)buildFurnMeshes(furnSpecs,k)}
   for(const v of vehicles){if(v.driver||v.two)continue;v.age=(v.age|0)+1;if(rng()<.35){try{splat3(pick(frontParts(v,rng()<.5?1:-1,.3)||[v.g.children[0]]),1,1,[0x6a3a1a,0x7a4a22,0x5a2a12],R(.06,.14),RI(2,4))}catch(e){}}
     if(v.age>3&&rng()<.15&&v.wheels){const w=v.wheels.find(w=>w.visible&&w.scale.y>.9);if(w){w.scale.y*=.82;w.position.y-=.06;v.flat=(v.flat|0)+1}}}}
 function update(dt){
@@ -5121,15 +5126,18 @@ function lzd(src,out){let ip=0,op=0;while(ip<src.length){const t=src[ip++];let l
   let r=op-off;for(let k=0;k<len;k++)out[op++]=out[r++]}return out}
 // every cell is compared with the bare terrain the seed would generate there; only differences (buildings, caves, trees, your edits) survive as non-zero bytes
 const baseCell=(y,cq,h,tb,wx,z)=>y===0?13:y<h-7?(y<h-8?ORE(h3(wx,y,z))||3:3):y<h?(tb===3?3:2):y===h?(cq?(tb===7?7:2):tb):y===h+1&&cq?22+cq:0;
-function regionBase(R){const RR=RS*RS,tb=new Uint8Array(RR),cq=new Uint8Array(RR),hh=new Int16Array(RR);regionHeights(R,tb,cq,hh);return[tb,cq,hh]}
-function rleEncode(R){const X0=R.rx*RS,Z0=R.rz*RS,[tb,cqa,hh]=regionBase(R);let o=0;
+function regionBase(R,writeH){const X0=R.rx*RS,Z0=R.rz*RS;
+  if(R.base){if(writeH){const hc=R.base[3];for(let z=0;z<RS;z++){const o=md(Z0+z)*W;for(let x=0;x<RS;x++)hmap[o+md(X0+x)]=hc[z*RS+x]}}return R.base}
+  const RR=RS*RS,tb=new Uint8Array(RR),cq=new Uint8Array(RR),hh=new Int16Array(RR);regionHeights(R,tb,cq,hh);const hc=new Int16Array(RR);for(let z=0;z<RS;z++){const o=md(Z0+z)*W;for(let x=0;x<RS;x++)hc[z*RS+x]=hmap[o+md(X0+x)]}
+  return R.base=[tb,cq,hh,hc]}
+function rleEncode(R){const X0=R.rx*RS,Z0=R.rz*RS,[tb,cqa,hh]=regionBase(R,false);let o=0;
   for(let y=0;y<H;y++)for(let z=Z0;z<Z0+RS;z++){let i=(y*W+md(z))*W+md(X0),c=(z-Z0)*RS;for(let x=X0;x<X0+RS;x++,i++,c++){const v=vox[i],cq=cqa[c],h=hh[c]-(cq?1:0);
     let bv=baseCell(y,cq,h,tb[c],x,z);if(bv===5&&!(y<h-12))bv=3;RBUF[o++]=v===bv?0:v===0?254:v}}
   R.rle=lzc(RBUF)}
-function rleDecode(R){const X0=R.rx*RS,Z0=R.rz*RS;lzd(R.rle,RBUF);const[tb,cqa,hh]=regionBase(R);let o=0;
+function rleDecode(R){const X0=R.rx*RS,Z0=R.rz*RS;lzd(R.rle,RBUF);const[tb,cqa,hh]=regionBase(R,true);let o=0;
   for(let y=0;y<H;y++)for(let z=Z0;z<Z0+RS;z++){let i=(y*W+md(z))*W+md(X0),c=(z-Z0)*RS;for(let x=X0;x<X0+RS;x++,i++,c++){const t=RBUF[o++];
     if(t===0){const cq=cqa[c],h=hh[c]-(cq?1:0);let bv=baseCell(y,cq,h,tb[c],x,z);if(bv===5&&!(y<h-12))bv=3;vox[i]=bv}else vox[i]=t===254?0:t}}}
-function evictCache(){const c=[...regions.values()].filter(R=>!R.live&&R.rle).sort((a,b)=>b.lru-a.lru);for(const R of c.slice(RLE_MAX)){R.rle=null;R.spec=null}}
+function evictCache(){const c=[...regions.values()].filter(R=>!R.live&&R.rle).sort((a,b)=>b.lru-a.lru);for(const R of c.slice(RLE_MAX)){R.rle=null;R.spec=null;R.base=null}for(const R of regions.values())if(!R.live&&!R.rle)R.base=null}
 const cacheBytes=()=>{let n=0;for(const R of regions.values())if(R.rle)n+=R.rle.length;return n};
 const inReg=(R,x,z)=>Math.floor(x/VS/RS)===R.rx&&Math.floor(z/VS/RS)===R.rz;
 function loadRegion(R){
@@ -5141,7 +5149,7 @@ function loadRegion(R){
     for(const c of campSpecs)if(!c[2]){const ty=topY(c[0],c[1]);crateSpots.push([(c[0]+.5)*VS-1.2,(ty+1)*VS,(c[1]+.5)*VS-1.4,!!c[3]])}
     R.spec={};for(const k of SPEC_KEYS)R.spec[k]=SCRATCH[k].slice();clearScratch();
     const X0=R.rx*RS,Z0=R.rz*RS;for(const[li,v]of R.edits){const x=li%RS,z=((li/RS)|0)%RS,y=(li/(RS*RS))|0;vox[(y*W+md(Z0+z))*W+md(X0+x)]=v}}
-  R.live=true;rng=mulberry(rhash(R.rx,R.rz,3)^day);spawnRegion(R);rng=sv;REC=rec;
+  R.live=true;R.vdirty=false;rng=mulberry(rhash(R.rx,R.rz,3)^day);spawnRegion(R);rng=sv;REC=rec;
 }
 function spawnRegion(Rg){
   const S=Rg.spec,st=Rg.st||{},first=!Rg.visited;Rg.visited=true;Rg.objs=[];
@@ -5200,7 +5208,7 @@ function unloadRegion(R,keep=true){
   // chunk meshes + furniture in the region's slots
   const cx0=R.rx*RS/CS,cz0=R.rz*RS/CS,n=RS/CS;
   for(let dz=0;dz<n;dz++)for(let dx=0;dx<n;dx++){const k=slotOf(cx0+dx,cz0+dz);if(loaded[k])unloadChunk(k);dirtyC.delete(k);if(furnMeshes[k]){gone(furnMeshes[k]);furnMeshes[k].geometry.dispose();furnMeshes[k]=null}}
-  if(keep){rleEncode(R);R.lru=++lruT}else{R.rle=null;R.spec=null}
+  if(keep){if(!R.rle||R.vdirty)rleEncode(R);R.vdirty=false;R.lru=++lruT}else{R.rle=null;R.spec=null;R.base=null}
   R.live=false;
 }
 function rebuildGlobals(){for(const k of SPEC_KEYS)SCRATCH[k].length=0;
@@ -5208,7 +5216,15 @@ function rebuildGlobals(){for(const k of SPEC_KEYS)SCRATCH[k].length=0;
   roomIdx.clear();winIdx.clear();trimOff.clear();for(const R of regions.values())if(R.live&&R.to)for(const k of R.to)trimOff.add(k);
   for(const[x,y,z,ax,tc,door]of winSpecs)for(let du=0;du<4;du++)for(let dv=0;dv<5;dv++){if(du>0&&du<3&&(door?dv<4:dv>0&&dv<4))continue;const L=(door?DCELL:WCELL)[dv*4+du];if(!L.length)continue;
     winIdx.set(vi(ax?x+du:x,y+dv,ax?z:z+du),{L,ax,tc})}}
-function setWindow(nox,noz,force){
+let winQ=[],winTarget=null;
+function winStep(){const op=winQ.shift();if(op[0]==='u')unloadRegion(op[1]);else loadRegion(op[1]);if(winQ.length)rebuildGlobals();
+  if(!winQ.length){const[nox,noz]=winTarget;winTarget=null;OX=nox;OZ=noz;planTowns();blockDmg.clear();rebuildGlobals();evictCache();for(let k=0;k<NC*NC;k++)if(loaded[k])dirtyC.add(k);rtDirty=true;RTW.ox=-1e9}}
+function setWindow(nox,noz,force,stagger){
+  if(stagger&&!force){const want=new Set(),wx=nox/RS,wz=noz/RS;for(let dz=0;dz<3;dz++)for(let dx=0;dx<3;dx++)want.add(rkey(wx+dx,wz+dz));
+    const out=[...regions.values()].filter(R=>R.live&&!want.has(R.key)),inn=[...want].map(k=>{const[a,b]=k.split(',').map(Number);return reg(a,b)}).filter(R=>!R.live);
+    const slot=(A,B_)=>((A.rx-B_.rx)%3+3)%3===0&&((A.rz-B_.rz)%3+3)%3===0;
+    if(out.length===inn.length&&inn.every(N=>out.some(O=>slot(O,N)))){winQ=[];for(const N of inn){const O=out.find(O=>slot(O,N));winQ.push(['u',O],['l',N])}winTarget=[nox,noz];return}}
+  winQ=[];winTarget=null;
   const want=new Set(),wx=nox/RS,wz=noz/RS;for(let dz=0;dz<3;dz++)for(let dx=0;dx<3;dx++)want.add(rkey(wx+dx,wz+dz));
   for(const R of regions.values())if(R.live&&(force||!want.has(R.key)))unloadRegion(R);
   OX=nox;OZ=noz;planTowns();blockDmg.clear();
@@ -5220,13 +5236,13 @@ function setWindow(nox,noz,force){
 }
 // keep the window centred on the players, with some slack so walking back and forth across a border doesn't thrash
 const SLACK=56;
-function updateWindow(force){
+function updateWindow(force){if(winQ.length&&!force){winStep();return}if(force&&winQ.length){while(winQ.length)winStep()}
   const cs=running?players.filter(p=>p.dead<=0||true).map(p=>p.vehicle?p.vehicle.pos:p.pos):[spawn];if(!cs.length)return;
   let cx=0,cz=0;for(const c of cs){cx+=c.x;cz+=c.z}cx=cx/cs.length/VS;cz=cz/cs.length/VS;
   const mx=OX+RS,mz=OZ+RS;let nox=OX,noz=OZ;
   if(force||cx<mx-SLACK||cx>=mx+RS+SLACK)nox=(Math.floor(cx/RS)-1)*RS;
   if(force||cz<mz-SLACK||cz>=mz+RS+SLACK)noz=(Math.floor(cz/RS)-1)*RS;
-  if(nox!==OX||noz!==OZ||force){setWindow(nox,noz,false);if(running)for(const p of players)if(!inWin(vc(p.pos.x)-24,vc(p.pos.z)-24)||!inWin(vc(p.pos.x)+24,vc(p.pos.z)+24)){const o=players.find(q=>q!==p);if(o){p.pos.copy(o.pos);p.pos.x+=1;msg(p,'Too far from your partner — pulled back')}}}
+  if(nox!==OX||noz!==OZ||force){setWindow(nox,noz,false,!force);if(winQ.length)return;if(running)for(const p of players)if(!inWin(vc(p.pos.x)-24,vc(p.pos.z)-24)||!inWin(vc(p.pos.x)+24,vc(p.pos.z)+24)){const o=players.find(q=>q!==p);if(o){p.pos.copy(o.pos);p.pos.x+=1;msg(p,'Too far from your partner — pulled back')}}}
 }
 function ensureWindowAt(pos){const cx=pos.x/VS,cz=pos.z/VS;if(cx<OX+RS-SLACK||cx>=OX+2*RS+SLACK||cz<OZ+RS-SLACK||cz>=OZ+2*RS+SLACK)setWindow((Math.floor(cx/RS)-1)*RS,(Math.floor(cz/RS)-1)*RS,false)}
 function worldInit(){
