@@ -52,6 +52,8 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 **Realism:** the block textures got a pass for depth: bevelled bricks with burnt and pale ones mixed in, soot and grime, concrete pores and stains, wood grain and knots, rust running from rivets, shingle rows, leaf clusters and mottling everywhere, at the same pixel count. On High and Ultra the image gets **ambient occlusion** from the depth buffer (corners, creases and contact shadows) and a soft **glow** around bright light. Every level gets a **filmic tone curve**.
 
+**Pause menu (Esc):** resume, *Respawn (unstuck)*, or **teleport** to your bed, the crossroads, the nearest town, a random town or your co-op partner.
+
 **Unstuck:** a *Respawn* button is always on screen (and the ` key; = for player 2; *Unstuck* on phones). It puts you back at your respawn point with everything you're carrying, for when you glitch into something.
 
 **No overlapping UI:** the HUD is laid out (and checked by script) for desktop, laptop, split-screen, phones in portrait and landscape, and tablets, so nothing sits on top of anything else.

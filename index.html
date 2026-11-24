@@ -307,7 +307,9 @@ body.touch .prompt{top:auto;bottom:calc(50% + 22px);font-size:10px;line-height:1
 
 <div id="pause" class="screen hidden" style="background:rgba(0,0,0,.6)"><div class="kit" style="max-width:420px;text-align:center">
   <h2 style="font-size:40px;color:var(--rust)">Paused</h2><p class="sub" style="margin:8px auto 16px">Click to take back the mouse and keep surviving.</p>
-  <button class="go" id="bResume">Resume</button></div></div>
+  <button class="go" id="bResume">Resume</button>
+  <div class="row" style="justify-content:center;margin-top:14px"><button id="pRsp">Respawn (unstuck)</button></div>
+  <p class="note" style="margin:14px 0 6px">Teleport to</p><div class="row" id="pTp" style="justify-content:center"></div></div></div>
 
 <div id="menu" class="screen hidden" style="background:rgba(0,0,0,.55)"><div class="kit">
   <h2 id="mTitle">Attaché case</h2>
@@ -2032,7 +2034,7 @@ addEventListener('mousemove',e=>{if(document.pointerLockElement===canvas&&player
 function lock(){try{const r=canvas.requestPointerLock();if(r&&r.catch)r.catch(()=>{})}catch(e){}}
 document.addEventListener('pointerlockchange',()=>{const l=document.pointerLockElement===canvas;
   if(l){wasLocked=true;if(paused){paused=false;$('#pause').classList.add('hidden')}}
-  else if(wasLocked&&running&&players.length===1&&!menuP){paused=true;$('#pause').classList.remove('hidden')}});
+  else if(wasLocked&&running&&players.length===1&&!menuP){paused=true;renderPause();$('#pause').classList.remove('hidden')}});
 const k=c=>keys[c]?1:0,pr=c=>pressed.has(c);
 const gpPrev=[[],[]];
 function gpRead(slot,inp){
@@ -2814,6 +2816,18 @@ $('#mWear').addEventListener('click',e=>{const b=e.target.closest('button');if(!
 $('#mEat').onclick=()=>{if(menuP){eat(menuP);renderMenu()}};
 $('#mBand').onclick=()=>{if(menuP){heal(menuP);renderMenu()}};
 $('#mClose').onclick=closeMenu;
+// pause menu: unstick or teleport (bed, crossroads, nearest or random town, your partner)
+function tpTargets(p){const T=[];if(p.spawnPt)T.push(['Your bed',()=>p.spawnPt.clone()]);T.push(['Crossroads',()=>{const v=spawn.clone();v.x+=p.i*1.5;return v}]);
+  const tc=t=>{const k=Math.floor(t.n/2);return new V3((t.x0+P*k+6)*VS,(G+1)*VS,(t.z0+P*k+6)*VS)},px=p.pos.x/VS,pz=p.pos.z/VS,dist=t=>Math.hypot((t.x0+t.x1)/2-px,(t.z0+t.z1)/2-pz);
+  const other=towns.filter(t=>!(px>=t.x0&&px<=t.x1&&pz>=t.z0&&pz<=t.z1)).sort((a,b)=>dist(a)-dist(b));
+  if(other.length)T.push(['Nearest town',()=>tc(other[0])]);if(towns.length)T.push(['Random town',()=>tc(pick(towns))]);
+  const o=players.find(q=>q!==p&&q.dead<=0);if(o)T.push([`Player ${o.i+1}`,()=>{const v=(o.vehicle?o.vehicle.pos:o.pos).clone();v.x+=1.2;return v}]);return T}
+function teleport(p,pos){if(p.vehicle)exitVehicle(p);p.sleeping=null;p.body.g.rotation.x=0;p.pos.copy(pos);ensureWindowAt(p.pos);
+  // land on the ground (not inside a wall): rise until the space is clear
+  for(let i=0;i<40&&hit(p.pos.x,p.pos.y+.02,p.pos.z,.3,1.75);i++)p.pos.y+=VS;p.vel.set(0,0,0);p.eye=p.pos.y+1.6;msg(p,'Teleported')}
+function renderPause(){const p=players[0];if(!p){$('#pTp').innerHTML='';return}$('#pTp').innerHTML=tpTargets(p).map(([n],i)=>`<button data-i="${i}">${n}</button>`).join('')}
+$('#pTp').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');const p=players[0];if(!b||!p)return;const t=tpTargets(p)[+b.dataset.i];if(t){teleport(p,t[1]());$('#bResume').click()}});
+$('#pRsp').onclick=()=>{const p=players[0];if(p)unstick(p);$('#bResume').click()};
 $('#bResume').onclick=()=>{paused=false;$('#pause').classList.add('hidden');lock()};
 
 // ---------------- ladders + manholes
