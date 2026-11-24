@@ -41,11 +41,17 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 **Pixel size** (start screen or case): the 3D view renders at ½, ⅓ or ¼ of the screen resolution and is scaled up with hard pixel edges (×2 by default), or *Smooth* for full resolution. The UI is pixelated to match, with pixel fonts, hard bevels and hand-drawn 16×16 pixel-art icons.
 
-**Pixel shadows everywhere:** every shadow (on blocks, furniture, grass, people and cars) is looked up on the same 1/32 m texture-pixel grid, so all shadow edges are pixelated.
+**8 × 8 pixels per block:** every block face shows an 8 × 8 texture (point-sampled so mortar lines and board joints stay crisp).
+
+**Pixel shadows everywhere:** every shadow (on blocks, furniture, grass, people and cars) is looked up on the same 1/16 m texture-pixel grid, so all shadow edges are pixelated.
 
 **Rain:** wet, sky-exposed ground turns into a pixelated mirror. Reflections, ripples and glints are snapped to the texture-pixel grid, and anything under a roof stays dry.
 
 **Realism:** the block textures got a pass for depth: bevelled bricks with burnt and pale ones mixed in, soot and grime, concrete pores and stains, wood grain and knots, rust running from rivets, shingle rows, leaf clusters and mottling everywhere, at the same pixel count. On High and Ultra the image gets **ambient occlusion** from the depth buffer (corners, creases and contact shadows) and a soft **glow** around bright light. Every level gets a **filmic tone curve**.
+
+**Unstuck:** a *Respawn* button is always on screen (and the ` key; = for player 2; *Unstuck* on phones). It puts you back at your respawn point with everything you're carrying, for when you glitch into something.
+
+**No overlapping UI:** the HUD is laid out (and checked by script) for desktop, laptop, split-screen, phones in portrait and landscape, and tablets, so nothing sits on top of anything else.
 
 **All-pixel UI:** a pixel font is built into the game (hand-drawn 5×7 glyphs turned into a real font at startup), so every label, menu, sign and button is crisp pixel type even offline. Touch buttons and the joystick are square too.
 
@@ -93,6 +99,7 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 - **Tents:** abandoned campsites dot the countryside, bandits camp in them, and you can sew your own (5 cloth + 3 wood). Sleep in one like a bed.
 - **Respawn:** when you die, choose your bed, the crossroads or a random town. The case also has a *Respawn (stuck?)* button.
 - **Bunk beds** in some bedrooms, and you can build one (12 planks + 4 cloth).
+- **Chainsaw:** craft one (2 metal + 4 scrap + 1 fuel can) or find it in hardware stores. Press 1 again (or tap Tool) to swap between bat and saw, then hold attack. A few tenths of a second on an arm, leg or neck takes it off; hold it on the torso and the zombie comes apart at the waist, the top half tumbling away. It burns fuel (tops itself up from your fuel cans) and cuts through logs, planks and leaves.
 - **Explosives:** throw **pipe bombs** (Q; craft from 2 scrap + 2 coal) or place **dynamite** (5-second fuse, a much bigger blast that tears through walls; craft from 3 coal + 1 cloth + 1 scrap). Hardware stores stock both. Blasts shake the screen.
 - **Cooking:** at a campfire, pick a recipe: grilled meat, hot beans, roast vegetables, meat stew (food, health and warmth), bone broth (warms you right up) or smoked jerky. It simmers in a pot on the flames for a few seconds, then goes in your case. Vegetables turn up in grocery stores and kitchens.
 - **Crouch (C / Ctrl / Duck):** 1 m tall and slow, enough to climb through a window once the glass is out.
