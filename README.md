@@ -12,7 +12,7 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 - **320 × 320 m world** built from half-metre pixel-textured blocks, with quarter-height grass caps that smooth hills and slopes, a large central town plus several smaller towns, rolling hills and mountains, forests and caves. Every world comes from a **seed**, so the same seed always builds the same world.
 - **Chunk streaming:** only the 8 × 8 m chunks around the players are meshed; the rest load in as you move and unload behind you. Pick a render distance from 32 to 128 m. Fog and camera range follow it.
-- **Realistic towns:** 6 m two-lane roads, 1.5 m sidewalks, 15 m lots, and houses 11–15 m across (level with the sidewalks) with 3.5 m floors, 1–3 storeys, painted drywall in a different colour per room, real stair blocks (two steps per block) with wooden or iron railings, framed windows (some smashed or boarded), front and back doors, stairs and roof access.
+- **Realistic towns:** 6 m two-lane roads, 1.5 m sidewalks, 15 m lots, and houses 11–15 m across (level with the sidewalks) with 3 m storeys (2.5 m ceilings), 1–3 storeys, painted drywall in a different colour per room with baseboards and crown moulding, switchback staircases with landings (two steps per block) and wooden or iron railings, framed windows (some smashed or boarded), front and back doors, stairs and roof access.
 - **Furnished rooms:** each floor is split into rooms joined by doorways and doors.
   - Living rooms: couch facing a flat-screen or an old CRT TV (rabbit ears, VCR) on a TV stand, coffee table, rug, armchair, bookcase.
   - Kitchens: fridge, counters, sink and stove, plus a table and chairs.
@@ -54,7 +54,13 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
   - Seasonal grass and leaves, and in winter snow on the ground, roads, roofs and trees.
   - Rain, storms and snowfall; winter days are shorter.
   - Cold drains your warmth unless you're indoors, by a fire, in a car or wearing a coat.
-- **People:** survivors in the towns shoot zombies and trade with you. Bandits in the wilds shoot on sight.
+- **People:**
+  - Survivors claim a house. By day they forage (raid crates, hunt, pick up carcasses) and carry food back to a stash. They board up open windows and set spike traps at the door.
+  - At night they go home, open the door, close it behind them and sleep. About 1 in 4 are night owls who keep scavenging.
+  - They shoot zombies and trade with you. Raid a stash while its owner sees you and they turn hostile.
+  - Bandits camp around fires and tents in the wilds and shoot on sight.
+- **Tents:** abandoned campsites dot the countryside, bandits camp in them, and you can sew your own (5 cloth + 3 wood). Sleep in one like a bed.
+- **Respawn:** when you die, choose your bed, the crossroads or a random town. The backpack also has a *Respawn (stuck?)* button.
 - **Beds:** sleep through the night (in co-op, both players lie down). A bed also sets your respawn point.
 - **Vehicles:** sedans, pickups, vans, police cruisers, ambulances, city buses and motorcycles. They need fuel and repairs, and they collide with each other, with people and with animals (you can stand on the roofs).
   - First-person cabin at real seat height: you see your own body at the wheel and most of the road.

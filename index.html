@@ -80,6 +80,7 @@ details summary{cursor:pointer;color:var(--dim);font-weight:600;padding:6px 0}
 .hurt{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(150,0,0,.75));opacity:0}
 .dead{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(60,0,0,.55);font:clamp(40px,7vw,80px) 'Bebas Neue',sans-serif;color:#ff6b55}
 .dead small{font:600 16px Barlow,sans-serif;color:var(--ink)}
+.rsp{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;justify-content:center}.rsp button{pointer-events:auto;font:20px 'Bebas Neue',sans-serif;letter-spacing:.04em}.rsp button.on{background:var(--rust);border-color:#e0634c}
 .tag{position:absolute;top:14px;left:50%;transform:translateX(-50%);font:18px 'Bebas Neue',sans-serif;letter-spacing:.05em;background:rgba(0,0,0,.55);padding:3px 12px;border-radius:3px}
 #top{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:6;background:rgba(0,0,0,.7);padding:6px 18px;border-radius:0 0 6px 6px;font:20px 'Bebas Neue',sans-serif;letter-spacing:.05em;white-space:nowrap}
 #top em{font-style:normal;color:var(--rust)}
@@ -206,7 +207,7 @@ body.touch .prompt{top:calc(50% + 34px);font-size:13px;white-space:normal;text-a
   <h3>Workbench</h3>
   <div id="mRec"></div>
   <h3>World</h3>
-  <div class="row"><button id="mSave">Save now</button><button id="mCode">Copy save code</button><label>Render distance <select id="rdSel2"></select></label><label>Graphics <select id="gfxSel2"></select></label></div>
+  <div class="row"><button id="mSave">Save now</button><button id="mRsp">Respawn (stuck?)</button><button id="mCode">Copy save code</button><label>Render distance <select id="rdSel2"></select></label><label>Graphics <select id="gfxSel2"></select></label></div>
   <textarea id="mCodeOut" class="hidden" rows="2" readonly></textarea>
   <p class="note" id="mSaveNote" style="margin:6px 0 0"></p>
   <div class="row" style="margin-top:14px"><button id="mEat">Eat</button><button id="mBand">Use bandage</button><button id="mClose" class="go" style="margin-left:auto">Close</button></div>
@@ -231,7 +232,7 @@ const fbm=(x,z)=>vnoise(x/16,z/16)*.6+vnoise(x/7,z/7)*.3+vnoise(x/3,z/3)*.1;
 
 // ---------------- world data
 // VS = size of one voxel in world units (0.5 = half-size blocks). The world is 96x96 units.
-const VS=.5,W=640,H=68,CS=16,NC=W/CS,G=24,FH=7,P=48;
+const VS=.5,W=640,H=68,CS=16,NC=W/CS,G=24,FH=6,P=48;
 const vox=new Uint8Array(W*H*W), hmap=new Int16Array(W*W);
 const inB=(x,y,z)=>x>=0&&z>=0&&x<W&&z<W&&y>=0&&y<H;
 function get(x,y,z){if(y>=H&&x>=0&&z>=0&&x<W&&z<W)return 0;if(!inB(x,y,z))return 13;return vox[(y*W+z)*W+x]}
@@ -249,7 +250,7 @@ const SH=[],BTOP=new Float32Array(32).fill(1);
 SH[23]=[[0,0,0,1,.25,1]];SH[24]=[[0,0,0,1,.5,1]];SH[25]=[[0,0,0,1,.75,1]];BTOP[23]=.25;BTOP[24]=.5;BTOP[25]=.75;
 SH[26]=[[0,0,0,1,.5,1],[.5,.5,0,1,1,1]];SH[27]=[[0,0,0,1,.5,1],[0,.5,0,.5,1,1]];SH[28]=[[0,0,0,1,.5,1],[0,.5,.5,1,1,1]];SH[29]=[[0,0,0,1,.5,1],[0,.5,0,1,1,.5]];
 const MATS=[['plank',B.PLANK],['stone',B.STONE],['dirt',B.DIRT],['metal',B.METAL],['stairs',B.STPX]];
-const LABEL={stairs:'Stairs',bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
+const LABEL={tent:'Tent',stairs:'Stairs',bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
 // towns: a large one in the middle, smaller ones scattered through the wilds
 const towns=[];
 function townAt(x,z,m){for(const t of towns)if(x>=t.x0-m&&x<=t.x1+m&&z>=t.z0-m&&z<=t.z1+m)return t;return null}
@@ -427,15 +428,16 @@ function bathroom(r,fb){floorMat(r,fb,B.TILEF);placeF('tub',r,fb);placeF('toilet
 function bedroom(r,fb){const b=placeF('bed',r,fb);if(b)placeF('nightstand',r,fb,b.sd,b.o+(rng()<.5?-1:2));placeF('wardrobe',r,fb);placeF('dresser',r,fb);if(rng()<.4)placeF('plant',r,fb)}
 function hall(r,fb){placeF('bookcase',r,fb);placeF('plant',r,fb);if(rng()<.5)placeF('dresser',r,fb)}
 function basementRoom(r,fb){placeF('shelf',r,fb);placeF('shelf',r,fb);placeF('bench',r,fb);placeF('heater',r,fb);if(rng()<.5)placeF('shelf',r,fb)}
+const homes=[];let curB=-1;
 function spotsIn(r,fb,base){
   for(let c=0,t=0;c<(base?2:1)&&t<20;t++){const cx=RI(r.x0,r.x1),cz=RI(r.z0,r.z1);
     if(fpFree(cx,cz,1,1,fb,2)){crateSpots.push([(cx+.5)*VS,(fb+1)*VS,(cz+.5)*VS,base&&rng()<.5]);resv.add(rk(cx,cz,fb));c++}}
-  for(let t=0;t<20;t++){const cx=RI(r.x0+1,r.x1-1),cz=RI(r.z0+1,r.z1-1);if(fpFree(cx,cz,2,2,fb,4)){indoorSpots.push([(cx+1)*VS,(fb+1)*VS,(cz+1)*VS]);break}}
+  for(let t=0;t<20;t++){const cx=RI(r.x0+1,r.x1-1),cz=RI(r.z0+1,r.z1-1);if(fpFree(cx,cz,2,2,fb,4)){indoorSpots.push([(cx+1)*VS,(fb+1)*VS,(cz+1)*VS,curB,!base&&fb===G+1?1:0]);break}}
 }
 function building(lx,lz,S){
   resv=new Set();
   const w=RI(22,S),d=RI(22,S),x0=lx+RI(0,S-w),z0=lz+RI(0,S-d),x1=x0+w-1,z1=z0+d-1;
-  const rail=['wood','metal','none','wood','metal'][RI(0,4)];
+  const rail=['wood','metal','none','wood','metal'][RI(0,4)],trimC=rng()<.6?0:RI(1,2);
   const floors=RI(1,3),g=G+1,mat=rng()<.5?B.CONC:B.BRICK,top=g+floors*FH,BD=7;
   for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
     const edge=x===x0||x===x1||z===z0||z===z1;
@@ -450,7 +452,7 @@ function building(lx,lz,S){
     reserve(x0+1,x0+3,z0+2,z0+4+BD,g);reserve(x0+1,x0+3,z0+3+BD,z0+6+BD,g-BD-1);
   }
   // room split: xs (wall along z), zs (wall along x)
-  const xs=x0+RI(10,w-9),zs=z0+RI(12,d-9);
+  const xs=x0+RI(Math.min(13,w-9),w-9),zs=z0+RI(12,d-9);
   const rooms=(fb)=>({A:{x0:x0+1,x1:xs-1,z0:z0+1,z1:zs-1},Bk:{x0:xs+1,x1:x1-1,z0:z0+1,z1:zs-1},C:{x0:x0+1,x1:xs-1,z0:zs+1,z1:z1-1},D:{x0:xs+1,x1:x1-1,z0:zs+1,z1:z1-1}});
   const xm=Math.floor((x0+xs)/2)-1;
   for(let k=0;k<floors;k++){
@@ -469,16 +471,20 @@ function building(lx,lz,S){
     const o3=RI(x0+3,Math.min(xs-4,x0+12));for(let x=o3;x<o3+3;x++)for(let y=b+1;y<=b+4;y++)setv(x,y,zs,0);reserve(o3,o3+2,zs-2,zs+2,b);
     const o4=RI(xs+3,x1-4);doorAt(o4,b+1,zs,1,.7);reserve(o4-1,o4+2,zs-2,zs+3,b);
     // stairs to the next floor / roof
-    for(let i=0;i<FH;i++)for(const zz of[z1-1,z1-2])setv(x0+2+i,b+1+i,zz,B.STPX);
-    if(rail!=='none')furnSpecs.push(['rail',(x0+2)*VS,(b+1)*VS,(z1-2)*VS,0,{run:FH*VS,rise:FH*VS,style:rail}]);
-    for(let i=0;i<FH-1;i++)for(const zz of[z1-1,z1-2,z1-3])setv(x0+2+i,b+FH,zz,0);
-    reserve(x0+1,x0+3+FH,z1-3,z1-1,b);
+    // switchback: even floors climb +x along the back wall, odd floors climb -x in the lane beside it
+    const sx0=x0+4,odd=k%2===1,lane=odd?[z1-3,z1-4]:[z1-1,z1-2];
+    for(let i=0;i<FH;i++)for(const zz of lane)setv(odd?sx0+FH-1-i:sx0+i,b+1+i,zz,odd?B.STNX:B.STPX);
+    if(rail!=='none')furnSpecs.push(odd?['rail',(sx0+FH)*VS,(b+1)*VS,(z1-4)*VS,Math.PI,{run:FH*VS,rise:FH*VS,style:rail}]:['rail',sx0*VS,(b+1)*VS,(z1-2)*VS,0,{run:FH*VS,rise:FH*VS,style:rail}]);
+    for(let i=0;i<FH;i++)for(const zz of[...lane,odd?z1-5:z1-3])setv(odd?sx0+FH-i:sx0-1+i,b+FH,zz,0);
+    if(!odd){reserve(x0+1,sx0+FH+1,z1-3,z1-1,b);reserve(sx0+FH-1,sx0+FH+2,z1-4,z1-1,b+FH)}
+    else{reserve(sx0-1,sx0+FH+2,z1-5,z1-3,b);reserve(sx0-3,sx0,z1-5,z1-2,b+FH)}
   }
   doorAt(xm,g+1,z0,1);reserve(xm-1,xm+2,z0+1,z0+3,g);
+  curB=homes.length;homes.push({x0,x1,z0,z1,g,floors,door:[xm,z0]});
   if(rng()<.5){doorAt(x1-4,g+1,z1,-1);reserve(x1-5,x1-2,z1-3,z1-1,g)}
   for(let k=0;k<floors;k++){
     const fb=g+FH*k,R=rooms(fb);
-    for(const[key,r]of Object.entries(R))paintRooms.push({x0:r.x0,x1:r.x1,z0:r.z0,z1:r.z1,y0:fb+1,y1:fb+FH-1,c:key==='D'&&k<2?[.86,.93,.94]:PAINT[RI(0,PAINT.length-1)]});
+    for(const[key,r]of Object.entries(R))paintRooms.push({x0:r.x0,x1:r.x1,z0:r.z0,z1:r.z1,y0:fb+1,y1:fb+FH-1,c:key==='D'&&k<2?[.86,.93,.94]:PAINT[RI(0,PAINT.length-1)],trim:trimC});
     if(k===0){floorMat(R.Bk,fb,B.TILEF);living(R.A,fb);kitchen(R.Bk,fb);bathroom(R.D,fb);if(floors===1)bedroom(R.C,fb);else hall(R.C,fb)}
     else{bedroom(R.A,fb);if(rng()<.6)bedroom(R.Bk,fb);else living(R.Bk,fb);hall(R.C,fb);if(k===1)bathroom(R.D,fb);else bedroom(R.D,fb)}
     for(const r of Object.values(R))spotsIn(r,fb,false);
@@ -822,7 +828,7 @@ function mkGeo(P,N,C,I,UV){const g=new THREE.BufferGeometry();if(UV)g.setAttribu
   g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));
   if(C)g.setAttribute('color',new THREE.Float32BufferAttribute(C,3));g.setIndex(I);g.computeBoundingSphere();return g}
 // typed-array mesher with packed vertices (16 B/vertex instead of 44):
-// position Uint16 in quarter-voxel units (chunk-local), normal Int8, colour Uint8, uv Uint16 (all normalised except position)
+// position Uint16 in 1/16-voxel units (chunk-local, 1-voxel margin), normal Int8, colour Uint8, uv Uint16 (all normalised except position)
 let mCap=1<<15,mP=new Uint16Array(mCap*3),mN=new Int8Array(mCap*3),mC=new Uint8Array(mCap*3),mU=new Uint16Array(mCap*2),mI=new Uint32Array(mCap*1.5);
 function mGrow(){mCap*=2;const g=(a,n)=>{const b=new a.constructor(n);b.set(a);return b};mP=g(mP,mCap*3);mN=g(mN,mCap*3);mC=g(mC,mCap*3);mU=g(mU,mCap*2);mI=g(mI,mCap*1.5)}
 const isOpq=b=>b!==0&&b!==14&&b!==15&&b!==17&&b!==20&&!SH[b];
@@ -833,7 +839,7 @@ const loaded=new Uint8Array(NC*NC);
 function quad(x,y,z,ox,oz,fi,bx,tile,cr,cg,cb,s,vs=0){
   if(mv+4>mCap)mGrow();const f=FACES[fi],a0=FACE_UV[fi][0],a1=FACE_UV[fi][1],P=[x,y,z],pu=P[a0]&1,pv=P[a1]&1,tx=tile%ACOLS,ty=(tile/ACOLS)|0;
   for(let c=0;c<4;c++){const q=f[3][c],fr=[q[0]?bx[3]:bx[0],q[1]?bx[4]:bx[1],q[2]?bx[5]:bx[2]],o3=(mv+c)*3,o2=(mv+c)*2;
-    mP[o3]=Math.round((x-ox+fr[0])*4);mP[o3+1]=Math.round((y+fr[1])*4);mP[o3+2]=Math.round((z-oz+fr[2])*4);
+    mP[o3]=Math.round((x-ox+1+fr[0])*16);mP[o3+1]=Math.round((y+fr[1])*16);mP[o3+2]=Math.round((z-oz+1+fr[2])*16);
     mN[o3]=f[0]*127;mN[o3+1]=f[1]*127;mN[o3+2]=f[2]*127;mC[o3]=Math.min(255,cr*s*255);mC[o3+1]=Math.min(255,cg*s*255);mC[o3+2]=Math.min(255,cb*s*255);
     const u=(pu+fr[a0])/2,vv=(pv+fr[a1]+(a1===1?vs:0))/2;mU[o2]=((tx*TS+.03+u*(TS-.06))/AW)*65535;mU[o2+1]=(1-(ty*TS+.03+(1-vv)*(TS-.06))/AH)*65535}
   mI[mi]=mv;mI[mi+1]=mv+1;mI[mi+2]=mv+2;mI[mi+3]=mv;mI[mi+4]=mv+2;mI[mi+5]=mv+3;mi+=6;mv+=4;
@@ -853,8 +859,13 @@ function buildChunk(cx,cz){
     const pr=paintRooms.length?roomsFor(cx,cz):null;
     if(!shp){for(let fi=0;fi<6;fi++){const o=nb[fi];if(isOpq(o)||(fi===2&&SH[o]))continue;
         let t=tiles[fi],r=cr,g=cg,bb=cb;
-        if(pr&&(fi<2||fi>3)&&(b===19||b===6||b===11)){const rm=roomAt(pr,x+FACES[fi][0],y,z+FACES[fi][2]);if(rm){t=TILE.wall;r=rm.c[0];g=rm.c[1];bb=rm.c[2]}}
-        quad(x,y,z,x0,z0,fi,FULLBOX[0],t,r,g,bb,v*FACES[fi][4])}}
+        let rm=null;if(pr&&(fi<2||fi>3)&&(b===19||b===6||b===11)){rm=roomAt(pr,x+FACES[fi][0],y,z+FACES[fi][2]);if(rm){t=TILE.wall;r=rm.c[0];g=rm.c[1];bb=rm.c[2]}}
+        quad(x,y,z,x0,z0,fi,FULLBOX[0],t,r,g,bb,v*FACES[fi][4]);
+        if(rm&&(y===rm.y0||y===rm.y1)){const bot=y===rm.y0,tc=TRIMC[rm.trim];
+          // baseboard: 2/16 deep x 6/16 tall + 3/16 bevelled cap; crown: 2-step moulding
+          const parts=bot?[[2/16,0,6/16],[3/16,6/16,7/16]]:[[2/16,12/16,1],[3/16,14/16,1],[1/16,11/16,12/16]];
+          for(const[T,ya,yb]of parts){const bx=fi===0?[1,ya,0,1+T,yb,1]:fi===1?[-T,ya,0,0,yb,1]:fi===4?[0,ya,1,1,yb,1+T]:[0,ya,-T,1,yb,0];
+            quad(x,y,z,x0,z0,fi,bx,TILE.frame,tc[0],tc[1],tc[2],1);quad(x,y,z,x0,z0,2,bx,TILE.frame,tc[0],tc[1],tc[2],1.08);quad(x,y,z,x0,z0,3,bx,TILE.frame,tc[0],tc[1],tc[2],.7)}}}}
     else for(const bx of shp)for(let fi=0;fi<6;fi++){
         // cull only faces that sit on the voxel boundary against a full opaque neighbour
         const onB=fi===0?bx[3]===1:fi===1?bx[0]===0:fi===2?bx[4]===1:fi===3?bx[1]===0:fi===4?bx[5]===1:bx[2]===0;if(onB&&isOpq(nb[fi]))continue;
@@ -869,12 +880,13 @@ function buildChunk(cx,cz){
     g.setAttribute('position',new THREE.BufferAttribute(mP.slice(0,mv*3),3));g.setAttribute('normal',new THREE.BufferAttribute(mN.slice(0,mv*3),3,true));
     g.setAttribute('color',new THREE.BufferAttribute(mC.slice(0,mv*3),3,true));g.setAttribute('uv',new THREE.BufferAttribute(mU.slice(0,mv*2),2,true));
     g.setIndex(new THREE.BufferAttribute(mv>65535?mI.slice(0,mi):Uint16Array.from(mI.subarray(0,mi)),1));g.computeBoundingSphere();
-    const m=new THREE.Mesh(g,vmat);m.position.set(x0*VS,0,z0*VS);m.scale.setScalar(VS/4);m.castShadow=GFX<3;m.receiveShadow=true;freeze(m);scene.add(m);chunkMeshes[k]=m}
+    const m=new THREE.Mesh(g,vmat);m.position.set((x0-1)*VS,0,(z0-1)*VS);m.scale.setScalar(VS/16);m.castShadow=GFX<3;m.receiveShadow=true;freeze(m);scene.add(m);chunkMeshes[k]=m}
   if(GP.length){const gm=new THREE.Mesh(mkGeo(GP,GN,null,GI,GUV),gmat);gm.scale.setScalar(VS);gm.renderOrder=2;gm.receiveShadow=true;freeze(gm);scene.add(gm);glassMeshes[k]=gm}
   loaded[k]=1;if(furnMeshes[k])furnMeshes[k].visible=true;
 }
 // painted drywall: rooms record their interior box and colour; wall faces looking into a room get plaster in that colour
 const paintRooms=[],roomIdx=new Map();
+const TRIMC=[[1.08,1.06,1.02],[.7,.5,.32],[.46,.32,.2]];
 const PAINT=[[.93,.9,.8],[.76,.86,.78],[.74,.83,.92],[.95,.8,.72],[.85,.85,.84],[.96,.87,.6],[.84,.77,.9],[.7,.8,.7],[.92,.92,.9],[.88,.74,.66]];
 function roomsFor(cx,cz){const k=cz*NC+cx;let r=roomIdx.get(k);if(r)return r;const X0=cx*CS-1,X1=cx*CS+CS,Z0=cz*CS-1,Z1=cz*CS+CS;
   r=paintRooms.filter(m=>m.x1>=X0&&m.x0<=X1&&m.z1>=Z0&&m.z0<=Z1);roomIdx.set(k,r);return r}
@@ -1071,6 +1083,7 @@ const RECIPES=[
   {out:'mine',n:1,need:{scrap:2,coal:2,cloth:1},label:'Rig a tripwire bomb'},
   {out:'stairs',n:4,need:{plank:3},label:'Cut stair blocks'},
   {out:'bed',n:1,need:{plank:6,cloth:3},label:'Build a bed'},
+  {out:'tent',n:1,need:{cloth:5,wood:3},label:'Sew a tent'},
   {out:'fire',n:1,need:{wood:3,stone:4},label:'Stack a campfire'},
   {out:'helmet',n:1,need:{metal:2,cloth:1},label:'Beat out a metal helmet'},
   {out:'scrapvest',n:1,need:{metal:3,scrap:2,cloth:2},label:'Rivet scrap armor'},
@@ -1078,10 +1091,10 @@ const RECIPES=[
   {out:'cargo',n:1,need:{cloth:4,hide:1},label:'Sew padded pants'},
   {out:'bandage',n:2,need:{hide:1,cloth:1},label:'Hide-and-rag dressings'},
   {out:'ammo',n:5,need:{bone:2,scrap:1},label:'Bone-tipped rounds'}];
-const LOOT=[['ammo',20,4,10],['scrap',18,1,3],['cloth',14,1,3],['food',16,1,2],['bandage',8,1,1],['fuel',10,1,1],['kit',3,1,1],['metal',4,1,2],['coal',7,1,3],['beartrap',3,1,1],['mine',2,1,1],['spikes',3,1,1],['hardhat',3,1,1],['jacket',3,1,1],['vest',2,1,1],['riot',2,1,1],['cargo',2,1,1],['helmet',1,1,1]];
+const LOOT=[['ammo',20,4,10],['scrap',18,1,3],['cloth',14,1,3],['food',16,1,2],['bandage',8,1,1],['fuel',10,1,1],['kit',3,1,1],['metal',4,1,2],['coal',7,1,3],['beartrap',3,1,1],['mine',2,1,1],['spikes',3,1,1],['tent',1,1,1],['hardhat',3,1,1],['jacket',3,1,1],['vest',2,1,1],['riot',2,1,1],['cargo',2,1,1],['helmet',1,1,1]];
 const TOOLS=['Bat','Pistol','Pickaxe','Build','Place'];
 const ICONS={"Bat": '<path d="M7 26 24 9" stroke-width="4.5" stroke-linecap="round"/><path d="M21 7l4 4M18 10l4 4M23 13l3-1M15 13l1-3"/>', "Pistol": '<path d="M4 11h21v6h-9l-2 8H9l2-8H4z" fill="currentColor" stroke="none"/><path d="M14 17q1 3 3 1"/>', "Pickaxe": '<path d="M17 9 11 27" stroke-width="3" stroke-linecap="round"/><path d="M4 12Q15 1 28 11" stroke-width="3.2" stroke-linecap="round"/>', "Build": '<path class="cube" d="M16 4l12 6-12 6-12-6z"/><path class="cube" d="M4 10l12 6v12L4 22z" opacity=".7"/><path class="cube" d="M28 10l-12 6v12l12-6z" opacity=".45"/>', "Place": '<path d="M3 27h26" stroke-width="2.5"/><path d="M6 27l3-11 3 11M13 27l3-15 3 15M20 27l3-11 3 11" fill="currentColor" stroke="none"/>'};
-const TRAPS=[['spikes','Spike trap'],['beartrap','Bear trap'],['mine','Tripwire bomb'],['bed','Bed'],['fire','Campfire']];
+const TRAPS=[['spikes','Spike trap'],['beartrap','Bear trap'],['mine','Tripwire bomb'],['bed','Bed'],['fire','Campfire'],['tent','Tent']];
 
 // ---------------- crates & vehicles
 const crateMat=new THREE.MeshLambertMaterial({map:tileTex(TILE.plank),color:0xb08a60}),stashMat=new THREE.MeshLambertMaterial({map:tileTex(TILE.metal),color:0x7a8a60});
@@ -1235,7 +1248,7 @@ function makeDoor(s){
   doors.push(d);
 }
 function toggleDoor(d,p){
-  if(d.open){if(d.cells.some(c=>blockedByEntity(c[0],c[1],c[2]))){msg(p,'Something is in the doorway');return}for(const c of d.cells)setv(c[0],c[1],c[2],B.DOOR);d.open=false}
+  if(d.open){if(d.cells.some(c=>blockedByEntity(c[0],c[1],c[2]))){if(p)msg(p,'Something is in the doorway');return}for(const c of d.cells)setv(c[0],c[1],c[2],B.DOOR);d.open=false}
   else{for(const c of d.cells)setv(c[0],c[1],c[2],0);d.open=true}
   SND.creak();
 }
@@ -1273,11 +1286,11 @@ function makeHud(p){
   <div class="stats"><div class="bar hp"><i></i><span>HEALTH</span></div><div class="bar fd"><i></i><span>FOOD</span></div><div class="bar st"><i></i><span>STAMINA</span></div><div class="bar tp"><i></i><span>WARMTH</span></div><div class="arm"></div></div>
   <div class="hot">${TOOLS.map((t,k)=>`<div class="slot"><i class="k">${k+1}</i><svg viewBox="0 0 32 32" aria-hidden="true">${ICONS[t]}</svg><b>${t}</b><span></span></div>`).join('')}</div>
   <div class="veh hidden"><h3></h3><div class="bar fd"><i></i><span>FUEL</span></div><div class="bar hp"><i></i><span>CONDITION</span></div><div class="vs" style="margin-top:6px"></div></div>
-  <div class="dead hidden">You died<small></small></div>`;
+  <div class="dead hidden">You died<div class="rsp"></div><small></small></div>`;
   $('#huds').appendChild(el);
   const q=s=>el.querySelector(s);
   return{el,hurt:q('.hurt'),prompt:q('.prompt'),inv:q('.inv'),feed:q('.feed'),hp:q('.stats .hp i'),arm:q('.arm'),fd:q('.stats .fd i'),st:q('.stats .st i'),tp:q('.stats .tp i'),
-    slots:[...el.querySelectorAll('.slot')],veh:q('.veh'),vt:q('.veh h3'),vf:q('.veh .fd i'),vh:q('.veh .hp i'),vs:q('.vs'),dead:q('.dead'),deadS:q('.dead small'),cross:q('.cross')};
+    slots:[...el.querySelectorAll('.slot')],veh:q('.veh'),vt:q('.veh h3'),vf:q('.veh .fd i'),vh:q('.veh .hp i'),vs:q('.vs'),dead:q('.dead'),deadS:q('.dead small'),rsp:q('.rsp'),cross:q('.cross')};
 }
 function msg(p,t){for(const q of(p?[p]:players)){const d=document.createElement('div');d.textContent=t;q.hud.feed.appendChild(d);
   while(q.hud.feed.children.length>4)q.hud.feed.firstChild.remove();setTimeout(()=>d.remove(),5600)}}
@@ -1460,10 +1473,16 @@ function damage(p,a,silent){
   if(!silent){SND.hurt();p.flash=.6;burst(new V3(p.pos.x,p.pos.y+1.2,p.pos.z),10,3,RED)}
   if(p.hp<=0){p.hp=0;p.dead=5;if(p.vehicle)exitVehicle(p);
     for(const key in p.inv)p.inv[key]=Math.floor(p.inv[key]/2);
-    splat(p.pos,2.2);burst(new V3(p.pos.x,p.pos.y+1,p.pos.z),50,5,RED);p.body.g.rotation.x=-Math.PI/2;
+    splat(p.pos,2.2);burst(new V3(p.pos.x,p.pos.y+1,p.pos.z),50,5,RED);p.body.g.rotation.x=-Math.PI/2;p.dead=9;p.rspSel=0;
     msg(p,'You died and dropped half your supplies');}
 }
-function respawn(p){p.pos.copy(p.spawnPt||spawn);if(!p.spawnPt)p.pos.x+=p.i*1.5;p.vel.set(0,0,0);p.hp=100;p.hunger=Math.max(p.hunger,60);p.body.g.rotation.x=0;p.eye=p.pos.y+1.6;p.dead=0;msg(p,p.spawnPt?'Back on your feet by your bed':'Back on your feet at the crossroads')}
+function respawnOpts(p){return[p.spawnPt?'Your bed':null,'Crossroads','Random town'].filter(Boolean)}
+function respawnAt(p,choice){
+  if(choice==='Your bed'&&p.spawnPt)return p.spawnPt.clone();
+  if(choice==='Random town'&&towns.length>1){const t=towns[RI(1,towns.length-1)],k=Math.floor(t.n/2);return new V3((t.x0+P*k+6)*VS,(G+1)*VS,(t.z0+P*k+6)*VS)}
+  const v=spawn.clone();v.x+=p.i*1.5;return v;
+}
+function respawn(p,choice){p.pos.copy(respawnAt(p,choice||respawnOpts(p)[p.rspSel||0]||'Crossroads'));p.vel.set(0,0,0);p.hp=100;p.hunger=Math.max(p.hunger,60);p.body.g.rotation.x=0;p.eye=p.pos.y+1.6;p.dead=0;msg(p,'Back on your feet')}
 function nearestZombieInFront(p,dir,range){
   let best=null,bd=range;
   for(const z of zombies){if(z.dead)continue;const dx=z.pos.x-p.pos.x,dy=z.pos.y+1-(p.pos.y+1),dz=z.pos.z-p.pos.z,d=Math.hypot(dx,dy,dz);
@@ -1566,6 +1585,7 @@ function interact(p){
   const c=nearestCrate(p,2.6);if(c){loot(p,c);return}
   const bg=nearestBag(p,1.8);if(bg){takeBag(p,bg);return}
   const np=nearestNPC(p,2.4);if(np){talkNPC(p,np);return}
+  const sh=nearestStash(p,1.8);if(sh){raidStash(p,sh);return}
   const bd=nearestBed(p,1.8);if(bd){trySleep(p,bd);return}
   const fi=nearestFire(p,1.9);if(fi){cook(p);return}
   const d=nearestDoor(p,1.9);if(d){toggleDoor(d,p);return}
@@ -1578,6 +1598,7 @@ function promptFor(p){
   if(p.sleeping)return sleepT?'':players.length>1?`Sleeping · waiting for the other player to lie down · ${K} — get up`:`Sleeping · ${K} — get up`;
   if(nearestCrate(p,2.6))return`${K} — search supply crate`;
   const bg=nearestBag(p,1.8);if(bg)return`${K} — take ${bg.label}`;
+  const sh0=nearestStash(p,1.8);if(sh0&&!nearestNPC(p,2.4))return`${K} — raid ${sh0.owner?sh0.owner.name+"'s":'a'} stash (${Object.values(sh0.items).reduce((a,b)=>a+b,0)} items)`;
   const np=nearestNPC(p,2.4);if(np)return npcHostileTo(np,p)?`${np.name} (hostile)`:`${K} — talk to ${np.name} (survivor)`;
   if(nearestBed(p,1.8))return dayLight()<.35?`${K} — sleep until dawn`:`Bed · sleep here at night (sets respawn)`;
   if(nearestFire(p,1.9))return p.inv.meat?`${K} — cook ${p.inv.meat} raw meat`:'Campfire · bring raw meat to cook';
@@ -1594,7 +1615,8 @@ function promptFor(p){
 // ---------------- update player
 function updatePlayer(p,dt){
   const inp=p.inp=(menuP===p)?{f:0,s:0,turn:0,look:0}:readInput(p);
-  if(p.dead>0){p.dead-=dt;if(p.dead<=0)respawn(p);p.cam.position.set(p.pos.x,p.pos.y+.4,p.pos.z);p.body.g.position.copy(p.pos);return}
+  if(p.dead>0){const ops=respawnOpts(p);p.rspSel=(p.rspSel||0)%ops.length;if(inp.interact||inp.toolNext)p.rspSel=(p.rspSel+1)%ops.length;if(inp.jump&&p.dead<6.5)p.dead=.001;
+    p.dead-=dt;if(p.dead<=0)respawn(p);p.cam.position.set(p.pos.x,p.pos.y+.4,p.pos.z);p.body.g.position.copy(p.pos);return}
   if(p.sleeping){const b=p.sleeping;
     if(inp.interact||(dayLight()>=.35&&!sleepT)){p.sleeping=null;p.body.g.rotation.x=0;p.body.g.rotation.order='XYZ';msg(p,'You get up')}
     else{const c=Math.cos(b.yaw),sn=Math.sin(b.yaw);p.cam.position.set(b.pos.x-.65*sn,b.pos.y+.8,b.pos.z-.65*c);p.cam.rotation.set(.45,b.yaw+Math.PI,0);
@@ -1799,7 +1821,11 @@ function updHud(p){
   h.cross.style.display=p.vehicle||p.dead>0||p.adsK>.6?'none':'';h.cross.classList.toggle('on',p.onTarget);
   const v=p.vehicle;h.veh.classList.toggle('hidden',!v);
   if(v){h.vt.textContent=v.name+(v.driver===p?'':' · passenger');h.vf.style.width=v.fuel+'%';h.vh.style.width=Math.max(0,v.hp)+'%';h.vs.textContent=`${Math.round(Math.abs(v.speed)*3.6)} km/h${v.broken?' · WRECKED':v.fuel<=0?' · NO FUEL':''}`}
-  h.dead.classList.toggle('hidden',!(p.dead>0));if(p.dead>0)h.deadS.textContent=`Respawning in ${Math.ceil(p.dead)}…`;
+  h.dead.classList.toggle('hidden',!(p.dead>0));
+  if(p.dead>0){const ops=respawnOpts(p),key=ops.join('|')+(p.rspSel||0);
+    if(h.rspKey!==key){h.rspKey=key;h.rsp.innerHTML=ops.map((o,i)=>`<button data-i="${i}" class="${i===(p.rspSel||0)?'on':''}">${o}</button>`).join('');
+      h.rsp.querySelectorAll('button').forEach(b=>b.onclick=()=>{p.rspSel=+b.dataset.i;p.dead=.001})}
+    h.deadS.textContent=`Respawn in ${Math.ceil(p.dead)}… ${p.k.use} to switch, ${p.i?'N':'Space'} or click to go now`}
 }
 function updTop(){
   const hr=(tDay*24+6)%24,hh=Math.floor(hr),mm=Math.floor((hr-hh)*60/10)*10;
@@ -1879,6 +1905,7 @@ function placeTrap(p,vh){
   if(!(p.inv[key]>0)){msg(p,`No ${name.toLowerCase()} — craft one in the backpack`);return}
   const wx=(x+.5)*VS,wy=y*VS,wz=(z+.5)*VS;
   if(key==='bed'){p.inv.bed--;makeBed(wx,wy,wz,p.yaw+Math.PI);SND.place();msg(p,'Bed set down — sleep in it at night');return}
+  if(key==='tent'){p.inv.tent--;makeTent(wx,wy,wz,p.yaw);SND.place();msg(p,'Tent pitched — sleep in it at night to skip to dawn (sets respawn)');return}
   if(key==='fire'){p.inv.fire--;makeFire(wx,wy,wz);SND.place();msg(p,'Campfire lit — cook raw meat here');return}
   if(traps.some(t=>Math.hypot(t.pos.x-wx,t.pos.z-wz)<.9&&Math.abs(t.pos.y-wy)<1))return;
   p.inv[key]--;const t={type:key,name,armed:true,cd:0,uses:key==='spikes'?8:1,gone:false};
@@ -2103,6 +2130,24 @@ function makeBed(x,y,z,yaw){const g=new THREE.Group();
   const bl=[0x5a3a3a,0x3a4a5a,0x4a5a3a,0x6a5a3a][RI(0,3)];part(g,.96,.06,1.15,bl,0,.48,.32);part(g,.96,.3,.04,bl,0,.33,.9);
   if(rng()<.5)part(g,.3,.006,.25,0x4a0606,R(-.2,.2),.455,R(-.45,0));
   g.position.set(x,y,z);g.rotation.y=yaw;scene.add(g);castBig(g,.3);freeze(g);const b={g,pos:g.position,yaw};beds.push(b);return b}
+// A-frame tent: sleeps like a bed (sets respawn)
+function makeTent(x,y,z,yaw,col){
+  col=col||[0x5a6a3a,0x8a5a2a,0x3a5a6a,0x7a2a22,0x6a6a5a][RI(0,4)];const g=new THREE.Group(),L=2.3,hw=1.05,rh=1.25,ang=Math.atan2(rh,hw),sl=Math.hypot(hw,rh);
+  const dk=new THREE.Color(col).multiplyScalar(.75).getHex();
+  for(const sx of[-1,1]){const pn=part(g,sl,.04,L,col,sx*hw/2,rh/2,0);pn.rotation.z=-sx*ang;const st=part(g,sl*.98,.02,.05,dk,sx*hw/2,rh/2+.03,L*.2);st.rotation.z=-sx*ang}
+  for(let i=0;i<5;i++){const w=2*hw*(1-(i+.5)/5),h=rh/5;part(g,w,h,.03,col,0,h*(i+.5),-L/2)}
+  for(const sx of[-1,1]){const f=part(g,hw*.8,.03,rh*.9,col,sx*hw*.45,rh*.45,L/2+.25);f.rotation.x=Math.PI/2-.35;f.rotation.y=sx*.5}
+  part(g,.05,rh+.1,.05,0x5a4a32,0,(rh+.1)/2,L/2);part(g,.05,rh+.1,.05,0x5a4a32,0,(rh+.1)/2,-L/2);part(g,.06,.06,L+.2,0x4a3a26,0,rh,0);
+  part(g,2*hw-.1,.02,L-.1,0x3a3a30,0,.01,0);part(g,.7,.1,1.8,[0x8a2a22,0x2a4a7a,0x4a6a3a][RI(0,2)],-.35,.06,-.1);part(g,.32,.08,.22,0x8a8a80,-.35,.1,-.85);
+  for(const sx of[-1,1])for(const sz of[-1,1]){const gl=part(g,.012,.012,1.1,0xcfc8b0,sx*(hw+.35),.42,sz*(L/2-.2));gl.rotation.x=sz*.0;gl.rotation.z=sx*.85}
+  g.position.set(x,y,z);g.rotation.y=yaw;scene.add(g);castBig(g,.3);freeze(g);
+  const b={g,pos:g.position,yaw:yaw+Math.PI,tent:true};beds.push(b);return b;
+}
+function campsite(x,z,lit){const ty=topY(x,z);if(ty<0)return;const wx=(x+.5)*VS,wy=(ty+1)*VS,wz=(z+.5)*VS;
+  makeTent(wx+2.2,wy,wz,rng()*6.28);if(rng()<.5)makeTent(wx-2.4,wy,wz+1,rng()*6.28);
+  if(lit)makeFire(wx,wy,wz);else{const g=new THREE.Group();for(let i=0;i<8;i++){const a=i/8*6.283;part(g,.16,.12,.16,0x6a6a66,Math.cos(a)*.38,.06,Math.sin(a)*.38)}part(g,.5,.05,.5,0x1a1612,0,.02,0);g.position.set(wx,wy,wz);scene.add(g);freeze(g)}
+  return[wx,wy,wz];
+}
 function nearestBed(p,r){let best=null,bd=r;for(const b of beds){const d=b.pos.distanceTo(p.pos);if(d<bd){bd=d;best=b}}return best}
 function trySleep(p,b){
   if(dayLight()>=.35){p.spawnPt=new V3(b.pos.x+Math.cos(b.yaw)*.9,b.pos.y,b.pos.z-Math.sin(b.yaw)*.9);msg(p,'Respawn point set. You can only sleep once night falls');return}
@@ -2176,11 +2221,75 @@ function spawnNPC(x,y,z,kind){
   const bandit=kind==='bandit',shirt=bandit?[0x2a2a2a,0x3a2418,0x4a1a1a][RI(0,2)]:[0x5a6a4a,0x6a5a3a,0x3a5a6a,0x7a6a5a,0x5a3a5a][RI(0,4)];
   const m=makeHuman({skin:[0xc9a07a,0x8a5a3a,0xe0b894,0x6a4028,0xb07a50][RI(0,4)],shirt,pants:[0x2a3242,0x3a3328,0x262626][RI(0,2)],hat:bandit?0x1a1a1a:[0x5a2a1a,0x3b3b2b,0x2a3a4a][RI(0,2)],arm:shirt});
   m.g.rotation.order='YXZ';part(m.armR,.07,.1,.3,0x1a1a1a,0,-.62,.12);if(bandit)part(m.head,.4,.14,.06,0x2a2a2a,0,-.08,.2);
+  const sack=part(m.g,.38,.42,.22,0x6a5a3a,0,1.2,-.28);sack.visible=false;
   m.g.position.set(x,y,z);scene.add(m.g);castBig(m.g,.3);
   const n={...m,pos:m.g.position,vel:new V3(),home:new V3(x,y,z),kind,hp:bandit?70:85,name:NPC_NAMES[RI(0,NPC_NAMES.length-1)],wT:0,wD:-1,shootT:R(.8,1.6),dead:0,hostileTo:null,
-    trade:TRADES[RI(0,TRADES.length-1)],offerT:0,offerFor:null,walk:0,grounded:false,npc:true,aimT:0,seeT:0,sees:false,greet:0};
+    trade:TRADES[RI(0,TRADES.length-1)],offerT:0,offerFor:null,walk:0,grounded:false,npc:true,aimT:0,seeT:0,sees:false,greet:0,
+    sack,st:'idle',stT:R(3,10),owl:rng()<.25,carry:null,tgt:null,lie:0,fixT:R(2,8),hammer:0,ph:rng()*6,bld:null,stash:null};
   npcs.push(n);return n;
 }
+// ---------------- survivor home bases: forage by day, carry food home to a stash, fortify, sleep at night (some are night owls)
+let stashes=[];
+const bIn=(b,x,z)=>{const vx=vc(x),vz=vc(z);return vx>b.x0&&vx<b.x1&&vz>b.z0&&vz<b.z1};
+function homeDoor(n){const b=n.bld;if(!b)return null;return doorMap.get(dkey(b.door[0],b.g+1,b.door[1]))}
+// steer toward (tx,tz), routing through the home's front door when crossing its walls
+function npcSteer(n,tx,tz){
+  const b=n.bld;let gx=tx,gz=tz;
+  if(b){const inN=bIn(b,n.pos.x,n.pos.z),inT=bIn(b,tx,tz),dx=(b.door[0]+1)*VS,din=(b.door[1]+2.2)*VS,dout=(b.door[1]-2.2)*VS;
+    if(inN!==inT){const nearDoorLine=Math.abs(n.pos.x-dx)<.45;
+      if(inN){gx=dx;gz=nearDoorLine?dout:din}else{gx=dx;gz=nearDoorLine?din:dout}
+      const d=homeDoor(n);if(d&&!d.open&&!d.gone&&Math.hypot(n.pos.x-dx,n.pos.z-(b.door[1]+.5)*VS)<2.2)toggleDoor(d,null)}
+    else{const d=homeDoor(n);if(d&&d.open&&!d.gone&&inN&&Math.hypot(n.pos.x-dx,n.pos.z-(b.door[1]+.5)*VS)>3&&rng()<.02)toggleDoor(d,null)}}
+  const ddx=gx-n.pos.x,ddz=gz-n.pos.z,l=Math.hypot(ddx,ddz);return l<.3?[0,0,l]:[ddx/l,ddz/l,Math.hypot(tx-n.pos.x,tz-n.pos.z)];
+}
+function npcFortify(n){
+  const b=n.bld;if(!b)return false;
+  if(!b.holes){b.holes=[];for(let x=b.x0;x<=b.x1;x++)for(let z=b.z0;z<=b.z1;z++){if(!(x===b.x0||x===b.x1||z===b.z0||z===b.z1))continue;
+    if(z===b.door[1]&&x>=b.door[0]-1&&x<=b.door[0]+2||z===b.z1&&x>=b.x1-5&&x<=b.x1-2)continue;for(let y=b.g+1;y<=b.g+5;y++)b.holes.push([x,y,z])}}
+  while(b.holes.length){const[x,y,z]=b.holes.pop();const v=get(x,y,z);if(v===0||v===B.GLASS&&false){setBlock(x,y,z,B.PLANK);burst(new V3((x+.5)*VS,(y+.5)*VS,(z+.5)*VS),5,2,BRGB[B.PLANK],1);
+    if(players.some(p=>p.pos.distanceTo(n.pos)<30))sNoise(.08,600,.3);return true}}
+  if(!b.trap){b.trap=1;const tx=(b.door[0]+1)*VS,tz=(b.door[1]-2.5)*VS,t={type:'spikes',name:'Spike trap',armed:true,cd:0,uses:8,gone:false};t.g=makeTrapMesh(t);t.g.position.set(tx,(b.g+1)*VS,tz);scene.add(t.g);t.pos=t.g.position;traps.push(t);return true}
+  return false;
+}
+function stashFor(n){if(n.stash)return n.stash;const g=new THREE.Group();part(g,.9,.5,.6,0x46543a,0,.25,0);part(g,.96,.08,.66,0x2a3a2a,0,.52,0);part(g,.5,.18,.4,0x6a5a3a,.1,.65,0);
+  g.position.set(n.home.x+.8,n.home.y,n.home.z);scene.add(g);n.stash={g,pos:g.position,items:{},owner:n};stashes.push(n.stash);return n.stash}
+function nearestStash(p,r){let best=null,bd=r;for(const s of stashes){const d=s.pos.distanceTo(p.pos);if(d<bd&&Object.keys(s.items).length){bd=d;best=s}}return best}
+function raidStash(p,s){const n=Object.values(s.items).reduce((a,b)=>a+b,0);for(const[k,q]of Object.entries(s.items))p.inv[k]+=q;s.items={};SND.pick();msg(p,`Took ${n} items from the stash`);
+  const o=s.owner;if(o&&!o.dead&&o.pos.distanceTo(p.pos)<22&&canSee(o,p)){o.hostileTo=p;msg(p,`${o.name} saw that! They're coming for you.`)}}
+function survivorAI(n,dt,night){ // returns [wx,wz,speed,faceTarget]
+  const home=n.home;if(night&&!n.owl&&n.st!=='sleep')n.st='return';if(!night&&n.st==='sleep'){n.st='idle';n.stT=R(4,10)}
+  n.stT-=dt;
+  if(n.st==='sleep'){const[wx,wz,d]=npcSteer(n,home.x,home.z);if(d>.8)return[wx,wz,1.5];n.lie=Math.min(1,n.lie+dt*2);return[0,0,0]}
+  n.lie=Math.max(0,n.lie-dt*3);
+  if(n.st==='return'){const[wx,wz,d]=npcSteer(n,home.x,home.z);
+    if(d<1.4){if(n.carry){const s=stashFor(n);for(const[k,q]of Object.entries(n.carry))s.items[k]=(s.items[k]||0)+q;n.carry=null;n.sack.visible=false}
+      n.st=night&&!n.owl?'sleep':'idle';n.stT=R(8,18);return[0,0,0]}return[wx,wz,2.4]}
+  if(n.st==='idle'){
+    if(n.fixT>0)n.fixT-=dt;else if(bIn(n.bld||{x0:0,x1:-1,z0:0,z1:-1},n.pos.x,n.pos.z)||!n.bld){n.fixT=R(14,24);if(npcFortify(n)){n.hammer=.6}}
+    if(n.stT<=0){n.st='forage';n.stT=R(80,140);n.tgt=null}
+    const[wx,wz,d]=npcSteer(n,home.x+Math.sin(performance.now()/4000+n.ph)*1.5,home.z+Math.cos(performance.now()/5000+n.ph)*1.5);return d>1.2?[wx,wz,1.2]:[0,0,0]}
+  // forage: crates, carcasses / bags, animals to hunt; otherwise roam
+  if(n.st==='forage'){
+    if(n.stT<=0||(n.carry&&Object.values(n.carry).reduce((a,b)=>a+b,0)>=4)){n.st='return';return[0,0,0]}
+    if(!n.tgt||n.tgt.gone||(n.tgt.c&&n.tgt.c.looted)||(n.tgt.b&&!bags.includes(n.tgt.b))||(n.tgt.a&&n.tgt.a.gone)){
+      n.tgt=null;let bd=70;
+      for(const c of crates){if(c.looted||c.claim&&c.claim!==n)continue;const d=c.pos.distanceTo(n.pos);if(d<bd&&Math.abs(c.pos.y-n.pos.y)<3){bd=d;n.tgt={c,pos:c.pos}}}
+      for(const b of bags){const d=b.pos.distanceTo(n.pos);if(d<bd*.8){bd=d;n.tgt={b,pos:b.pos}}}
+      for(const a of animals){if(a.dead||a.A.hostile===true)continue;const d=a.pos.distanceTo(n.pos);if(d<Math.min(bd,45)){bd=d;n.tgt={a,pos:a.pos}}}
+      if(!n.tgt){const ang=rng()*6.283,r=R(20,45);n.tgt={pos:new V3(home.x+Math.cos(ang)*r,home.y,home.z+Math.sin(ang)*r),roam:true}}
+      if(n.tgt.c)n.tgt.c.claim=n}
+    const t=n.tgt,[wx,wz,d]=npcSteer(n,t.pos.x,t.pos.z);
+    if(t.a){if(t.a.dead){const bg=bags.find(b=>b.pos.distanceTo(t.a.pos)<1.5);n.tgt=bg?{b:bg,pos:bg.pos}:null;return[0,0,0]}
+      if(d<16&&n.shootT<=0&&canSee(n,t.a)){n.shootT=R(1,1.6);npcShot(n,t.a.pos.x,t.a.pos.y,t.a.pos.z);if(rng()<.55)hurtAnimal(t.a,40,{x:wx,z:wz},null)}
+      return d<12?[0,0,0,t.a.pos]:[wx,wz,3.2]}
+    if(d<1.3){n.carry=n.carry||{};
+      if(t.c){t.c.looted=true;t.c.lid.position.set(.25,.75,0);t.c.lid.rotation.z=-.7;const q=RI(1,3);n.carry.food=(n.carry.food||0)+q;if(rng()<.5)n.carry.ammo=(n.carry.ammo||0)+RI(2,6);if(rng()<.3)n.carry.bandage=(n.carry.bandage||0)+1}
+      else if(t.b){for(const[k,q]of Object.entries(t.b.items))n.carry[k]=(n.carry[k]||0)+q;scene.remove(t.b.g);bags=bags.filter(x=>x!==t.b)}
+      n.sack.visible=Object.keys(n.carry).length>0;n.tgt=null;return[0,0,0]}
+    return[wx,wz,t.roam?1.8:2.6]}
+  return[0,0,0];
+}
+
 function npcHostileTo(n,p){return n.kind==='bandit'||n.hostileTo===p}
 function npcShot(n,tx,ty,tz){const d=Math.hypot(tx-n.pos.x,tz-n.pos.z);const near=players.some(p=>p.pos.distanceTo(n.pos)<60);
   if(near){const v=Math.max(.05,1-Math.min(...players.map(p=>p.pos.distanceTo(n.pos)))/60);sNoise(.25,2000,.8*v);sTone(150,40,.12,.3*v,'square')}
@@ -2217,25 +2326,29 @@ function updateNPC(n,dt,night){
       if(rng()<hitC){if(tp.vehicle)tp.vehicle.hp-=4;else damage(tp,7+day*.4)}}}
   else if(tz){face=tz.pos;if(tzd<3.2){const dx=n.pos.x-tz.pos.x,dz=n.pos.z-tz.pos.z,l=Math.hypot(dx,dz)||1;wx=dx/l;wz=dz/l;sp=3.4}
     if(n.shootT<=0&&canSee(n,tz)){n.shootT=R(.9,1.5);npcShot(n,tz.pos.x,tz.pos.y,tz.pos.z);if(rng()<.6){const dx=tz.pos.x-n.pos.x,dz=tz.pos.z-n.pos.z,l=Math.hypot(dx,dz)||1;hurtZombie(tz,34,{x:dx/l,z:dz/l},null)}}}
+  else if(n.kind==='survivor'&&!n.hostileTo){const r=survivorAI(n,dt,night);wx=r[0];wz=r[1];sp=r[2]||0;if(r[3])face=r[3];
+    if(n.lie>0)wx=wz=0;
+    for(const p of players)if(p.pos.distanceTo(n.pos)<5&&n.st!=='sleep'){face=p.pos;if(n.st!=='forage'&&n.st!=='return'){wx=wz=0}if(n.greet<=0){n.greet=60;msg(p,`${n.name}: "Easy. I'm friendly — ${p.k.use} to trade."`)}}}
   else{const hx=n.home.x-n.pos.x,hz=n.home.z-n.pos.z,hd=Math.hypot(hx,hz);
-    if(hd>14){wx=hx/hd;wz=hz/hd}else{n.wT-=dt;if(n.wT<=0){n.wT=R(3,8);n.wD=night||rng()<.4?-1:rng()*6.283}if(n.wD>=0){wx=Math.cos(n.wD)*.6;wz=Math.sin(n.wD)*.6}}
-    for(const p of players)if(p.pos.distanceTo(n.pos)<5&&!npcHostileTo(n,p)){face=p.pos;wx=wz=0;if(n.greet<=0&&n.kind==='survivor'){n.greet=60;msg(p,`${n.name}: "Easy. I'm friendly — ${p.k.use} to trade."`)}}}
+    if(hd>(night?5:14)){wx=hx/hd;wz=hz/hd}else{n.wT-=dt;if(n.wT<=0){n.wT=R(3,8);n.wD=night||rng()<.4?-1:rng()*6.283}if(n.wD>=0){wx=Math.cos(n.wD)*.6;wz=Math.sin(n.wD)*.6}}
+    }
   n.greet-=dt;
   n.vel.x+=(wx*sp-n.vel.x)*Math.min(1,dt*8);n.vel.z+=(wz*sp-n.vel.z)*Math.min(1,dt*8);n.vel.y=Math.max(-18,n.vel.y-24*dt);
   const blocked=moveEnt(n,dt,.3,1.8);vehPush(n,.3,1.8);if(blocked&&n.grounded){n.vel.y=7.6;if(!tp&&!tz)n.wD=rng()*6.283}
   const tx=face?face.x-n.pos.x:n.vel.x,tzz=face?face.z-n.pos.z:n.vel.z;
   if(Math.abs(tx)+Math.abs(tzz)>.05){let d=Math.atan2(tx,tzz)-n.g.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));n.g.rotation.y+=d*Math.min(1,dt*8)}
   const v=Math.hypot(n.vel.x,n.vel.z);n.walk+=dt*v*2.6;const s=Math.sin(n.walk)*Math.min(.7,v*.25);
-  n.legL.rotation.x=s;n.legR.rotation.x=-s;n.armL.rotation.x=-s*.6;n.armR.rotation.x=(face&&(tp||tz))?-1.5:-.3-s*.3;
-  if(players.every(p=>n.pos.distanceTo(p.pos)>110)){scene.remove(n.g);n.gone=true}
+  n.legL.rotation.x=s;n.legR.rotation.x=-s;n.armL.rotation.x=-s*.6;n.hammer=Math.max(0,n.hammer-dt);n.armR.rotation.x=(face&&(tp||tz))?-1.5:n.hammer>0?-1.2-Math.sin(n.hammer*20)*.6:-.3-s*.3;
+  n.g.rotation.x=-n.lie*Math.PI/2;if(n.lie>.5&&tz&&tzd<8){n.st='idle';n.lie=0}
+  if(players.every(p=>n.pos.distanceTo(p.pos)>110)){scene.remove(n.g);n.gone=true;if(n.bld)n.bld.claimed=null}
 }
 function spawnNPCsNear(){
   const alive=npcs.filter(n=>!n.dead).length;if(alive>=8)return;
   const p=players[RI(0,players.length-1)],bandit=rng()<Math.min(.55,.25+day*.04);
-  if(!bandit){const near=indoorSpots.filter(s=>{const d=Math.hypot(s[0]-p.pos.x,s[2]-p.pos.z);return d>25&&d<60});
-    if(near.length){const s=near[RI(0,near.length-1)];if(!hit(s[0],s[1]+.05,s[2],.3,1.8))spawnNPC(s[0],s[1],s[2],'survivor')}return}
+  if(!bandit){const near=indoorSpots.filter(s=>{const d=Math.hypot(s[0]-p.pos.x,s[2]-p.pos.z);return d>25&&d<70&&s[4]&&homes[s[3]]&&!homes[s[3]].claimed});
+    if(near.length){const s=near[RI(0,near.length-1)];if(!hit(s[0],s[1]+.05,s[2],.3,1.8)){const n=spawnNPC(s[0],s[1],s[2],'survivor');n.bld=homes[s[3]];n.bld.claimed=n}}return}
   for(let t=0;t<14;t++){const a=rng()*6.283,d=R(35,55),x=vc(p.pos.x+Math.cos(a)*d),z=vc(p.pos.z+Math.sin(a)*d);if(x<6||z<6||x>W-7||z>W-7)continue;
-    const ty=topY(x,z);if(ty!==hmap[z*W+x])continue;const n=RI(2,3);for(let i=0;i<n;i++)spawnNPC((x+.5)*VS+R(-1.5,1.5),(ty+1)*VS+.2,(z+.5)*VS+R(-1.5,1.5),'bandit');return}
+    const ty=topY(x,z);if(ty!==hmap[z*W+x])continue;const n=RI(2,3);campsite(x,z,true);for(let i=0;i<n;i++)spawnNPC((x+.5)*VS+R(-2,2),(ty+1)*VS+.2,(z+.5)*VS+R(-2,2),'bandit');return}
 }
 
 // ---------------- main loop
@@ -2315,9 +2428,12 @@ function worldInit(){
   for(let i=0;i<16;i++){const x=RI(T.x0,T.x1),z=RI(T.z0,T.z1);if(Math.hypot(x*VS-spawn.x,z*VS-spawn.z)<18)continue;const ty=topY(x,z);if(ty===hmap[z*W+x])spawnZ((x+.5)*VS,(ty+1)*VS,(z+.5)*VS)}
   for(const m of manholes)makeManhole(m);
   for(const s of caveSpots.slice(0,40))crates.push(makeCrate(s[0],s[1],s[2],true));
-  for(const b of bedSpecs)makeBed(b[0],b[1],b[2],b[3]);initBeds=beds.length;
+  for(const b of bedSpecs)makeBed(b[0],b[1],b[2],b[3]);
+  for(let i=0,t=0;i<16&&t<400;t++){const x=RI(20,W-21),z=RI(20,W-21);if(inTown(x,z)||townDist(x,z)<30)continue;const ty=topY(x,z);if(ty!==hmap[z*W+x]||get(x,ty,z)===B.LEAF)continue;
+    const c=campsite(x,z,false);if(c)crates.push(makeCrate(c[0]-1.2,c[1],c[2]-1.4,rng()<.4));i++}
+  initBeds=beds.length;
   for(let i=0;i<14;i++)spawnAnimal(false);
-  {const own=indoorSpots.filter(s=>Math.hypot(s[0]-spawn.x,s[2]-spawn.z)<55&&Math.hypot(s[0]-spawn.x,s[2]-spawn.z)>12);for(let i=0;i<3&&own.length;i++){const s=own.splice(RI(0,own.length-1),1)[0];if(!hit(s[0],s[1]+.05,s[2],.3,1.8))spawnNPC(s[0],s[1],s[2],'survivor')}}
+  {const own=indoorSpots.filter(s=>s[4]&&homes[s[3]]&&Math.hypot(s[0]-spawn.x,s[2]-spawn.z)<60&&Math.hypot(s[0]-spawn.x,s[2]-spawn.z)>12);for(let i=0;i<3&&own.length;i++){const s=own.splice(RI(0,own.length-1),1)[0];const hb=homes[s[3]];if(hb.claimed||hit(s[0],s[1]+.05,s[2],.3,1.8))continue;const n=spawnNPC(s[0],s[1],s[2],'survivor');n.bld=hb;hb.claimed=n}}
   for(const t of towns)for(let i=0;i<6*t.n;i++){const x=R(t.x0,t.x1)*VS,z=R(t.z0,t.z1)*VS;splat({x,y:topW(x,z),z},R(.8,2))}
   worldReady=true;
 }
@@ -2326,7 +2442,7 @@ function resetWorld(ns){
   for(const arr of[chunkMeshes,glassMeshes,furnMeshes,grassMeshes])for(const m of arr)if(m)m.geometry.dispose();chunkMeshes.length=0;glassMeshes.length=0;furnMeshes.length=0;grassMeshes.length=0;loaded.fill(0);
   for(const o of[...scene.children])if(!baseObjs.has(o))scene.remove(o);
   zombies=[];npcs=[];vehicles=[];crates=[];doors=[];doorMap.clear();traps=[];gibs=[];bags=[];animals=[];fires=[];beds=[];decals.length=0;manObjs.length=0;
-  for(const a of[crateSpots,carSpots,indoorSpots,doorSpecs,sewerSpots,manholes,caveSpots,bedSpecs,furnSpecs,paintRooms])a.length=0;roomIdx.clear();
+  for(const a of[crateSpots,carSpots,indoorSpots,doorSpecs,sewerSpots,manholes,caveSpots,bedSpecs,furnSpecs,paintRooms,homes])a.length=0;stashes=[];roomIdx.clear();
   pLife.fill(0);pPos.fill(-100);blockDmg.clear();vox.fill(0);hmap.fill(0);
   seed=ns|0;rng=mulberry(seed);kills=0;day=1;tDay=.08;
   worldInit();
@@ -2344,7 +2460,7 @@ function collectState(){
       i:Object.fromEntries(Object.entries(p.inv).filter(e=>e[1]>0)),s:p.spawnPt?[r2(p.spawnPt.x),r2(p.spawnPt.y),r2(p.spawnPt.z)]:0})),
     c:crates.map((c,i)=>c.looted?i:-1).filter(i=>i>=0),d:doors.map(d=>d.gone?2:d.open?1:0).join(''),
     vh:vehicles.map(v=>[r2(v.pos.x),r2(v.pos.z),r2(v.yaw),Math.round(v.fuel),Math.round(v.hp),v.broken?1:0]),
-    b:beds.slice(initBeds).map(b=>[r2(b.pos.x),r2(b.pos.y),r2(b.pos.z),r2(b.yaw)]),f:fires.map(f=>[r2(f.pos.x),r2(f.pos.y),r2(f.pos.z)]),
+    b:beds.slice(initBeds).map(b=>[r2(b.pos.x),r2(b.pos.y),r2(b.pos.z),r2(b.tent?b.yaw-Math.PI:b.yaw),b.tent?1:0]),f:fires.map(f=>[r2(f.pos.x),r2(f.pos.y),r2(f.pos.z)]),
     tr:traps.map(t=>[t.type,r2(t.pos.x),r2(t.pos.y),r2(t.pos.z),t.armed?1:0,t.uses])};
 }
 async function zip(u,mode){if(!window.CompressionStream)return null;try{const st=new Blob([u]).stream().pipeThrough(mode?new DecompressionStream('deflate-raw'):new CompressionStream('deflate-raw'));return new Uint8Array(await new Response(st).arrayBuffer())}catch(e){return null}}
@@ -2360,7 +2476,7 @@ function applyState(st){
     else if(ch==='1'){d.open=true;d.ang=-d.inward*Math.PI/2;for(const c of d.cells)setv(...c,0)}});
   (st.vh||[]).forEach((a,i)=>{const v=vehicles[i];if(!v)return;v.pos.x=a[0];v.pos.z=a[1];v.yaw=a[2];v.fuel=a[3];v.hp=a[4];v.broken=!!a[5];
     let gy=H-1;while(gy>0&&get(vc(a[0]),gy,vc(a[1]))===0)gy--;v.gy=gy;v.pos.y=(gy+1)*VS});
-  (st.b||[]).forEach(a=>makeBed(a[0],a[1],a[2],a[3]));(st.f||[]).forEach(a=>makeFire(a[0],a[1],a[2]));
+  (st.b||[]).forEach(a=>a[4]?makeTent(a[0],a[1],a[2],a[3]):makeBed(a[0],a[1],a[2],a[3]));(st.f||[]).forEach(a=>makeFire(a[0],a[1],a[2]));
   (st.tr||[]).forEach(a=>{const t={type:a[0],name:(TRAPS.find(x=>x[0]===a[0])||[0,'Trap'])[1],armed:!!a[4],cd:0,uses:a[5],gone:false};t.g=makeTrapMesh(t);t.g.position.set(a[1],a[2],a[3]);scene.add(t.g);t.pos=t.g.position;
     if(t.type==='beartrap'&&!t.armed){t.jaws[0].rotation.x=-1.45;t.jaws[1].rotation.x=1.45}traps.push(t)});
   day=st.day;tDay=st.t;kills=st.k||0;
@@ -2390,6 +2506,7 @@ $('#bCoop').onclick=()=>play(2);
 $('#bRand').onclick=()=>{$('#seedIn').value=String((Math.random()*1e9)|0)};
 $('#bLoad').onclick=()=>loadCode($('#codeIn').value);
 $('#bCont').onclick=()=>{try{loadCode(localStorage.getItem('deadground-save'))}catch(e){}};
+$('#mRsp').onclick=()=>{const p=menuP;if(!p)return;if(p.vehicle)exitVehicle(p);respawn(p);closeMenu()};
 $('#mSave').onclick=async()=>{await autoSave();$('#mSaveNote').textContent='Saved in this browser.'};
 $('#mCode').onclick=async()=>{const c=await encodeSave();const o=$('#mCodeOut');o.value=c;o.classList.remove('hidden');o.select();
   let ok=false;try{await navigator.clipboard.writeText(c);ok=true}catch(e){}$('#mSaveNote').textContent=`${ok?'Copied':'Select and copy the code above'} — ${c.length.toLocaleString()} characters for the whole world.`};
