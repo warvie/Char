@@ -209,6 +209,12 @@ body:not(.touch) .phud.narrow .feed{width:min(300px,46%)}body:not(.touch) .phud.
 body.touch .veh{padding:6px 8px}body.touch .veh h3{font-size:10px!important}body.touch .veh .vs{font-size:10px}
 body.touch .feed{max-height:calc(50vh - 200px);overflow:hidden;justify-content:flex-end}
 body.touch .rspb{display:none}
+#emo{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;background:rgba(14,12,9,.92);border:2px solid rgba(235,230,216,.3);padding:10px 12px;width:min(520px,94vw);max-height:86vh;overflow:auto;font:20px DGPixel,monospace;color:var(--ink)}
+#emo h3{margin:0 0 8px;font-size:20px;color:var(--rust)}#emo small{display:block;margin-top:8px;font-size:10px;color:var(--dim)}
+#emoL{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}#emoL button{min-height:40px;font:20px DGPixel,monospace;text-align:left;padding:4px 8px}#emoL button i{font-style:normal;color:var(--dim);margin-right:6px}
+.tb[data-b=emote]{right:calc(62px + env(safe-area-inset-right));top:calc(308px + env(safe-area-inset-top))}
+@media(orientation:landscape){.tb[data-b=emote]{right:calc(10px + env(safe-area-inset-right));top:calc(182px + env(safe-area-inset-top))}}
+.phud .hot .slot{pointer-events:auto;cursor:pointer;touch-action:none}.slot.tap{transform:scale(.92)}
 /* small phones: the whole touch layout shrinks in proportion (set from script), so buttons keep their spacing instead of colliding */
 body.touch #touch,body.touch .phud{zoom:var(--tz,1)}
 body.touch .veh{top:calc(200px + env(safe-area-inset-top))}
@@ -230,6 +236,27 @@ body.touch .prompt{top:auto;bottom:calc(50% + 22px);font-size:10px;line-height:1
   body.touch .veh{left:calc(12px + env(safe-area-inset-left));top:calc(124px + env(safe-area-inset-top))}
   body.touch .feed{top:calc(26px + env(safe-area-inset-top));bottom:auto;left:194px;right:176px;width:auto;align-items:center}
   body.touch .prompt{max-width:calc(100% - 352px)}}
+/* ---- touch buttons v2: Use-tool (labelled with what the held tool does), Use (doors, tables, people), a second-function button that only shows when the tool has one; Jump is the biggest */
+.tb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1}
+.tb .ti{width:24px;height:24px;image-rendering:pixelated}.tb.sm .ti{width:18px;height:18px}.tb span{font-size:10px;letter-spacing:.02em;white-space:nowrap}
+.tb.sm{font-size:10px}
+.tb[data-b=jump]{width:100px;height:100px;right:calc(12px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));background:rgba(46,110,52,.62);border-color:rgba(150,220,140,.6)}
+.tb[data-b=jump] .ti{width:34px;height:34px}.tb[data-b=jump] span{font-size:20px}
+.tb.big{width:84px;height:84px;right:calc(122px + env(safe-area-inset-right));bottom:calc(26px + env(safe-area-inset-bottom));background:rgba(150,38,24,.62);border-color:rgba(240,150,120,.6)}
+.tb.big .ti{width:30px;height:30px}.tb.big span{font-size:20px}
+.tb[data-b=use]{right:calc(132px + env(safe-area-inset-right));bottom:calc(124px + env(safe-area-inset-bottom));background:rgba(34,74,140,.62);border-color:rgba(140,180,240,.6)}
+.tb[data-b=alt]{right:calc(30px + env(safe-area-inset-right));bottom:calc(130px + env(safe-area-inset-bottom));background:rgba(150,110,20,.62);border-color:rgba(240,200,110,.6)}
+.tb.idle{opacity:.45}.tb.gone{display:none!important}
+.tb[data-b=bag]{background:rgba(96,66,36,.6)}.tb[data-b=tool]{background:rgba(70,70,70,.6)}.tb[data-b=view]{background:rgba(84,52,120,.6)}.tb[data-b=run]{background:rgba(24,104,104,.6)}
+.tb[data-b=duck]{background:rgba(52,64,86,.6)}.tb[data-b=bomb]{background:rgba(130,60,16,.6)}.tb[data-b=talk]{background:rgba(40,96,140,.6)}.tb[data-b=emote]{background:rgba(140,50,110,.6)}.tb[data-b=rsp]{background:rgba(110,36,36,.6)}
+.tb.on{background:rgba(163,174,94,.75)!important}
+.tb[data-b=view]{top:calc(144px + env(safe-area-inset-top))}.tb[data-b=run]{top:calc(196px + env(safe-area-inset-top))}
+@media(orientation:landscape){
+  .tb[data-b=view]{right:calc(10px + env(safe-area-inset-right));top:calc(78px + env(safe-area-inset-top))}.tb[data-b=run]{right:calc(62px + env(safe-area-inset-right));top:calc(78px + env(safe-area-inset-top))}
+  .tb[data-b=emote]{right:calc(114px + env(safe-area-inset-right));top:calc(26px + env(safe-area-inset-top))}}
+#picC{width:128px;height:128px;image-rendering:pixelated;border:2px solid rgba(235,230,216,.35);background:#1d1d21;touch-action:none;cursor:crosshair;flex:none}
+#picPal{display:grid;grid-template-columns:repeat(8,26px);gap:3px;margin-bottom:6px}#picPal b{width:26px;height:26px;display:block;border:2px solid rgba(0,0,0,.4);cursor:pointer}#picPal b.on{border-color:#ebe6d8}
+#lobbyL .lp{display:flex;align-items:center;gap:8px;margin:3px 0}#lobbyL img{width:32px;height:32px;image-rendering:pixelated}#lobbyL .ok{color:var(--olive)}#lobbyL button{min-height:0;padding:3px 10px;margin-left:auto}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="huds"></div>
@@ -239,8 +266,8 @@ body.touch .prompt{top:auto;bottom:calc(50% + 22px);font-size:10px;line-height:1
 <div id="cook" class="hidden"><h2>Campfire</h2><div id="cookList"></div><div class="row" style="margin-top:10px"><button id="cookClose" class="go" style="margin-left:auto">Done</button></div></div>
 <div id="split" class="hidden"></div><div id="fade"></div><div id="flash"></div>
 <div id="touch" class="hidden"><div id="stick"><i></i></div>
-  <button class="tb big" data-b="act">Act</button><button class="tb" data-b="jump">Jump</button><button class="tb" data-b="use">Use</button><button class="tb" data-b="place">Place</button><button class="tb" data-b="aim">Aim</button>
-  <button class="tb sm" data-b="bag">Bag</button><button class="tb sm" data-b="tool">Tool</button><button class="tb sm" data-b="mat">Type</button><button class="tb sm" data-b="view">View</button><button class="tb sm" data-b="run">Run</button><button class="tb sm" data-b="duck">Duck</button><button class="tb sm" data-b="bomb">Bomb</button><button class="tb sm" data-b="talk">Talk</button><button class="tb sm" data-b="rsp">Unstuck</button></div>
+  <button class="tb big" data-b="act"><img class="ti" alt=""><span>Swing</span></button><button class="tb jmp" data-b="jump"><img class="ti" alt=""><span>Jump</span></button><button class="tb" data-b="use"><img class="ti" alt=""><span>Use</span></button><button class="tb" data-b="alt"><img class="ti" alt=""><span>Aim</span></button>
+  <button class="tb sm" data-b="bag">Bag</button><button class="tb sm" data-b="tool">Tool</button><button class="tb sm" data-b="view">View</button><button class="tb sm" data-b="run">Run</button><button class="tb sm" data-b="duck">Duck</button><button class="tb sm" data-b="bomb">Bomb</button><button class="tb sm" data-b="talk">Talk</button><button class="tb sm" data-b="emote">Emote</button><button class="tb sm" data-b="rsp">Unstuck</button></div>
 
 <div id="start" class="screen"><div class="kit">
   <h1>Dead Ground</h1>
@@ -259,6 +286,13 @@ body.touch .prompt{top:auto;bottom:calc(50% + 22px);font-size:10px;line-height:1
     <label>Graphics <select id="gfxSel"></select></label>
     <label>Pixel size <select id="pixSel"></select></label>
   </div>
+  <details class="opts" id="onl" open><summary>Online &amp; profile</summary>
+    <p id="netSt" class="note" style="margin:6px 0">Checking for online play…</p>
+    <div class="row"><label>Username <input id="unIn" maxlength="16" autocomplete="off" spellcheck="false" placeholder="3–16 letters, numbers, _"></label><button id="unBtn" type="button">Claim name</button><span id="unMsg" class="note"></span></div>
+    <div class="row" style="align-items:flex-start"><canvas id="picC" width="16" height="16" aria-label="Profile picture, 16 by 16 pixels: draw on it"></canvas>
+      <div><div id="picPal"></div><div class="row"><button id="picPhoto" type="button">From a photo…</button><input id="picFile" type="file" accept="image/*" hidden><button id="picClr" type="button">Clear</button><button id="picSave" type="button">Save picture</button></div><small id="picSz" class="note"></small></div></div>
+    <h3 style="margin:10px 0 4px">Players online now</h3><div id="lobbyL" class="note">—</div>
+  </details>
   <details class="opts"><summary>Load a save code</summary><div class="row"><textarea id="codeIn" rows="2" placeholder="Paste a DG1… save code"></textarea><button id="bLoad" type="button">Load</button></div></details>
   <div class="ctl">
     <div><h3>Player 1 — keyboard + mouse</h3><dl>
@@ -307,6 +341,7 @@ body.touch .prompt{top:auto;bottom:calc(50% + 22px);font-size:10px;line-height:1
   <p class="note">The whole world is rebuilt from its seed, so a save only stores the seed plus what you changed, packed into a short code. The game also saves itself in this browser every 90 seconds. Split-screen co-op runs on one computer. Online play would need a game server, which this page can't host. Each run makes a new random world.</p>
 </div></div>
 
+<div id="emo" class="hidden"><h3>Emotes &amp; dances</h3><div id="emoL"></div><small>J or Emote to close · moving stops a dance</small></div>
 <div id="pause" class="screen hidden" style="background:rgba(0,0,0,.6)"><div class="kit" style="max-width:420px;text-align:center">
   <h2 style="font-size:40px;color:var(--rust)">Paused</h2><p class="sub" style="margin:8px auto 16px">Click to take back the mouse and keep surviving.</p>
   <button class="go" id="bResume">Resume</button>
@@ -1416,7 +1451,7 @@ function streamChunks(centers,budget){
   return want.length;
 }
 const viewUnits=()=>RD*CS*VS;
-function setBlock(x,y,z,v){if(!inB(x,y,z))return;setv(x,y,z,v);rebuildAt(x,z)}
+function setBlock(x,y,z,v){if(!inB(x,y,z))return;setv(x,y,z,v);rebuildAt(x,z);if(NET.wr&&!NET.applying)netEdit('b',x,y,z,v)}
 function breakGlass(x,y,z){
   const st=[[x,y,z]],done=new Set();let n=0;
   while(st.length&&n<16){const[a,b,c]=st.pop();if(get(a,b,c)!==B.GLASS)continue;setv(a,b,c,0);n++;
@@ -1855,7 +1890,12 @@ function makeVehicle(s){
     w.add(new THREE.Mesh(wheelGeo,lam(0x151515)));w.add(new THREE.Mesh(hubGeo,lam(0x8a8a8a)));part(w,.33,.06,.06,0x555555,0,0,0);w.userData.front=z>0;g.add(w);wheels.push(w)}
   let gy=H-1;while(gy>0&&get(vc(s.x),gy,vc(s.z))===0)gy--;g.position.set(s.x,(gy+1)*VS,s.z);g.rotation.y=s.yaw;scene.add(g);castBig(g,.45);
   const broken=!s.good&&rng()<(D.pedal?.15:.4);
-  return{col:ci,type:t,two,pedal:!!D.pedal,name:D.name,g,pos:g.position,yaw:s.yaw,speed:0,gy,fuel:D.pedal?100:s.good?30:(rng()<.5?0:RI(10,55)),hp:broken?0:RI(45,100),broken,
+  // windshield blood layer: a transparent pixel canvas on the front face of the glass, seen from outside and from the driver's seat
+  let wsh=null;g.children.forEach(c=>{if(!wsh&&c.material===glassMat&&c.geometry&&c.geometry.parameters){const P=c.geometry.parameters,cv=document.createElement('canvas');cv.width=48;cv.height=Math.max(12,Math.round(48*P.height/P.width));
+    const tx=new THREE.CanvasTexture(cv);tx.magFilter=tx.minFilter=THREE.NearestFilter;tx.generateMipmaps=false;
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(P.width-.03,P.height-.03),new THREE.MeshLambertMaterial({map:tx,transparent:true,depthWrite:false,side:THREE.DoubleSide}));
+    m.position.set(c.position.x,c.position.y,c.position.z+P.depth/2+.012);m.renderOrder=3;m.visible=false;g.add(m);wsh={m,cv,tx,amt:0,t:0}}});
+  return{wsh,col:ci,type:t,two,pedal:!!D.pedal,name:D.name,g,pos:g.position,yaw:s.yaw,speed:0,gy,fuel:D.pedal?100:s.good?30:(rng()<.5?0:RI(10,55)),hp:broken?0:RI(45,100),broken,
     driver:null,pass:null,wheels,L,Wd,VH:D.VH,maxS:D.maxS,acc:D.acc,steerA:0,IN,lights};
 }
 // ---- collisions: people/animals vs vehicles, vehicles vs vehicles
@@ -1932,6 +1972,8 @@ function makeHud(p){
   <div class="dead hidden">You died<div class="rsp"></div><small></small></div>`;
   $('#huds').appendChild(el);
   const q=s=>el.querySelector(s);el.querySelector('.rspb').addEventListener('click',e=>{e.stopPropagation();unstick(p)});
+  // tap (or click) a hotbar slot to switch to it; tapping the bat slot again swaps bat and chainsaw like pressing 1 twice
+  el.querySelectorAll('.slot').forEach((sl,k)=>sl.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&document.pointerLockElement)return;e.preventDefault();e.stopPropagation();p.tapTool=k;sl.classList.add('tap');setTimeout(()=>sl.classList.remove('tap'),160)}));
   return{el,hurt:q('.hurt'),prompt:q('.prompt'),inv:q('.inv'),feed:q('.feed'),hp:q('.stats .hp i'),arm:q('.arm'),fd:q('.stats .fd i'),st:q('.stats .st i'),tp:q('.stats .tp i'),
     slots:[...el.querySelectorAll('.slot')],veh:q('.veh'),vt:q('.veh h3'),vf:q('.veh .fd i'),vh:q('.veh .hp i'),vs:q('.vs'),dead:q('.dead'),deadS:q('.dead small'),rsp:q('.rsp'),cross:q('.cross')};
 }
@@ -2137,9 +2179,38 @@ addEventListener('wheel',e=>{if(running)wheel+=Math.sign(e.deltaY)},{passive:tru
 addEventListener('mousemove',e=>{if(document.pointerLockElement===canvas&&players[0]&&!menuP){const p=players[0];
   if(p.vehicle){if(p.carView){p.cyaw=clamp(p.cyaw-e.movementX*.0022,-2.4,2.4);p.cpitch=clamp(p.cpitch-e.movementY*.0022,-1,1)}return}const ms=p.aim?.0013:.0022;p.yaw-=e.movementX*ms;p.pitch=clamp(p.pitch-e.movementY*ms,-1.5,1.5)}});
 function lock(){try{const r=canvas.requestPointerLock();if(r&&r.catch)r.catch(()=>{})}catch(e){}}
+// ---------------- emotes and dances
+const EMOTES=[['Wave',2.4],['Cheer',2.4],['Point',2],['Thumbs up',2],['Facepalm',2.6],['Laugh',2.8],['Salute',2.2],['Sit',0],['Groove',0],['Robot',0],['Disco',0],['Headbang',0],['Spin',0],['Shuffle',0]];
+const EMKEY=['Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9','Digit0','Minus','Equal','BracketLeft','BracketRight'],EMLAB=['1','2','3','4','5','6','7','8','9','0','-','=','[',']'];
+let emoOpen=false;
+function openEmo(on){emoOpen=on;$('#emo').classList.toggle('hidden',!on);if(on){$('#emoL').innerHTML=EMOTES.map(([n,d],i)=>`<button data-e="${i}"><i>${isTouch?'':EMLAB[i]}</i>${n}${d?'':' ♪'}</button>`).join('');if(!isTouch&&document.pointerLockElement)document.exitPointerLock()}
+  else if(!isTouch&&running&&!document.pointerLockElement)lock()}
+$('#emo').addEventListener('pointerdown',e=>{e.stopPropagation();const b=e.target.closest('button');if(b&&players[0]){startEmote(players[0],+b.dataset.e);openEmo(false)}});
+addEventListener('keydown',e=>{if(!running)return;if(e.code==='KeyJ'&&players.length===1&&!e.repeat){openEmo(!emoOpen);return}
+  if(emoOpen){const i=EMKEY.indexOf(e.code);if(i>=0&&players[0]){e.preventDefault();e.stopPropagation();startEmote(players[0],i);openEmo(false)}else if(e.code==='Escape')openEmo(false)}},true);
+function startEmote(p,i){if(p.vehicle||p.dead>0)return;p.emote={id:i,t:0};p.body.g.traverse(o=>o.layers.set(0));p.fpBody=null}
+function stopEmote(p){if(!p.emote)return;p.emote=null;const b=p.body;b.g.rotation.order='XYZ';for(const k of['armL','armR','legL','legR'])b[k].rotation.z=0;b.head.rotation.z=0;setBodyFP(p,false)}
+// pose a body (yours or another player's) for emote i at time t; returns body height offset and extra spin
+function emotePose(b,i,t){const S=Math.sin,A=b.armL.rotation,Rr=b.armR.rotation,L=b.legL.rotation,Rl=b.legR.rotation,H=b.head.rotation;
+  A.set(0,0,0);Rr.set(0,0,0);L.set(0,0,0);Rl.set(0,0,0);H.set(0,0,0);let y=0,spin=0;const n=EMOTES[i][0];
+  if(n==='Wave'){Rr.z=2.5+S(t*11)*.4}
+  else if(n==='Cheer'){A.z=-2.7+S(t*12)*.2;Rr.z=2.7-S(t*12)*.2;y=Math.abs(S(t*6))*.18}
+  else if(n==='Point'){Rr.x=-1.55;H.x=.05}
+  else if(n==='Thumbs up'){Rr.x=-1.1;Rr.z=.25;H.x=-.1}
+  else if(n==='Facepalm'){Rr.x=-2.5;Rr.z=-.55;H.x=.4;H.y=S(t*3)*.15}
+  else if(n==='Laugh'){H.x=-.35+S(t*15)*.15;A.x=-.7;Rr.x=-.7;A.z=.3;Rr.z=-.3;y=S(t*15)*.03}
+  else if(n==='Salute'){Rr.x=-2.3;Rr.z=-1.05;H.x=-.05}
+  else if(n==='Sit'){L.x=Rl.x=-1.5;A.x=Rr.x=-.35;y=-.42}
+  else if(n==='Groove'){const s=S(t*7);L.x=s*.35;Rl.x=-s*.35;A.x=-.4+s*.8;Rr.x=-.4-s*.8;H.x=Math.abs(s)*.2;y=Math.abs(S(t*7))*.06;spin=S(t*3.5)*.35}
+  else if(n==='Robot'){const k=Math.floor(t*3)%4;A.x=k&1?-1.57:0;Rr.x=k&2?-1.57:0;A.z=k===3?-1.57:0;Rr.z=k===1?1.57:0;H.y=(k-1.5)*.4;L.x=k===2?-.5:0;Rl.x=k===0?-.5:0}
+  else if(n==='Disco'){const up=Math.floor(t*2.4)%2;Rr.z=up?2.6:-.5;Rr.x=up?0:-.4;A.x=-.4;A.z=.2;y=Math.abs(S(t*7.5))*.05;spin=up?.3:-.3;L.x=up?.25:0}
+  else if(n==='Headbang'){H.x=S(t*13)*.55;A.x=Rr.x=-1+S(t*13)*.25;A.z=-.35;Rr.z=.35;y=S(t*13)*.03}
+  else if(n==='Spin'){A.z=-1.5;Rr.z=1.5;spin=t*7;y=Math.abs(S(t*3.5))*.1}
+  else if(n==='Shuffle'){const s=S(t*12);L.x=s*.6;Rl.x=-s*.6;A.x=-s*.6;Rr.x=s*.6;y=Math.abs(s)*.06;b.g.position.x+=S(t*3)*.15}
+  return{y,spin}}
 document.addEventListener('pointerlockchange',()=>{const l=document.pointerLockElement===canvas;
   if(l){wasLocked=true;if(paused){paused=false;$('#pause').classList.add('hidden')}}
-  else if(wasLocked&&running&&players.length===1&&!menuP){paused=true;renderPause();$('#pause').classList.remove('hidden')}});
+  else if(wasLocked&&running&&players.length===1&&!menuP&&!emoOpen){paused=true;renderPause();$('#pause').classList.remove('hidden')}});
 const k=c=>keys[c]?1:0,pr=c=>pressed.has(c);
 const gpPrev=[[],[]];
 function gpRead(slot,inp){
@@ -2160,7 +2231,7 @@ function readInput(p){
     if(wheel){inp.tool=(p.tool+(wheel>0?1:4))%5;wheel=0}
     if(players.length===1)gpRead(0,inp);
     if(T.on){inp.f+=-T.my;inp.s+=T.mx;if(T.held.act)inp.primary=true;if(T.held.jump)inp.jump=true;if(T.run)inp.sprint=true;if(T.aim)inp.aim=true;inp.pad=true;
-      const q=T.pressed;if(q.has('use'))inp.interact=true;if(q.has('tool'))inp.toolNext=true;if(q.has('mat'))inp.matNext=true;if(q.has('place'))inp.place=true;if(q.has('bag'))inp.menu=true;if(q.has('view'))inp.view=true;if(q.has('bomb'))inp.throw=true;if(q.has('talk'))inp.interact=true;if(q.has('rsp'))unstick(p);if(T.duck)inp.crouch=true}
+      const q=T.pressed;if(q.has('emote'))openEmo(!emoOpen);if(q.has('alt'))touchAlt(p,inp);if(q.has('use'))inp.interact=true;if(q.has('tool'))inp.toolNext=true;if(q.has('mat'))inp.matNext=true;if(q.has('place'))inp.place=true;if(q.has('bag'))inp.menu=true;if(q.has('view'))inp.view=true;if(q.has('bomb'))inp.throw=true;if(q.has('talk'))inp.interact=true;if(q.has('rsp'))unstick(p);if(T.duck)inp.crouch=true}
   }else{
     inp.f=k('KeyI')-k('KeyK');inp.turn=k('KeyL')-k('KeyJ');inp.look=k('KeyU')-k('KeyO');
     inp.jump=!!keys.KeyN;inp.sprint=!!keys.KeyP;inp.primary=!!keys.KeyH;inp.aim=!!keys.Quote;
@@ -2183,7 +2254,7 @@ function eat(p,only){
 function heal(p){if(p.inv.bandage>0){p.inv.bandage--;p.hp=Math.min(100,p.hp+40);SND.pick();msg(p,'Wrapped a bandage (+health)')}else msg(p,'No bandages — craft one from 2 cloth')}
 function damage(p,a,silent){
   if(p.dead>0||p.creative)return;if(!silent)a*=1-armorOf(p);p.hp-=a;
-  if(p.sleeping&&!silent){p.sleeping=null;p.body.g.rotation.x=0;msg(p,'Something woke you!')}
+  if(p.sleeping&&!silent){p.sleeping=null;p.body.g.rotation.x=0;p.body.g.rotation.order='XYZ';settle(p,true);msg(p,'Something woke you!')}
   if(!silent){SND.hurt();p.flash=.6;burst(new V3(p.pos.x,p.pos.y+1.2,p.pos.z),10,3,RED)}
   if(p.hp<=0){p.hp=0;p.dead=5;if(p.vehicle)exitVehicle(p);
     for(const key in p.inv)p.inv[key]=Math.floor(p.inv[key]/2);
@@ -2198,7 +2269,14 @@ function respawnAt(p,choice){
 }
 // always-available escape hatch for glitches: back to your respawn point with everything you're carrying
 function unstick(p){if(!running)return;if(p.vehicle)exitVehicle(p);if(p.dead>0){p.dead=.001;return}p.sleeping=null;p.body.g.rotation.x=0;const hp=p.hp,hu=p.hunger;respawn(p);p.hp=hp;p.hunger=hu;msg(p,'Respawned (unstuck)')}
-function respawn(p,choice){p.pos.copy(respawnAt(p,choice||respawnOpts(p)[p.rspSel||0]||'Crossroads'));ensureWindowAt(p.pos);p.vel.set(0,0,0);p.hp=100;p.hunger=Math.max(p.hunger,60);p.body.g.rotation.x=0;p.eye=p.pos.y+1.6;p.dead=0;msg(p,'Back on your feet')}
+// nearest spot where a standing player fits with floor under their feet: searched outward ring by ring, a few blocks up and down
+function freeSpot(x,y,z){if(!inWin(vc(x)-16,vc(z)-16)||!inWin(vc(x)+16,vc(z)+16))return new V3(x,y,z);const ok=(X,Y,Z)=>!hit(X,Y+.02,Z,.3,1.75)&&hit(X,Y-.12,Z,.25,.1);const DY=[0,1,-1,2,-2,3,4,-3,5,6,8,10];
+  for(let r=0;r<=14;r++)for(const dy of DY)for(let i=-r;i<=r;i++)for(let j=-r;j<=r;j++){if(Math.max(Math.abs(i),Math.abs(j))!==r)continue;
+    const X=(vc(x)+i+.5)*VS,Y=(vc(y+.01)+dy)*VS+(r===0&&dy===0?y-vc(y+.01)*VS:0),Z=(vc(z)+j+.5)*VS;if(ok(X,Y,Z))return new V3(r===0?x:X,Y,r===0?z:Z)}
+  // nothing nearby: stand on top of whatever is in this column
+  let gy=H-2;while(gy>0&&!solid(vc(x),gy,vc(z)))gy--;let yy=(gy+1)*VS;for(let n=0;n<40&&hit(x,yy+.02,z,.3,1.75);n++)yy+=VS;return new V3(x,yy,z)}
+function settle(p,quiet){const q=freeSpot(p.pos.x,p.pos.y,p.pos.z);const moved=q.distanceTo(p.pos)>.05;p.pos.copy(q);p.vel.set(0,0,0);p.eye=p.pos.y+1.6;p.crouch=false;p.stuckT=0;if(moved&&!quiet)msg(p,'Moved you out of the blocks');return moved}
+function respawn(p,choice){p.pos.copy(respawnAt(p,choice||respawnOpts(p)[p.rspSel||0]||'Crossroads'));ensureWindowAt(p.pos);settle(p,true);p.vel.set(0,0,0);p.hp=100;p.hunger=Math.max(p.hunger,60);p.body.g.rotation.x=0;p.eye=p.pos.y+1.6;p.dead=0;msg(p,'Back on your feet')}
 function nearestZombieInFront(p,dir,range){
   let best=null,bd=range;
   for(const z of zombies){if(z.dead)continue;const dx=z.pos.x-p.pos.x,dy=z.pos.y+1-(p.pos.y+1),dz=z.pos.z-p.pos.z,d=Math.hypot(dx,dy,dz);
@@ -2358,7 +2436,7 @@ function exitVehicle(p){
   p.vehicle=null;p.body.g.visible=true;p.vm.g.visible=true;p.body.g.rotation.set(0,0,0);p.body.g.rotation.order='XYZ';p.body.armL.rotation.z=p.body.armR.rotation.z=0;setBodyFP(p,false);
   const side=p===v.driver?-1:1,rx=Math.cos(v.yaw)*side,rz=-Math.sin(v.yaw)*side;
   p.pos.set(v.pos.x+rx*(v.Wd/2+.7),v.pos.y,v.pos.z+rz*(v.Wd/2+.7));
-  let n=0;while(hit(p.pos.x,p.pos.y,p.pos.z,.3,1.75)&&n++<16)p.pos.y+=VS;
+  settle(p,true);
   p.vel.set(0,0,0);p.yaw=v.yaw+Math.PI;p.pitch=-.1;p.eye=p.pos.y+1.6;
 }
 function interact(p){
@@ -2400,7 +2478,7 @@ function updatePlayer(p,dt){
   if(p.dead>0){const ops=respawnOpts(p);p.rspSel=(p.rspSel||0)%ops.length;if(inp.interact||inp.toolNext)p.rspSel=(p.rspSel+1)%ops.length;if(inp.jump&&p.dead<6.5)p.dead=.001;
     p.dead-=dt;if(p.dead<=0)respawn(p);p.cam.position.set(p.pos.x,p.pos.y+.4,p.pos.z);p.body.g.position.copy(p.pos);return}
   if(p.sleeping){const b=p.sleeping;
-    if(inp.interact||(dayLight()>=.35&&!sleepT)){p.sleeping=null;p.body.g.rotation.x=0;p.body.g.rotation.order='XYZ';msg(p,'You get up')}
+    if(inp.interact||(dayLight()>=.35&&!sleepT)){p.sleeping=null;p.body.g.rotation.x=0;p.body.g.rotation.order='XYZ';settle(p,true);msg(p,'You get up')}
     else{const c=Math.cos(b.yaw),sn=Math.sin(b.yaw);p.cam.position.set(b.pos.x-.65*sn,b.pos.y+.8,b.pos.z-.65*c);p.cam.rotation.set(.45,b.yaw+Math.PI,0);
       p.body.g.rotation.order='YXZ';p.body.g.rotation.set(-Math.PI/2,b.yaw,0);p.body.g.position.set(b.pos.x+.9*sn,b.pos.y+.5,b.pos.z+.9*c);
       p.vm.g.visible=false;p.outline.visible=false;p.light.intensity=0;p.hunger=Math.max(0,p.hunger-dt*.1);return}}
@@ -2415,6 +2493,7 @@ function updatePlayer(p,dt){
   if(p.hunger<=0)damage(p,dt*1.2,true);else if(p.hunger>60&&p.hp<100)p.hp=Math.min(100,p.hp+dt*.5);
   p.cool-=dt;p.swing=Math.max(0,p.swing-dt*3.5);p.flash=Math.max(0,p.flash-dt);p.flashT-=dt;
   if(!(p.inv.saw>0))p.useSaw=false;
+  if(p.tapTool!=null){inp.tool=p.tapTool;p.tapTool=null}
   if(inp.tool!=null){if(inp.tool===0&&p.tool===0&&p.inv.saw>0){p.useSaw=!p.useSaw;msg(p,p.useSaw?'Chainsaw':'Bat')}p.tool=inp.tool}
   if(inp.toolNext){if(p.tool===0&&p.inv.saw>0&&!p.useSaw)p.useSaw=true;else{p.tool=(p.tool+1)%5;if(p.tool===0)p.useSaw=false}}
   if(p.inv.saw>0&&!p.sawSeen){p.sawSeen=true;p.sawFuel=p.sawFuel??60;msg(p,'Chainsaw! Press 1 again (or tap Tool) to switch between the bat and the saw')}if(inp.matNext){if(p.tool===4)p.trap=(p.trap+1)%TRAPS.length;else p.mat=(p.mat+1)%matList(p).length}
@@ -2431,7 +2510,10 @@ function updatePlayer(p,dt){
   p.stamina=clamp(p.stamina+(sprint?-20:13)*dt,0,100);
   // crouch (C / Ctrl): 1.05 m tall, slow and quiet - fits through a 1.5 m window opening once the glass is out
   if(inp.crouch)p.crouch=true;else if(p.crouch&&!hit(p.pos.x,p.pos.y+.02,p.pos.z,.3,1.75))p.crouch=false;
-  if(p.fly&&inp.crouch)p.crouch=false;const PH=p.crouch?1.05:1.75;p.body.g.scale.y=p.crouch?.62:1;
+  if(p.fly&&inp.crouch)p.crouch=false;
+  // watchdog: if a block ends up inside you (placed, loaded or fallen in), duck if that frees you, otherwise move to the nearest free spot
+  if(inWin(vc(p.pos.x),vc(p.pos.z))&&hit(p.pos.x,p.pos.y+.02,p.pos.z,.28,p.crouch?1.05:1.75)){p.stuckT=(p.stuckT||0)+dt;if(p.stuckT>.25){if(!p.crouch&&!hit(p.pos.x,p.pos.y+.02,p.pos.z,.28,1.05)){p.crouch=true;p.stuckT=0}else settle(p)}}else p.stuckT=0;
+  const PH=p.crouch?1.05:1.75;p.body.g.scale.y=p.crouch?.62:1;
   const sp=(sprint&&!p.crouch?7.2:p.crouch?2.2:4.4)*(p.aim?.5:1);p.vel.x=mx*sp;p.vel.z=mz*sp;p.vel.y=Math.max(-18,p.vel.y-24*dt);
   if(p.creative&&inp.jump&&!p.jumpHeld){const t=performance.now();if(t-(p.lastJump||0)<300){p.fly=!p.fly;msg(p,p.fly?'Flying — jump to rise, crouch to sink, double-tap jump to land':'Landed')}p.lastJump=t}p.jumpHeld=!!inp.jump;
   if(!p.creative)p.fly=false;
@@ -2460,6 +2542,10 @@ function updatePlayer(p,dt){
   vm.g.rotation.x=-p.swing*(p.tool===1?.4:1.1);const ak=p.adsK,bob=l>.1?Math.sin(p.walk*.5)*.02*(1-ak*.8):0;vm.g.position.set(.38*(1-ak),-.43+.342*ak+bob,-.7+.28*ak);vm.flash.visible=p.flashT>0;
   const b=p.body;b.g.position.copy(p.pos);b.g.rotation.y=p.yaw+Math.PI;const sw=l>.1?Math.sin(p.walk*.5)*.7:0;
   b.legL.rotation.x=sw;b.legR.rotation.x=-sw;b.armL.rotation.x=-sw*.6;b.armR.rotation.x=-.6-p.swing*1.2;b.head.rotation.x=-p.pitch*.5;
+  if(p.emote){const E=p.emote;if(l>.1||inp.primary||inp.jump||p.vehicle||(EMOTES[E.id][1]&&E.t>EMOTES[E.id][1]))stopEmote(p);
+    else{E.t+=dt;const o=emotePose(b,E.id,E.t);b.g.position.y+=o.y;b.g.rotation.y+=o.spin;vm.g.visible=false;
+      // swing the camera round to watch yourself: slow orbit in front of you
+      const a=p.yaw+Math.PI+Math.sin(E.t*.35)*.6,cx=p.pos.x-Math.sin(a)*3.1,cz=p.pos.z-Math.cos(a)*3.1;p.cam.position.set(cx,p.pos.y+1.9,cz);p.cam.lookAt(p.pos.x,p.pos.y+1.05,p.pos.z)}}
 }
 
 // ---------------- vehicles
@@ -2496,6 +2582,7 @@ function updateVehicle(v,dt){
   }
   v.pos.y+=((v.gy+BTOP[get(vc(v.pos.x),v.gy,vc(v.pos.z))])*VS-v.pos.y)*Math.min(1,dt*10);
   v.g.rotation.y=v.yaw;if(v.pedal)v.g.rotation.z=v.driver?v.steerA*.25:.2;
+  wsTick(v,dt);
   for(const w of v.wheels){w.rotation.x+=v.speed*dt/.38;w.rotation.y=w.userData.front?v.steerA:0}
   if(v.pedal&&Math.abs(v.speed)>1)for(const z of zombies){if(z.dead)continue;if(Math.hypot(z.pos.x-v.pos.x,z.pos.z-v.pos.z)<.9&&Math.abs(z.pos.y-v.pos.y)<2){z.kx+=Math.sin(v.yaw)*v.speed*.6;z.kz+=Math.cos(v.yaw)*v.speed*.6;v.speed*=-.2;if(d){d.flash=.2;damage(d,3,true)}SND.hit();break}}
   if(!v.pedal&&Math.abs(v.speed)>1.5)for(const z of zombies){if(z.dead||z.tumble)continue;
@@ -2617,6 +2704,7 @@ function updHud(p){
     if(k===0){const sw=!!p.useSaw;if(s.dataset.saw!==String(sw)){s.dataset.saw=String(sw);s.querySelector('b').textContent=sw?'Saw':'Bat';s.querySelector('img').src=pxIcon(sw?'saw':'Bat')}}});
   const show=['scrip','spikes','beartrap','mine','ammo','food','bandage','scrap','cloth','fuel','kit','wood','plank','stone','dirt','coal','iron','metal'].filter(x=>p.inv[x]>0||x==='ammo'||x==='food');
   h.inv.innerHTML=show.map(x=>`<span>${LABEL[x]}</span><b>${p.inv[x]}</b>`).join('');
+  if(isTouch&&p.i===0)touchLabels(p);
   h.prompt.textContent=isTouch&&p.vehicle?'':promptFor(p); // on phones the car panel sits where the prompt would; the Use button gets you out
   h.cross.style.display=p.vehicle||p.dead>0||p.adsK>.6?'none':'';h.cross.classList.toggle('on',p.onTarget);
   const v=p.vehicle;h.veh.classList.toggle('hidden',!v);
@@ -2630,8 +2718,8 @@ function updHud(p){
 function updTop(){
   const hr=(tDay*24+6)%24,hh=Math.floor(hr),mm=Math.floor((hr-hh)*60/10)*10;
   const night=dayLight()<.25;
-  if(isTouch){$('#top').innerHTML=`Day ${day} · ${SEASONS[Math.max(0,curSeason)]} · ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}${night?' <em>Night</em>':''} · ${zombies.filter(z=>!z.dead).length} walking · ${zLeft()} left`;return}
-  $('#top').innerHTML=`Day ${day} · ${SEASONS[Math.max(0,curSeason)]}${WX.amt>.3?(WX.type==='snow'?' · snow':WX.type==='storm'?' · storm':' · rain'):''} · ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} ${night?'<em>Night</em>':''} · ${kills} dead · ${zombies.filter(z=>!z.dead).length} walking · ${zLeft()} more out there`;
+  if(isTouch){$('#top').innerHTML=`Day ${day} · ${SEASONS[Math.max(0,curSeason)]} · ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}${night?' <em>Night</em>':''} · ${zombies.filter(z=>!z.dead).length} walking · ${zLeft()} left${NET.wr?` · ${NET.av.size+1} online`:''}`;return}
+  $('#top').innerHTML=`Day ${day} · ${SEASONS[Math.max(0,curSeason)]}${WX.amt>.3?(WX.type==='snow'?' · snow':WX.type==='storm'?' · storm':' · rain'):''} · ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} ${night?'<em>Night</em>':''} · ${kills} dead · ${zombies.filter(z=>!z.dead).length} walking · ${zLeft()} more out there${NET.wr?` · ${NET.av.size+1} online`:''}`;
 }
 
 // ================= built-in pixel font =================
@@ -2965,11 +3053,11 @@ function tpTargets(p){const T=[];if(p.spawnPt)T.push(['Your bed',()=>p.spawnPt.c
   const o=players.find(q=>q!==p&&q.dead<=0);if(o)T.push([`Player ${o.i+1}`,()=>{const v=(o.vehicle?o.vehicle.pos:o.pos).clone();v.x+=1.2;return v}]);return T}
 function teleport(p,pos){if(p.vehicle)exitVehicle(p);p.sleeping=null;p.body.g.rotation.x=0;p.pos.copy(pos);ensureWindowAt(p.pos);
   // land on the ground (not inside a wall): rise until the space is clear
-  for(let i=0;i<40&&hit(p.pos.x,p.pos.y+.02,p.pos.z,.3,1.75);i++)p.pos.y+=VS;p.vel.set(0,0,0);p.eye=p.pos.y+1.6;msg(p,'Teleported')}
+  settle(p,true);msg(p,'Teleported')}
 function renderPause(){const p=players[0];if(!p){$('#pTp').innerHTML='';return}$('#pTp').innerHTML=tpTargets(p).map(([n],i)=>`<button data-i="${i}">${n}</button>`).join('')}
 $('#pTp').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');const p=players[0];if(!b||!p)return;const t=tpTargets(p)[+b.dataset.i];if(t){teleport(p,t[1]());$('#bResume').click()}});
 // back to the title screen: save, tear the players down, and let the next game start fresh (or Continue from this save)
-async function toMainMenu(){if(!running)return;try{await autoSave()}catch(e){}
+async function toMainMenu(){if(!running)return;try{await autoSave()}catch(e){}netLeaveWorld();
   if(menuP)closeMenu();if(cookP)closeCook();if(talkP)closeTalk();paused=false;$('#pause').classList.add('hidden');$('#board').classList.add('hidden');
   for(const p of players){if(p.vehicle)exitVehicle(p);scene.remove(p.cam,p.body.g,p.light,p.light.target,p.outline);p.hud.el.remove()}
   players=[];running=false;REC=false;bombs.forEach(b=>scene.remove(b.g));bombs=[];if(engG)engG.gain.value=0;
@@ -3032,7 +3120,8 @@ function placeTrap(p,vh){
 }
 function nearestTrap(p,r){let best=null,bd=r;for(const t of traps){const d=Math.hypot(t.pos.x-p.pos.x,t.pos.y-p.pos.y,t.pos.z-p.pos.z);if(d<bd){bd=d;best=t}}return best}
 function pickTrap(p,t){t.gone=true;scene.remove(t.g);traps=traps.filter(x=>x!==t);p.inv[t.type]++;SND.pick();msg(p,`Picked up the ${t.name.toLowerCase()}`)}
-function explode(pos,pw=1){
+function explode(pos,pw=1){if(NET.wr&&!NET.applying)netEdit('x',Math.round(pos.x*10),Math.round(pos.y*10),Math.round(pos.z*10),Math.round(pw*10));const _na=NET.applying;NET.applying=true;try{return explode0(pos,pw)}finally{NET.applying=_na}}
+function explode0(pos,pw=1){
   SND.boom();const c=new V3(pos.x,pos.y+.4,pos.z);burst(c,60*pw,9*pw,[1,.55,.1],3);burst(c,40*pw,6*pw,DUST,4);flashT=Math.max(flashT,.25*pw);for(const p of players){const d=p.pos.distanceTo(pos);if(d<30*pw)p.shake=Math.max(p.shake||0,(1-d/(30*pw))*.6*pw)}
   for(const z of zombies){if(z.dead)continue;const d=z.pos.distanceTo(pos);if(d<4.2*pw){const dx=(z.pos.x-pos.x)/(d||1),dz=(z.pos.z-pos.z)/(d||1);if(d<3.2*pw)dismember(z,RI(1,3),{x:dx*3,z:dz*3});hurtZombie(z,190*(1-d/(4.6*pw)),{x:dx*2,z:dz*2},null)}}
   for(const a of animals){if(a.dead)continue;const d=a.pos.distanceTo(pos);if(d<4*pw)hurtAnimal(a,150*(1-d/(4.6*pw)),{x:0,z:0},null)}
@@ -3095,11 +3184,158 @@ function updateTraps(dt){
   traps=traps.filter(t=>!t.gone);
 }
 
+// ---------------- online: accounts, unique usernames, pixel profile pictures, live multiplayer
+// Identity is the player's signed-in Claude account (the platform vouches for it; no passwords or phone numbers are collected).
+// A username is a shared document names/<lowercase> claimed under a short lock, so only one account can hold it.
+// Pictures are 16 x 16 in a 16-colour palette, run-length packed then base64url: usually 40-180 characters.
+// Players in the same world seed share a live room: each sends one packed presence string (~40 chars) plus its recent block edits.
+const NET={wr:null,lobby:null,db:null,user:null,uid:null,canW:null,status:'offline',name:'',nameK:'',claimed:false,pic:null,picS:'',applying:false,
+  edits:[],eseq:0,lastS:'',lastT:0,seen:new Map(),av:new Map(),ver:new Map(),seedRoom:null};
+const PAL=['#000000','#1d1d21','#55565e','#9da0a6','#ebe6d8','#5c3522','#a8693a','#e3b98a','#6e1717','#c33a2c','#e58a2c','#e6cf4a','#3c7036','#80bd58','#2c5a96','#80b1e0'];
+function b64u(bytes){let s='';for(const v of bytes)s+=String.fromCharCode(v);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function unb64u(t){const s=atob(t.replace(/-/g,'+').replace(/_/g,'/'));return[...s].map(c=>c.charCodeAt(0))}
+function packPic(a){const run=[];for(let i=0;i<256;){let j=i;while(j<256&&a[j]===a[i]&&j-i<16)j++;run.push((j-i-1)<<4|a[i]);i=j}
+  if(run.length<128)return b64u([0,...run]);const b=[1];for(let i=0;i<256;i+=2)b.push(a[i]<<4|a[i+1]);return b64u(b)}
+function unpackPic(t){const a=new Uint8Array(256);try{const b=unb64u(t||'');if(b[0]===1){for(let i=0;i<128;i++){a[2*i]=b[i+1]>>4;a[2*i+1]=b[i+1]&15}}
+  else{let k=0;for(let i=1;i<b.length&&k<256;i++){const n=(b[i]>>4)+1,c=b[i]&15;for(let j=0;j<n&&k<256;j++)a[k++]=c}}}catch(e){}return a}
+const picC2={};
+function picURL(t){if(picC2[t])return picC2[t];try{const a=unpackPic(t),c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');for(let i=0;i<256;i++){x.fillStyle=PAL[a[i]];x.fillRect(i&15,i>>4,1,1)}return picC2[t]=c.toDataURL()}catch(e){return''}}
+function defaultPic(){const a=new Uint8Array(256).fill(14);for(let y=3;y<13;y++)for(let x=4;x<12;x++)a[y*16+x]=7;for(const[x,y]of[[6,7],[9,7]])a[y*16+x]=1;for(let x=6;x<10;x++)a[10*16+x]=8;for(let x=4;x<12;x++){a[3*16+x]=5;a[4*16+x]=5}return a}
+const enc36=v=>Math.round(v).toString(36),dec36=t=>parseInt(t,36)||0;
+function validName(n){return /^[A-Za-z0-9_]{3,16}$/.test(n)}
+function netSt(t){NET.status=t;const e=$('#netSt');if(e)e.textContent=t}
+function saveLocalProfile(){try{localStorage.setItem('deadground-prof',JSON.stringify({n:NET.name,p:NET.picS}))}catch(e){}}
+async function netInit(){
+  try{const l=JSON.parse(localStorage.getItem('deadground-prof')||'null');if(l){NET.name=l.n||'';NET.picS=l.p||''}}catch(e){}
+  NET.pic=NET.picS?unpackPic(NET.picS):defaultPic();if(!NET.picS)NET.picS=packPic(NET.pic);$('#unIn').value=NET.name;drawPicEd();
+  const C=window.claude;if(!C||typeof C.use!=='function'){netSt('Offline. Online play, usernames and the players list work when this game is opened in Claude. Your name and picture are saved in this browser.');renderLobby();return}
+  netSt('Connecting…');
+  const [user,db,room]=await Promise.all([C.use('user'),C.use('db'),C.use('room')].map(p=>p.catch(()=>null)));NET.user=user;NET.db=db;NET.lobby=room;
+  if(user){try{NET.uid=await user.id()}catch(e){}try{NET.canW=await user.can('data.write')}catch(e){NET.canW=null}}
+  if(db&&NET.uid){try{const s=await db.doc('profiles/'+NET.uid).get();if(s.exists){const d=s.data();if(d.n&&validName(d.n)){NET.name=d.n;NET.nameK=d.n.toLowerCase();NET.claimed=true}if(d.p){NET.picS=d.p;NET.pic=unpackPic(d.p)}$('#unIn').value=NET.name;drawPicEd();saveLocalProfile()}}catch(e){}
+    if(NET.claimed){try{const s=await db.doc('names/'+NET.nameK).get();if(!(s.exists&&s.data().u===NET.uid)){NET.claimed=false}}catch(e){}}}
+  const who=NET.claimed?`Signed in as ${NET.name}.`:NET.uid?'Signed in with your Claude account. Claim a username so other players see you.':'Not signed in.';
+  const w=NET.canW===false?' (You can play online, but this share level can’t save a username: ask the owner for Contributor or Editor access.)':'';
+  netSt((room?'Online. ':'Online play isn’t available in this view. ')+who+w);
+  if(room){room.onPeers(()=>renderLobby());room.onConnection(c=>{if(!c)return;lobbyPresence()});lobbyPresence()}renderLobby()}
+function lobbyPresence(){if(!NET.lobby)return;NET.lobby.presence({n:NET.name||null,p:NET.picS,u:NET.uid,sd:running?String(seed):null}).catch(()=>{})}
+// a presented name counts as verified only if names/<lower> really belongs to that sender
+function verifyName(by,n){if(!n||!by||!NET.db)return false;const k=n.toLowerCase(),key=by+'|'+k;if(NET.ver.has(key))return NET.ver.get(key);NET.ver.set(key,false);
+  NET.db.doc('names/'+k).get().then(s=>{NET.ver.set(key,!!(s.exists&&s.data().u===by));renderLobby()}).catch(()=>{});return false}
+function peerLabel(pr,by){const n=typeof pr.n==='string'&&validName(pr.n)?pr.n:'Survivor';return{n,ok:verifyName(by,n)}}
+function renderLobby(){const el=$('#lobbyL');if(!el)return;if(!NET.lobby){el.textContent='—';return}
+  const ps=NET.lobby.peers().filter(q=>q.kind==='viewer');el.textContent='';if(!ps.length){el.textContent='Nobody yet.';return}
+  for(const q of ps){const pr=q.presence||{},L=peerLabel(pr,q.by),row=document.createElement('div');row.className='lp';const im=document.createElement('img');im.alt='';
+    if(typeof pr.p==='string'&&pr.p.length<400)im.src=picURL(pr.p);row.appendChild(im);const nm=document.createElement('span');nm.textContent=(q.sameTab?NET.name||'You':L.n)+(q.sameTab?' (you)':'');row.appendChild(nm);
+    if(L.ok&&!q.sameTab){const ok=document.createElement('small');ok.className='ok';ok.textContent='✓';row.appendChild(ok)}
+    const sd=typeof pr.sd==='string'&&/^-?\d{1,11}$/.test(pr.sd)?pr.sd:null;const st=document.createElement('small');st.textContent=sd?' · in a world':' · on the menu';row.appendChild(st);
+    if(sd&&!q.sameTab&&!running){const b=document.createElement('button');b.type='button';b.textContent='Join';b.onclick=()=>{$('#seedIn').value=sd;play(1)};row.appendChild(b)}
+    el.appendChild(row)}}
+async function claimName(){const n=$('#unIn').value.trim(),m=$('#unMsg');if(!validName(n)){m.textContent='Use 3–16 letters, numbers or _';return}
+  NET.name=n;saveLocalProfile();lobbyPresence();
+  if(!NET.db||!NET.uid){m.textContent='Saved in this browser (not reserved: open the game in Claude to reserve it).';return}
+  m.textContent='Checking…';const k=n.toLowerCase();
+  try{const ref=NET.db.doc('names/'+k);const L=await ref.acquire({holder:NET.uid,ttlMs:4000});if(!L.acquired){m.textContent='Someone is claiming that name right now. Try again in a moment.';return}
+    const s=await ref.get();const d=s.exists?s.data():null;if(d&&d.u&&d.u!==NET.uid){m.textContent=`“${n}” is taken.`;NET.name=NET.claimed?NET.name:'';return}
+    await ref.set({u:NET.uid,n,t:Date.now()});
+    if(NET.claimed&&NET.nameK&&NET.nameK!==k){try{const o=NET.db.doc('names/'+NET.nameK),os=await o.get();if(os.exists&&os.data().u===NET.uid)await o.delete()}catch(e){}}
+    NET.nameK=k;NET.claimed=true;await NET.db.doc('profiles/'+NET.uid).set({n,p:NET.picS,t:Date.now()});m.textContent=`“${n}” is yours.`;NET.ver.clear();netSt('Online. Signed in as '+n+'.')}
+  catch(e){m.textContent=NET.canW===false?'Your access level can’t save a name here (needs Contributor or Editor). Using it unreserved.':'Couldn’t reach the name list just now. Try again.'}
+  lobbyPresence()}
+// ---- picture editor: draw with the palette, or squeeze a photo down to 16 x 16 in the palette
+let picCol=9;
+function drawPicEd(){const c=$('#picC');if(!c||!NET.pic)return;const x=c.getContext('2d');for(let i=0;i<256;i++){x.fillStyle=PAL[NET.pic[i]];x.fillRect(i&15,i>>4,1,1)}
+  const s=packPic(NET.pic);$('#picSz').textContent=`Stored as ${s.length} characters (${Math.ceil(s.length*.75)} bytes)`}
+function initPicEd(){const pal=$('#picPal');pal.innerHTML=PAL.map((c,i)=>`<b data-i="${i}" style="background:${c}" title="Colour ${i+1}"></b>`).join('');const mark=()=>pal.querySelectorAll('b').forEach(b=>b.classList.toggle('on',+b.dataset.i===picCol));mark();
+  pal.addEventListener('click',e=>{const b=e.target.closest('b');if(b){picCol=+b.dataset.i;mark()}});
+  const c=$('#picC');let down=false;const paint=e=>{const r=c.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/r.width*16),y=Math.floor((e.clientY-r.top)/r.height*16);if(x<0||y<0||x>15||y>15)return;NET.pic[y*16+x]=picCol;drawPicEd()};
+  c.addEventListener('pointerdown',e=>{down=true;try{c.setPointerCapture(e.pointerId)}catch(_){}paint(e)});c.addEventListener('pointermove',e=>{if(down)paint(e)});c.addEventListener('pointerup',()=>down=false);
+  $('#picClr').onclick=()=>{NET.pic.fill(1);drawPicEd()};$('#picPhoto').onclick=()=>$('#picFile').click();
+  $('#picFile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{const c2=document.createElement('canvas');c2.width=c2.height=16;const x=c2.getContext('2d');
+    const s=Math.min(im.width,im.height);x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,16,16);const d=x.getImageData(0,0,16,16).data,P=PAL.map(h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)));
+    for(let i=0;i<256;i++){let b=0,bd=1e9;for(let k=0;k<16;k++){const q=P[k],dd=(d[i*4]-q[0])**2*.3+(d[i*4+1]-q[1])**2*.59+(d[i*4+2]-q[2])**2*.11;if(dd<bd){bd=dd;b=k}}NET.pic[i]=b}URL.revokeObjectURL(im.src);drawPicEd()};im.src=URL.createObjectURL(f);e.target.value=''};
+  $('#picSave').onclick=async()=>{NET.picS=packPic(NET.pic);saveLocalProfile();lobbyPresence();const m=$('#unMsg');
+    if(NET.db&&NET.uid&&NET.claimed){try{await NET.db.doc('profiles/'+NET.uid).set({n:NET.name,p:NET.picS,t:Date.now()});m.textContent='Picture saved to your profile.'}catch(e){m.textContent='Picture saved in this browser.'}}else m.textContent='Picture saved in this browser.'};
+  $('#unBtn').onclick=claimName}
+// ---- in a world: one room per seed
+async function netJoinWorld(){if(!NET.lobby)return;lobbyPresence();const name='w-'+(seed>>>0).toString(36);
+  try{NET.wr=await NET.lobby.join(name)}catch(e){NET.wr=null;return}NET.seen.clear();NET.edits=[];
+  NET.wr.onPeers(ch=>{for(const q of ch.left)dropAvatar(q.peer);for(const q of[...ch.joined,...ch.updated])if(!q.sameTab&&q.kind==='viewer')netPeer(q);
+    if(ch.joined.some(q=>!q.sameTab&&q.kind==='viewer'))for(const q of ch.joined)if(!q.sameTab&&q.kind==='viewer'&&players[0])msg(players[0],`${peerLabel(q.presence||{},q.by).n} is in this world`)});
+  NET.lastS='';NET.lastT=0}
+function netLeaveWorld(){if(NET.wr){NET.wr.leave().catch(()=>{});NET.wr=null}for(const k of[...NET.av.keys()])dropAvatar(k);lobbyPresence()}
+function netEdit(k,x,y,z,v){NET.eseq++;NET.edits.push(k+[NET.eseq,x,y,z,v].map(enc36).join(','));if(NET.edits.length>48)NET.edits.shift()}
+function netTick(dt){if(!NET.wr)return;const p=players[0];if(!p)return;const now=performance.now();if(now-NET.lastT<90)return;
+  const fl=(p.crouch?1:0)|(p.vehicle?2:0)|(p.dead>0?4:0)|(p.sleeping?8:0),e=p.emote;
+  const st=[p.pos.x*100,p.pos.y*100,p.pos.z*100,((p.yaw%6.2832)+6.2832)%6.2832*40,p.pitch*40,p.tool,fl,e?e.id+1:0,e?e.t*10:0,p.hp].map(enc36).join('.');
+  const ed=NET.edits.join(';');if(st===NET.lastS&&ed===NET.lastE&&now-NET.lastT<1000)return;NET.lastS=st;NET.lastE=ed;NET.lastT=now;
+  NET.wr.presence({v:1,n:NET.name||null,p:NET.picS,u:NET.uid,s:st,e:ed}).catch(()=>{})}
+function netPeer(q){const pr=q.presence||{};if(typeof pr.s!=='string')return;const f=pr.s.split('.').map(dec36);if(f.length<10)return;
+  let a=NET.av.get(q.peer);if(!a)a=makeAvatar(q);a.by=q.by;
+  a.tx=f[0]/100;a.ty=f[1]/100;a.tz=f[2]/100;a.tyaw=f[3]/40;a.tool=f[5];a.fl=f[6];a.em=f[7]-1;a.emT=f[8]/10;a.hp=f[9];a.seenT=performance.now();
+  const L=peerLabel(pr,q.by),pic=typeof pr.p==='string'&&pr.p.length<400?pr.p:'';if(L.n!==a.n||L.ok!==a.ok||pic!==a.pic){a.n=L.n;a.ok=L.ok;a.pic=pic;drawTag(a)}
+  // block edits we haven't applied yet from this player
+  if(typeof pr.e==='string'&&pr.e){const last=NET.seen.get(q.peer)||0;let mx=last;NET.applying=true;
+    try{for(const t of pr.e.split(';')){const k=t[0],v=t.slice(1).split(',').map(dec36);if(v.length<5||v[0]<=last)continue;mx=Math.max(mx,v[0]);
+      if(k==='b'&&v[4]>=0&&v[4]<256&&inB(v[1],v[2],v[3]))setBlock(v[1],v[2],v[3],v[4]);else if(k==='x')explode(new V3(v[1]/10,v[2]/10,v[3]/10),Math.min(3,v[4]/10))}}finally{NET.applying=false}
+    NET.seen.set(q.peer,mx)}}
+function hashCol(s,set){let h=7;for(const c of String(s||''))h=Math.imul(h^c.charCodeAt(0),16777619);return set[(h>>>0)%set.length]}
+function makeAvatar(q){const id=q.by||q.peer,m=makeHuman({skin:hashCol(id+'s',[0xd8a878,0xb07850,0x8a5a3a,0xe8c0a0,0x6a4028]),shirt:hashCol(id,[0x3a5a8a,0x8a3a3a,0x3a7a4a,0x6a4a8a,0x9a7a2a,0x2a6a7a]),pants:0x2a2f3a,hat:hashCol(id+'h',[0x6a4a2a,0x2a2a2a,0x8a2a2a,0x2a4a6a])});
+  m.g.rotation.order='YXZ';scene.add(m.g);castBig(m.g,.3);const c=document.createElement('canvas');c.width=128;c.height=32;const tx=new THREE.CanvasTexture(c);tx.magFilter=tx.minFilter=THREE.NearestFilter;tx.generateMipmaps=false;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false}));sp.scale.set(1.6,.4,1);sp.position.y=2.25;m.g.add(sp);
+  const a={m,sp,c,tx,x:null,walk:0,n:'',ok:false,pic:''};NET.av.set(q.peer,a);return a}
+function drawTag(a){const x=a.c.getContext('2d');x.clearRect(0,0,128,32);x.fillStyle='rgba(10,9,7,.6)';x.fillRect(0,2,128,28);
+  if(a.pic){const im=new Image();im.onload=()=>{x.imageSmoothingEnabled=false;x.drawImage(im,3,5,22,22);a.tx.needsUpdate=true};im.src=picURL(a.pic)}
+  pixelText(x,(a.n||'Survivor')+(a.ok?'':'?'),78,16,2,a.ok?'#ebe6d8':'#b8b2a4',96);a.tx.needsUpdate=true}
+function dropAvatar(peer){const a=NET.av.get(peer);if(!a)return;scene.remove(a.m.g);a.tx.dispose();NET.av.delete(peer)}
+function updateAvatars(dt){const now=performance.now();for(const[k,a]of NET.av){if(now-(a.seenT||0)>15000){dropAvatar(k);continue}const g=a.m.g;
+  if(a.x==null){a.x=a.tx;a.y=a.ty;a.z=a.tz;a.yaw=a.tyaw}const k2=Math.min(1,dt*10),ox=a.x,oz=a.z;a.x+=(a.tx-a.x)*k2;a.y+=(a.ty-a.y)*k2;a.z+=(a.tz-a.z)*k2;
+  let dy=a.tyaw-a.yaw;dy=Math.atan2(Math.sin(dy),Math.cos(dy));a.yaw+=dy*k2;const sp=Math.hypot(a.x-ox,a.z-oz)/Math.max(dt,1e-3);a.walk+=sp*dt*3;
+  g.position.set(a.x,a.y,a.z);g.rotation.set(0,a.yaw+Math.PI,0);g.scale.y=a.fl&1?.62:1;g.visible=!(a.fl&4);const b=a.m,sw=sp>.4?Math.sin(a.walk*.5)*.7:0;
+  for(const q of['armL','armR','legL','legR','head'])b[q].rotation.set(0,0,0);
+  if(a.fl&2||a.fl&8){const o=emotePose(b,7,0);g.position.y+=o.y;if(a.fl&8){g.rotation.x=-Math.PI/2;g.position.y+=.35}}
+  else if(a.em>=0&&a.em<EMOTES.length){a.emT+=dt;const o=emotePose(b,a.em,a.emT);g.position.y+=o.y;g.rotation.y+=o.spin}
+  else{b.legL.rotation.x=sw;b.legR.rotation.x=-sw;b.armL.rotation.x=-sw*.6;b.armR.rotation.x=a.tool===1?-1.4:-.5}}}
+// ---------------- touch button icons (pixel bitmaps) and live labels
+const TBI={jump:['....#....','...###...','..#####..','.#######.','....#....','....#....','....#....','....#....'],
+ use:['...#.#.#.','..##.#.#.','..#######','..#######','#.#######','########.','.#####...','..###....'],
+ aim:['....#....','..#####..','.#..#..#.','.#.....#.','####.####','.#.....#.','.#..#..#.','..#####..','....#....'],
+ block:['..#####..','.#....##.','#####.#.#','#...#.#.#','#...#.##.','#...#.#..','#####....'],
+ swap:['..#......','.###.....','#.#.####.','..#....#.','..#....#.','.####.#.#','......###','.......#.'],
+ next:['.#.......','.##......','.###.....','.####....','.###.....','.##......','.#.......'],
+ bag:['...###...','..#...#..','.#######.','#########','####.####','#########','.#######.'],
+ tool:['#.....##.','##...##..','.##.##...','..###....','..###....','.##.##...','##...##..'],
+ view:['..#####..','.#.....#.','#..###..#','#..#.#..#','#..###..#','.#.....#.','..#####..'],
+ run:['#..#..#..','.#..#..#.','..#..#..#','.#..#..#.','#..#..#..'],
+ duck:['....#....','....#....','....#....','.#######.','..#####..','...###...','....#....'],
+ bomb:['......#.#','.....#...','..####...','.######..','.######..','.######..','..####...'],
+ talk:['#######..','#.....#..','#.#.#.#..','#.....#..','#######..','.#.......','#........'],
+ emote:['..#####..','.#.....#.','#..#.#..#','#.......#','#.#...#.#','#..###..#','.#.....#.','..#####..'],
+ rsp:['..####...','.#....#.#','#......##','#.....###','#........','.#....#..','..####...'],
+ car:['..####...','.#....#..','########.','#.#####.#','########.','.#....#..']};
+const TBIC={};
+function tbIcon(k){if(TBIC[k])return TBIC[k];try{const rows=TBI[k],c=document.createElement('canvas');c.width=9;c.height=9;const x=c.getContext('2d');x.fillStyle='#ebe6d8';
+  const oy=Math.floor((9-rows.length)/2);rows.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==='#')x.fillRect(i,j+oy,1,1)}));return TBIC[k]=c.toDataURL()}catch(e){return TBIC[k]=''}}
+const ACTL=['Swing','Shoot','Dig','Build','Set trap'];
+// what the second-function button does for the held tool (null = none, so the button hides)
+function altFor(p){if(p.vehicle||p.sleeping||p.dead>0)return null;const t=p.tool;
+  if(t===0)return p.inv.saw>0?[p.useSaw?'Bat':'Chainsaw','swap']:null;if(t===1)return['Aim','aim'];if(t===2)return['Place','block'];if(t===3)return['Type','next'];if(t===4)return['Next trap','next'];return null}
+function touchAlt(p,inp){const a=altFor(p);if(!a)return;const t=p.tool;
+  if(t===0)inp.tool=0;else if(t===1){T.aim=!T.aim}else if(t===2)inp.place=true;else inp.matNext=true}
+let tbLast='';
+function touchLabels(p){const tb=k=>document.querySelector(`#touch .tb[data-b=${k}]`);if(p.tool!==1&&T.aim)T.aim=false;
+  const veh=!!p.vehicle,act=veh||p.sleeping?null:(p.tool===0&&p.useSaw?'Saw':ACTL[p.tool]);
+  const pr=promptFor(p),m=/— ([a-z]+)/i.exec(pr),use=veh?'Get out':p.sleeping?'Get up':m?m[1][0].toUpperCase()+m[1].slice(1):'Use',alt=altFor(p);
+  const key=[act,p.tool,use,!!m,alt&&alt[0],T.aim,veh].join('|');{const ab=tb('alt');if(ab)ab.classList.toggle('on',p.tool===1&&T.aim&&!p.vehicle)}if(key===tbLast)return;tbLast=key;
+  const set=(k,label,icon,src)=>{const b=tb(k);if(!b)return;b.classList.toggle('gone',label==null);if(label==null)return;const sp=b.querySelector('span'),im=b.querySelector('.ti');if(sp)sp.textContent=label;if(im){const u=src||tbIcon(icon);if(im.getAttribute('src')!==u)im.setAttribute('src',u)}};
+  set('act',act,null,act?pxIcon(TOOLS[p.tool]):'');set('jump',veh?'Brake':'Jump','jump');set('use',use,veh?'car':'use');tb('use').classList.toggle('idle',!veh&&!p.sleeping&&!m);
+  set('alt',alt&&alt[0],alt&&alt[1])}
+function initTouchIcons(){for(const k of['bag','tool','view','run','duck','bomb','talk','emote','rsp']){const b=document.querySelector(`#touch .tb[data-b=${k}]`);if(!b||b.querySelector('.ti'))continue;const t=b.textContent;b.innerHTML=`<img class="ti" alt="" src="${tbIcon(k)}"><span></span>`;b.querySelector('span').textContent=t}}
 // ---------------- touch controls
 const T={aim:false,on:false,mx:0,my:0,held:{},pressed:new Set(),stick:null,look:null,run:false,sx:0,sy:0,lx:0,ly:0};
 {
   const stickEl=$('#stick'),knob=$('#stick i');
-  if(isTouch)document.body.classList.add('touch');
+  if(isTouch)document.body.classList.add('touch');initTouchIcons();
   document.querySelectorAll('.tb').forEach(b=>{const k=b.dataset.b;
     b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();T.on=true;T.held[k]=true;T.pressed.add(k);
       if(k==='run'){T.run=!T.run;b.classList.toggle('on',T.run)}else if(k==='duck'){T.duck=!T.duck;b.classList.toggle('on',T.duck)}else if(k==='aim'){T.aim=!T.aim;b.classList.toggle('on',T.aim)}else b.classList.add('on')});
@@ -3168,7 +3404,7 @@ function dismember(z,n,dir){const ks=['armL','armR','legL','legR','head'].filter
 // ---------------- hit by a car: slow hits shove, fast hits throw the body flailing through the air, then it flops on the ground.
 // Impact damage grows with the square of the speed; harder hits tear limbs off, snap them in half, or cut the zombie in two.
 function carHitZombie(z,v,d){const s=Math.abs(v.speed),fx=Math.sin(v.yaw)*Math.sign(v.speed),fz=Math.cos(v.yaw)*Math.sign(v.speed),dir={x:fx*2,z:fz*2};
-  v.hp-=.4+s*.07;v.speed*=s>9?.93:.85;if(d)d.flash=.12+s*.006;SND.hit();bloody(v.g,Math.round(2+s*.4),120);
+  v.hp-=.4+s*.07;v.speed*=s>9?.93:.85;if(d)d.flash=.12+s*.006;SND.hit();bloody(v.g,Math.round(2+s*.4),120);wsBlood(v,Math.round(2+s*.5),s);
   if(s<5){z.kx+=fx*s*1.2;z.kz+=fz*s*1.2;z.chasing=true;z.hp-=s*3;burst(new V3(z.pos.x,z.pos.y+1.1,z.pos.z),10,3,RED,1.2);if(z.hp<=0)killZombie(z,d);return}
   const dmg=s*s*.6;z.hp-=dmg;
   // limbs: torn clean off, or snapped through the middle, more often the faster the hit
@@ -3180,6 +3416,16 @@ function carHitZombie(z,v,d){const s=Math.abs(v.speed),fx=Math.sin(v.yaw)*Math.s
   z.tumble={t:0,rest:0,killBy:z.hp<=0?(d||true):null,vel:new V3(fx*s*R(.75,1.05)+R(-1,1),R(3,4.5)+s*.3,fz*s*R(.75,1.05)+R(-1,1)),
     spin:new V3(R(-1,1)*(4+s*.6),R(-3,3),R(-1,1)*(4+s*.5)),ph:[0,1,2,3].map(()=>R(0,6)),bounces:0};
   z.g.rotation.order='YXZ';z.chasing=true;sNoise(.25,500,.6)}
+// blood thrown onto the windshield: spatters, drops and streaks that run down; it dries off slowly, faster in rain
+function wsBlood(v,n,s){const W=v.wsh;if(!W)return;const cv=W.cv,x=cv.getContext('2d'),w=cv.width,h=cv.height;W.m.visible=true;
+  for(let k=0;k<n;k++){const cx=R(.1,.9)*w,cy=R(.05,.75)*h,r=R(1,2.6+s*.12),dk=R(0,1);x.fillStyle=`rgba(${110+dk*60|0},${6+dk*10|0},${6+dk*8|0},${R(.75,.95)})`;
+    for(let i=-Math.ceil(r);i<=r;i++)for(let j=-Math.ceil(r);j<=r;j++)if(i*i+j*j<=r*r*R(.6,1.2))x.fillRect(cx+i|0,cy+j|0,1,1);
+    for(let d=0;d<RI(2,6);d++){const a=R(0,6.3),L=r+R(1,4+s*.25);x.fillRect(cx+Math.cos(a)*L|0,cy+Math.sin(a)*L*.6|0,1,1)}
+    if(rng()<.6){const L=RI(2,Math.round(h*.4));for(let j=0;j<L;j++)x.fillRect(cx+(j>L*.6&&rng()<.3?1:0)|0,cy+r+j|0,1,1)}}
+  W.amt=Math.min(1,W.amt+n*.05);W.tx.needsUpdate=true}
+function wsTick(v,dt){const W=v.wsh;if(!W||W.amt<=0)return;W.t+=dt;if(W.t<.6)return;const rate=.012+WX.wet*.06;
+  const x=W.cv.getContext('2d');x.globalCompositeOperation='destination-out';x.fillStyle=`rgba(0,0,0,${rate*W.t/.6})`;x.fillRect(0,0,W.cv.width,W.cv.height);x.globalCompositeOperation='source-over';
+  W.amt-=rate*W.t*.8;W.t=0;if(W.amt<=0){W.amt=0;x.clearRect(0,0,W.cv.width,W.cv.height);W.m.visible=false}W.tx.needsUpdate=true}
 // cut a limb through the middle: the lower half flies off as a gib, the upper half stays on with a bloody end
 function halfLimb(z,k,dir){const o=z[k];if(!o||!o.parent||z.cut[k])return;z.half=z.half||{};if(z.half[k]){sever(z,k,dir);return}z.half[k]=true;
   const L=k[0]==='l'?.85:.66,yc=-L/2;z.g.updateMatrixWorld(true);const low=new THREE.Group();
@@ -3393,7 +3639,7 @@ function updateSleep(dt){
   if(!sleepT&&alive.length&&alive.every(p=>p.sleeping)){sleepT=2.4;$('#fade').style.opacity=1}
   if(sleepT){const prev=sleepT;sleepT=Math.max(0,sleepT-dt);
     if(prev>1.2&&sleepT<=1.2){if(tDay>.5)day++;tDay=.03;
-      for(const p of players){if(p.sleeping){p.sleeping=null;p.body.g.rotation.x=0;p.body.g.rotation.order='XYZ'}p.hunger=Math.max(5,p.hunger-30);p.hp=Math.min(100,p.hp+50)}
+      for(const p of players){if(p.sleeping){p.sleeping=null;p.body.g.rotation.x=0;p.body.g.rotation.order='XYZ';settle(p,true)}p.hunger=Math.max(5,p.hunger-30);p.hp=Math.min(100,p.hp+50)}
       for(const z of zombies)if(!z.dead&&players.every(p=>z.pos.distanceTo(p.pos)>22)){scene.remove(z.g);z.gone=true}
       msg(null,`You wake at dawn. Day ${day}.`);$('#fade').style.opacity=0}}
 }
@@ -3697,7 +3943,7 @@ function spawnNPCsNear(){
 const introCam=new THREE.PerspectiveCamera(60,1,.1,200);
 let spawnT=2,animT=3,sleepT=0,hudT=0,lastDl=1,clockT=performance.now();
 function update(dt){
-  const dlPrev=dayLight();tDay+=dt/DAYLEN;if(tDay>=1){tDay-=1;day++;nightPassed();msg(null,`Dawn of day ${day}. The dead slow down.`)}
+  netTick(dt);updateAvatars(dt);  const dlPrev=dayLight();tDay+=dt/DAYLEN;if(tDay>=1){tDay-=1;day++;nightPassed();msg(null,`Dawn of day ${day}. The dead slow down.`)}
   const dl=dayLight(),night=dl<.25;
   if(dlPrev>=.25&&dl<.25)msg(null,'Night falls. They are faster now — find walls.');
   updSky();
@@ -3751,7 +3997,7 @@ function startGame(n){
   initAudio();if(AC&&AC.resume)AC.resume();
   for(let i=0;i<n;i++){const p=makePlayer(i);if(startCreative){p.creative=true;msg(p,'Creative mode: every block, unlimited, no damage. Double-tap jump to fly, R picks the block')}players.push(p)}startCreative=false;
   $('#start').classList.add('hidden');$('#top').classList.remove('hidden');$('#split').classList.toggle('hidden',n<2);
-  running=true;REC=true;worldUsed=true;if(!loadingSave)tDay=.08;if(isTouch)$('#touch').classList.remove('hidden');
+  running=true;REC=true;worldUsed=true;netJoinWorld();if(!loadingSave)tDay=.08;if(isTouch)$('#touch').classList.remove('hidden');
   if(!loadingSave)msg(null,'Check the crates in the buildings. A sedan sits just up the road.');
   if(n>1)msg(players[1],'Player 2: I K J L to move, H to act, Y to use');
   lock();
@@ -3979,6 +4225,7 @@ $('#mCode').onclick=async()=>{const c=await encodeSave();const o=$('#mCodeOut');
 try{if(localStorage.getItem('deadground-save'))$('#bCont').classList.remove('hidden')}catch(e){}
 for(const o of scene.children)baseObjs.add(o);
 document.querySelectorAll('#start button').forEach(b=>b.disabled=true);
+try{initPicEd()}catch(e){}setTimeout(()=>{netInit().catch(()=>{})},0);
 setTimeout(()=>{worldInit();preload();$('#seedIn').placeholder=String(seed);setMsg(worldSummary());document.querySelectorAll('#start button').forEach(b=>b.disabled=false)},40);
 updSky();requestAnimationFrame(frame);
 }

@@ -63,6 +63,24 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 **Small phones:** on screens smaller than a typical phone, the whole touch layout (buttons, stick, hotbar and HUD) shrinks in proportion, so no button overlaps another in portrait or landscape. This is checked on 18 phone and tablet sizes.
 
+**Touch buttons:** *Jump* is the biggest button. The red action button is labelled with what your held tool does (*Swing*, *Saw*, *Shoot*, *Dig*, *Build*, *Set trap*). The blue *Use* button is named after whatever is in front of you (*Open*, *Talk*, *Search*, *Sleep*…) and dims when nothing is. The amber button appears only when the held tool has a second function: *Aim* for the pistol, *Place* for the pickaxe, *Type* or *Next trap*, or switching between bat and chainsaw. Each button has its own colour and pixel icon, and you can tap a hotbar slot to switch to it.
+
+**Never stuck in blocks:** waking up, respawning, teleporting and getting out of a car always put you in the nearest free spot with a floor under you. If a block ever ends up inside you (placed, loaded or fallen in), you duck if that frees you, otherwise you're moved out within a quarter second.
+
+**Emotes and dances** (J, or *Emote* on phones): Wave, Cheer, Point, Thumbs up, Facepalm, Laugh, Salute, Sit, plus looping dances (Groove, Robot, Disco, Headbang, Spin, Shuffle). Pick one with its number key or a click. The camera swings round so you can watch, and moving cancels it. Other players see your emotes.
+
+## Online
+
+When the game is opened in Claude (the published artifact), the start screen's **Online & profile** panel signs you in with your Claude account.
+
+- **Username:** claim a name (3–16 letters, numbers or _). Each name can belong to only one account: it's reserved in a shared list under a short lock, so two people can't grab it at once. Other players' names show a ✓ when they really own them.
+- **Profile picture:** draw a 16 × 16 picture in a 16-colour palette, or squeeze a photo down to one. It's run-length packed and base64-encoded, usually 40–180 characters.
+- **Playing together:** everyone in the same world seed shares a live room. The players list shows who's online and who's in a world, with a *Join* button that loads their seed. In a world you see each other walking, crouching, driving, sleeping and dancing, with name tags and pictures. Block edits and explosions are synced, and the top bar counts players online. Each player's state is one presence update of about 140 bytes (position, look, tool, flags, emote, health, plus the last 48 block edits).
+- **Who can join:** only people the game artifact is shared with, signed in to Claude. To reserve a username they need Contributor or Editor access; view-only players can still play together under an unreserved name. Zombies, animals and loot are simulated on each device, so they won't be in identical places for everyone.
+- **Phone numbers:** not used. Sign-in comes from the player's Claude account, so the game never collects phone numbers or passwords.
+
+Outside Claude (for example, this repo opened as a plain file), the game still works offline, and your name and picture are saved in that browser.
+
 **Rotating your phone:** the picture is resized to the new screen shape every frame and again just after a rotation, so turning between portrait and landscape never leaves the view stretched or squashed.
 
 **All-pixel UI:** a pixel font is built into the game (hand-drawn 5×7 glyphs turned into a real font at startup), so every label, menu, sign and button is crisp pixel type even offline. Touch buttons and the joystick are square too.
@@ -86,6 +104,7 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 - **Zombies** are slow by day and fast at night. They notice you only within range (22 m by day, 34 m at night) and in line of sight, give up once you're well out of range, and come to investigate gunshots. They break blocks hit by hit: a window in one hit, a wooden door in about 10 s, a brick wall only with a crowd. Metal holds longest. Some wear hard hats, helmets, vests or jackets that soak up damage.
 - **Zombie looks:** rotting pixel skin with veins, mottling and open sores, torn and blood-soaked clothes, bared teeth, and sometimes a torn cheek or bare skull. Some show ribs through a hole in the shirt or a spine down the back, or have bones snapped through a forearm or shin. Some have already lost an arm, both arms, a leg or half a forearm, with a bloody stump and bone.
 - **Running zombies down:** a slow bump shoves a zombie. Hit one at speed and it's thrown through the air, limbs flailing, bounces, then flops and twitches on the ground. Impact damage grows with speed, and harder hits tear limbs off, snap them in half (the lower half flies off), take the head, or cut the zombie in two. Survivors get back up, or crawl if they lost a leg.
+- **Windshield blood:** zombies you hit splatter the windshield with drops, spatters and streaks that run down the glass, visible from the driver's seat and outside. It dries off over a minute or so, and faster in the rain.
 - **Aiming:** hold right-click (pistol) to aim down sights, which is more accurate but slower. There's a light aim assist toward visible targets, a bit stronger on touch and gamepad.
 - **Shooting:** bullets leave holes where they hit. Shoot off arms and legs: legless zombies crawl, armless ones bite weaker, and a headshot pops the head off. Cars and tripwire bombs tear limbs off too.
 - **Loot:** crates in houses (each public building stocks its own kind of loot), basements, sewers and caves. Dead zombies drop loot bags, sometimes with the clothing they wore.
