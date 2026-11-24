@@ -10,9 +10,9 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 ## The world
 
-- **320 × 320 m world** built from half-metre pixel-textured blocks: a large central town plus several smaller towns, rolling hills and mountains, forests and caves. Every world comes from a **seed**, so the same seed always builds the same world.
+- **320 × 320 m world** built from half-metre pixel-textured blocks, with quarter-height grass caps that smooth hills and slopes, a large central town plus several smaller towns, rolling hills and mountains, forests and caves. Every world comes from a **seed**, so the same seed always builds the same world.
 - **Chunk streaming:** only the 8 × 8 m chunks around the players are meshed; the rest load in as you move and unload behind you. Pick a render distance from 32 to 128 m. Fog and camera range follow it.
-- **Realistic towns:** 6 m two-lane roads, 1.5 m sidewalks, 15 m lots, and houses 11–15 m across (level with the sidewalks) with 3.5 m floors, 1–3 storeys, framed windows (some smashed or boarded), front and back doors, stairs and roof access.
+- **Realistic towns:** 6 m two-lane roads, 1.5 m sidewalks, 15 m lots, and houses 11–15 m across (level with the sidewalks) with 3.5 m floors, 1–3 storeys, painted drywall in a different colour per room, real stair blocks (two steps per block) with wooden or iron railings, framed windows (some smashed or boarded), front and back doors, stairs and roof access.
 - **Furnished rooms:** each floor is split into rooms joined by doorways and doors.
   - Living rooms: couch facing a flat-screen or an old CRT TV (rabbit ears, VCR) on a TV stand, coffee table, rug, armchair, bookcase.
   - Kitchens: fridge, counters, sink and stove, plus a table and chairs.
@@ -35,7 +35,7 @@ Shadows are snapped to texture pixels on every level that has them. When it rain
 
 Also on every level: a sky dome with sun, moon and stars; pixel textures that span 2×2 blocks so bricks, planks and tiles run continuously; swaying grass tufts; and seasonal ambience (ash and dust, fireflies, falling leaves, snow and rain that stop at roofs, embers and flies).
 
-Performance: chunk streaming, typed-array meshing, merged furniture, frozen static meshes, only large parts casting shadows, shadow maps refreshed every few frames, and dynamic render scale that only drops if frames get slow.
+Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60% less GPU memory), typed-array meshing, merged furniture, frozen static meshes, only large parts casting shadows, shadow maps refreshed every few frames, and dynamic render scale that only drops if frames get slow.
 
 ## Surviving
 
@@ -49,7 +49,7 @@ Performance: chunk streaming, typed-array meshing, merged furniture, frozen stat
   - Materials: planks, metal plates, ammo (from scrap or bone), bandages, repair kits, fuel.
   - Placeables: spike traps, bear traps, tripwire bombs, beds, campfires.
   - Wearables: helmets, armor, coats, pants.
-- **Building and digging:** place plank, stone, dirt or metal blocks and dig anything except bedrock. Build walls 3 high in stone or metal.
+- **Building and digging:** place plank, stone, dirt, metal or stair blocks (stairs face the way you're looking) and dig anything except bedrock. Build walls 3 high in stone or metal.
 - **Seasons:** spring, summer, autumn and winter turn every 3 days.
   - Seasonal grass and leaves, and in winter snow on the ground, roads, roofs and trees.
   - Rain, storms and snowfall; winter days are shorter.

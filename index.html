@@ -239,13 +239,17 @@ let REC=false;const edits=new Map();
 function setv(x,y,z,v){if(inB(x,y,z)){const i=(y*W+z)*W+x;vox[i]=v;if(REC){edits.set(i,v);rtDirty=true}}}
 const solid=(x,y,z)=>{const b=get(x,y,z);return b!==0&&b!==17};
 const vc=a=>Math.floor(a/VS);
-const B={GRASS:1,DIRT:2,STONE:3,COAL:4,IRON:5,CONC:6,ASPH:7,PLANK:8,LOG:9,LEAF:10,BRICK:11,METAL:12,BED:13,DOOR:14,GLASS:15,FRAME:16,LADDER:17,SLUDGE:18,WALL:19,FURN:20,TILEF:21,ROOF:22};
-const BCOL=[0,0x56613a,0x5a4632,0x6a6a68,0x2a2a2c,0x8f6a52,0x8a8780,0x2e2e32,0x8b6a40,0x4a3826,0x3c4728,0x7a3a2c,0x76838a,0x161616,0x6a4a2e,0x9fc4d0,0xcfc8b4,0x6b4a2a,0x2f3a1a,0xb8b0a0,0x6a5040,0xd0d0c8,0x48443e];
-const HARD=[0,.18,.18,.55,.65,.85,.6,.55,.35,.4,.08,.6,1.5,1e9,1.2,.1,.3,1e9,.3,.5,1e9,.5,.6];
-const DROP=[null,'dirt','dirt','stone','coal','iron','stone','stone','plank','wood',null,'stone','metal',null,null,null,'plank',null,'dirt','stone',null,'stone','stone'];
-const opaque=b=>b!==0&&b!==B.GLASS&&b!==B.DOOR&&b!==B.LADDER&&b!==B.FURN;
-const MATS=[['plank',B.PLANK],['stone',B.STONE],['dirt',B.DIRT],['metal',B.METAL]];
-const LABEL={bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
+const B={GRASS:1,DIRT:2,STONE:3,COAL:4,IRON:5,CONC:6,ASPH:7,PLANK:8,LOG:9,LEAF:10,BRICK:11,METAL:12,BED:13,DOOR:14,GLASS:15,FRAME:16,LADDER:17,SLUDGE:18,WALL:19,FURN:20,TILEF:21,ROOF:22,G25:23,G50:24,G75:25,STPX:26,STNX:27,STPZ:28,STNZ:29};
+const BCOL=[0,0x56613a,0x5a4632,0x6a6a68,0x2a2a2c,0x8f6a52,0x8a8780,0x2e2e32,0x8b6a40,0x4a3826,0x3c4728,0x7a3a2c,0x76838a,0x161616,0x6a4a2e,0x9fc4d0,0xcfc8b4,0x6b4a2a,0x2f3a1a,0xb8b0a0,0x6a5040,0xd0d0c8,0x48443e,0x56613a,0x56613a,0x56613a,0x8b6a40,0x8b6a40,0x8b6a40,0x8b6a40];
+const HARD=[0,.18,.18,.55,.65,.85,.6,.55,.35,.4,.08,.6,1.5,1e9,1.2,.1,.3,1e9,.3,.5,1e9,.5,.6,.15,.15,.15,.35,.35,.35,.35];
+const DROP=[null,'dirt','dirt','stone','coal','iron','stone','stone','plank','wood',null,'stone','metal',null,null,null,'plank',null,'dirt','stone',null,'stone','stone','dirt','dirt','dirt','stairs','stairs','stairs','stairs'];
+const opaque=b=>b!==0&&b!==B.GLASS&&b!==B.DOOR&&b!==B.LADDER&&b!==B.FURN&&!(b>=23&&b<=29);
+// collision/render shapes in voxel fractions [x0,y0,z0,x1,y1,z1]; undefined = full cube
+const SH=[],BTOP=new Float32Array(32).fill(1);
+SH[23]=[[0,0,0,1,.25,1]];SH[24]=[[0,0,0,1,.5,1]];SH[25]=[[0,0,0,1,.75,1]];BTOP[23]=.25;BTOP[24]=.5;BTOP[25]=.75;
+SH[26]=[[0,0,0,1,.5,1],[.5,.5,0,1,1,1]];SH[27]=[[0,0,0,1,.5,1],[0,.5,0,.5,1,1]];SH[28]=[[0,0,0,1,.5,1],[0,.5,.5,1,1,1]];SH[29]=[[0,0,0,1,.5,1],[0,.5,0,1,1,.5]];
+const MATS=[['plank',B.PLANK],['stone',B.STONE],['dirt',B.DIRT],['metal',B.METAL],['stairs',B.STPX]];
+const LABEL={stairs:'Stairs',bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
 // towns: a large one in the middle, smaller ones scattered through the wilds
 const towns=[];
 function townAt(x,z,m){for(const t of towns)if(x>=t.x0-m&&x<=t.x1+m&&z>=t.z0-m&&z<=t.z1+m)return t;return null}
@@ -270,18 +274,19 @@ const topW=(x,z)=>(topY(vc(x),vc(z))+1)*VS;
 
 function gen(){
   // pass 1: per-column height + surface block; pass 2: fill layer by layer so writes stay sequential in memory
-  const WW=W*W,topB=new Uint8Array(WW);let maxH=0;
+  const WW=W*W,topB=new Uint8Array(WW),capQ=new Uint8Array(WW);let maxH=0;
   for(let z=0;z<W;z++)for(let x=0;x<W;x++){
     const col=z*W+x,town=inTown(x,z);let h=G;
-    if(!town){const d=townDist(x,z);h=G+Math.round((fbm(x/2,z/2)-.42)*26*Math.min(1,d/16)+(vnoise(x/110,z/110)-.38)*34*Math.min(1,d/50))}
+    let q=0;
+    if(!town){const d=townDist(x,z);let hf=G+(fbm(x/2,z/2)-.42)*26*Math.min(1,d/16)+(vnoise(x/110,z/110)-.38)*34*Math.min(1,d/50);hf=hf<14?14:hf>H-22?H-22:hf;h=Math.floor(hf);q=Math.round((hf-h)*4);if(q===4){h++;q=0}}
     h=h<14?14:h>H-22?H-22:h;
     const road=town&&isRoad(x,z),walk=town&&!road&&isWalk(x,z);
     if(town&&!road&&townAt(x,z,0))h=G+1; // lots + sidewalks sit one curb (0.5 m) above the road
-    topB[col]=road?7:walk?6:(town&&h3(x>>1,99,z>>1)<.45?2:1);hmap[col]=h;if(h>maxH)maxH=h;
+    topB[col]=road?7:walk?6:(town&&h3(x>>1,99,z>>1)<.45?2:1);capQ[col]=q;hmap[col]=h+(q?1:0);if(h+1>maxH)maxH=h+1;
   }
   for(let y=0;y<=maxH+1;y++){let i=y*WW;for(let z=0;z<W;z++)for(let x=0;x<W;x++,i++){
-    const col=i-y*WW,h=hmap[col];let b=0;
-    if(y===0)b=13;else if(y<h-7){b=3;if(y<h-8){const r=h3(x,y,z);if(r<.05)b=4;else if(r<.08&&y<h-12)b=5}}else if(y<h)b=2;else if(y===h)b=topB[col];
+    const col=i-y*WW,cq=capQ[col],h=hmap[col]-(cq?1:0);let b=0;
+    if(y===0)b=13;else if(y<h-7){b=3;if(y<h-8){const r=h3(x,y,z);if(r<.05)b=4;else if(r<.08&&y<h-12)b=5}}else if(y<h)b=2;else if(y===h)b=cq?2:topB[col];else if(y===h+1&&cq)b=22+cq;
     if(b)vox[i]=b}}
   caves();
   sewers();
@@ -430,6 +435,7 @@ function spotsIn(r,fb,base){
 function building(lx,lz,S){
   resv=new Set();
   const w=RI(22,S),d=RI(22,S),x0=lx+RI(0,S-w),z0=lz+RI(0,S-d),x1=x0+w-1,z1=z0+d-1;
+  const rail=['wood','metal','none','wood','metal'][RI(0,4)];
   const floors=RI(1,3),g=G+1,mat=rng()<.5?B.CONC:B.BRICK,top=g+floors*FH,BD=7;
   for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
     const edge=x===x0||x===x1||z===z0||z===z1;
@@ -439,8 +445,8 @@ function building(lx,lz,S){
   const hasBase=rng()<.45;
   if(hasBase){
     for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){const edge=x===x0||x===x1||z===z0||z===z1;for(let y=g-BD-1;y<g;y++)setv(x,y,z,(edge||y===g-BD-1)?B.CONC:0)}
-    for(let i=1;i<=BD;i++)for(const xx of[x0+1,x0+2]){setv(xx,g,z0+3+i,0);setv(xx,g-i,z0+3+i,B.PLANK)}
-    for(let z=z0+4;z<=z0+3+BD;z++)setv(x0+3,g+1,z,B.FRAME);
+    for(let i=1;i<=BD;i++)for(const xx of[x0+1,x0+2]){setv(xx,g,z0+3+i,0);setv(xx,g-i,z0+3+i,B.STNZ)}
+    furnSpecs.push(['rail',(x0+3)*VS,(g-BD+1)*VS,(z0+4+BD)*VS,Math.PI/2,{run:BD*VS,rise:BD*VS,style:rail==='none'?'wood':rail}]);
     reserve(x0+1,x0+3,z0+2,z0+4+BD,g);reserve(x0+1,x0+3,z0+3+BD,z0+6+BD,g-BD-1);
   }
   // room split: xs (wall along z), zs (wall along x)
@@ -463,14 +469,16 @@ function building(lx,lz,S){
     const o3=RI(x0+3,Math.min(xs-4,x0+12));for(let x=o3;x<o3+3;x++)for(let y=b+1;y<=b+4;y++)setv(x,y,zs,0);reserve(o3,o3+2,zs-2,zs+2,b);
     const o4=RI(xs+3,x1-4);doorAt(o4,b+1,zs,1,.7);reserve(o4-1,o4+2,zs-2,zs+3,b);
     // stairs to the next floor / roof
-    for(let i=0;i<FH;i++)for(const zz of[z1-1,z1-2])setv(x0+2+i,b+1+i,zz,B.PLANK);
-    for(let i=0;i<FH-1;i++)for(const zz of[z1-1,z1-2])setv(x0+2+i,b+FH,zz,0);
+    for(let i=0;i<FH;i++)for(const zz of[z1-1,z1-2])setv(x0+2+i,b+1+i,zz,B.STPX);
+    if(rail!=='none')furnSpecs.push(['rail',(x0+2)*VS,(b+1)*VS,(z1-2)*VS,0,{run:FH*VS,rise:FH*VS,style:rail}]);
+    for(let i=0;i<FH-1;i++)for(const zz of[z1-1,z1-2,z1-3])setv(x0+2+i,b+FH,zz,0);
     reserve(x0+1,x0+3+FH,z1-3,z1-1,b);
   }
   doorAt(xm,g+1,z0,1);reserve(xm-1,xm+2,z0+1,z0+3,g);
   if(rng()<.5){doorAt(x1-4,g+1,z1,-1);reserve(x1-5,x1-2,z1-3,z1-1,g)}
   for(let k=0;k<floors;k++){
     const fb=g+FH*k,R=rooms(fb);
+    for(const[key,r]of Object.entries(R))paintRooms.push({x0:r.x0,x1:r.x1,z0:r.z0,z1:r.z1,y0:fb+1,y1:fb+FH-1,c:key==='D'&&k<2?[.86,.93,.94]:PAINT[RI(0,PAINT.length-1)]});
     if(k===0){floorMat(R.Bk,fb,B.TILEF);living(R.A,fb);kitchen(R.Bk,fb);bathroom(R.D,fb);if(floors===1)bedroom(R.C,fb);else hall(R.C,fb)}
     else{bedroom(R.A,fb);if(rng()<.6)bedroom(R.Bk,fb);else living(R.Bk,fb);hall(R.C,fb);if(k===1)bathroom(R.D,fb);else bedroom(R.D,fb)}
     for(const r of Object.values(R))spotsIn(r,fb,false);
@@ -481,6 +489,7 @@ function building(lx,lz,S){
   for(let i=0;i<10;i++){const x=rng()<.5?x0-1:x1+1,z=RI(z0,z1);if(!isRoad(x,z)&&get(x,g+1,z)===0&&get(x,g,z))setv(x,g+1,z,mat)}
 }
 function tree(x,z){
+  {const t=topY(x,z),tb=get(x,t,z);if(tb>=23&&tb<=25)setv(x,t,z,B.GRASS)}
   const h=topY(x,z),th=RI(8,12),dead=rng()<.35;
   for(let i=1;i<=th;i++)setv(x,h+i,z,B.LOG);
   if(dead){setv(x+1,h+th-2,z,B.LOG);setv(x+2,h+th-1,z,B.LOG);return}
@@ -556,7 +565,7 @@ const postMat=new THREE.ShaderMaterial({defines:{RAYS:24,MB:1,SSR:22},depthTest:
     // rain: wet, sky-exposed flat surfaces reflect the scene (screen-space), with puddles and ripples
     if(wet>.01&&d<.99999){vec3 P=recon(uv,d),Px=recon(uv+vec2(px.x,0.),texture2D(tDepth,uv+vec2(px.x,0.)).x),Py=recon(uv+vec2(0.,px.y),texture2D(tDepth,uv+vec2(0.,px.y)).x);
       vec3 N=normalize(cross(Px-P,Py-P));if(N.y<0.)N=-N;
-      if(N.y>.82){vec2 hc=(P.xz/.5-hOrigin.xz)/hSize.xz;float top=texture2D(tHeight,hc).r*255.*.5;float ex=(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)?1.:step(top-.08,P.y);
+      if(N.y>.82){vec2 hc=(P.xz/.5-hOrigin.xz)/hSize.xz;float top=texture2D(tHeight,hc).r*255.*.5;float ex=(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)?1.:step(top-.55,P.y);
         float pud=smoothstep(.4,.8,vn(P.xz*.32)+.2*wet),k=wet*ex*(.3+.7*pud);
         if(k>.01){vec3 V=normalize(P-camPos),Rr=reflect(V,vec3(0.,1.,0.));Rr.xz+=(vec2(vn(P.xz*9.+rtm*5.),vn(P.zx*9.-rtm*4.))-.5)*.05*wet;Rr=normalize(Rr);
           vec3 hcol=fogCol*1.05,R0=P+vec3(0.,.02,0.);float stp=.3;
@@ -693,7 +702,7 @@ float getShadowMask(){float s=1.;
 #endif
   return s;}`)
     .replace('#include <map_fragment>',`#include <map_fragment>
-  if(wet>0.){vec2 hc=(vRtW.xz/.5-rtOrigin.xz)/rtSize.xz;float top=texture2D(hTex,hc).r*255.;float ex=(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)?1.:step(top-.06,vRtW.y/.5+.02);
+  if(wet>0.){vec2 hc=(vRtW.xz/.5-rtOrigin.xz)/rtSize.xz;float top=texture2D(hTex,hc).r*255.;float ex=(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)?1.:step(top-1.05,vRtW.y/.5+.02);
     diffuseColor.rgb*=1.-.4*wet*ex;}`)
     .replace('#include <aomap_fragment>',`#include <aomap_fragment>
 #ifdef RTX
@@ -788,7 +797,8 @@ const TILE_OF=[];{const T=TILE,all=t=>[t,t,t,t,t,t],top=(s,t)=>[s,s,t,s,s,s];
   TILE_OF[B.COAL]=all(T.coal);TILE_OF[B.IRON]=all(T.iron);TILE_OF[B.CONC]=all(T.conc);TILE_OF[B.ASPH]=top(T.asph,T.asphTop);TILE_OF[B.PLANK]=all(T.plank);
   TILE_OF[B.LOG]=[T.bark,T.bark,T.logTop,T.logTop,T.bark,T.bark];TILE_OF[B.LEAF]=all(T.leaf);TILE_OF[B.BRICK]=all(T.brick);TILE_OF[B.METAL]=all(T.metal);
   TILE_OF[B.BED]=all(T.bed);TILE_OF[B.GLASS]=all(T.glass);TILE_OF[B.FRAME]=all(T.frame);TILE_OF[B.SLUDGE]=all(T.sludge);TILE_OF[B.DOOR]=all(T.plank);TILE_OF[B.LADDER]=all(T.plank);
-  TILE_OF[B.WALL]=all(T.wall);TILE_OF[B.TILEF]=[T.tilef,T.tilef,T.tilef,T.plank,T.tilef,T.tilef];TILE_OF[B.ROOF]=[T.roofSide,T.roofSide,T.roofTop,T.conc,T.roofSide,T.roofSide]}
+  TILE_OF[B.WALL]=all(T.wall);TILE_OF[B.TILEF]=[T.tilef,T.tilef,T.tilef,T.plank,T.tilef,T.tilef];TILE_OF[B.ROOF]=[T.roofSide,T.roofSide,T.roofTop,T.conc,T.roofSide,T.roofSide];
+  for(let b=23;b<=25;b++)TILE_OF[b]=TILE_OF[B.GRASS];for(let b=26;b<=29;b++)TILE_OF[b]=all(T.plank)}
 const FACE_UV=[[2,1],[2,1],[0,2],[0,2],[0,1],[0,1]]; // which axes give (u,v) on each face
 // uv for corner c of a face on voxel (x,y,z): pick the quarter of the 1 m tile from the voxel's parity
 function quv(tile,fi,c,x,y,z){const a=FACE_UV[fi],P=[x,y,z],u=((P[a[0]]&1)+c[a[0]])/2,v=((P[a[1]]&1)+c[a[1]])/2,tx=tile%ACOLS,ty=(tile/ACOLS)|0;
@@ -811,42 +821,64 @@ const chunkMeshes=[],glassMeshes=[],grassMeshes=[];
 function mkGeo(P,N,C,I,UV){const g=new THREE.BufferGeometry();if(UV)g.setAttribute('uv',new THREE.Float32BufferAttribute(UV,2));
   g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));
   if(C)g.setAttribute('color',new THREE.Float32BufferAttribute(C,3));g.setIndex(I);g.computeBoundingSphere();return g}
-// typed-array mesher: one pass per chunk, direct index neighbour lookups, buffers reused between chunks
-let mCap=1<<15,mP=new Float32Array(mCap*3),mN=new Float32Array(mCap*3),mC=new Float32Array(mCap*3),mU=new Float32Array(mCap*2),mI=new Uint32Array(mCap*1.5);
+// typed-array mesher with packed vertices (16 B/vertex instead of 44):
+// position Uint16 in quarter-voxel units (chunk-local), normal Int8, colour Uint8, uv Uint16 (all normalised except position)
+let mCap=1<<15,mP=new Uint16Array(mCap*3),mN=new Int8Array(mCap*3),mC=new Uint8Array(mCap*3),mU=new Uint16Array(mCap*2),mI=new Uint32Array(mCap*1.5);
 function mGrow(){mCap*=2;const g=(a,n)=>{const b=new a.constructor(n);b.set(a);return b};mP=g(mP,mCap*3);mN=g(mN,mCap*3);mC=g(mC,mCap*3);mU=g(mU,mCap*2);mI=g(mI,mCap*1.5)}
-const isOpq=b=>b!==0&&b!==14&&b!==15&&b!==17&&b!==20;
+const isOpq=b=>b!==0&&b!==14&&b!==15&&b!==17&&b!==20&&!SH[b];
+const FULLBOX=[[0,0,0,1,1,1]];
+let mv=0,mi=0;
 const loaded=new Uint8Array(NC*NC);
+// one quad of box `bx` (fractions within the voxel) on face fi of voxel (x,y,z), chunk-local origin (ox,oz)
+function quad(x,y,z,ox,oz,fi,bx,tile,cr,cg,cb,s,vs=0){
+  if(mv+4>mCap)mGrow();const f=FACES[fi],a0=FACE_UV[fi][0],a1=FACE_UV[fi][1],P=[x,y,z],pu=P[a0]&1,pv=P[a1]&1,tx=tile%ACOLS,ty=(tile/ACOLS)|0;
+  for(let c=0;c<4;c++){const q=f[3][c],fr=[q[0]?bx[3]:bx[0],q[1]?bx[4]:bx[1],q[2]?bx[5]:bx[2]],o3=(mv+c)*3,o2=(mv+c)*2;
+    mP[o3]=Math.round((x-ox+fr[0])*4);mP[o3+1]=Math.round((y+fr[1])*4);mP[o3+2]=Math.round((z-oz+fr[2])*4);
+    mN[o3]=f[0]*127;mN[o3+1]=f[1]*127;mN[o3+2]=f[2]*127;mC[o3]=Math.min(255,cr*s*255);mC[o3+1]=Math.min(255,cg*s*255);mC[o3+2]=Math.min(255,cb*s*255);
+    const u=(pu+fr[a0])/2,vv=(pv+fr[a1]+(a1===1?vs:0))/2;mU[o2]=((tx*TS+.03+u*(TS-.06))/AW)*65535;mU[o2+1]=(1-(ty*TS+.03+(1-vv)*(TS-.06))/AH)*65535}
+  mI[mi]=mv;mI[mi+1]=mv+1;mI[mi+2]=mv+2;mI[mi+3]=mv;mI[mi+4]=mv+2;mI[mi+5]=mv+3;mi+=6;mv+=4;
+}
 function buildChunk(cx,cz){
-  const WW=W*W,x0=cx*CS,z0=cz*CS,nb=[0,0,0,0,0,0];let nv=0,ni=0;const GP=[],GN=[],GI=[],GUV=[],TP=[],TU=[],TC=[],TI=[],gd=GFX===0?.18:.42;
+  const WW=W*W,x0=cx*CS,z0=cz*CS,nb=[0,0,0,0,0,0];mv=0;mi=0;const GP=[],GN=[],GI=[],GUV=[],TP=[],TU=[],TC=[],TI=[],gd=GFX===0?.18:.42;
   for(let y=0;y<H;y++)for(let z=z0;z<z0+CS;z++){let i=(y*W+z)*W+x0;for(let x=x0;x<x0+CS;x++,i++){
     const b=vox[i];if(!b||b===14||b===17||b===20)continue;
     nb[0]=x<W-1?vox[i+1]:13;nb[1]=x>0?vox[i-1]:13;nb[2]=y<H-1?vox[i+WW]:0;nb[3]=y>0?vox[i-WW]:13;nb[4]=z<W-1?vox[i+W]:13;nb[5]=z>0?vox[i-W]:13;
     if(b===15){for(let fi=0;fi<6;fi++){const o=nb[fi];if(o===15||isOpq(o))continue;const f=FACES[fi],n=GP.length/3;
       for(const c of f[3]){GP.push(x+c[0],y+c[1],z+c[2]);GN.push(f[0],f[1],f[2]);pushUV(GUV,TILE.glass,fi,c,x,y,z)}GI.push(n,n+1,n+2,n,n+2,n+3)}continue}
-    if(b===1&&nb[2]===0&&h3(x,y+11,z)<gd){const ox=x+.5+(h3(x,1,z)-.5)*.5,oz=z+.5+(h3(z,2,x)-.5)*.5,hh=.8+h3(x,3,z)*.9,ww=.55+h3(x,4,z)*.35,a=h3(x,5,z)*3,sh=.8+h3(x,6,z)*.3;
-      for(const r of[a,a+1.5708]){const dx=Math.cos(r)*ww,dz=Math.sin(r)*ww,n=TP.length/3;TP.push(ox-dx,y+1,oz-dz,ox+dx,y+1,oz+dz,ox+dx,y+1+hh,oz+dz,ox-dx,y+1+hh,oz-dz);TU.push(0,0,1,0,1,1,0,1);for(let q=0;q<4;q++)TC.push(sh,sh,sh);TI.push(n,n+1,n+2,n,n+2,n+3)}}
+    const shp=SH[b],topF=shp?BTOP[b]:1;
+    if((b===1||(b>=23&&b<=25))&&!isOpq(nb[2])&&!SH[nb[2]]&&h3(x,y+11,z)<gd){const ox=x+.5+(h3(x,1,z)-.5)*.5,oz=z+.5+(h3(z,2,x)-.5)*.5,hh=.8+h3(x,3,z)*.9,ww=.55+h3(x,4,z)*.35,a=h3(x,5,z)*3,sh=.8+h3(x,6,z)*.3,yb=y+topF;
+      for(const r of[a,a+1.5708]){const dx=Math.cos(r)*ww,dz=Math.sin(r)*ww,n=TP.length/3;TP.push(ox-dx,yb,oz-dz,ox+dx,yb,oz+dz,ox+dx,yb+hh,oz+dz,ox-dx,yb+hh,oz-dz);TU.push(0,0,1,0,1,1,0,1);for(let q=0;q<4;q++)TC.push(sh,sh,sh);TI.push(n,n+1,n+2,n,n+2,n+3)}}
     let cr=1,cg=1,cb=1;const v=.88+.12*h3(x,y,z),tiles=TILE_OF[b];
     if((b===7||b===6||b===2)&&h3(x>>1,y+7,z>>1)<.035){cr=.75;cg=.16;cb=.13}
-    for(let fi=0;fi<6;fi++){if(isOpq(nb[fi]))continue;
-      if(nv+4>mCap)mGrow();const f=FACES[fi],s=v*f[4],t=tiles[fi],a0=FACE_UV[fi][0],a1=FACE_UV[fi][1],pu=(a0===0?x:a0===1?y:z)&1,pv=(a1===0?x:a1===1?y:z)&1,tx=t%ACOLS,ty=(t/ACOLS)|0;
-      for(let c=0;c<4;c++){const q=f[3][c],o3=(nv+c)*3,o2=(nv+c)*2;
-        mP[o3]=x+q[0];mP[o3+1]=y+q[1];mP[o3+2]=z+q[2];mN[o3]=f[0];mN[o3+1]=f[1];mN[o3+2]=f[2];mC[o3]=cr*s;mC[o3+1]=cg*s;mC[o3+2]=cb*s;
-        const u=(pu+q[a0])/2,vv=(pv+q[a1])/2;mU[o2]=(tx*TS+.03+u*(TS-.06))/AW;mU[o2+1]=1-(ty*TS+.03+(1-vv)*(TS-.06))/AH}
-      mI[ni]=nv;mI[ni+1]=nv+1;mI[ni+2]=nv+2;mI[ni+3]=nv;mI[ni+4]=nv+2;mI[ni+5]=nv+3;ni+=6;nv+=4}
+    const pr=paintRooms.length?roomsFor(cx,cz):null;
+    if(!shp){for(let fi=0;fi<6;fi++){const o=nb[fi];if(isOpq(o)||(fi===2&&SH[o]))continue;
+        let t=tiles[fi],r=cr,g=cg,bb=cb;
+        if(pr&&(fi<2||fi>3)&&(b===19||b===6||b===11)){const rm=roomAt(pr,x+FACES[fi][0],y,z+FACES[fi][2]);if(rm){t=TILE.wall;r=rm.c[0];g=rm.c[1];bb=rm.c[2]}}
+        quad(x,y,z,x0,z0,fi,FULLBOX[0],t,r,g,bb,v*FACES[fi][4])}}
+    else for(const bx of shp)for(let fi=0;fi<6;fi++){
+        // cull only faces that sit on the voxel boundary against a full opaque neighbour
+        const onB=fi===0?bx[3]===1:fi===1?bx[0]===0:fi===2?bx[4]===1:fi===3?bx[1]===0:fi===4?bx[5]===1:bx[2]===0;if(onB&&isOpq(nb[fi]))continue;
+        quad(x,y,z,x0,z0,fi,bx,tiles[fi],cr,cg,cb,v*FACES[fi][4],b>=23&&b<=25?1-topF:0)}
   }}
   const k=cz*NC+cx;
   for(const arr of[chunkMeshes,glassMeshes,grassMeshes])if(arr[k]){scene.remove(arr[k]);arr[k].geometry.dispose();arr[k]=null}
   if(TP.length){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(TP,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(TU,2));g.setAttribute('color',new THREE.Float32BufferAttribute(TC,3));
     const nn=new Float32Array(TP.length);for(let i=1;i<nn.length;i+=3)nn[i]=1;g.setAttribute('normal',new THREE.BufferAttribute(nn,3));g.setIndex(TI);g.computeBoundingSphere();
     const gm=new THREE.Mesh(g,grassMat);gm.scale.setScalar(VS);gm.receiveShadow=true;freeze(gm);scene.add(gm);grassMeshes[k]=gm}
-  if(nv){const g=new THREE.BufferGeometry();
-    g.setAttribute('position',new THREE.BufferAttribute(mP.slice(0,nv*3),3));g.setAttribute('normal',new THREE.BufferAttribute(mN.slice(0,nv*3),3));
-    g.setAttribute('color',new THREE.BufferAttribute(mC.slice(0,nv*3),3));g.setAttribute('uv',new THREE.BufferAttribute(mU.slice(0,nv*2),2));
-    g.setIndex(new THREE.BufferAttribute(nv>65535?mI.slice(0,ni):Uint16Array.from(mI.subarray(0,ni)),1));g.computeBoundingSphere();
-    const m=new THREE.Mesh(g,vmat);m.scale.setScalar(VS);m.castShadow=GFX<3;m.receiveShadow=true;freeze(m);scene.add(m);chunkMeshes[k]=m}
+  if(mv){const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.BufferAttribute(mP.slice(0,mv*3),3));g.setAttribute('normal',new THREE.BufferAttribute(mN.slice(0,mv*3),3,true));
+    g.setAttribute('color',new THREE.BufferAttribute(mC.slice(0,mv*3),3,true));g.setAttribute('uv',new THREE.BufferAttribute(mU.slice(0,mv*2),2,true));
+    g.setIndex(new THREE.BufferAttribute(mv>65535?mI.slice(0,mi):Uint16Array.from(mI.subarray(0,mi)),1));g.computeBoundingSphere();
+    const m=new THREE.Mesh(g,vmat);m.position.set(x0*VS,0,z0*VS);m.scale.setScalar(VS/4);m.castShadow=GFX<3;m.receiveShadow=true;freeze(m);scene.add(m);chunkMeshes[k]=m}
   if(GP.length){const gm=new THREE.Mesh(mkGeo(GP,GN,null,GI,GUV),gmat);gm.scale.setScalar(VS);gm.renderOrder=2;gm.receiveShadow=true;freeze(gm);scene.add(gm);glassMeshes[k]=gm}
   loaded[k]=1;if(furnMeshes[k])furnMeshes[k].visible=true;
 }
+// painted drywall: rooms record their interior box and colour; wall faces looking into a room get plaster in that colour
+const paintRooms=[],roomIdx=new Map();
+const PAINT=[[.93,.9,.8],[.76,.86,.78],[.74,.83,.92],[.95,.8,.72],[.85,.85,.84],[.96,.87,.6],[.84,.77,.9],[.7,.8,.7],[.92,.92,.9],[.88,.74,.66]];
+function roomsFor(cx,cz){const k=cz*NC+cx;let r=roomIdx.get(k);if(r)return r;const X0=cx*CS-1,X1=cx*CS+CS,Z0=cz*CS-1,Z1=cz*CS+CS;
+  r=paintRooms.filter(m=>m.x1>=X0&&m.x0<=X1&&m.z1>=Z0&&m.z0<=Z1);roomIdx.set(k,r);return r}
+function roomAt(list,x,y,z){for(const m of list)if(x>=m.x0&&x<=m.x1&&z>=m.z0&&z<=m.z1&&y>=m.y0&&y<=m.y1)return m;return null}
 function unloadChunk(k){for(const arr of[chunkMeshes,glassMeshes,grassMeshes])if(arr[k]){scene.remove(arr[k]);arr[k].geometry.dispose();arr[k]=null}loaded[k]=0;if(furnMeshes[k])furnMeshes[k].visible=false}
 const rb=(cx,cz)=>{if(cx>=0&&cz>=0&&cx<NC&&cz<NC&&loaded[cz*NC+cx])buildChunk(cx,cz)};
 function rebuildAt(x,z){
@@ -883,19 +915,23 @@ const tmpCol=new THREE.Color();
 function fbuf(k){let b=FBUF.get(k);if(!b){b={P:[],N:[],C:[],I:[]};FBUF.set(k,b)}return b}
 function furnBuilder(wx,wy,wz,yaw){
   const k=Math.floor(vc(wz)/CS)*NC+Math.floor(vc(wx)/CS),b=fbuf(k),c=Math.cos(yaw),s=Math.sin(yaw);
-  return(w,h,d,col,x,y,z,ry=0)=>{ // box in local metres, origin at footprint floor centre, front = +z
+  return(w,h,d,col,x,y,z,ry=0,rz=0)=>{ // box in local metres, origin at footprint floor centre, front = +z; rz rolls about local z
     tmpCol.setHex(col);const v=.88+rng()*.16,cr=tmpCol.r*v,cg=tmpCol.g*v,cb=tmpCol.b*v,c2=Math.cos(ry),s2=Math.sin(ry);
     for(const f of FACES){const n=b.P.length/3,sh=.75+f[4]*.25;
-      const nx0=f[0]*c2+f[2]*s2,nz0=-f[0]*s2+f[2]*c2,nx=nx0*c+nz0*s,nz=-nx0*s+nz0*c;
-      for(const q of f[3]){let lx=(q[0]-.5)*w,ly=(q[1]-.5)*h+y,lz=(q[2]-.5)*d;const rx=lx*c2+lz*s2+x,rz=-lx*s2+lz*c2+z;
-        b.P.push(wx+rx*c+rz*s,wy+ly,wz-rx*s+rz*c);b.N.push(nx,f[1],nz);b.C.push(cr*sh,cg*sh,cb*sh)}
+      let fnx=f[0],fny=f[1];if(rz){const cr=Math.cos(rz),sr=Math.sin(rz);fnx=f[0]*cr-f[1]*sr;fny=f[0]*sr+f[1]*cr}const nx0=fnx*c2+f[2]*s2,nz0=-fnx*s2+f[2]*c2,nx=nx0*c+nz0*s,nz=-nx0*s+nz0*c;
+      for(const q of f[3]){let lx=(q[0]-.5)*w,ly=(q[1]-.5)*h,lz=(q[2]-.5)*d;if(rz){const cr=Math.cos(rz),sr=Math.sin(rz),t=lx*cr-ly*sr;ly=lx*sr+ly*cr;lx=t}ly+=y;const rx=lx*c2+lz*s2+x,rz2=-lx*s2+lz*c2+z;
+        b.P.push(wx+rx*c+rz2*s,wy+ly,wz-rx*s+rz2*c);b.N.push(nx,fny,nz);b.C.push(cr*sh,cg*sh,cb*sh)}
       b.I.push(n,n+1,n+2,n,n+2,n+3)}};
 }
 const pick=a=>a[RI(0,a.length-1)];
 function buildFurn(sp){
-  const[type,wx,wy,wz,yaw]=sp,F=furnBuilder(wx,wy,wz,yaw),[fw,fd]=FD[type],W_=fw*VS,D_=fd*VS;
+  const[type,wx,wy,wz,yaw]=sp,F=furnBuilder(wx,wy,wz,yaw),[fw,fd]=FD[type]||[1,1],W_=fw*VS,D_=fd*VS;
   const wood=pick(WOODS),fab=pick(FABRIC),dk=0x1a1814,white=0xd8d4c8;
   switch(type){
+  case'rail':{const{run,rise,style}=sp[5],ang=Math.atan2(rise,run),len=Math.hypot(run,rise),hr=.95,metal=style==='metal',pc=metal?0x2a2c2e:0x5a3c22,rc=metal?0x3a3c3e:0x6e4a2a;
+    F(len,.07,.07,rc,run/2,rise/2+hr,0,0,ang);F(.1,hr+.1,.1,pc,.05,(hr+.1)/2,0);F(.1,hr+.1,.1,pc,run-.05,rise+(hr+.1)/2,0);
+    const n=metal?Math.round(run/.13):Math.round(run/.5);for(let i=1;i<n;i++){const x=i*run/n,base=Math.ceil(x/VS*2)/2*VS*(rise/run);F(metal?.025:.07,hr-.02,metal?.025:.07,pc,x,base+(hr-.02)/2,0)}
+    if(metal)F(len,.03,.03,rc,run/2,rise/2+.12,0,0,ang);break}
   case'couch':case'armchair':{F(W_,.22,D_*.95,dk,0,.2,0);const n=type==='couch'?3:1,cw=(W_-.4)/n;for(let i=0;i<n;i++)F(cw-.03,.16,D_*.66,fab,-W_/2+.2+cw*(i+.5),.39,D_*.12);
     F(W_,.58,.22,fab,0,.6,-D_/2+.13);F(.2,.42,D_*.95,fab,-W_/2+.1,.46,0);F(.2,.42,D_*.95,fab,W_/2-.1,.46,0);for(const sx of[-1,1])for(const sz of[-1,1])F(.06,.08,.06,dk,sx*(W_/2-.08),.04,sz*(D_/2-.08));break}
   case'tvstand':if(rng()<.45){F(W_*.92,.52,D_*.85,wood,0,.26,0);F(.02,.4,.01,dk,0,.27,D_*.43);F(.46,.09,.3,0x161616,-.1,.47,.02);F(.07,.02,.005,0x40c060,-.22,.48,.172);
@@ -1033,6 +1069,7 @@ const RECIPES=[
   {out:'spikes',n:1,need:{plank:6,scrap:2},label:'Hammer a spike trap'},
   {out:'beartrap',n:1,need:{metal:2,scrap:1},label:'Forge a bear trap'},
   {out:'mine',n:1,need:{scrap:2,coal:2,cloth:1},label:'Rig a tripwire bomb'},
+  {out:'stairs',n:4,need:{plank:3},label:'Cut stair blocks'},
   {out:'bed',n:1,need:{plank:6,cloth:3},label:'Build a bed'},
   {out:'fire',n:1,need:{wood:3,stone:4},label:'Stack a campfire'},
   {out:'helmet',n:1,need:{metal:2,cloth:1},label:'Beat out a metal helmet'},
@@ -1297,17 +1334,24 @@ function hurtZombie(z,dmg,dir,by){
 // ---------------- physics
 function hit(x,y,z,hw,h){
   const x0=vc(x-hw),x1=vc(x+hw-1e-4),y0=vc(y),y1=vc(y+h-1e-4),z0=vc(z-hw),z1=vc(z+hw-1e-4);
-  for(let ix=x0;ix<=x1;ix++)for(let iy=y0;iy<=y1;iy++)for(let iz=z0;iz<=z1;iz++)if(solid(ix,iy,iz))return true;
+  for(let ix=x0;ix<=x1;ix++)for(let iy=y0;iy<=y1;iy++)for(let iz=z0;iz<=z1;iz++){const b=get(ix,iy,iz);if(!b||b===17)continue;const sh=SH[b];if(!sh)return true;
+    for(const q of sh)if((ix+q[0])*VS<x+hw&&(ix+q[3])*VS>x-hw&&(iy+q[1])*VS<y+h&&(iy+q[4])*VS>y&&(iz+q[2])*VS<z+hw&&(iz+q[5])*VS>z-hw)return true}
   return false;
+}
+function supportTop(x,y0,y1,z,hw){ // highest box top in the footprint between heights y0..y1
+  let top=-1e9;const x0=vc(x-hw),x1=vc(x+hw-1e-4),z0=vc(z-hw),z1=vc(z+hw-1e-4);
+  for(let iy=vc(y0);iy<=vc(y1);iy++)for(let ix=x0;ix<=x1;ix++)for(let iz=z0;iz<=z1;iz++){const b=get(ix,iy,iz);if(!b||b===17)continue;const sh=SH[b]||FULLBOX;
+    for(const q of sh){if(!((ix+q[0])*VS<x+hw&&(ix+q[3])*VS>x-hw&&(iz+q[2])*VS<z+hw&&(iz+q[5])*VS>z-hw))continue;const t=(iy+q[4])*VS;if(t<=y1+1e-3&&t>top)top=t}}
+  return top;
 }
 function moveEnt(e,dt,hw,h){
   const p=e.pos;let blocked=false;
   const ny=p.y+e.vel.y*dt;
-  if(hit(p.x,ny,p.z,hw,h)){if(e.vel.y<0){p.y=(vc(ny)+1)*VS;e.grounded=true}else p.y=vc(ny+h)*VS-h-1e-3;e.vel.y=0}
+  if(hit(p.x,ny,p.z,hw,h)){if(e.vel.y<0){const t=supportTop(p.x,ny,p.y+.02,p.z,hw);p.y=t>-1e8?t:(vc(ny)+1)*VS;e.grounded=true}else p.y=vc(ny+h)*VS-h-1e-3;e.vel.y=0}
   else{p.y=ny;e.grounded=false}
   const step=(dx,dz)=>{const nx=p.x+dx,nz=p.z+dz;
     if(!hit(nx,p.y,nz,hw,h)){p.x=nx;p.z=nz;return}
-    if(e.grounded&&!hit(nx,p.y+VS+.02,nz,hw,h)&&!hit(p.x,p.y+VS+.02,p.z,hw,h)){p.y+=VS+.02;p.x=nx;p.z=nz;return}
+    if(e.grounded)for(const su of[VS*.5+.01,VS+.02])if(!hit(nx,p.y+su,nz,hw,h)&&!hit(p.x,p.y+su,p.z,hw,h)){p.y+=su;p.x=nx;p.z=nz;return}
     blocked=true};
   step(e.vel.x*dt,0);step(0,e.vel.z*dt);
   return blocked;
@@ -1469,7 +1513,8 @@ function blockedByEntity(x,y,z){
 function placeBlock(p,vh){
   if(!vh)return;const{px:x,py:y,pz:z}=vh;if(!inB(x,y,z)||get(x,y,z))return;
   const[name,id]=MATS[p.mat];if((p.inv[name]|0)<=0){msg(p,`Out of ${LABEL[name].toLowerCase()} — press ${p.i?'M':'R'} to switch material`);return}
-  if(blockedByEntity(x,y,z))return;setBlock(x,y,z,id);p.inv[name]--;SND.place();
+  if(blockedByEntity(x,y,z))return;let bid=id;if(name==='stairs'){const fx=-Math.sin(p.yaw),fz=-Math.cos(p.yaw);bid=Math.abs(fx)>Math.abs(fz)?(fx>0?B.STPX:B.STNX):(fz>0?B.STPZ:B.STNZ)}
+  setBlock(x,y,z,bid);p.inv[name]--;SND.place();
 }
 function primary(p,eye,dir,vh,dt){
   if(p.tool===0){if(p.cool<=0){p.cool=.55;p.swing=1;if(melee(p,eye,dir,2.8,36)){}else if(vh&&vh.t<2.8&&get(vh.x,vh.y,vh.z)===B.GLASS)breakGlass(vh.x,vh.y,vh.z);else sNoise(.08,300,.15)}}
@@ -1565,7 +1610,7 @@ function updatePlayer(p,dt){
   p.hunger=Math.max(0,p.hunger-dt*.22*(1+Math.max(0,p.coldRate)*.6));
   if(p.hunger<=0)damage(p,dt*1.2,true);else if(p.hunger>60&&p.hp<100)p.hp=Math.min(100,p.hp+dt*.5);
   p.cool-=dt;p.swing=Math.max(0,p.swing-dt*3.5);p.flash=Math.max(0,p.flash-dt);p.flashT-=dt;
-  if(inp.tool!=null)p.tool=inp.tool;if(inp.toolNext)p.tool=(p.tool+1)%5;if(inp.matNext){if(p.tool===4)p.trap=(p.trap+1)%TRAPS.length;else p.mat=(p.mat+1)%4}
+  if(inp.tool!=null)p.tool=inp.tool;if(inp.toolNext)p.tool=(p.tool+1)%5;if(inp.matNext){if(p.tool===4)p.trap=(p.trap+1)%TRAPS.length;else p.mat=(p.mat+1)%MATS.length}
   if(inp.eat)eat(p);if(inp.bandage)heal(p);if(inp.torch)p.torch=!p.torch;
   const night=dayLight()<.35;
   if(p.vehicle){if(inp.interact){exitVehicle(p);return}if(inp.view){p.carView=!p.carView;p.cyaw=p.cpitch=0}
@@ -1634,7 +1679,7 @@ function updateVehicle(v,dt){
         v.speed*=-.3}
       else{v.pos.x=nx;v.pos.z=nz;v.gy=Math.max(g1,g2)}}
   }
-  v.pos.y+=((v.gy+1)*VS-v.pos.y)*Math.min(1,dt*10);
+  v.pos.y+=((v.gy+BTOP[get(vc(v.pos.x),v.gy,vc(v.pos.z))])*VS-v.pos.y)*Math.min(1,dt*10);
   v.g.rotation.y=v.yaw;
   for(const w of v.wheels){w.rotation.x+=v.speed*dt/.38;w.rotation.y=w.userData.front?v.steerA:0}
   if(Math.abs(v.speed)>3)for(const z of zombies){if(z.dead)continue;
@@ -1671,7 +1716,7 @@ function updateVehicle(v,dt){
 }
 
 // ---------------- zombie AI
-const BREAK_EASY=new Set([B.PLANK,B.DIRT,B.GRASS,B.LEAF,B.LOG]),BREAK_HARD=new Set([B.STONE,B.CONC,B.BRICK,B.ASPH,B.COAL,B.WALL,B.TILEF,B.ROOF]);
+const BREAK_EASY=new Set([B.PLANK,B.DIRT,B.GRASS,B.LEAF,B.LOG,23,24,25,26,27,28,29]),BREAK_HARD=new Set([B.STONE,B.CONC,B.BRICK,B.ASPH,B.COAL,B.WALL,B.TILEF,B.ROOF]);
 function updateZombie(z,dt,night){
   if(z.dead){z.dead+=dt;z.g.rotation.x=z.crawl?1.45:-Math.min(1,z.dead*3)*Math.PI/2;if(z.dead>7)z.pos.y-=dt*.4;if(z.dead>10){scene.remove(z.g);z.gone=true}return}
   let tgt=null,bd=1e9;
@@ -1725,7 +1770,7 @@ function canSee(z,p){
 }
 function alertZombies(pos,r){for(const z of zombies){if(z.dead||z.chasing)continue;if(z.pos.distanceTo(pos)<r){z.alert=pos.clone();z.alertT=10}}}
 // toughness in zombie hits (about 1 per second each)
-const TOUGH={[B.GLASS]:1,[B.LEAF]:1,[B.DIRT]:4,[B.GRASS]:4,[B.PLANK]:7,[B.LOG]:9,[B.FRAME]:5,[B.WALL]:14,[B.TILEF]:14,[B.CONC]:45,[B.BRICK]:40,[B.STONE]:50,[B.ASPH]:40,[B.COAL]:50,[B.ROOF]:30,[B.IRON]:60,[B.METAL]:140};
+const TOUGH={[B.STPX]:7,[B.STNX]:7,[B.STPZ]:7,[B.STNZ]:7,[B.G25]:3,[B.G50]:3,[B.G75]:3,[B.GLASS]:1,[B.LEAF]:1,[B.DIRT]:4,[B.GRASS]:4,[B.PLANK]:7,[B.LOG]:9,[B.FRAME]:5,[B.WALL]:14,[B.TILEF]:14,[B.CONC]:45,[B.BRICK]:40,[B.STONE]:50,[B.ASPH]:40,[B.COAL]:50,[B.ROOF]:30,[B.IRON]:60,[B.METAL]:140};
 const blockDmg=new Map();
 function breakTarget(z,wx,wz){
   const fy=vc(z.pos.y+.05),cols=[];for(const o of[-.25,.25]){const fx=vc(z.pos.x+wx*.55-wz*o),fz=vc(z.pos.z+wz*.55+wx*o);if(!cols.some(c=>c[0]===fx&&c[1]===fz))cols.push([fx,fz])}
@@ -2281,7 +2326,7 @@ function resetWorld(ns){
   for(const arr of[chunkMeshes,glassMeshes,furnMeshes,grassMeshes])for(const m of arr)if(m)m.geometry.dispose();chunkMeshes.length=0;glassMeshes.length=0;furnMeshes.length=0;grassMeshes.length=0;loaded.fill(0);
   for(const o of[...scene.children])if(!baseObjs.has(o))scene.remove(o);
   zombies=[];npcs=[];vehicles=[];crates=[];doors=[];doorMap.clear();traps=[];gibs=[];bags=[];animals=[];fires=[];beds=[];decals.length=0;manObjs.length=0;
-  for(const a of[crateSpots,carSpots,indoorSpots,doorSpecs,sewerSpots,manholes,caveSpots,bedSpecs,furnSpecs])a.length=0;
+  for(const a of[crateSpots,carSpots,indoorSpots,doorSpecs,sewerSpots,manholes,caveSpots,bedSpecs,furnSpecs,paintRooms])a.length=0;roomIdx.clear();
   pLife.fill(0);pPos.fill(-100);blockDmg.clear();vox.fill(0);hmap.fill(0);
   seed=ns|0;rng=mulberry(seed);kills=0;day=1;tDay=.08;
   worldInit();
