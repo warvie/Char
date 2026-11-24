@@ -13,6 +13,12 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 - **320 × 320 m world** built from half-metre pixel-textured blocks, with quarter-height grass caps that smooth hills and slopes, a large central town plus several smaller towns, rolling hills and mountains, forests and caves. Every world comes from a **seed**, so the same seed always builds the same world.
 - **Chunk streaming:** only the 8 × 8 m chunks around the players are meshed; the rest load in as you move and unload behind you. Pick a render distance from 32 to 128 m. Fog and camera range follow it.
 - **Realistic towns:** 6 m two-lane roads, 1.5 m sidewalks, 15 m lots, and houses 11–15 m across (level with the sidewalks) with 3 m storeys (2.5 m ceilings), 1–3 storeys, painted drywall in a different colour per room with baseboards and crown moulding, switchback staircases with landings (two steps per block) and wooden or iron railings, framed windows (some smashed or boarded), front and back doors, stairs and roof access.
+- **Public buildings:** each town has some of these, under faded signs over the doors.
+  - **Hospitals** (2–3 storeys): reception, waiting chairs, wards with hospital beds and IV stands, medicine cabinets and a pharmacy full of bandages.
+  - **Grocery stores:** a plate-glass storefront, stocked aisles, checkouts, drinks coolers and a stockroom. Mostly food.
+  - **Hardware stores:** tool aisles, lumber racks and pegboard walls. Scrap, metal, planks, fuel, repair kits and traps.
+  - **Schools** (2 storeys): classrooms with chalkboards and rows of desks, lockers along the corridors and a cafeteria.
+- **Battle damage:** buildings are mostly chipped rather than holed. Walls and roofs have chunks bitten out of blocks, with the broken pieces lying in rubble piles below. Only a few blocks are knocked clean through, and roofs have ragged holes with debris on the floor underneath. Your digging, zombies clawing at walls and explosions chip blocks the same way before they break, and leave rubble behind.
 - **Furnished rooms:** each floor is split into rooms joined by doorways and doors.
   - Living rooms: couch facing a flat-screen or an old CRT TV (rabbit ears, VCR) on a TV stand, coffee table, rug, armchair, bookcase.
   - Kitchens: fridge, counters, sink and stove, plus a table and chairs.
@@ -42,7 +48,7 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 - **Zombies** are slow by day and fast at night. They notice you only within range (22 m by day, 34 m at night) and in line of sight, give up once you're well out of range, and come to investigate gunshots. They break blocks hit by hit: a window in one hit, a wooden door in about 10 s, a brick wall only with a crowd. Metal holds longest. Some wear hard hats, helmets, vests or jackets that soak up damage.
 - **Aiming:** hold right-click (pistol) to aim down sights, which is more accurate but slower. There's a light aim assist toward visible targets, a bit stronger on touch and gamepad.
 - **Shooting:** bullets leave holes where they hit. Shoot off arms and legs: legless zombies crawl, armless ones bite weaker, and a headshot pops the head off. Cars and tripwire bombs tear limbs off too.
-- **Loot:** crates in houses, basements, sewers and caves. Dead zombies drop loot bags, sometimes with the clothing they wore.
+- **Loot:** crates in houses (each public building stocks its own kind of loot), basements, sewers and caves. Dead zombies drop loot bags, sometimes with the clothing they wore.
 - **Wild animals:** deer and rabbits flee, wolves hunt in packs (worse at night), and boars charge if you get close. Kill them for raw meat, hide and bone. Cook meat at a campfire, because raw meat can make you sick.
 - **Clothing and armor:** hard hat, metal helmet, leather jacket, police vest, hide coat, scrap armor, padded pants, riot pants. Each blocks part of the incoming damage, up to 70%. Wear them from the backpack.
 - **Crafting** at the workbench in the backpack:
