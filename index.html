@@ -23,7 +23,9 @@ button.go{background:var(--rust);border-color:#e0634c;font:24px/1 'Bebas Neue',s
 button.go:hover{background:#d24c36}
 h1,h2,h3{font-family:'Bebas Neue',sans-serif;font-weight:400;letter-spacing:.03em;margin:0;line-height:1.05}
 /* screens */
-.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;z-index:20}
+.screen{position:fixed;inset:0;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:20;
+  padding:max(16px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.screen>.kit{margin:auto}
 #start{background:radial-gradient(ellipse at 50% 30%,rgba(0,0,0,.15),rgba(0,0,0,.85) 75%)}
 .kit{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:clamp(18px,3vw,34px);max-width:880px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 #start h1{font-size:clamp(56px,11vw,120px);color:var(--rust);text-shadow:0 3px 0 #3a0d07}
@@ -88,20 +90,30 @@ details summary{cursor:pointer;color:var(--dim);font-weight:600;padding:6px 0}
 .tb[data-b=jump]{right:calc(118px + env(safe-area-inset-right));bottom:calc(20px + env(safe-area-inset-bottom))}
 .tb[data-b=use]{right:calc(26px + env(safe-area-inset-right));bottom:calc(128px + env(safe-area-inset-bottom))}
 .tb[data-b=place]{right:calc(106px + env(safe-area-inset-right));bottom:calc(100px + env(safe-area-inset-bottom))}
-.tb.sm{width:50px;height:50px;font-size:14px;top:calc(48px + env(safe-area-inset-top))}
-.tb[data-b=bag]{right:calc(12px + env(safe-area-inset-right))}.tb[data-b=tool]{right:calc(68px + env(safe-area-inset-right))}.tb[data-b=mat]{right:calc(124px + env(safe-area-inset-right))}
-.tb[data-b=view]{right:calc(180px + env(safe-area-inset-right))}.tb[data-b=run]{right:calc(236px + env(safe-area-inset-right))}
+.tb.sm{width:46px;height:46px;font-size:14px;right:calc(10px + env(safe-area-inset-right))}
+/* portrait: small buttons in a column down the right edge, under the clock */
+.tb[data-b=bag]{top:calc(40px + env(safe-area-inset-top))}.tb[data-b=tool]{top:calc(92px + env(safe-area-inset-top))}.tb[data-b=mat]{top:calc(144px + env(safe-area-inset-top))}
+.tb[data-b=view]{top:calc(196px + env(safe-area-inset-top))}.tb[data-b=run]{top:calc(248px + env(safe-area-inset-top))}
+/* landscape: one row across the top-right corner */
+@media(orientation:landscape){.tb.sm{top:calc(8px + env(safe-area-inset-top))}
+  .tb[data-b=bag]{right:calc(10px + env(safe-area-inset-right))}.tb[data-b=tool]{right:calc(62px + env(safe-area-inset-right))}.tb[data-b=mat]{right:calc(114px + env(safe-area-inset-right))}
+  .tb[data-b=view]{right:calc(166px + env(safe-area-inset-right))}.tb[data-b=run]{right:calc(218px + env(safe-area-inset-right))}}
 #stick{position:absolute;left:calc(24px + env(safe-area-inset-left));bottom:calc(24px + env(safe-area-inset-bottom));width:130px;height:130px;border-radius:50%;border:2px solid rgba(235,230,216,.3);background:rgba(0,0,0,.2);pointer-events:none}
 #stick.on{border-color:rgba(235,230,216,.55)}
 #stick i{position:absolute;left:39px;top:39px;width:52px;height:52px;border-radius:50%;background:rgba(235,230,216,.45)}
-body.touch .stats{bottom:auto;top:calc(12px + env(safe-area-inset-top));left:auto;right:calc(12px + env(safe-area-inset-right));width:150px;top:calc(104px + env(safe-area-inset-top))}
-body.touch .hot{bottom:auto;top:calc(40px + env(safe-area-inset-top))}
-body.touch .feed{top:auto;bottom:170px;right:auto;left:16px;align-items:flex-start}
-body.touch .veh{bottom:auto;top:calc(170px + env(safe-area-inset-top))}
-body.touch .slot{width:52px;font-size:9px;padding:3px}body.touch .slot b{font-size:13px}
-body.touch .inv{font-size:10px}
-body.touch #top{font-size:15px;padding:3px 10px}
-body.touch .prompt{top:calc(50% + 34px);font-size:13px}
+body.touch .inv{display:none}
+body.touch #top{font-size:15px;padding:3px 10px;top:env(safe-area-inset-top)}
+body.touch .hot{bottom:auto;top:calc(34px + env(safe-area-inset-top));left:calc(50% - 28px)}
+body.touch .slot{width:50px;font-size:9px;padding:3px}body.touch .slot b{font-size:13px}
+body.touch .stats{bottom:auto;left:calc(12px + env(safe-area-inset-left));top:calc(100px + env(safe-area-inset-top));width:min(170px,42%)}
+body.touch .veh{bottom:auto;right:auto;left:calc(12px + env(safe-area-inset-left));top:calc(170px + env(safe-area-inset-top));width:160px}
+body.touch .feed{top:auto;bottom:190px;right:auto;left:calc(16px + env(safe-area-inset-left));align-items:flex-start;width:min(330px,70%)}
+body.touch .prompt{top:calc(50% + 34px);font-size:13px;white-space:normal;text-align:center;width:max-content;max-width:86%}
+@media(orientation:landscape){
+  body.touch .hot{left:50%;top:calc(34px + env(safe-area-inset-top))}
+  body.touch .stats{left:auto;right:calc(12px + env(safe-area-inset-right));top:calc(64px + env(safe-area-inset-top));width:170px}
+  body.touch .veh{left:calc(12px + env(safe-area-inset-left));top:calc(12px + env(safe-area-inset-top))}
+  body.touch .feed{bottom:auto;top:calc(90px + env(safe-area-inset-top));width:min(330px,40%)}}
 @media(prefers-reduced-motion:reduce){.feed div{animation:none}}
 </style></head><body>
 <canvas id="c"></canvas>
