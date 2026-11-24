@@ -30,6 +30,7 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 - **Blood:** pixel-art splatters with flung droplets where things die, spatter on nearby walls, and old dark pools in the streets where people fell months ago. No more red-tinted blocks.
 - **Overgrowth:** about 1 in 5 houses (more of the damaged ones) is being taken back by nature: ivy climbing the outside walls and in through open windows, trailing down inside, weeds across the floors, and sometimes a sapling breaking through the boards.
 - **Trees** have thin branches and twigs (14 cm and 8 cm thick) reaching off the trunk, ending in leaf clusters, or bare on dead trees.
+- **Windows stay clear:** nothing taller than half a metre is placed in front of a window (it goes elsewhere in the room), and ivy never fills a window or hangs over the glass.
 - **Furnished rooms:** each floor is split into rooms joined by doorways and doors.
   - Living rooms: couch facing a flat-screen or an old CRT TV (rabbit ears, VCR) on a TV stand, coffee table, rug, armchair, bookcase.
   - Kitchens: fridge, counters, sink and stove, plus a table and chairs.

@@ -554,7 +554,8 @@ function decorateCaves(Rg){
 let WB=.4,WMAT=B.CONC,WTRIM=0; // windows in the building being made: share smashed or boarded, wall material, trim colour
 function windowAt(cells){ // 4 wide x 5 tall frame, 2x3 pane (sill at 0.5 m, glass 1–2.5 m)
   // the surround is ordinary wall (brick/concrete outside, painted drywall inside); a casing of trim is drawn round the opening on both faces
-  const kind=rng(),c0=cells(0,0),c1=cells(1,0);winSpecs.push([c0[0],c0[1],c0[2],c1[0]!==c0[0]?1:0,WTRIM]);
+  const kind=rng(),c0=cells(0,0),c1=cells(1,0),alX=c1[0]!==c0[0];winSpecs.push([c0[0],c0[1],c0[2],alX?1:0,WTRIM]);
+  for(let du=0;du<4;du++){const[x,y,z]=cells(du,0);for(const sd of[-1,1])for(const fb of[y-1,y-2])winFront.add(rk(alX?x:x+sd,alX?z+sd:z,fb))}
   for(let dx=0;dx<4;dx++)for(let dy=0;dy<5;dy++){
     const [x,y,z]=cells(dx,dy),inner=dx>0&&dx<3&&dy>0&&dy<4;
     if(!inner)setv(x,y,z,WMAT);
@@ -582,9 +583,11 @@ const FD={couch:[5,2,2],tvstand:[4,1,2],ctable:[3,2,1],armchair:[2,2,2],bookcase
 const furnSpecs=[];let resv=new Set();
 const rk=(x,z,fb)=>x+','+z+','+fb;
 function reserve(x0,x1,z0,z1,fb){for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++)resv.add(rk(x,z,fb))}
+// floor cells right in front of a window: nothing taller than half a metre goes there
+let winFront=new Set();
 function fpFree(fx0,fz0,fw,fd,fb,h){
   for(let x=fx0;x<fx0+fw;x++)for(let z=fz0;z<fz0+fd;z++){
-    if(resv.has(rk(x,z,fb)))return false;const fl=get(x,fb,z);if(fl===0||fl===B.LADDER||fl===B.FURN)return false;
+    if(resv.has(rk(x,z,fb))||(h>=2&&winFront.has(rk(x,z,fb))))return false;const fl=get(x,fb,z);if(fl===0||fl===B.LADDER||fl===B.FURN)return false;
     for(let y=fb+1;y<=fb+Math.max(1,h);y++)if(get(x,y,z)!==0)return false}
   return true;
 }
@@ -655,13 +658,13 @@ function stairs(x0,z1,b,k,rail,n=FH){
 // ---- overgrowth: nature taking abandoned houses back - ivy up the walls and in through open windows, weeds across the floors, the odd sapling through the boards
 function overgrow(x0,x1,z0,z1,g,floors,w0,xm){
   const top=g+floors*FH,faces=[[x0,x1,z0,0,Math.PI],[x0,x1,z1,0,0],[z0,z1,x0,1,-Math.PI/2],[z0,z1,x1,1,Math.PI/2]];
-  for(const[a0,a1,c,side,yaw]of faces)for(let i=0,n=RI(2,6);i<n;i++){const t=RI(a0+1,a1-1);if(!side&&c===z0&&t>=xm-2&&t<=xm+3)continue;
+  const onGlass=(side,c,t)=>{for(let i=w0;i<winSpecs.length;i++){const[x,,z,ax]=winSpecs[i];if(ax&&!side&&z===c&&t>=x&&t<=x+3)return true;if(!ax&&side&&x===c&&t>=z&&t<=z+3)return true}return false};
+  for(const[a0,a1,c,side,yaw]of faces)for(let i=0,n=RI(2,6);i<n;i++){const t=RI(a0+1,a1-1);if(!side&&c===z0&&t>=xm-2&&t<=xm+3)continue;if(onGlass(side,c,t))continue;
     const x=side?c:t,z=side?t:c,out=yaw===Math.PI?-1:yaw===0?1:0,ox=yaw===-Math.PI/2?-1:yaw===Math.PI/2?1:0;
     const wx=(x+.5+ox*.5)*VS+ox*.01,wz=(z+.5+out*.5)*VS+out*.01,h=R(1.2,(top-g)*VS*.9);furnSpecs.push(['vine',wx,(g+1)*VS,wz,yaw,{h,w:R(.5,1.3)}])}
   // ivy in through open windows, trailing down inside
   for(let i=w0;i<winSpecs.length;i++){const[x,y,z,ax]=winSpecs[i];if(winSpecs[i][5])continue;
-    for(let du=1;du<3;du++)for(let dv=1;dv<4;dv++){const cx=ax?x+du:x,cz=ax?z:z+du,cy=y+dv;if(get(cx,cy,cz)===0&&rng()<.45)setv(cx,cy,cz,B.LEAF)}
-    if(rng()<.6){const inz=ax?(z===z0?1:-1):0,inx=ax?0:(x===x0?1:-1);furnSpecs.push(['vine',(x+(ax?2:.5)+inx*.5)*VS+inx*.01,y*VS,(z+(ax?.5:2)+inz*.5)*VS+inz*.01,ax?(inz>0?0:Math.PI):(inx>0?Math.PI/2:-Math.PI/2),{h:R(.7,1.05),w:R(.5,.9),hang:1}])}}
+    if(rng()<.6){const inz=ax?(z===z0?1:-1):0,inx=ax?0:(x===x0?1:-1);furnSpecs.push(['vine',(x+(ax?2:.5)+inx*.5)*VS+inx*.01,y*VS,(z+(ax?.5:2)+inz*.5)*VS+inz*.01,ax?(inz>0?0:Math.PI):(inx>0?Math.PI/2:-Math.PI/2),{h:R(.3,.46),w:R(.5,.9),hang:1}])}}
   // weeds pushing up through the ground floor, thickest near the walls
   for(let i=0,n=RI(6,16);i<n;i++){const x=RI(x0+1,x1-1),z=RI(z0+1,z1-1);if(get(x,g+1,z)!==0||resv.has(rk(x,z,g)))continue;furnSpecs.push(['weeds',(x+.5)*VS,(g+1)*VS,(z+.5)*VS,rng()*6.28,{n:RI(4,9)}])}
   // a sapling broke through the floor
@@ -688,7 +691,7 @@ function wreck(x0,x1,z0,z1,g,floors,lvl,fh=FH){
       else if(d<rad+1.4&&rng()<.8)setv(x,top,z,chipOf(B.ROOF,x,top,z))}}
 }
 function building(lx,lz,S){
-  resv=new Set();const hurt=rng()<.3;WB=hurt?.5:.08;const w0=winSpecs.length,wild=rng()<(hurt?.55:.18);if(wild)WB=Math.max(WB,.35);
+  resv=new Set();winFront=new Set();const hurt=rng()<.3;WB=hurt?.5:.08;const w0=winSpecs.length,wild=rng()<(hurt?.55:.18);if(wild)WB=Math.max(WB,.35);
   const w=RI(22,S),d=RI(22,S),x0=lx+RI(0,S-w),z0=lz+RI(0,S-d),x1=x0+w-1,z1=z0+d-1;
   const rail=['wood','metal','none','wood','metal'][RI(0,4)],trimC=rng()<.6?0:RI(1,2);
   const floors=RI(1,3),g=G+1,mat=rng()<.5?B.CONC:B.BRICK,top=g+floors*FH,BD=7;WMAT=mat;WTRIM=trimC;
@@ -756,7 +759,7 @@ function wallX(x,za,zb,b){for(let y=b+1;y<b+FH;y++)for(let z=za;z<=zb;z++)setv(x
 function wallZ(z,xa,xb,b){for(let y=b+1;y<b+FH;y++)for(let x=xa;x<=xb;x++)setv(x,y,z,B.WALL)}
 function opening(x,z,w,alongX,b){for(let i=0;i<w;i++)for(let y=b+1;y<=b+4;y++)setv(alongX?x+i:x,y,alongX?z:z+i,0)}
 function commercial(lx,lz,S,kind){
-  resv=new Set();const K=KIND[kind],hurt=rng()<.35;WB=hurt?.5:.08;
+  resv=new Set();winFront=new Set();const K=KIND[kind],hurt=rng()<.35;WB=hurt?.5:.08;
   const x0=lx+1,z0=lz+1,x1=lx+S-2,z1=lz+S-2,w=x1-x0+1,g=G+1,mat=(WMAT=K.mat),rail=kind==='school'?'wood':'metal';
   const store=kind==='grocery'||kind==='hardware',SHt=store?8:FH,floors=kind==='hospital'?RI(2,3):kind==='school'?2:1,top=g+(store?SHt:floors*FH),trim=kind==='school'?1:0;
   for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){const edge=x===x0||x===x1||z===z0||z===z1;
