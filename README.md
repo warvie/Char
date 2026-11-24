@@ -55,6 +55,8 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 **Meadows:** grassy ground grows daisies, poppies, dandelions, bluebells, lavender and clover, mostly in patches of one kind, with stray flowers elsewhere. They dry to seed heads in autumn. Grass shifts across lush, yellow-green, blue-green, olive and pale patches, and the blades cast pixel shadows that sway with them.
 
+**Trees** come in three sizes. Young ones have a 25 cm stem and a small crown. Normal ones have a log trunk and limbs that taper from thick to thin. Old ones have a 1 m trunk of 2 × 2 logs, flared roots, a big crown, and heavy 25 cm limbs that taper to branches, then twigs.
+
 **Pixel shadows everywhere:** every shadow (on blocks, furniture, grass, people and cars) is looked up on the same 1/16 m texture-pixel grid, so all shadow edges are pixelated.
 
 **Rain:** wet, sky-exposed ground turns into a pixelated mirror. Reflections, ripples and glints are snapped to the texture-pixel grid, and anything under a roof stays dry.
@@ -69,7 +71,11 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 **Small phones:** on screens smaller than a typical phone, the whole touch layout (buttons, stick, hotbar and HUD) shrinks in proportion, so no button overlaps another in portrait or landscape. This is checked on 18 phone and tablet sizes.
 
-**Touch buttons:** *Jump* is the biggest button. The red action button is labelled with what your held tool does (*Swing*, *Saw*, *Shoot*, *Dig*, *Build*, *Set trap*). The blue *Use* button is named after whatever is in front of you (*Open*, *Talk*, *Search*, *Sleep*…) and dims when nothing is. The amber button appears only when the held tool has a second function: *Aim* for the pistol, *Place* for the pickaxe, *Type* or *Next trap*, or switching between bat and chainsaw. Each button has its own colour and pixel icon, and you can tap a hotbar slot to switch to it.
+**Touch buttons:** the right edge has *Crawl* in the bottom corner, *Jump* the same size above it, and *Run* above that. The red action button (*Swing*, *Shoot*, *Dig*, *Build*, *Set trap*, *Eat*, *Punch*…) sits beside *Crawl*, with *Use* and the second-function button stacked above it. *Bag* sits at the end of the hotbar, and you tap a hotbar slot to switch to it. Each button has its own colour and pixel icon.
+
+**Crawl:** double-tap C (or tap *Crawl*) to go flat on your belly. You're 45 cm tall, slow, and fit through half-metre gaps. You only stand back up when there's room.
+
+**Hotbar (Minecraft-style):** six slots, each holding anything you carry: the bat or chainsaw, pistol, pickaxe, any building block, any trap or placeable, food, bandages, pipe bombs, or nothing (bare hands). In the case, select an item and click a slot (or press 1–6) to put it there. Clicking a slot with nothing selected clears it. R on a block or trap slot changes what's in that slot. The layout is saved with your game.
 
 **Never stuck in blocks:** waking up, respawning, teleporting and getting out of a car always put you in the nearest free spot with a floor under you. If a block ever ends up inside you (placed, loaded or fallen in), you duck if that frees you, otherwise you're moved out within a quarter second.
 
@@ -112,12 +118,19 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 - **A limited number of zombies:** each region starts with so many walkers (towns hold the most). Kill them and they're gone; the top bar shows how many are still out there. New ones only come from people who turn.
 - **Infection:** zombies bite people who can't fight back (unarmed family members). The bitten fall sick and turn within a minute or so, and anyone the dead kill gets back up. A bandage buys them time, not a cure.
 - **Streets:** roads have double yellow centre lines, white edge lines, zebra crosswalks with stop bars, and stone curbs with red or yellow painted ends. Big towns have traffic lights on mast arms (with walk signals and street-name signs), and smaller towns have four-way stops. Speed limit, no parking, one way and yield signs line the streets.
+- **Houses:**
+  - **Stairs:** they stop at the top floor, so no house has an open stairway onto the roof.
+  - **Outside:** a parapet around the roof, a brick chimney, roof vents and AC units, a porch with a canopy, step, doormat and light, a mailbox, and sometimes a picket fence across the front yard.
+  - **Inside:** curtains at most windows, a light in every ceiling, paintings on the walls (landscapes, sunsets, abstracts, portraits, flowers), and candles and lava lamps on tables, nightstands and dressers.
+- **Stores you can loot:** grocery aisles and drinks coolers hold canned food, vegetables, jerky and more. *Use* takes some off the shelf, and each shelf visibly empties over three takes (saved with the world). Hardware aisles give scrap, planks, fuel and the odd repair kit. All furniture has a pixel grain at the same texel size as blocks.
 - **Manholes:** three in four are covered by a round lid sitting in an iron collar, so the opening is round. *Use* drags the lid aside.
 - **Zombies** are slow by day and fast at night. They notice you only within range (22 m by day, 34 m at night) and in line of sight, give up once you're well out of range, and come to investigate gunshots. They break blocks hit by hit: a window in one hit, a wooden door in about 10 s, a brick wall only with a crowd. Metal holds longest. Some wear hard hats, helmets, vests or jackets that soak up damage.
 - **Zombie looks:** rotting pixel skin with veins, mottling and open sores, torn and blood-soaked clothes, bared teeth, and sometimes a torn cheek or bare skull. Some show ribs through a hole in the shirt or a spine down the back, or have bones snapped through a forearm or shin. Some have already lost an arm, both arms, a leg or half a forearm, with a bloody stump and bone.
 - **Running zombies down:** a slow bump shoves a zombie. Hit one at speed and it's thrown through the air, limbs flailing, bounces, then flops and twitches on the ground. Impact damage grows with speed, and harder hits tear limbs off, snap them in half (the lower half flies off), take the head, or cut the zombie in two. Survivors get back up, or crawl if they lost a leg.
 - **Car parts:** hit a parked car with the pickaxe to pry off its wheels, engine, battery and radio (plus scrap), until it's a stripped shell. With a wrench (2 scrap + 1 metal plate, or from hardware stores), *Use* fits a missing part from your case, so you can swap parts between cars. A car missing wheels, its engine or its battery won't go.
-- **Car radio:** press R in a car (or tap *Radio*) to cycle the stations: an oldies station, a rock station, an emergency broadcast, and off. Stations are synthesized live, and a parked car left playing can still be heard nearby.
+- **Dashboard:** every car has RPM, speed and fuel gauges and warning lights on a bezel standing proud of the dash. They used to sit just behind the dash face, which hid them. The RPM needle idles, climbs with throttle and drops through gears.
+- **Vehicle textures:** every part of every vehicle has a 16 × 16 pixel texture chosen by what it is (paint with rust and scratches, tyre tread, brushed metal, seat fabric, dash plastic). Textures are point-sampled and scaled so the pixels are the same size as on blocks.
+- **Car radio:** press R in a car (or tap *Radio*) to cycle the stations: KDRG oldies (chords, walking bass, brushed drums and a melody), WRCK rock (overdriven power chords, kick and snare), an emergency broadcast, and off. It plays through a small speaker chain (compressor, cabin reverb, band-limited speaker) and goes quiet the moment you get out.
 - **Windshield blood:** zombies you hit splatter the windshield with drops, spatters and streaks that run down the glass, visible from the driver's seat and outside. It dries off over a minute or so, and faster in the rain.
 - **Aiming:** hold right-click (pistol) to aim down sights, which is more accurate but slower. There's a light aim assist toward visible targets, a bit stronger on touch and gamepad.
 - **Shooting:** bullets leave holes where they hit. Shoot off arms and legs: legless zombies crawl, armless ones bite weaker, and a headshot pops the head off. Cars and tripwire bombs tear limbs off too.
