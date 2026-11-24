@@ -18,7 +18,8 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
   - **Grocery stores:** a plate-glass storefront, stocked aisles, checkouts, drinks coolers and a stockroom. Mostly food.
   - **Hardware stores:** tool aisles, lumber racks and pegboard walls. Scrap, metal, planks, fuel, repair kits and traps.
   - **Schools** (2 storeys): classrooms with chalkboards and rows of desks, lockers along the corridors and a cafeteria.
-- **Battle damage:** buildings are mostly chipped rather than holed. Walls and roofs have chunks bitten out of blocks, with the broken pieces lying in rubble piles below. Only a few blocks are knocked clean through, and roofs have ragged holes with debris on the floor underneath. Your digging, zombies clawing at walls and explosions chip blocks the same way before they break, and leave rubble behind.
+- **Battle damage:** most buildings came through intact, with whole windows. About 3 in 10 took real damage, and those are mostly chipped rather than holed. Walls and roofs have chunks bitten out of blocks, with the broken pieces lying in rubble piles below. Only a few blocks are knocked clean through, and roofs have ragged holes with debris on the floor underneath. 
+- **Every block breaks in stages:** dirt, grass, stone, ore, concrete, brick, drywall, roof, asphalt, planks, logs, metal, tile and window frames all go through three broken stages (chipped, heavily damaged, crumbled stub) before they give way. That happens under your pickaxe, zombie claws and explosions, and the broken pieces land as rubble. A block that is already damaged breaks faster.
 - **Furnished rooms:** each floor is split into rooms joined by doorways and doors.
   - Living rooms: couch facing a flat-screen or an old CRT TV (rabbit ears, VCR) on a TV stand, coffee table, rug, armchair, bookcase.
   - Kitchens: fridge, counters, sink and stove, plus a table and chairs.
@@ -31,7 +32,9 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 ## Graphics
 
-Four quality levels (start screen or backpack). They change effects only, never the resolution:
+**Pixel size** (start screen or case): the 3D view renders at ½, ⅓ or ¼ of the screen resolution and is scaled up with hard pixel edges (×2 by default), or *Smooth* for full resolution. The UI is pixelated to match, with pixel fonts, hard bevels and hand-drawn 16×16 pixel-art icons.
+
+Four quality levels (start screen or case). They change effects only:
 - **Ultra:** everything in High, plus **pixel ray tracing**. A 3D copy of the nearby blocks lives on the GPU, and for every texture pixel (16 per block side, the same as the textures) a ray is traced to the sun for shadow, with short rays for corner shading. Sunlight falls through windows in pixel-exact patches. Needs WebGL2, and is the default on desktop.
 - **High:** pixelated sun shadows, crepuscular rays, lens flare that hides when the sun is blocked, motion blur, real-time rain reflections, edge smoothing, drifting ground fog, distance haze, vignette and color grading.
 - **Medium:** lighter shadows and effects, no motion blur.
@@ -50,8 +53,8 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 - **Shooting:** bullets leave holes where they hit. Shoot off arms and legs: legless zombies crawl, armless ones bite weaker, and a headshot pops the head off. Cars and tripwire bombs tear limbs off too.
 - **Loot:** crates in houses (each public building stocks its own kind of loot), basements, sewers and caves. Dead zombies drop loot bags, sometimes with the clothing they wore.
 - **Wild animals:** deer and rabbits flee, wolves hunt in packs (worse at night), and boars charge if you get close. Kill them for raw meat, hide and bone. Cook meat at a campfire, because raw meat can make you sick.
-- **Clothing and armor:** hard hat, metal helmet, leather jacket, police vest, hide coat, scrap armor, padded pants, riot pants. Each blocks part of the incoming damage, up to 70%. Wear them from the backpack.
-- **Crafting** at the workbench in the backpack:
+- **Clothing and armor:** hard hat, metal helmet, leather jacket, police vest, hide coat, scrap armor, padded pants, riot pants. Each blocks part of the incoming damage, up to 70%. Wear them from the case.
+- **Crafting** at the workbench in the case:
   - Materials: planks, metal plates, ammo (from scrap or bone), bandages, repair kits, fuel.
   - Placeables: spike traps, bear traps, tripwire bombs, beds, campfires.
   - Wearables: helmets, armor, coats, pants.
@@ -60,14 +63,17 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
   - Seasonal grass and leaves, and in winter snow on the ground, roads, roofs and trees.
   - Rain, storms and snowfall; winter days are shorter.
   - Cold drains your warmth unless you're indoors, by a fire, in a car or wearing a coat.
-- **People:**
-  - Survivors claim a house. By day they forage (raid crates, hunt, pick up carcasses) and carry food back to a stash. They board up open windows and set spike traps at the door.
+- **People:** a fixed cast of named survivors and bandits with realistic names. Nobody respawns: when someone dies, they're gone for good and drop off the leaderboard. Out of sight, they keep fighting each night, and now and then one doesn't make it (you'll hear it on the radio).
+  - About half the houses still have a survivor living in them. By day they forage (raid crates, hunt, pick up carcasses) and carry food back to a stash. They board up open windows and set spike traps at the door.
   - At night they go home, open the door, close it behind them and sleep. About 1 in 4 are night owls who keep scavenging.
   - They shoot zombies and trade with you. Raid a stash while its owner sees you and they turn hostile.
-  - Bandits camp around fires and tents in the wilds and shoot on sight.
+  - Bandit gangs of 2–4 camp around fires and tents in the wilds and shoot on sight.
+- **Leaderboard:** hold **Z** (or open your case) to see zombies killed, people killed and nights survived for you and everyone still alive. Click a column to sort. Your nights count resets when you die.
+- **Attaché case (Tab):** a grid inventory like Resident Evil 4. Every item has a size (a fuel can is 2×2, a jacket 2×3, the bat 4×1) and stacks up to a limit. Drag items to arrange them, rotate them with R or right-click while dragging, or tap *Organize*. Select an item to use, wear, rotate or drop it. If you pick up more than fits, the extra drops in a bag at your feet.
 - **Tents:** abandoned campsites dot the countryside, bandits camp in them, and you can sew your own (5 cloth + 3 wood). Sleep in one like a bed.
-- **Respawn:** when you die, choose your bed, the crossroads or a random town. The backpack also has a *Respawn (stuck?)* button.
+- **Respawn:** when you die, choose your bed, the crossroads or a random town. The case also has a *Respawn (stuck?)* button.
 - **Beds:** sleep through the night (in co-op, both players lie down). A bed also sets your respawn point.
+- **Bicycles:** left by front doors and along the roads. No fuel needed, just pedalling (which makes you hungrier); about 30 km/h, quiet, and they bounce off zombies instead of running them down. One rider only.
 - **Vehicles:** sedans, pickups, vans, police cruisers, ambulances, city buses and motorcycles. They need fuel and repairs, and they collide with each other, with people and with animals (you can stand on the roofs).
   - First-person cabin at real seat height: you see your own body at the wheel and most of the road.
   - Turning steering wheel, working gauges and a **live rear-view mirror**; many vehicles have a **backup camera** screen with guide lines when reversing.
@@ -81,8 +87,8 @@ The world is rebuilt from its seed, so a save only stores the seed plus the bloc
 
 ## Controls
 
-**Player 1:** WASD move · mouse look · click act · right-click place block · 1–5 / wheel tools (bat, pistol, pickaxe, build, place) · R block material or item to place · E use / doors / loot / sleep / cook / enter car · V driver or outside view · Space jump (brake in car) · Shift sprint · Tab backpack · G eat · X bandage · T flashlight
+**Player 1:** WASD move · mouse look · click act · right-click place block · 1–5 / wheel tools (bat, pistol, pickaxe, build, place) · R block material or item to place · E use / doors / loot / sleep / cook / enter car · V driver or outside view · Space jump (brake in car) · Shift sprint · Tab attaché case · Z (hold) leaderboard · G eat · X bandage · T flashlight
 
-**Player 2:** I K / J L move & turn · U / O look · H act · Y use · N jump · P sprint · B tool · M material or item · , car view · [ eat · ] bandage · \ backpack · or a gamepad
+**Player 2:** I K / J L move & turn · U / O look · H act · Y use · N jump · P sprint · B tool · M material or item · , car view · [ eat · ] bandage · \ case · or a gamepad
 
 **Touch:** drag the left side to move, drag the right side to look · Act, Jump, Use, Place buttons bottom right · Bag, Tool, Type, View, Run along the top
