@@ -1080,8 +1080,8 @@ float getShadowMask(){float s=1.;
   return s;}`)};return m}
 function installVmatShader(){vmat.onBeforeCompile=sh=>{
   Object.assign(sh.uniforms,RTU);
-  sh.vertexShader='varying vec3 vRtW,vRtN;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvRtW=(modelMatrix*vec4(transformed,1.)).xyz;vRtN=normalize(mat3(modelMatrix)*objectNormal);');
-  sh.fragmentShader=`varying vec3 vRtW,vRtN;uniform vec3 rtOrigin,rtSize,sunDirU;uniform float sunK,wet,rtime;uniform sampler2D hTex;
+  sh.vertexShader='varying vec3 vRtW,vRtN;attribute vec4 aBl;attribute float aBlT;varying vec4 vBl;varying float vBlT;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvRtW=(modelMatrix*vec4(transformed,1.)).xyz;vRtN=normalize(mat3(modelMatrix)*objectNormal);vBl=aBl;vBlT=aBlT;');
+  sh.fragmentShader=`varying vec3 vRtW,vRtN;varying vec4 vBl;varying float vBlT;uniform vec3 rtOrigin,rtSize,sunDirU;uniform float sunK,wet,rtime;uniform sampler2D hTex;
 #ifdef RTX
 uniform highp sampler3D rtVox;
 #endif
@@ -1111,7 +1111,15 @@ float getShadowMask(){float s=1.;
   s*=mix(1.,rtSun(),sunK);
 #endif
   return s;}`)
-    .replace('#include <map_fragment>',`#include <map_fragment>
+    .replace('#include <map_fragment>',`
+#ifdef USE_MAP
+  vec2 mUv=vUv;
+  if(vBlT>.5){vec3 q=pxWorld()/.5;vec2 l=fract(q.xz);float t=mix(mix(vBl.x,vBl.y,l.x),mix(vBl.z,vBl.w,l.x),l.y);
+    vec2 ip=floor(q.xz*8.);float th=.55*fract(sin(dot(ip,vec2(12.9898,78.233)))*43758.5453)+.45*fract(sin(dot(floor(ip/2.),vec2(39.346,11.135)))*24634.6345);
+    if(t>th*.96+.02){float at=floor(vBlT+.5)-1.;vec2 cur=vec2(floor(vUv.x*${ACOLS}.),floor((1.-vUv.y)*${AROWS}.)),alt=vec2(mod(at,${ACOLS}.),floor(at/${ACOLS}.));
+      mUv+=vec2((alt.x-cur.x)/${ACOLS}.,-(alt.y-cur.y)/${AROWS}.);}}
+  vec4 texelColor=texture2D(map,mUv);texelColor=mapTexelToLinear(texelColor);diffuseColor*=texelColor;
+#endif
   if(wet>0.){vec2 hc=(vRtW.xz/.5-rtOrigin.xz)/rtSize.xz;float top=texture2D(hTex,hc).r*255.;float ex=(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)?1.:step(top-1.05,vRtW.y/.5+.02);
     diffuseColor.rgb*=1.-.4*wet*ex;}`)
     .replace('#include <aomap_fragment>',`#include <aomap_fragment>
@@ -1280,8 +1288,10 @@ function mkGeo(P,N,C,I,UV){const g=new THREE.BufferGeometry();if(UV)g.setAttribu
   if(C)g.setAttribute('color',new THREE.Float32BufferAttribute(C,3));g.setIndex(I);g.computeBoundingSphere();return g}
 // typed-array mesher with packed vertices (16 B/vertex instead of 44):
 // position Uint16 in 1/16-voxel units (chunk-local, 1-voxel margin), normal Int8, colour Uint8, uv Uint16 (all normalised except position)
-let mCap=1<<15,mP=new Uint16Array(mCap*3),mN=new Int8Array(mCap*3),mC=new Uint8Array(mCap*3),mU=new Uint16Array(mCap*2),mI=new Uint32Array(mCap*1.5);
-function mGrow(){mCap*=2;const g=(a,n)=>{const b=new a.constructor(n);b.set(a);return b};mP=g(mP,mCap*3);mN=g(mN,mCap*3);mC=g(mC,mCap*3);mU=g(mU,mCap*2);mI=g(mI,mCap*1.5)}
+let mCap=1<<15,mP=new Uint16Array(mCap*3),mN=new Int8Array(mCap*3),mC=new Uint8Array(mCap*3),mU=new Uint16Array(mCap*2),mI=new Uint32Array(mCap*1.5),mB=new Uint8Array(mCap*4),mT=new Uint8Array(mCap);
+// grass/dirt blending: corner mix of the other ground (0-255, corners x0z0,x1z0,x0z1,x1z1) and that ground's tile+1, for the top face being built
+let qBT=0;const qB=new Uint8Array(4);
+function mGrow(){mCap*=2;const g=(a,n)=>{const b=new a.constructor(n);b.set(a);return b};mP=g(mP,mCap*3);mN=g(mN,mCap*3);mC=g(mC,mCap*3);mU=g(mU,mCap*2);mI=g(mI,mCap*1.5);mB=g(mB,mCap*4);mT=g(mT,mCap)}
 // shaped blocks whose base fully covers the block below (slabs, stairs, chipped blocks with an intact bottom); rubble and stubs with gaps don't hide it
 const BOTFULL=new Uint8Array(256);for(let b=0;b<256;b++){const sh=SH[b];if(!sh)continue;let ok=1;
   for(let i=0;i<8&&ok;i++)for(let j=0;j<8&&ok;j++){const x=(i+.5)/8,z=(j+.5)/8;if(!sh.some(q=>q[1]<=.001&&x>=q[0]&&x<=q[3]&&z>=q[2]&&z<=q[5]))ok=0}BOTFULL[b]=ok}
@@ -1290,12 +1300,23 @@ const FULLBOX=[[0,0,0,1,1,1]];
 let mv=0,mi=0;
 const loaded=new Uint8Array(NC*NC);
 // one quad of box `bx` (fractions within the voxel) on face fi of voxel (x,y,z), chunk-local origin (ox,oz)
+// ground cells around a grass or dirt top: each corner takes the share of the other ground among the 4x4 open-topped cells around it,
+// so grass and dirt fade into each other over about two blocks either side of the edge (dithered per texel in the shader)
+const gKind=(x,y,z)=>{const b=get(x,y,z);if(b!==1&&b!==2&&!(b>=23&&b<=25))return 0;if(isOpq(get(x,y+1,z)))return 0;return b===2?2:1};
+const gGrid=new Uint8Array(25);
+function groundBlend(b,x,y,z){const me=b===2?2:1;let other=0;
+  for(let j=0;j<5;j++)for(let i=0;i<5;i++){const k=(i===2&&j===2)?me:gKind(x+i-2,y,z+j-2);gGrid[j*5+i]=k;if(k&&k!==me)other=1}
+  if(!other)return;let any=0;
+  for(let cz=0;cz<2;cz++)for(let cx=0;cx<2;cx++){let o=0,n=0;for(let j=cz;j<cz+4;j++)for(let i=cx;i<cx+4;i++){const k=gGrid[j*5+i];if(!k)continue;n++;if(k!==me)o++}
+    const v=n?Math.round(o/n*255):0;qB[cz*2+cx]=v;if(v)any=1}
+  if(any)qBT=(me===2?TILE.grassTop:TILE.dirtTop)+1}
 function quad(x,y,z,ox,oz,fi,bx,tile,cr,cg,cb,s,vs=0){
   if(mv+4>mCap)mGrow();const f=FACES[fi],a0=FACE_UV[fi][0],a1=FACE_UV[fi][1],P=[x,y,z],pu=P[a0]&1,pv=P[a1]&1,tx=tile%ACOLS,ty=(tile/ACOLS)|0;
   for(let c=0;c<4;c++){const q=f[3][c],fr=[q[0]?bx[3]:bx[0],q[1]?bx[4]:bx[1],q[2]?bx[5]:bx[2]],o3=(mv+c)*3,o2=(mv+c)*2;
     mP[o3]=Math.round((x-ox+1+fr[0])*16);mP[o3+1]=Math.round((y+fr[1])*16);mP[o3+2]=Math.round((z-oz+1+fr[2])*16);
     mN[o3]=f[0]*127;mN[o3+1]=f[1]*127;mN[o3+2]=f[2]*127;mC[o3]=Math.min(255,cr*s*255);mC[o3+1]=Math.min(255,cg*s*255);mC[o3+2]=Math.min(255,cb*s*255);
     const u=(pu+fr[a0])/2,vv=(pv+fr[a1]+(a1===1?vs:0))/2;mU[o2]=((tx*TS+.03+u*(TS-.06))/AW)*65535;mU[o2+1]=(1-(ty*TS+.03+(1-vv)*(TS-.06))/AH)*65535}
+  {const bt=fi===2?qBT:0;for(let c=0;c<4;c++){mT[mv+c]=bt;for(let j=0;j<4;j++)mB[(mv+c)*4+j]=bt?qB[j]:0}}
   mI[mi]=mv;mI[mi+1]=mv+1;mI[mi+2]=mv+2;mI[mi+3]=mv;mI[mi+4]=mv+2;mI[mi+5]=mv+3;mi+=6;mv+=4;
 }
 // chunks are addressed by world chunk coords; each lives in a ring slot of the window
@@ -1310,6 +1331,7 @@ function buildChunk(cx,cz){
     if(b===15){for(let fi=0;fi<6;fi++){const o=nb[fi];if(o===15||isOpq(o))continue;const f=FACES[fi],n=GP.length/3;
       for(const c of f[3]){GP.push(x+c[0],y+c[1],z+c[2]);GN.push(f[0],f[1],f[2]);pushUV(GUV,TILE.glass,fi,c,x,y,z)}GI.push(n,n+1,n+2,n,n+2,n+3)}continue}
     const shp=SH[b],topF=shp?BTOP[b]:1;
+    qBT=0;if((b===1||b===2||(b>=23&&b<=25))&&!isOpq(nb[2]))groundBlend(b,x,y,z);
     if((b===1||(b>=23&&b<=25))&&!isOpq(nb[2])&&!SH[nb[2]]&&h3(x,y+11,z)<gd){const ox=x+.5+(h3(x,1,z)-.5)*.5,oz=z+.5+(h3(z,2,x)-.5)*.5,hh=.8+h3(x,3,z)*.9,ww=.55+h3(x,4,z)*.35,a=h3(x,5,z)*3,sh=.8+h3(x,6,z)*.3,yb=y+topF;
       for(const r of[a,a+1.5708]){const dx=Math.cos(r)*ww,dz=Math.sin(r)*ww,n=TP.length/3;TP.push(ox-dx,yb,oz-dz,ox+dx,yb,oz+dz,ox+dx,yb+hh,oz+dz,ox-dx,yb+hh,oz-dz);TU.push(0,0,1,0,1,1,0,1);for(let q=0;q<4;q++)TC.push(sh,sh,sh);TI.push(n,n+1,n+2,n,n+2,n+3)}}
     let cr=1,cg=1,cb=1;const v=.88+.12*h3(x,y,z),tiles=TILE_OF[b];
@@ -1339,7 +1361,7 @@ function buildChunk(cx,cz){
     const gm=new THREE.Mesh(g,grassMat);gm.scale.setScalar(VS);gm.receiveShadow=true;freeze(gm);scene.add(gm);grassMeshes[k]=gm}
   if(mv){const g=new THREE.BufferGeometry();
     g.setAttribute('position',new THREE.BufferAttribute(mP.slice(0,mv*3),3));g.setAttribute('normal',new THREE.BufferAttribute(mN.slice(0,mv*3),3,true));
-    g.setAttribute('color',new THREE.BufferAttribute(mC.slice(0,mv*3),3,true));g.setAttribute('uv',new THREE.BufferAttribute(mU.slice(0,mv*2),2,true));
+    g.setAttribute('color',new THREE.BufferAttribute(mC.slice(0,mv*3),3,true));g.setAttribute('uv',new THREE.BufferAttribute(mU.slice(0,mv*2),2,true));g.setAttribute('aBl',new THREE.BufferAttribute(mB.slice(0,mv*4),4,true));g.setAttribute('aBlT',new THREE.BufferAttribute(mT.slice(0,mv),1));
     g.setIndex(new THREE.BufferAttribute(mv>65535?mI.slice(0,mi):Uint16Array.from(mI.subarray(0,mi)),1));g.computeBoundingSphere();
     const m=new THREE.Mesh(g,vmat);m.position.set((x0-1)*VS,0,(z0-1)*VS);m.scale.setScalar(VS/16);m.castShadow=GFX<3;m.receiveShadow=true;freeze(m);scene.add(m);chunkMeshes[k]=m}
   if(GP.length){const gm=new THREE.Mesh(mkGeo(GP,GN,null,GI,GUV),gmat);gm.scale.setScalar(VS);gm.renderOrder=2;gm.receiveShadow=true;freeze(gm);scene.add(gm);glassMeshes[k]=gm}

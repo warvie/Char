@@ -47,6 +47,8 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 
 **8 × 8 pixels per block:** every block face shows an 8 × 8 texture (point-sampled so mortar lines and board joints stay crisp).
 
+**Ground that blends:** where grass meets bare dirt, the two fade into each other over about two blocks on each side. The fade is dithered one texture pixel at a time in clumpy noise, so there is no hard line between them and it stays pixelated.
+
 **Pixel shadows everywhere:** every shadow (on blocks, furniture, grass, people and cars) is looked up on the same 1/16 m texture-pixel grid, so all shadow edges are pixelated.
 
 **Rain:** wet, sky-exposed ground turns into a pixelated mirror. Reflections, ripples and glints are snapped to the texture-pixel grid, and anything under a roof stays dry.
