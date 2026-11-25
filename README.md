@@ -9,6 +9,12 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+
+## v17.6 — trim on the grid
+
+- WRECT/DRECT on whole block pixels (1/8 block), outward-snapped; pieces abut instead of overlapping; plinths/sill 2 px deep, others 1 px.
+- Z-fight removal: `pxUnclash` moves a coplanar same-facing overlapping box face 2 mm outward (stacking). Furniture uses a per-chunk spatial grid of boxes across all pieces; `part()` checks siblings and its parent. Coplanar overlaps in a test world fell from ~81k to ~200 (the rest are deliberately tilted parts).
+
 ## v17.5 — mops and rain
 
 - **Blood on blocks:** splats/puddles/wall spatter are recorded 1/16 m stain pixels on block faces (40k pool with free list), following the surface and running over edges; old transparent decal planes no longer used for blood.
