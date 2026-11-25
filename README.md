@@ -20,6 +20,8 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 - **Realistic towns:** 6 m two-lane roads, 1.5 m sidewalks, 15 m lots, and houses 11–15 m across (level with the sidewalks) with 3 m storeys (2.5 m ceilings), 1–3 storeys, painted drywall in a different colour per room with baseboards and crown moulding, switchback staircases with landings (two steps per block) and wooden or iron railings, framed windows (some smashed or boarded), front and back doors, stairs and roof access.
 - **Land:** rolling hills, mountain ranges (ridged peaks of bare stone, far from towns), winding rivers and ponds you can swim in, boulders and scattered pebbles, and dirt off-road trails wandering through the wilds.
 - **Roads between towns** leave each town straight out of one of its streets at the full 6 m street width, level with it, then narrow to a 4 m country road that curves and wiggles across the land, cut and filled to an even grade, with yellow centre dashes. Where they cross water or a deep dip they become bridges: an asphalt deck on concrete, with parapets and piers. Road paint only sits on solid road, and disappears where the road is dug out.
+- **Town houses** sit back from the street in their own yards: swimming pools with loungers, vegetable patches, hedges, back-yard trees and side driveways (often with the family car). City buildings still fill their lots.
+- **Town names:** every town is named ("Millfield", "City of Ashbrook"…), with green entrance signs showing the population, and the names appear on the map. Country roads have white edge lines as well as yellow centre dashes; rivers and ponds have reeds, cattails and lily pads.
 - **Settlements of every size:** single-block hamlets at lonely crossroads, ordinary towns, and big cities (about 1 region in 10) with 3–6 storey buildings, a mall and far more abandoned traffic.
   - **Gas stations:** a lit canopy over two pump islands (Use a pump to siphon the last of its fuel), a price-sign pole, and a little shop with a till, coolers, shelves and fuel cans in the back.
   - **Parks:** grass, gravel paths, a stone fountain, park benches, a swing set, a slide, picnic tables, lamp posts and old trees.
@@ -162,6 +164,10 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 - **Weather:** rain soaks you, and wet clothes make you colder until you dry off by a fire. Snow slows you down and shows your footprints. Fog shrinks how far you can see to a few metres.
 - **Decay:** each day weeds creep further onto the roads, and abandoned cars rust and their tyres go flat.
 - **Cars:** about 3 in 10 parked cars have an alarm that wails when bumped or stripped, calling every zombie nearby. Rubble and spike traps blow out tyres (slower, pulls to one side; fit a spare wheel). Leave the headlights on at night and the battery goes flat (fit a car battery).
+
+## Fishing
+
+Craft a fishing rod (2 planks, 1 cloth, 1 scrap) or find one in a hardware store. Put it in a pocket, stand at the edge of a river or pond facing the water and Use to cast. The bobber floats where it lands. When it dips (you'll hear a splash), Use again within a couple of seconds to reel in: usually a bass, trout or catfish, sometimes junk. Grill fish at a campfire; raw fish is risky, and both spoil overnight.
 
 ## Surviving
 

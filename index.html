@@ -326,6 +326,12 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>Pixel size <select id="pixSel"></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
+    <h4>v15 · Nov 24, 2026 — a better-built world, and fishing</h4><ul>
+      <li>Fixed buildings that showed their furniture, doors and curtains with no walls: nothing in a chunk shows until its walls and floor are built, and a chunk slot can no longer be mistaken for a different place.</li>
+      <li>Fixed roads in a second world following the first world's town layout.</li>
+      <li>Town houses are smaller and set back from the street, with real yards: pools with loungers, vegetable patches, hedges, back-yard trees and driveways with the family car.</li>
+      <li>Every town has a name, on green entrance signs with the population and on the map. Country roads have white edge lines. Rivers and ponds have reeds, cattails and lily pads.</li>
+      <li>New: fishing. Craft a rod (2 planks, cloth, scrap) or find one in hardware stores, cast from the bank, wait for the bobber to dip, reel in, and grill the fish at a fire.</li></ul>
     <h4>v14.1 · Nov 24, 2026 — smoother</h4><ul>
       <li>No more freezes when you cross into a new area: the world swaps regions one at a time over several frames, keeps each region's terrain heights cached, and skips re-packing regions you didn't change.</li>
       <li>Fixed a leak that piled up copies of the passing airliner.</li>
@@ -557,7 +563,7 @@ const MATS=[['plank',B.PLANK],['stone',B.STONE],['dirt',B.DIRT],['metal',B.METAL
 // creative mode: every block, unlimited
 const CMATS=[['grass',B.GRASS],['dirt',B.DIRT],['stone',B.STONE],['coal',B.COAL],['iron',B.IRON],['conc',B.CONC],['asph',B.ASPH],['plank',B.PLANK],['log',B.LOG],['leaf',B.LEAF],['brick',B.BRICK],['metal',B.METAL],['glass',B.GLASS],['wall',B.WALL],['tile',B.TILEF],['roof',B.ROOF],['stairs',B.STPX],['frame',B.FRAME],['ladder',B.LADDER],['sludge',B.SLUDGE],['bedrock',B.BED],['gcap1',B.G25],['gcap2',B.G50],['gcap3',B.G75]];
 const matList=p=>p.creative?CMATS:MATS,curMat=p=>{const L=matList(p);return L[p.mat%L.length]};
-const LABEL={batfix:'Bat repair',water:'Bottled water',dirtywater:'Dirty water',bottle:'Empty bottle',soda:'Soda',splint:'Splint',pills:'Antibiotics',batteries:'Batteries',shorts:'Shorts',slacks:'Slacks',jeans:'Jeans',schoolbag:'School backpack',hikepack:'Hiking pack',milpack:'Military rucksack',cigs:'Cigarettes',weed:'Marijuana',lswitch:'Light switch',lamp:'Lamp',wire:'Wire',wheel:'Wheel',engine:'Engine',battery:'Car battery',carradio:'Car radio',wrench:'Wrench',frame:'Wood frame',ladder:'Ladder',sludge:'Sewer sludge',bedrock:'Bedrock',gcap1:'Grass (¼ step)',gcap2:'Grass (½ step)',gcap3:'Grass (¾ step)',scrip:'Scrip',saw:'Chainsaw',grass:'Grass',conc:'Concrete',asph:'Asphalt',log:'Log',leaf:'Leaves',brick:'Brick',glass:'Glass',wall:'Drywall',tile:'Tile',roof:'Roof',veg:'Vegetables',stew:'Meat stew',broth:'Bone broth',jerky:'Jerky',roast:'Roast veg',hotbeans:'Hot beans',tnt:'Dynamite',pipebomb:'Pipe bomb',bunk:'Bunk bed',tent:'Tent',stairs:'Stairs',bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
+const LABEL={rod:'Fishing rod',fish:'Raw fish',cookedfish:'Grilled fish',batfix:'Bat repair',water:'Bottled water',dirtywater:'Dirty water',bottle:'Empty bottle',soda:'Soda',splint:'Splint',pills:'Antibiotics',batteries:'Batteries',shorts:'Shorts',slacks:'Slacks',jeans:'Jeans',schoolbag:'School backpack',hikepack:'Hiking pack',milpack:'Military rucksack',cigs:'Cigarettes',weed:'Marijuana',lswitch:'Light switch',lamp:'Lamp',wire:'Wire',wheel:'Wheel',engine:'Engine',battery:'Car battery',carradio:'Car radio',wrench:'Wrench',frame:'Wood frame',ladder:'Ladder',sludge:'Sewer sludge',bedrock:'Bedrock',gcap1:'Grass (¼ step)',gcap2:'Grass (½ step)',gcap3:'Grass (¾ step)',scrip:'Scrip',saw:'Chainsaw',grass:'Grass',conc:'Concrete',asph:'Asphalt',log:'Log',leaf:'Leaves',brick:'Brick',glass:'Glass',wall:'Drywall',tile:'Tile',roof:'Roof',veg:'Vegetables',stew:'Meat stew',broth:'Bone broth',jerky:'Jerky',roast:'Roast veg',hotbeans:'Hot beans',tnt:'Dynamite',pipebomb:'Pipe bomb',bunk:'Bunk bed',tent:'Tent',stairs:'Stairs',bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
 // towns: a large one in the middle, smaller ones scattered through the wilds
 const towns=[];
 function townAt(x,z,m){for(const t of towns)if(x>=t.x0-m&&x<=t.x1+m&&z>=t.z0-m&&z<=t.z1+m)return t;return null}
@@ -637,7 +643,7 @@ function curvePts(a0,b0,hs){const LD=(a0[2]||a0[3])?18:0,a=[a0[0]+a0[2]*LD,a0[1]
   for(let i=0;i<=N;i++){const t=i/N,u=1-t,sn=Math.sin(t*Math.PI),w=sn*sn*Math.sin(t*Math.PI*fr+ph)*amp;
     pts.push([u*u*u*a[0]+3*u*u*t*c1[0]+3*u*t*t*c2[0]+t*t*t*b[0]+px*w,u*u*u*a[1]+3*u*u*t*c1[1]+3*u*t*t*c2[1]+t*t*t*b[1]+pz*w])}
   for(let k=LD*2-1;k>=0;k--)pts.push([b0[0]+b0[2]*k/2,b0[1]+b0[3]*k/2]);return pts}
-function regionRoads(Rg){const X0=Rg.rx*RS,Z0=Rg.rz*RS,X1=X0+RS,Z1=Z0+RS,cells=new Map(),dash=[];
+function regionRoads(Rg){const X0=Rg.rx*RS,Z0=Rg.rz*RS,X1=X0+RS,Z1=Z0+RS,cells=new Map(),dash=[],edge=[];
   for(let rz=Rg.rz-3;rz<=Rg.rz+1;rz++)for(let rx=Rg.rx-3;rx<=Rg.rx+1;rx++)for(const[a,b,hs]of townLinks(rx,rz)){
     if(Math.max(a[0],b[0])+60<X0||Math.min(a[0],b[0])-60>X1||Math.max(a[1],b[1])+60<Z0||Math.min(a[1],b[1])-60>Z1)continue;
     const pts=curvePts(a,b,hs),hs0=pts.map(([x,z])=>{const n=natH(Math.round(x),Math.round(z));return n.wl?Math.max(n.hf,WL+2):n.hf}),N=pts.length,sm=new Float32Array(N);
@@ -646,17 +652,18 @@ function regionRoads(Rg){const X0=Rg.rx*RS,Z0=Rg.rz*RS,X1=X0+RS,Z1=Z0+RS,cells=n
       const e=Math.min(i,N-1-i),hw=4+2*Math.max(0,Math.min(1,1-(e-36)/40)),RR=Math.ceil(hw+1.8);
       for(let dz=-RR;dz<=RR;dz++)for(let dx=-RR;dx<=RR;dx++){const cx=Math.round(x+dx),cz=Math.round(z+dz);if(cx<X0||cz<Z0||cx>=X1||cz>=Z1)continue;const dd=Math.hypot(cx-x,cz-z);if(dd>hw+1.8)continue;
         const c=(cz-Z0)*RS+(cx-X0),o=cells.get(c);if(!o||dd-hw<o.d-o.hw)cells.set(c,{d:dd,y:ry,fy:sm[i],core:dd<=hw,hw})}
-      if(i%9===0&&x>=X0&&x<X1&&z>=Z0&&z<Z1){const j=Math.min(N-1,i+1);{const fy=sm[i],fl=Math.floor(fy),q=Math.round((fy-fl)*4);dash.push([x,z,fl+q/4+(q===4?0:0),Math.atan2(pts[j][0]-x,pts[j][1]-z)])}}}}
+      if(i%9===0&&x>=X0&&x<X1&&z>=Z0&&z<Z1){const j=Math.min(N-1,i+1);{const fy=sm[i],fl=Math.floor(fy),q=Math.round((fy-fl)*4);dash.push([x,z,fl+q/4+(q===4?0:0),Math.atan2(pts[j][0]-x,pts[j][1]-z)])}}
+      if(i%3===0&&x>=X0+1&&x<X1-1&&z>=Z0+1&&z<Z1-1){const j=Math.min(N-1,i+1),a=Math.atan2(pts[j][0]-x,pts[j][1]-z),fy=sm[i],fl=Math.floor(fy),q=Math.round((fy-fl)*4),off=hw-.8;for(const sd of[-1,1])edge.push([x+Math.cos(a)*off*sd,z-Math.sin(a)*off*sd,fl+q/4,a])}}}
   // off-road trails: a couple of winding dirt tracks wandering across the wild part of each region
   const r=mulberry(rhash(Rg.rx,Rg.rz,41)),trail=new Set();
   for(let t=0;t<2;t++){const a=[X0+20+r()*(RS-40),Z0+20+r()*(RS-40),0,0],b=[X0+20+r()*(RS-40),Z0+20+r()*(RS-40),0,0];if(Math.hypot(b[0]-a[0],b[1]-a[1])<80)continue;
     for(const[x,z]of curvePts(a,b,rhash(Rg.rx,Rg.rz,50+t)))for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const cx=Math.round(x+dx),cz=Math.round(z+dz);if(cx<X0||cz<Z0||cx>=X1||cz>=Z1||(dx&&dz&&r()<.5))continue;trail.add((cz-Z0)*RS+(cx-X0))}}
-  return{cells,dash,trail}}
+  return{cells,dash,edge,trail}}
 // airport ground (local coords): runway, taxiway, apron, service road, terminal car park, hangar floor
 function airPaved(T,x,z){const a=x-T.x0,b=z-T.z0;return(b>=8&&b<=21&&a>=3&&a<=196)||(a>=56&&a<=61&&b>=22&&b<=33)||(a>=30&&a<=195&&b>=34&&b<=60)||(b>=41&&b<=52)||(a>=50&&a<=150&&b>=80)||(a>=150&&a<=186&&b>=61&&b<=92)||(a>=95&&a<=106&&b>=60)}
 // pass 1: per-column height + surface block (noise in world coordinates, so regions meet seamlessly)
 function regionHeights(Rg,topB,capQ,hh){const X0=Rg.rx*RS,Z0=Rg.rz*RS,X1=X0+RS,Z1=Z0+RS;
-  const RD_=regionRoads(Rg),wlA=new Int16Array(RS*RS),deck=new Int16Array(RS*RS);Rg._wl=wlA;Rg._deck=deck;Rg._dash=RD_.dash;Rg._road=RD_.cells;Rg._trail=RD_.trail;
+  const RD_=regionRoads(Rg),wlA=new Int16Array(RS*RS),deck=new Int16Array(RS*RS);Rg._wl=wlA;Rg._deck=deck;Rg._dash=RD_.dash;Rg._edge=RD_.edge;Rg._road=RD_.cells;Rg._trail=RD_.trail;
   for(let z=Z0;z<Z1;z++)for(let x=X0;x<X1;x++){
     const col=(z-Z0)*RS+(x-X0),town=inTown(x,z);let h=G;
     let q=0,nat=null;
@@ -692,9 +699,11 @@ function restOfRegion(Rg){const X0=Rg.rx*RS,Z0=Rg.rz*RS,X1=X0+RS,Z1=Z0+RS;
     lots.forEach(([lx,lz],i)=>{const k=kindAt.get(i),mgk=inMg(i);if(mgk===2)return;if(mgk===1){officeTower(lx,lz,P+30,30);return}
       if(k==='gas')gasStation(lx,lz,30);else if(k==='park')park(lx,lz,30);else if(k==='mall')mall(lx,lz,30);
       else if(k)commercial(lx,lz,30,k);
-      else if(rng()<(t.n>3?.88:.78))building(lx,lz,30);
+      else if(rng()<(t.n>3?.88:.78)){building(lx,lz,30);if(!CITY)yard(lx,lz,30)}
       else for(let n=0;n<22;n++){const x=lx+RI(0,29),z=lz+RI(0,29);if(rng()<.35)setv(x,G+2,z,chipOf(B.CONC,x,G+2,z));else rubbleAt(x,G+2,z,rng()<.5?B.CONC:B.BRICK)}})}
   CITY=false;
+  for(const T of mine)townSigns(T,Rg,X0,Z0);waterDecor(Rg,X0,Z0);
+  if(Rg._edge)for(const[x,z,ry,a]of Rg._edge)if(!inTown(x|0,z|0))furnSpecs.push(['redge',x*VS,(ry+1)*VS,z*VS,a]);
   for(let i=0;i<Math.round(1400*AREA);i++){const x=RI(X0+6,X1-7),z=RI(Z0+6,Z1-7);if(inTown(x,z))continue;const c=(z-Z0)*RS+(x-X0);if(Rg._road&&(Rg._road.has(c)||Rg._trail.has(c)||Rg._wl[c]))continue;tree(x,z)}
   // rocks: boulders of stone (some with coal), pebbles scattered on the grass, more of both on the mountains
   for(let i=0;i<Math.round(260*AREA*4);i++){const x=RI(X0+4,X1-5),z=RI(Z0+4,Z1-5),c=(z-Z0)*RS+(x-X0);if(inTown(x,z)||(Rg._road&&(Rg._road.has(c)||Rg._wl[c])))continue;const y=topY(x,z),tb=get(x,y,z);
@@ -819,7 +828,7 @@ function doorAt(x,y,z,inward,chance=.8){ // 2 wide x 4 tall opening along x; the
   if(real)doorSpecs.push({x,y,z,inward});
 }
 // ---- furniture: footprint w (along wall) x d (depth) x h (collision height) in voxels
-const FD={pbench:[4,2,2],swing:[7,3,5],slide:[2,6,4],picnic:[4,4,2],lamppost:[1,1,9],pump:[1,1,4],atable:[3,3,2],lamp:[1,1,3],lswitch:[1,1,3],wire:[1,1,0],gsign:[1,1,12],plane:[40,40,10],couch:[5,2,2],tvstand:[4,1,2],ctable:[3,2,1],armchair:[2,2,2],bookcase:[3,1,4],plant:[1,1,2],rug:[5,4,0],
+const FD={reeds:[1,1,2],lounger:[2,4,1],spost:[1,1,6],pbench:[4,2,2],swing:[7,3,5],slide:[2,6,4],picnic:[4,4,2],lamppost:[1,1,9],pump:[1,1,4],atable:[3,3,2],lamp:[1,1,3],lswitch:[1,1,3],wire:[1,1,0],gsign:[1,1,12],plane:[40,40,10],couch:[5,2,2],tvstand:[4,1,2],ctable:[3,2,1],armchair:[2,2,2],bookcase:[3,1,4],plant:[1,1,2],rug:[5,4,0],
   counter:[2,2,2],sink:[2,2,2],stove:[2,2,2],fridge:[2,2,4],ktable:[3,3,2],
   toilet:[1,2,2],bsink:[2,1,2],tub:[5,2,1],
   bed:[2,4,1],bunk:[2,4,4],nightstand:[1,1,1],wardrobe:[3,1,4],dresser:[3,1,2],
@@ -959,7 +968,8 @@ function houseDetails(lx,lz,S,x0,x1,z0,z1,g,floors,top,mat,xm,xs,zs,w0,rooms){
 let CITY=false;
 function building(lx,lz,S){
   resv=new Set();winFront=new Set();const hurt=rng()<.3;WB=hurt?.5:.08;const w0=winSpecs.length,wild=rng()<(hurt?.55:.18);if(wild)WB=Math.max(WB,.35);
-  const w=RI(22,S),d=RI(22,S),x0=lx+RI(0,S-w),z0=lz+RI(0,S-d),x1=x0+w-1,z1=z0+d-1;
+  // city buildings fill their lots; town houses are smaller and set back from the street, leaving room for yards and driveways
+  const w=CITY?RI(22,S):RI(20,25),d=CITY?RI(22,S):RI(19,24),x0=lx+RI(0,S-w),z0=CITY?lz+RI(0,S-d):lz+RI(2,Math.max(2,Math.min(4,S-d-4))),x1=x0+w-1,z1=z0+d-1;
   const rail=['wood','metal','none','wood','metal'][RI(0,4)],trimC=rng()<.6?0:RI(1,2);
   const floors=CITY?RI(3,6):RI(1,3),g=G+1,mat=rng()<.5?B.CONC:B.BRICK,top=g+floors*FH,BD=7;WMAT=mat;WTRIM=trimC;
   for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
@@ -1108,6 +1118,45 @@ function classroom(r,fb){
   if(rng()<.5)placeF('bookcase',r,fb,OPP[sd]);
 }
 function cafeteria(r,fb){floorMat(r,fb,B.TILEF);for(let i=0;i<3;i++)for(let j=0;j<3;j++)fitAt('lunch',r,r.x0+4+i*6,r.z0+3+j*5,fb,0);placeF('counter',r,fb,'E');placeF('fridge',r,fb,'E');placeF('stove',r,fb,'E');crateAt(r,fb,2,'school',true)}
+// ---- yards: every house gets something different out back and at the side
+function yard(lx,lz,S){const b=curB;if(!b||b.kind||b.x0==null)return;const g=G+1,back=lz+S-1-b.z1;
+  if(back>=7&&rng()<.3){const pw=Math.max(4,Math.min(10,b.x1-b.x0-6)),px0=Math.floor((b.x0+b.x1)/2-pw/2),pz0=b.z1+3,pz1=Math.min(lz+S-3,pz0+(back>=10?5:2));
+    // a backyard swimming pool: a concrete rim, a metre of water, a tiled bottom
+    for(let x=px0-1;x<=px0+pw;x++)for(let z=pz0-1;z<=pz1+1;z++){const edge=x===px0-1||x===px0+pw||z===pz0-1||z===pz1+1;if(edge)setv(x,g,z,B.CONC);else{setv(x,g,z,255);setv(x,g-1,z,255);setv(x,g-2,z,B.TILEF)}}
+    furnSpecs.push(['lounger',(px0-2.5)*VS,(g+1)*VS,((pz0+pz1)/2)*VS,Math.PI/2],['lounger',(px0+pw+2.5)*VS,(g+1)*VS,((pz0+pz1)/2+1)*VS,-Math.PI/2])}
+  else if(back>=4&&rng()<.35){for(let x=b.x0+1;x<b.x1-1;x++)for(let z=b.z1+2;z<Math.min(lz+S-2,b.z1+7);z++)setv(x,g,z,(x-b.x0)%2?B.DIRT:B.GRASS)}
+  if(rng()<.3)for(let z=lz+3;z<lz+S-1;z++)for(const x of[lx,lx+S-1])if(!get(x,g+1,z)){setv(x,g+1,z,B.LEAF);if(rng()<.65)setv(x,g+2,z,B.LEAF)}
+  if(back>=5)for(const x of[lx+2,lx+S-3])if(rng()<.45&&!get(x,g+1,lz+S-3))tree(x,lz+S-3);
+  // a driveway down the side of the house, often with the family car still on it (never where the front fence runs)
+  const fenced=furnSpecs.some(s=>s[0]==='fence'&&Math.abs(s[3]-(lz+.5)*VS)<.05&&s[1]>lx*VS&&s[1]<(lx+S)*VS);
+  const side=b.x0-lx>=6?-1:lx+S-1-b.x1>=6?1:0;if(side&&!fenced&&rng()<.75){const dx0=side<0?lx+1:b.x1+2;for(let x=dx0;x<=dx0+3;x++)for(let z=lz;z<=Math.min(lz+S-2,b.z0+9);z++)if(!get(x,g+1,z))setv(x,g,z,B.CONC);
+    if(rng()<.5)carSpots.push({x:(dx0+2)*VS,z:(lz+5)*VS,yaw:rng()<.5?0:Math.PI,type:pick(['car','car','van','truck','car','ev'])})}}
+// ---- town names (deterministic per town), shown on entrance signs and the map
+const TN1=['Oak','Mill','Ash','Cedar','Fair','Pine','Rock','Elm','Maple','Clear','Spring','Red','Willow','Stone','Birch','Glen','Hazel','Iron','Lake','Marsh','North','Silver','Wolf','Crow'],TN2=['field','ville','ford','wood','brook','haven','ton','port','dale','ridge','creek','burg','view','hollow','springs','falls'];
+function townName(t){if(t.air)return'AIRPORT';const r=mulberry(rhash(t.x0,t.z0,991));return TN1[Math.floor(r()*TN1.length)]+TN2[Math.floor(r()*TN2.length)]}
+function townSigns(T,Rg,X0,Z0){const ex=townExits(T),nm=T.air?'AIRPORT':T.city?('CITY OF '+townName(T).toUpperCase()):townName(T).toUpperCase(),pop=T.air?'':T.city?'POP. 48,210':T.n===1?'POP. 37':T.n>=3?'POP. '+(3000+((T.x0*7+T.z0*13)%9000)):'POP. '+(400+((T.x0*3+T.z0)%1800));
+  for(const k in ex){const[x,z,dx,dz]=ex[k],sx=x+dx*10-dz*9.5,sz=z+dz*10+dx*9.5;if(sx<X0+2||sz<Z0+2||sx>=X0+RS-2||sz>=Z0+RS-2)continue;const c=(Math.round(z+dz*12)-Z0)*RS+(Math.round(x+dx*12)-X0);if(!Rg._road||!Rg._road.has(c))continue;
+    const y=topY(Math.floor(sx),Math.floor(sz))+1,ry=Math.atan2(-dx,-dz);furnSpecs.push(['spost',sx*VS,y*VS,sz*VS,0]);
+    signSpecs.push({x:sx*VS-Math.sin(ry)*.08,y:y*VS+2.15,z:sz*VS-Math.cos(ry)*.08,w:Math.min(4.2,nm.length*.3+.9),text:nm,bg:'#1e5a2e',fg:'#f4f0e0',ry});if(pop)signSpecs.push({x:sx*VS-Math.sin(ry)*.08,y:y*VS+1.55,z:sz*VS-Math.cos(ry)*.08,w:1.6,text:pop,bg:'#1e5a2e',fg:'#d8e8d8',ry})}}
+// ---- banks: reeds and cattails along rivers and ponds, lily pads out on the water
+function waterDecor(Rg,X0,Z0){if(!Rg._wl)return;const wl=Rg._wl;
+  for(let t=0;t<2400;t++){const lx=RI(1,RS-2),lz=RI(1,RS-2),c=lz*RS+lx;if(!wl[c])continue;let land=null;for(const[a,b]of[[1,0],[-1,0],[0,1],[0,-1]]){const n=(lz+b)*RS+lx+a;if(!wl[n]){land=[lx+a,lz+b];break}}
+    const x=X0+lx,z=Z0+lz;
+    if(land&&rng()<.55){const X=X0+land[0],Z=Z0+land[1],y=topY(X,Z),b=get(X,y,Z);if((b===B.GRASS||b===B.DIRT||(b>=23&&b<=25))&&!get(X,y+1,Z))furnSpecs.push(['reeds',(X+.5)*VS,(y+1)*VS-(b>=23&&b<=25?(4-(b-22))*VS/4:0),(Z+.5)*VS,rng()*6.28,{n:RI(5,11)}])}
+    else if(!land&&rng()<.08&&get(x,wl[c],z)===255&&!get(x,wl[c]+1,z))furnSpecs.push(['lily',(x+.5)*VS,(wl[c]+.88)*VS+.004,(z+.5)*VS,rng()*6.28])}}
+// ---------------- fishing: craft a rod, cast at the water's edge, wait for the bobber to dip, reel in
+function waterSpot(p){const dx=Math.sin(p.yaw+Math.PI),dz=Math.cos(p.yaw+Math.PI);
+  for(let d=1;d<=10;d++){const X=vc(p.pos.x+dx*d*.5),Z=vc(p.pos.z+dz*d*.5);for(let y=vc(p.pos.y)+1;y>=vc(p.pos.y)-5;y--){const b=get(X,y,Z);if(b===255&&get(X,y+1,Z)!==255)return new V3((X+.5)*VS,(y+.88)*VS,(Z+.5)*VS);if(b&&b!==255)break}}
+  return null}
+function fishUse(p){const F=p.fishing;
+  if(F){scene.remove(F.bob);p.fishing=null;if(F.bite>0){const r=rng();SND.pick();if(r<.7){p.inv.fish++;msg(p,pick(['You land a fat river bass!','A trout, flapping on the bank.','A good-sized catfish!','Got one!']))}else{const j=pick(['scrap','cloth','bottle']);p.inv[j]++;msg(p,`You reel in… ${j==='bottle'?'an old bottle':j==='cloth'?'a soggy rag':'a rusted can'}.`)}}else msg(p,'You reel in. Nothing on the hook.');return}
+  const w=waterSpot(p);if(!w){msg(p,'Face a river or pond from its edge and cast');return}
+  const bob=new THREE.Group();part(bob,.12,.08,.12,0xe8e8e8,0,0,0);part(bob,.12,.08,.12,0xd02020,0,.08,0);part(bob,.02,.12,.02,0x1a1a1a,0,.18,0);bob.position.copy(w);scene.add(bob);
+  p.fishing={bob,w,t:R(5,16),bite:0,x:p.pos.x,z:p.pos.z};try{sNoise(.18,900,.12,'bandpass',2,.2,false,.35)}catch(e){}msg(p,'You cast your line. Wait for the bobber to dip…')}
+function fishTick(p,dt){const F=p.fishing;if(!F)return;if(Math.hypot(p.pos.x-F.x,p.pos.z-F.z)>2.5||p.vehicle||p.dead>0||p.hitem!=='rod'){scene.remove(F.bob);p.fishing=null;return}
+  F.bob.position.y=F.w.y+Math.sin(performance.now()*.004)*.015-(F.bite>0?.07:0);
+  if(F.bite>0){F.bite-=dt;if(F.bite<=0){msg(p,'It got away.');F.t=R(5,16)}}
+  else if((F.t-=dt)<=0){F.bite=1.7;try{sNoise(.25,700,.18,'lowpass',1,.3)}catch(e){}burst(F.w.clone(),6,1.2,[.7,.8,.9],.6);msg(p,'The bobber dips — reel it in! (Use)')}}
 // ---- office towers on merged city blocks: glass curtain walls between concrete floor bands, a lobby, open-plan floors of desks
 function officeTower(lx,lz,SX,SZ){
   resv=new Set();winFront=new Set();const hurt=rng()<.3;WB=hurt?.45:.06;const x0=lx+1,z0=lz+1,x1=lx+SX-2,z1=lz+SZ-2,g=G+1,floors=RI(6,10),top=g+floors*FH;WMAT=B.CONC;WTRIM=0;
@@ -1846,12 +1895,14 @@ function rebuildAt(x,z){
 }
 let RD=isTouch?6:8;try{const r=+localStorage.getItem('deadground-rd');if(r>=3&&r<=10)RD=r}catch(e){}
 const want=[],dirtyC=new Set(); // dirtyC: loaded chunks to remesh in the background (window shifted under them)
+const chunkLd=(x,z)=>{const k=slotOf(x,z);return!!loaded[k]&&slotC[k*2]===x&&slotC[k*2+1]===z};
+const chunkReadyAt=(px,pz)=>chunkLd(Math.floor(px/VS/CS),Math.floor(pz/VS/CS));
 function streamChunks(centers,budget){
   const r2=RD*RD,cs=centers.map(c=>[Math.floor(c.x/VS/CS),Math.floor(c.z/VS/CS)]),bx=OX/CS,bz=OZ/CS;want.length=0;
   for(const[ccx,ccz]of cs)for(let dz=-RD;dz<=RD;dz++)for(let dx=-RD;dx<=RD;dx++){const d=dx*dx+dz*dz;if(d>r2)continue;const x=ccx+dx,z=ccz+dz;
-    if(!chunkIn(x,z)||loaded[slotOf(x,z)])continue;want.push(d*4096+(z-bz)*NC+(x-bx))}
+    if(!chunkIn(x,z)||chunkLd(x,z))continue;want.push(d*4096+(z-bz)*NC+(x-bx))}
   let n=0;
-  if(want.length){want.sort((a,b)=>a-b);for(const w of want){if(n>=budget)break;const l=w%4096,x=bx+l%NC,z=bz+((l/NC)|0);if(!loaded[slotOf(x,z)]){buildChunk(x,z);n++}}}
+  if(want.length){want.sort((a,b)=>a-b);for(const w of want){if(n>=budget)break;const l=w%4096,x=bx+l%NC,z=bz+((l/NC)|0);if(!chunkLd(x,z)){const k=slotOf(x,z);if(loaded[k])unloadChunk(k);buildChunk(x,z);n++}}}
   for(const k of dirtyC){if(n>=budget)break;dirtyC.delete(k);if(loaded[k]){buildChunk(slotC[k*2],slotC[k*2+1]);n++}}
   const r2u=(RD+2)*(RD+2);
   for(let k=0;k<NC*NC;k++){if(!loaded[k])continue;const x=slotC[k*2],z=slotC[k*2+1];let keep=chunkIn(x,z);
@@ -1932,6 +1983,11 @@ function buildFurn(sp){
     F(2.2,2.2,2.2,wh,1.6,y0+.1,-fl/2-2.6,.45);F(.25,3.4,2.4,c,2.3,y0+2.6,-fl/2-3.6,.45);F(6.5,.2,1.5,gr,2.2,y0+.5,-fl/2-3.8,.45);F(2.64,2.64,.3,0x141210,0,y0,-fl/2);
     for(let i=0;i<10;i++)F(R(1,3.5),.02,R(1,4),0x141210,R(-5,6),.01,R(-12,10),R(0,3));for(let i=0;i<16;i++)F(R(.3,1.3),R(.1,.4),R(.3,1.6),pick([wh,gr,c,dk]),R(-9,10),.12,R(-16,16),R(0,3));break}
   case'pebbles':{for(let k=0;k<RI(3,7);k++){const s2=R(.05,.16);F(s2,s2*R(.5,.8),s2*R(.8,1.2),pick([0x7a7a76,0x8a8680,0x5e5c58,0x9a948a,0x6a625a]),R(-.22,.22),s2*.3,R(-.22,.22),R(0,3))}break}
+  case'redge':{if(roadAt(sp,0,0,0))F(.11,.012,.72,0xe4e4dc,0,.006,0);break}
+  case'spost':{F(.11,2.6,.11,0x6a6c70,0,1.3,0);break}
+  case'reeds':{const n=(sp[5]||{}).n||7;for(let k=0;k<n;k++){const a=k*2.4,r=R(.03,.22),x=Math.cos(a)*r,z=Math.sin(a)*r,h=R(.5,1.15);F(.025,h,.025,pick([0x5a7a2a,0x6a8a32,0x7a7a3a]),x,h/2,z,a);if(rng()<.45)F(.05,.15,.05,0x5a3a1a,x,h+.05,z);else F(.1,.02,.03,0x6a8a32,x+.03,h*.7,z,a)}break}
+  case'lily':{F(.34,.012,.3,pick([0x3a7a2a,0x4a8a32,0x2e6a24]),0,0,0);F(.08,.013,.15,0x2a4a1a,.1,.001,0);if(rng()<.3){F(.08,.05,.08,pick([0xf0b0c8,0xf8f0e8]),-.04,.03,.02);F(.03,.03,.03,0xf0d040,-.04,.06,.02)}break}
+  case'lounger':{const c=pick([0xe8e8e0,0x3a7aa8,0xd8a030]);F(.6,.06,1.8,c,0,.32,0);F(.6,.5,.06,c,0,.55,-.92,0);for(const sx of[-1,1])for(const sz of[-1,1])F(.04,.3,.04,0xb8bcc0,sx*.26,.15,sz*.8);break}
   case'rdash':{if(roadAt(sp,0,0,0))F(.12,.012,1.5,0xd8b030,0,.006,0);break}
   case'roofac':{F(.9,.6,.7,0x9a9c9a,0,.3,0);for(let i=0;i<5;i++)F(.86,.02,.02,0x5a5c5a,0,.1+i*.1,.36);F(.5,.04,.5,0x3a3c3a,0,.62,0);F(.08,.3,.08,0x6a6c6a,.4,.15,-.4);break}
   case'roofvent':{F(.12,.55,.12,0x6a6c70,0,.27,0);F(.22,.06,.22,0x4a4c50,0,.58,0);if(rng()<.6)F(.1,.35,.1,0x6a6c70,.4,.17,.2);break}
@@ -2089,7 +2145,7 @@ function buildFurnMeshes(list,only){
   for(const sp of list)if(!sp.gone&&(only==null||sp.k===only))buildOne(sp);
   if(only!=null&&!FBUF.has(only)&&furnMeshes[only]){scene.remove(furnMeshes[only]);furnMeshes[only].geometry.dispose();furnMeshes[only]=null}
   for(const[k,b]of FBUF){if(furnMeshes[k]){scene.remove(furnMeshes[k]);furnMeshes[k].geometry.dispose()}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(b.P,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(b.N,3));
-    g.setAttribute('color',new THREE.Float32BufferAttribute(b.C,3));g.setIndex(b.I);g.computeBoundingSphere();const m=new THREE.Mesh(g,furnMat);m.visible=!!loaded[k];m.castShadow=m.receiveShadow=true;freeze(m);scene.add(m);furnMeshes[k]=m}
+    g.setAttribute('color',new THREE.Float32BufferAttribute(b.C,3));g.setIndex(b.I);g.computeBoundingSphere();const m=new THREE.Mesh(g,furnMat);{const s0=list.find(q=>q.k===k);m.visible=s0?chunkReadyAt(s0[1],s0[3]):!!loaded[k]}m.castShadow=m.receiveShadow=true;freeze(m);scene.add(m);furnMeshes[k]=m}
   FBUF.clear();
 }
 
@@ -2270,6 +2326,7 @@ const pockets=p=>p.creative?HOTN:((CLOTHES[p.wear.legs]||{}).pk||2);
 const caseW=p=>((CLOTHES[p&&p.wear.back]||{}).bag||[8,5])[0],caseH=p=>((CLOTHES[p&&p.wear.back]||{}).bag||[8,5])[1];
 const armorOf=p=>Math.min(.7,['head','body','legs'].reduce((s,k)=>s+(p.wear[k]?CLOTHES[p.wear[k]].armor:0),0));
 const RECIPES=[
+  {out:'rod',n:1,need:{plank:2,cloth:1,scrap:1},label:'Make a fishing rod'},
   {out:'batfix',n:1,need:{plank:1,scrap:1},label:'Repair your bat'},
   {out:'splint',n:1,need:{plank:2,cloth:1},label:'Make a splint'},
   {out:'schoolbag',n:1,need:{cloth:6,scrap:1},label:'Sew a backpack'},
@@ -2310,7 +2367,7 @@ const LOOTK={college:[['hikepack',10,1,1],['schoolbag',14,1,1],['weed',12,1,3],[
   gas:[['water',14,1,2],['soda',12,1,2],['fuel',40,1,2],['food',14,1,2],['jerky',8,1,2],['scrap',8,1,2],['scrip',10,3,12],['bandage',4,1,1],['kit',3,1,1],['hotbeans',4,1,1]],
   mall:[['water',8,1,2],['soda',8,1,2],['jeans',10,1,1],['cargo',6,1,1],['shorts',6,1,1],['slacks',6,1,1],['schoolbag',6,1,1],['hikepack',4,1,1],['cigs',5,1,1],['cloth',24,1,3],['jacket',6,1,1],['cargo',6,1,1],['hardhat',4,1,1],['scrip',18,4,20],['food',10,1,2],['jerky',6,1,2],['bandage',6,1,1],['scrap',6,1,2]],
   air:[['food',18,1,2],['jerky',10,1,2],['cloth',14,1,2],['scrip',16,4,16],['bandage',8,1,1],['kit',4,1,1],['jacket',3,1,1],['fuel',6,1,1]],grocery:[['water',22,1,3],['soda',14,1,3],['scrip',8,4,20],['veg',22,1,3],['food',46,1,3],['cloth',4,1,2],['fuel',5,1,1],['bandage',5,1,1],['scrap',6,1,2],['coal',4,1,2]],
-  hardware:[['wrench',6,1,1],['battery',3,1,1],['saw',2,1,1],['tnt',3,1,1],['pipebomb',4,1,1],['scrap',22,1,4],['metal',14,1,2],['plank',12,2,5],['wood',8,1,3],['fuel',10,1,1],['kit',8,1,1],['beartrap',5,1,1],['spikes',5,1,1],['mine',2,1,1],['hardhat',6,1,1],['coal',6,1,3]],
+  hardware:[['rod',6,1,1],['wrench',6,1,1],['battery',3,1,1],['saw',2,1,1],['tnt',3,1,1],['pipebomb',4,1,1],['scrap',22,1,4],['metal',14,1,2],['plank',12,2,5],['wood',8,1,3],['fuel',10,1,1],['kit',8,1,1],['beartrap',5,1,1],['spikes',5,1,1],['mine',2,1,1],['hardhat',6,1,1],['coal',6,1,3]],
   hospital:[['pills',20,1,2],['splint',8,1,1],['water',10,1,2],['bandage',44,1,3],['cloth',14,1,3],['food',6,1,1],['kit',3,1,1],['scrap',6,1,2],['ammo',5,2,6],['vest',2,1,1]],
   school:[['food',20,1,2],['cloth',18,1,3],['scrap',12,1,2],['bandage',9,1,1],['jacket',4,1,1],['cargo',4,1,1],['ammo',5,2,5],['plank',6,1,3]]};
 const TOOLS=['Bat','Pistol','Pickaxe','Build','Place'];
@@ -2571,7 +2628,7 @@ function makePlayer(i){
   outline.layers.set(3+i);scene.add(outline);
   const pos=spawn.clone();pos.x+=i*1.5;outline.scale.setScalar(VS);
   const p={i,cam,body,vm,light,outline,pos,vel:new V3(),yaw:Math.PI,pitch:-.05,hp:100,hunger:100,stamina:100,inv:{...START_INV},tool:0,mat:0,hot:HOT0.slice(),hsel:0,grounded:false,
-    temp:100,wT:0,coldRate:0,coldMsg:0,fx:null,trap:0,aim:false,adsK:0,onTarget:false,pad:false,cl,wear:{head:null,body:null,legs:pick(['shorts','slacks','jeans','jeans','slacks']),back:rng()<.3?'schoolbag':null},sleeping:null,spawnPt:null,vehicle:null,carView:true,cyaw:0,cpitch:0,dig:null,cool:0,dead:0,swing:0,eye:pos.y+1.6,flash:0,kills:0,walk:0,torch:false,inp:{},k:P_KEYS[i],flashT:0,promptT:0};
+    temp:100,wT:0,coldRate:0,coldMsg:0,fx:null,trap:0,aim:false,adsK:0,onTarget:false,pad:false,cl,mag:12,wear:{head:null,body:null,legs:pick(['shorts','slacks','jeans','jeans','slacks']),back:rng()<.3?'schoolbag':null},sleeping:null,spawnPt:null,vehicle:null,carView:true,cyaw:0,cpitch:0,dig:null,cool:0,dead:0,swing:0,eye:pos.y+1.6,flash:0,kills:0,walk:0,torch:false,inp:{},k:P_KEYS[i],flashT:0,promptT:0};
   p.hud=makeHud(p);return p;
 }
 function makeHud(p){
@@ -2906,7 +2963,7 @@ function readInput(p){
 
 // ---------------- player actions
 // what each food does: hunger, health, warmth; raw meat can make you sick
-const FOODS={water:{h:0,th:45,t:'Drank a bottle of clean water'},dirtywater:{h:0,th:40,dirty:1,t:'Drank unboiled water'},soda:{h:6,th:30,t:'Drank a warm can of soda'},stew:{h:55,hp:15,w:20,t:'Ate a bowl of meat stew'},cooked:{h:45,hp:5,t:'Ate cooked meat'},hotbeans:{h:45,w:10,t:'Ate hot beans'},roast:{h:24,hp:3,t:'Ate roast vegetables'},
+const FOODS={fish:{h:8,raw:true,t:'Ate raw fish'},cookedfish:{h:34,hp:4,t:'Ate a grilled fish'},water:{h:0,th:45,t:'Drank a bottle of clean water'},dirtywater:{h:0,th:40,dirty:1,t:'Drank unboiled water'},soda:{h:6,th:30,t:'Drank a warm can of soda'},stew:{h:55,hp:15,w:20,t:'Ate a bowl of meat stew'},cooked:{h:45,hp:5,t:'Ate cooked meat'},hotbeans:{h:45,w:10,t:'Ate hot beans'},roast:{h:24,hp:3,t:'Ate roast vegetables'},
   food:{h:38,t:'Ate a can of cold beans'},jerky:{h:20,t:'Chewed some jerky'},broth:{h:20,hp:5,w:35,t:'Drank hot bone broth'},veg:{h:12,t:'Ate raw vegetables'},meat:{h:15,raw:1,t:'Choked down raw meat'}};
 // ---------------- the body: thirst, limb injuries, bleeding, infection, fatigue, sickness
 const nearWater=p=>{const x=vc(p.pos.x),y=vc(p.pos.y+.2),z=vc(p.pos.z);for(let dy=-1;dy<=1;dy++)for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)if(get(x+dx,y+dy,z+dz)===255)return true;return false};
@@ -3015,7 +3072,7 @@ const FHP={pbench:3,swing:4,slide:5,picnic:3,lamppost:4,pump:6,atable:2,lamp:1,l
 const FMETAL=new Set(['pump','lamppost','swing','slide','plane','gsign','lswitch','fridge','stove','heater','locker','cabinet','cooler','aisle','checkout','toolrack','tub','hbed','sink','bsink','toilet','tvstand']),FCLOTH=new Set(['couch','armchair','rug','chairs']),FSOFT=new Set(['weeds','vine','plant']);
 function rayBox(o,d,b,max){let t0=0,t1=max;const O=[o.x,o.y,o.z],D=[d.x,d.y,d.z];for(let a=0;a<3;a++){const lo=b[a],hi=b[a+3];if(Math.abs(D[a])<1e-9){if(O[a]<lo||O[a]>hi)return -1;continue}
   let ta=(lo-O[a])/D[a],tb=(hi-O[a])/D[a];if(ta>tb){const q=ta;ta=tb;tb=q}if(ta>t0)t0=ta;if(tb<t1)t1=tb;if(t0>t1)return -1}return t0}
-const FLAT=new Set(['lane','xwalk','curb','pebbles','rdash','rwy']);
+const FLAT=new Set(['lane','xwalk','curb','pebbles','rdash','rwy','redge','lily']);
 function decorRay(eye,dir,max){let best=null,bt=max;
   for(const sp of furnSpecs){const b=sp.bb;if(sp.gone||!b||FLAT.has(sp[0]))continue;if(Math.abs((b[0]+b[3])/2-eye.x)>max+3||Math.abs((b[2]+b[5])/2-eye.z)>max+3)continue;const t=rayBox(eye,dir,b,bt);if(t>=0&&t<bt){bt=t;best={sp,t}}}
   for(const bd of beds){const r=1.1,top=bd.bunk?1.95:bd.tent?1.3:.8,P=bd.pos;if(Math.abs(P.x-eye.x)>max+3||Math.abs(P.z-eye.z)>max+3)continue;const t=rayBox(eye,dir,[P.x-r,P.y,P.z-r,P.x+r,P.y+top,P.z+r],bt);if(t>=0&&t<bt){bt=t;best={bed:bd,t}}}
@@ -3113,7 +3170,7 @@ function primary(p,eye,dir,vh,dt){
       else{setBlock(vh.x,vh.y,vh.z,0);burst(new V3((vh.x+.5)*VS,(vh.y+.5)*VS,(vh.z+.5)*VS),12,3,BRGB[b],1);const d=DROP[b];if(d){if(p.creative){}else dropBlock(vh.x,vh.y,vh.z,b)}if(BASE_OF[b]&&!isRub(b)&&rng()<.4)dropRubble(vh.x,vh.y,vh.z,b)}
       p.dig=null}
   }
-  else if(p.tool===5){if(p.cool<=0){p.cool=.5;const k=p.hitem;if(k&&FOODS[k]){if(p.inv[k]>0)eat(p,k);else msg(p,`No ${LABEL[k].toLowerCase()} left`)}else if(k==='bandage')heal(p);else if(k==='splint'||k==='pills'){if(p.inv[k]>0)useMed(p,k);else msg(p,`No ${LABEL[k].toLowerCase()} left`)}else if(k==='cigs'||k==='weed'){if(p.inv[k]>0)smoke(p,k);else msg(p,`No ${LABEL[k].toLowerCase()} left`)}else if(k==='pipebomb')throwBomb(p);else{p.swing=1;melee(p,eye,dir,2.2,9)}}}
+  else if(p.tool===5){if(p.cool<=0){p.cool=.5;const k=p.hitem;if(k&&FOODS[k]){if(p.inv[k]>0)eat(p,k);else msg(p,`No ${LABEL[k].toLowerCase()} left`)}else if(k==='bandage')heal(p);else if(k==='rod'){if(p.inv.rod>0)fishUse(p);else msg(p,'No fishing rod')}else if(k==='splint'||k==='pills'){if(p.inv[k]>0)useMed(p,k);else msg(p,`No ${LABEL[k].toLowerCase()} left`)}else if(k==='cigs'||k==='weed'){if(p.inv[k]>0)smoke(p,k);else msg(p,`No ${LABEL[k].toLowerCase()} left`)}else if(k==='pipebomb')throwBomb(p);else{p.swing=1;melee(p,eye,dir,2.2,9)}}}
   else if(p.tool===3){if(p.cool<=0){p.cool=.22;p.swing=.6;const ce=p.creative?creativeSel(p):null;if(ce&&ce.kind!=='block'){p.cool=.35;placeCreative(p,vh,ce)}else placeBlock(p,vh)}}
   else if(p.cool<=0){p.cool=.5;placeTrap(p,vh)}
 }
@@ -3703,6 +3760,9 @@ const PXI={},PXD={
   tnt:r=>{r(3,4,4,11,'#c02018');r(9,4,4,11,'#c02018');r(3,4,1,11,'#e04030');r(9,4,1,11,'#e04030');r(3,8,10,2,'#2a2a2a');r(7,1,1,4,'#8a7a5a');r(8,0,1,1,'#f0a020')},
   pipebomb:r=>{r(4,3,8,11,'#7a7e82');r(4,3,8,2,'#5a5e62');r(4,12,8,2,'#5a5e62');r(5,5,1,7,'#9aa0a4');r(7,0,1,3,'#8a7a5a');r(8,0,1,1,'#f0a020')},
   bunk:r=>{r(1,2,2,13,'#6a4a2a');r(13,2,2,13,'#6a4a2a');r(3,4,10,3,'#e8e0d0');r(3,6,10,1,'#4a6a9a');r(3,10,10,3,'#e8e0d0');r(3,12,10,1,'#9a4a4a');r(10,3,1,9,'#8a6a40')},
+  rod:r=>{for(let i=0;i<12;i++)r(2+i,13-i,1,1,'#8a6a3a');r(4,10,2,2,'#3a3a3a');for(let i=0;i<5;i++)r(14,2+i*2,1,1,'#d8d8d8');r(13,12,2,2,'#d02020')},
+  fish:r=>{r(3,6,9,4,'#7a8a9a');r(12,5,3,6,'#6a7a8a');r(4,7,1,1,'#1a1a1a');r(5,9,6,1,'#c8d0d8')},
+  cookedfish:r=>{r(3,6,9,4,'#a86a2a');r(12,5,3,6,'#8a5a22');r(4,7,1,1,'#1a1a1a');r(5,7,6,1,'#5a3010')},
   wire:r=>{for(let i=0;i<5;i++)r(2+i*2,4+((i%2)*4),3,2,'#8a2418');r(1,4,2,2,'#c89040');r(13,10,2,2,'#c89040')},
   lamp:r=>{r(4,2,8,5,'#e8dcc0');r(5,7,6,1,'#fff1c8');r(7,8,2,6,'#8a8a8a');r(5,14,6,1,'#3a3a3a')},
   lswitch:r=>{r(5,3,6,10,'#e8e4d8');r(7,5,2,6,'#b8b4a8');r(7,5,2,3,'#f0f0f0')},
@@ -3768,9 +3828,9 @@ const CW=12,CH=8;
 // [width, height, stack size]
 const ITEM={wheel:[2,2,1],engine:[3,2,1],battery:[2,1,1],carradio:[2,1,1],wrench:[2,1,1],scrip:[1,1,999],saw:[3,1,1],veg:[1,1,6],stew:[1,1,2],broth:[1,1,2],jerky:[1,1,10],roast:[1,1,4],hotbeans:[1,1,2],tnt:[1,2,3],pipebomb:[1,1,4],bunk:[3,2,1],Pistol:[2,2,1],Bat:[4,1,1],Pickaxe:[2,2,1],ammo:[2,1,60],scrap:[1,1,10],cloth:[1,1,10],fuel:[2,2,1],food:[1,1,3],bandage:[1,1,3],wood:[2,1,10],plank:[2,1,20],
   dirt:[1,1,32],stone:[1,1,32],coal:[1,1,16],iron:[1,1,16],metal:[2,1,4],kit:[2,1,1],meat:[1,1,4],cooked:[1,1,4],hide:[2,2,3],bone:[1,1,8],
-  water:[1,2,4],dirtywater:[1,2,4],bottle:[1,2,4],soda:[1,1,6],splint:[1,2,2],pills:[1,1,6],batteries:[1,1,8],lswitch:[1,1,4],lamp:[1,2,2],wire:[1,1,32],spikes:[2,1,2],beartrap:[2,2,1],mine:[1,1,2],tent:[3,1,1],stairs:[1,1,16],bed:[3,2,1],fire:[2,1,2],
+  rod:[1,4,1],fish:[2,1,4],cookedfish:[2,1,4],water:[1,2,4],dirtywater:[1,2,4],bottle:[1,2,4],soda:[1,1,6],splint:[1,2,2],pills:[1,1,6],batteries:[1,1,8],lswitch:[1,1,4],lamp:[1,2,2],wire:[1,1,32],spikes:[2,1,2],beartrap:[2,2,1],mine:[1,1,2],tent:[3,1,1],stairs:[1,1,16],bed:[3,2,1],fire:[2,1,2],
   hardhat:[2,1,1],helmet:[2,2,1],jacket:[2,3,1],vest:[2,2,1],hidecoat:[2,3,1],scrapvest:[2,2,1],cargo:[2,3,1],riot:[2,3,1],shorts:[2,2,1],slacks:[2,3,1],jeans:[2,3,1],schoolbag:[3,3,1],hikepack:[3,4,1],milpack:[3,4,1],cigs:[1,1,4],weed:[1,1,8]};
-const DESC={water:'Clean water (+water). Leaves an empty bottle.',dirtywater:'River water. Boil it at a campfire, or drink it and maybe get sick.',bottle:'Fill it at a river or pond (Use), or stand in the rain.',soda:'Sugar and fizz. Some water, a little food.',splint:'Use it: injured arms and legs heal four times faster for a few minutes.',pills:'Antibiotics. Use them to cure an infected wound.',batteries:'Recharges your flashlight.',shorts:'2 pockets (2 hotbar slots).',slacks:'3 pockets (3 hotbar slots).',jeans:'4 pockets (4 hotbar slots).',cargo:'Cargo pants: 8 pockets (8 hotbar slots) and a little padding.',riot:'Riot pants: 4 pockets and solid padding.',schoolbag:'Wear it: case grows to 10 × 6. Upgrade it into a hiking pack.',hikepack:'Wear it: case grows to 12 × 8. Upgrade it into a military rucksack.',milpack:'Wear it: case grows to 14 × 9.',cigs:'Smoke one (Use): calms your nerves and steadies your aim for a minute, but costs a little health and makes you cough.',weed:'Smoke it (Use): everything slows and softens for a while, pain fades a little, and you get very hungry.',scrip:'Hand-stamped trade tokens: the money of the end of the world. Survivors and drifters buy and sell for scrip.',saw:'Runs on fuel cans. Press 1 again (or tap Tool) to switch between bat and saw; hold attack to cut. Limbs come off, and hold it on the torso to cut them in half. Also cuts wood.',veg:'Potatoes, carrots, onions. Better cooked.',stew:'Hearty: lots of food, health and warmth.',broth:'Hot drink. Warms you right up.',jerky:'Smoked meat. Light and keeps forever.',roast:'Roast vegetables.',hotbeans:'Warm beans straight from the can.',tnt:'Place it and run: a long fuse, then a big blast that tears through walls.',pipebomb:'Throwable. Short fuse, shrapnel.',bunk:'Two beds stacked. Place it to set your respawn point.',Pistol:'9 mm sidearm. Always with you.',Bat:'Ash bat with a taped grip. Always with you.',Pickaxe:'Digs dirt, stone and walls. Always with you.',
+const DESC={rod:'Hold it at the edge of a river or pond and Use to cast. When the bobber dips, Use again to reel in.',fish:'Grill it at a campfire. Raw fish is risky.',cookedfish:'Flaky, smoky, filling.',water:'Clean water (+water). Leaves an empty bottle.',dirtywater:'River water. Boil it at a campfire, or drink it and maybe get sick.',bottle:'Fill it at a river or pond (Use), or stand in the rain.',soda:'Sugar and fizz. Some water, a little food.',splint:'Use it: injured arms and legs heal four times faster for a few minutes.',pills:'Antibiotics. Use them to cure an infected wound.',batteries:'Recharges your flashlight.',shorts:'2 pockets (2 hotbar slots).',slacks:'3 pockets (3 hotbar slots).',jeans:'4 pockets (4 hotbar slots).',cargo:'Cargo pants: 8 pockets (8 hotbar slots) and a little padding.',riot:'Riot pants: 4 pockets and solid padding.',schoolbag:'Wear it: case grows to 10 × 6. Upgrade it into a hiking pack.',hikepack:'Wear it: case grows to 12 × 8. Upgrade it into a military rucksack.',milpack:'Wear it: case grows to 14 × 9.',cigs:'Smoke one (Use): calms your nerves and steadies your aim for a minute, but costs a little health and makes you cough.',weed:'Smoke it (Use): everything slows and softens for a while, pain fades a little, and you get very hungry.',scrip:'Hand-stamped trade tokens: the money of the end of the world. Survivors and drifters buy and sell for scrip.',saw:'Runs on fuel cans. Press 1 again (or tap Tool) to switch between bat and saw; hold attack to cut. Limbs come off, and hold it on the torso to cut them in half. Also cuts wood.',veg:'Potatoes, carrots, onions. Better cooked.',stew:'Hearty: lots of food, health and warmth.',broth:'Hot drink. Warms you right up.',jerky:'Smoked meat. Light and keeps forever.',roast:'Roast vegetables.',hotbeans:'Warm beans straight from the can.',tnt:'Place it and run: a long fuse, then a big blast that tears through walls.',pipebomb:'Throwable. Short fuse, shrapnel.',bunk:'Two beds stacked. Place it to set your respawn point.',Pistol:'9 mm sidearm. Always with you.',Bat:'Ash bat with a taped grip. Always with you.',Pickaxe:'Digs dirt, stone and walls. Always with you.',
   ammo:'9 mm rounds.',scrap:'Bent metal and wire. Crafting and repairs.',cloth:'Rags. Bandages, tents and clothing.',fuel:'A can of petrol. Pour into a car.',food:'Canned beans. Restores hunger.',
   bandage:'Restores health.',wood:'Chopped logs.',plank:'Building planks.',dirt:'For building.',stone:'For building.',coal:'Fuel for fires and makeshift petrol.',iron:'Smelt into metal plates.',
   metal:'Armor, repairs and walls.',kit:'Fixes a wrecked vehicle.',meat:'Raw. Cook it at a campfire first.',cooked:'Cooked meat. Restores hunger and a little health.',hide:'Animal hide. Coats and dressings.',
@@ -4140,7 +4200,7 @@ function updateAvatars(dt){const now=performance.now();for(const[k,a]of NET.av){
 // ---------------- hotbar: six slots, each bound to anything you carry (Minecraft-style). Bindings: 'Bat' 'Saw' 'Pistol' 'Pickaxe',
 // 'b:<block>' build with that block, 'p:<trap>' place that trap/bed/fire, 'i:<item>' eat/use/throw it, 'c:<n>' creative palette entry, null = bare hands
 const HOTN=8,HOT0=['Bat','Pistol','Pickaxe','b:plank','p:spikes',null,null,null];
-function bindingFor(p,k){if(k==='Bat'||k==='Pistol'||k==='Pickaxe')return k;if(k==='saw')return'Saw';if(matList(p).some(m=>m[0]===k))return'b:'+k;if(TRAPS.some(t=>t[0]===k))return'p:'+k;if(FOODS[k]||k==='bandage'||k==='pipebomb'||k==='cigs'||k==='weed'||k==='splint'||k==='pills')return'i:'+k;return null}
+function bindingFor(p,k){if(k==='Bat'||k==='Pistol'||k==='Pickaxe')return k;if(k==='saw')return'Saw';if(matList(p).some(m=>m[0]===k))return'b:'+k;if(TRAPS.some(t=>t[0]===k))return'p:'+k;if(FOODS[k]||k==='bandage'||k==='pipebomb'||k==='cigs'||k==='weed'||k==='splint'||k==='pills'||k==='rod')return'i:'+k;return null}
 function selectHot(p,s){p.hsel=s;const b=p.hot[s];p.hitem=null;
   if(b==='Bat'||b==='Saw'){p.tool=0;p.useSaw=b==='Saw'&&p.inv.saw>0}else if(b==='Pistol')p.tool=1;else if(b==='Pickaxe')p.tool=2;
   else if(b&&b.startsWith('b:')){p.tool=3;const L=matList(p),i=L.findIndex(m=>m[0]===b.slice(2));if(i>=0)p.mat=i;if(p.creative)p.csel=CRE().findIndex(e=>e.kind==='block'&&CMATS[e.i][0]===b.slice(2))}
@@ -4222,7 +4282,7 @@ function touchLabels(p){const tb=k=>document.querySelector(`#touch .tb[data-b=${
   const pr=promptFor(p),m=/— ([a-z]+)/i.exec(pr),use=veh?'Get out':p.sleeping?'Get up':m?m[1][0].toUpperCase()+m[1].slice(1):'Use',alt=altFor(p);
   const key=[act,p.tool,p.hot[p.hsel],use,!!m,alt&&alt[0],T.aim,veh].join('|');{const ab=tb('alt');if(ab)ab.classList.toggle('on',p.tool===1&&T.aim&&!p.vehicle)}if(key===tbLast)return;tbLast=key;
   const set=(k,label,icon,src)=>{const b=tb(k);if(!b)return;b.classList.toggle('gone',label==null);if(label==null)return;const sp=b.querySelector('span'),im=b.querySelector('.ti');if(sp)sp.textContent=label;if(im){const u=src||tbIcon(icon);if(im.getAttribute('src')!==u)im.setAttribute('src',u)}};
-  set('act',p.tool===5&&!p.hitem?'Punch':p.tool===5&&FOODS[p.hitem]?'Eat':p.tool===5&&(p.hitem==='cigs'||p.hitem==='weed')?'Smoke':p.tool===5&&p.hitem==='pipebomb'?'Throw':act,null,act?(hotView(p,p.hot[p.hsel]).icon||tbIcon('use')):'');set('jump',veh?'Brake':'Jump','jump');set('use',use,veh?'car':'use');tb('use').classList.toggle('idle',!veh&&!p.sleeping&&!m);
+  set('act',p.tool===5&&!p.hitem?'Punch':p.tool===5&&FOODS[p.hitem]?'Eat':p.tool===5&&p.hitem==='rod'?(p.fishing?(p.fishing.bite>0?'REEL IN!':'Reel in'):'Cast'):p.tool===5&&(p.hitem==='cigs'||p.hitem==='weed')?'Smoke':p.tool===5&&p.hitem==='pipebomb'?'Throw':act,null,act?(hotView(p,p.hot[p.hsel]).icon||tbIcon('use')):'');set('jump',veh?'Brake':'Jump','jump');set('use',use,veh?'car':'use');tb('use').classList.toggle('idle',!veh&&!p.sleeping&&!m);
   set('alt',alt&&alt[0],alt&&alt[1])}
 function initTouchIcons(){for(const k of['view','run','duck','bomb','talk','emote','home','rsp']){const b=document.querySelector(`#touch .tb[data-b=${k}]`);if(!b||b.querySelector('.ti'))continue;const t=b.textContent;b.innerHTML=`<img class="ti" alt="" src="${tbIcon(k)}"><span></span>`;b.querySelector('span').textContent=t}}
 // ---------------- touch controls
@@ -4366,7 +4426,7 @@ function drawMap(p){const cv=$('#mapCv'),x=cv.getContext('2d'),N=cv.width,S=W/N,
     let c=b===255?[40,90,150]:bs===B.ASPH?[52,52,56]:bs===B.CONC?[150,148,140]:bs===B.ROOF?[120,62,50]:bs===B.METAL?[120,124,130]:bs===B.LEAF?[46,86,40]:bs===B.STONE?[130,128,122]:bs===B.DIRT?[112,88,60]:bs===B.GLASS?[150,190,210]:[70,118,56];
     const sh=.8+.2*Math.min(1,Math.max(-1,(y-G)/20));const o=(j*N+i)*4;D[o]=c[0]*sh;D[o+1]=c[1]*sh;D[o+2]=c[2]*sh;D[o+3]=255}
   x.putImageData(img,0,0);const px=q=>(q/VS-OX)/S,pz=q=>(q/VS-OZ)/S;
-  x.font='bold 11px monospace';x.textAlign='center';for(const t of towns){const cx=((t.x0+t.x1)/2-OX)/S,cz=((t.z0+t.z1)/2-OZ)/S;if(cx<0||cz<0||cx>N||cz>N)continue;x.fillStyle='rgba(0,0,0,.6)';x.fillText(t.air?'AIRPORT':t.city?'CITY':t.n===1?'HAMLET':'TOWN',cx+1,cz+1);x.fillStyle='#f0e0b0';x.fillText(t.air?'AIRPORT':t.city?'CITY':t.n===1?'HAMLET':'TOWN',cx,cz)}
+  x.font='bold 11px monospace';x.textAlign='center';for(const t of towns){const cx=((t.x0+t.x1)/2-OX)/S,cz=((t.z0+t.z1)/2-OZ)/S;if(cx<0||cz<0||cx>N||cz>N)continue;x.fillStyle='rgba(0,0,0,.6)';const L=townName(t).toUpperCase();x.fillText(L,cx+1,cz+1);x.fillStyle=t.city?'#ffd070':'#f0e0b0';x.fillText(L,cx,cz)}
   for(const v of vehicles)if(v.ev){x.fillStyle='#40c0ff';x.fillRect(px(v.pos.x)-2,pz(v.pos.z)-2,4,4)}
   const v=p&&p.vehicle,T=v&&v.auto||p&&p.wp;if(T){x.strokeStyle='#ffd040';x.lineWidth=2;x.beginPath();x.arc(px(T.x),pz(T.z),6,0,6.3);x.stroke()}
   if(p){const a=p.vehicle?p.vehicle.yaw:p.yaw+Math.PI,cx=px(p.pos.x),cz=pz(p.pos.z);x.fillStyle='#ff4030';x.beginPath();x.moveTo(cx+Math.sin(a)*7,cz+Math.cos(a)*7);x.lineTo(cx+Math.sin(a+2.5)*5,cz+Math.cos(a+2.5)*5);x.lineTo(cx+Math.sin(a-2.5)*5,cz+Math.cos(a-2.5)*5);x.fill()}
@@ -4531,7 +4591,7 @@ function makeFire(x,y,z){const g=new THREE.Group();
   g.position.set(x,y,z);scene.add(g);const f={g,pos:g.position,fl};fires.push(f);return f}
 function nearestFire(p,r){let best=null,bd=r;for(const f of fires){const d=f.pos.distanceTo(p.pos);if(d<bd){bd=d;best=f}}return best}
 // ---- cooking: pick a recipe at a campfire; it simmers in a pot on the flames, then lands in your case
-const COOK=[{out:'water',n:1,need:{dirtywater:1},t:5,label:'Boil water'},{out:'cooked',n:1,need:{meat:1},t:6,label:'Grilled meat'},{out:'hotbeans',n:1,need:{food:1},t:4,label:'Heat a can of beans'},
+const COOK=[{out:'cookedfish',n:1,need:{fish:1},t:6,label:'Grill a fish'},{out:'water',n:1,need:{dirtywater:1},t:5,label:'Boil water'},{out:'cooked',n:1,need:{meat:1},t:6,label:'Grilled meat'},{out:'hotbeans',n:1,need:{food:1},t:4,label:'Heat a can of beans'},
   {out:'roast',n:2,need:{veg:2},t:5,label:'Roast vegetables'},{out:'stew',n:2,need:{meat:1,veg:1,food:1},t:12,label:'Meat stew'},
   {out:'broth',n:2,need:{bone:2,veg:1},t:10,label:'Bone broth'},{out:'jerky',n:4,need:{meat:3,coal:1},t:15,label:'Smoked jerky'}];
 const canCook=(p,r)=>Object.entries(r.need).every(([a,q])=>p.inv[a]>=q);
@@ -5010,7 +5070,7 @@ function flatTyre(v){if(!v.wheels)return;const w=v.wheels.find(w=>w.scale.y>.9);
 // ---------------- noise travels: gunshots, explosions, alarms, engines and lit windows at night pull the dead toward the source
 function noise(pos,r){alertZombies(pos,r)}
 let lampNoiseT=4;
-function realismTick(dt){try{vehRealism(dt)}catch(e){}
+function realismTick(dt){for(const p of players)try{fishTick(p,dt)}catch(e){}try{vehRealism(dt)}catch(e){}
   // engines: running vehicles are loud
   for(const v of vehicles)if(v.driver&&!v.pedal&&(v.nT=(v.nT||0)-dt)<=0){v.nT=1.2;noise(v.pos,14+Math.abs(v.speed)*1.6)}
   // lit rooms at night draw attention
@@ -5028,7 +5088,7 @@ const fps=[],fpGeo=new THREE.PlaneGeometry(.12,.26),fpMat=new THREE.MeshBasicMat
 function footprint(x,y,z,yaw,side){const m=new THREE.Mesh(fpGeo,fpMat);m.rotation.set(-Math.PI/2,0,yaw);m.position.set(x+Math.cos(yaw)*side*.12,y+.02,z-Math.sin(yaw)*side*.12);scene.add(m);fps.push({m,t:60});if(fps.length>140){scene.remove(fps.shift().m)}}
 function fpTick(dt){for(let i=fps.length-1;i>=0;i--){if((fps[i].t-=dt)<=0){scene.remove(fps[i].m);fps.splice(i,1)}}}
 // a new day: fresh food spoils, the land creeps back over the roads, abandoned cars rust and lose air
-function dailyDecay(){const ROT={meat:.6,cooked:.4,veg:.3,roast:.3,stew:.3,broth:.3};
+function dailyDecay(){const ROT={meat:.6,cooked:.4,veg:.3,roast:.3,stew:.3,broth:.3,fish:.6,cookedfish:.4};
   for(const p of players){const lost=[];for(const k in ROT){const n=p.inv[k]|0;if(n>0){const r=Math.ceil(n*ROT[k]);p.inv[k]-=r;lost.push(`${r} ${LABEL[k].toLowerCase()}`)}}if(lost.length)msg(p,'Spoiled overnight: '+lost.join(', ')+'. Cans keep; fresh food doesn\'t.')}
   const pc=players[0]&&players[0].pos;if(!pc)return;const cx=vc(pc.x),cz=vc(pc.z);let n=0;
   for(let t=0;t<900&&n<60;t++){const x=cx+RI(-120,120),z=cz+RI(-120,120),y=topY(x,z);if(get(x,y,z)!==B.ASPH||get(x,y+1,z))continue;let g=0;for(const[dx,dz]of[[1,0],[-1,0],[0,1],[0,-1]]){const nb=get(x+dx,topY(x+dx,z+dz),z+dz);if(nb===B.GRASS||nb===B.DIRT||(nb>=23&&nb<=25))g++};
@@ -5076,7 +5136,8 @@ function render(){
   hemi.intensity=sv[0];sun.intensity=sv[1];scene.fog.near=sv[2];scene.fog.far=sv[3];scene.fog.color.setHex(sv[4]);
 }
 let cullT=0;
-function cullEntities(cs){const F=(viewUnits()+6)**2,vis=(o,px,pz)=>{let m=1e9;for(const c of cs){const dx=(px??o.position.x)-c.x,dz=(pz??o.position.z)-c.z,d=dx*dx+dz*dz;if(d<m)m=d}o.visible=m<F};
+function cullEntities(cs){const F=(viewUnits()+6)**2,vis=(o,px,pz)=>{let m=1e9;const X=px??o.position.x,Z=pz??o.position.z;for(const c of cs){const dx=X-c.x,dz=Z-c.z,d=dx*dx+dz*dz;if(d<m)m=d}o.visible=m<F&&chunkReadyAt(X,Z)};
+  for(const R of regions.values())if(R.live)for(const o of R.objs||[])vis(o);
   crates.forEach(c=>vis(c.g));doors.forEach(d=>{if(!d.gone)vis(d.pivot)});beds.forEach(b=>vis(b.g));fires.forEach(f=>vis(f.g));traps.forEach(t=>vis(t.g));bags.forEach(b=>vis(b.g));decals.forEach(o=>vis(o));
   vehicles.forEach(v=>{if(!v.driver&&!v.pass)vis(v.g)});manObjs.forEach(o=>o.userData.c?vis(o,o.userData.c[0],o.userData.c[1]):vis(o))}
 function frame(){
@@ -5216,14 +5277,14 @@ function rebuildGlobals(){for(const k of SPEC_KEYS)SCRATCH[k].length=0;
   roomIdx.clear();winIdx.clear();trimOff.clear();for(const R of regions.values())if(R.live&&R.to)for(const k of R.to)trimOff.add(k);
   for(const[x,y,z,ax,tc,door]of winSpecs)for(let du=0;du<4;du++)for(let dv=0;dv<5;dv++){if(du>0&&du<3&&(door?dv<4:dv>0&&dv<4))continue;const L=(door?DCELL:WCELL)[dv*4+du];if(!L.length)continue;
     winIdx.set(vi(ax?x+du:x,y+dv,ax?z:z+du),{L,ax,tc})}}
-let winQ=[],winTarget=null;
+let winQ=[],winTarget=null,winNew=[];
 function winStep(){const op=winQ.shift();if(op[0]==='u')unloadRegion(op[1]);else loadRegion(op[1]);if(winQ.length)rebuildGlobals();
-  if(!winQ.length){const[nox,noz]=winTarget;winTarget=null;OX=nox;OZ=noz;planTowns();blockDmg.clear();rebuildGlobals();evictCache();for(let k=0;k<NC*NC;k++)if(loaded[k])dirtyC.add(k);rtDirty=true;RTW.ox=-1e9}}
+  if(!winQ.length){const[nox,noz]=winTarget;winTarget=null;OX=nox;OZ=noz;planTowns();blockDmg.clear();rebuildGlobals();evictCache();const n=RS/CS;for(const N of winNew){const cx0=N.rx*n,cz0=N.rz*n;for(let dz=-1;dz<=n;dz++)for(let dx=-1;dx<=n;dx++){if(dx>=0&&dx<n&&dz>=0&&dz<n)continue;const k=slotOf(cx0+dx,cz0+dz);if(loaded[k])dirtyC.add(k)}}winNew=[];rtDirty=true;RTW.ox=-1e9}}
 function setWindow(nox,noz,force,stagger){
   if(stagger&&!force){const want=new Set(),wx=nox/RS,wz=noz/RS;for(let dz=0;dz<3;dz++)for(let dx=0;dx<3;dx++)want.add(rkey(wx+dx,wz+dz));
     const out=[...regions.values()].filter(R=>R.live&&!want.has(R.key)),inn=[...want].map(k=>{const[a,b]=k.split(',').map(Number);return reg(a,b)}).filter(R=>!R.live);
     const slot=(A,B_)=>((A.rx-B_.rx)%3+3)%3===0&&((A.rz-B_.rz)%3+3)%3===0;
-    if(out.length===inn.length&&inn.every(N=>out.some(O=>slot(O,N)))){winQ=[];for(const N of inn){const O=out.find(O=>slot(O,N));winQ.push(['u',O],['l',N])}winTarget=[nox,noz];return}}
+    if(out.length===inn.length&&inn.every(N=>out.some(O=>slot(O,N)))){winQ=[];for(const N of inn){const O=out.find(O=>slot(O,N));winQ.push(['u',O],['l',N])}winTarget=[nox,noz];winNew=inn;return}}
   winQ=[];winTarget=null;
   const want=new Set(),wx=nox/RS,wz=noz/RS;for(let dz=0;dz<3;dz++)for(let dx=0;dx<3;dx++)want.add(rkey(wx+dx,wz+dz));
   for(const R of regions.values())if(R.live&&(force||!want.has(R.key)))unloadRegion(R);
@@ -5257,7 +5318,7 @@ function resetWorld(ns){
   for(const arr of[chunkMeshes,glassMeshes,furnMeshes,grassMeshes]){for(const m of arr)if(m)m.geometry.dispose();arr.length=0}loaded.fill(0);dirtyC.clear();
   for(const o of[...scene.children])if(!baseObjs.has(o))scene.remove(o);
   zombies=[];npcs=[];vehicles=[];crates=[];doors=[];doorMap.clear();traps=[];gibs=[];bags=[];drops=[];animals=[];fires=[];beds=[];decals.length=0;manObjs.length=0;miscObjs.length=0;
-  clearScratch();for(const k in KIND)KIND[k].used=null;stashes=[];roomIdx.clear();regions.clear();planCache.clear();roster.length=0;rosterNames.clear();
+  clearScratch();for(const k in KIND)KIND[k].used=null;stashes=[];roomIdx.clear();regions.clear();planCache.clear();if(typeof linkCache!=='undefined')linkCache.clear();winQ=[];winTarget=null;winNew=[];roster.length=0;rosterNames.clear();
   pLife.fill(0);pPos.fill(-100);blockDmg.clear();vox.fill(0);hmap.fill(0);
   seed=ns|0;rng=mulberry(seed);kills=0;day=1;tDay=.08;
   worldInit();
