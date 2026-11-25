@@ -102,7 +102,8 @@ details summary{cursor:pointer;color:var(--dim);font-weight:600;padding:6px 0}
 #devHud{position:fixed;top:44px;left:50%;transform:translateX(-50%);z-index:40;pointer-events:none;background:rgba(0,0,0,.62);color:#cfe8c0;font:12px/1.35 ui-monospace,Menlo,Consolas,monospace;padding:5px 9px;border:1px solid #3a5a30;white-space:pre-wrap;width:max-content;max-width:min(680px,62vw);overflow:hidden}
 #cGrid{flex:none}.case{max-height:calc(100vh - 140px);overflow-y:auto}
 .ricon{width:32px;height:32px;image-rendering:pixelated;background:#1a2416;border:1px solid #3a4a30;padding:2px}.rimg{width:14px;height:14px;image-rendering:pixelated;vertical-align:-3px;margin:0 2px 0 4px}#mRec .rec{grid-template-columns:auto minmax(0,1fr) auto}
-.hot.many .slot{width:40px}@media(orientation:portrait){body.touch .hot.many{left:50%!important;gap:2px;padding:3px}body.touch .hot.many .slot{width:calc((100vw - 40px)/9)!important;padding:2px 0!important}body.touch .hot.many .slot span{font-size:7px}body.touch .hot.many .slot b{font-size:14px}}body.touch .hot.many .slot{width:41px}body.touch .hot.many{gap:3px}
+.hot.many .slot{width:40px}.hot.lots .slot{width:36px}.hot.lots .slot span{font-size:8px}
+@media(orientation:portrait){body.touch .hot.lots .slot{width:calc((100vw - 52px)/12)!important}body.touch .hot.lots .slot span{display:none}}@media(orientation:portrait){body.touch .hot.many{left:50%!important;gap:2px;padding:3px}body.touch .hot.many .slot{width:calc((100vw - 40px)/9)!important;padding:2px 0!important}body.touch .hot.many .slot span{font-size:7px}body.touch .hot.many .slot b{font-size:14px}}body.touch .hot.many .slot{width:41px}body.touch .hot.many{gap:3px}
 @media(orientation:landscape) and (max-width:720px){body.touch .hot.many .slot{width:33px;padding:2px 1px}body.touch .hot.many .slot span{font-size:8px}body.touch .hot.many{gap:2px;padding:3px}}
 .rec{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
 .rec small{color:var(--dim);display:block}
@@ -336,7 +337,7 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>Developer mode <select id="devSel"><option value="0">Off</option><option value="1">On</option></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
-    <h4>v17 · Nov 25, 2026 — far view</h4><ul><li>Far view: the world now reaches 4x your render distance. Past the loaded chunks a light, low-detail terrain mesh carries the hills, rivers, towns and treelines out to the horizon; it builds a few rows a frame so it never stutters (toggle it next to Render distance)</li><li>The flashlight lights up blocks too, not just furniture and people: every block, zombie, animal and car in the beam is lit in chunky pixels, and walls cast crisp shadows</li><li>Road paint is now part of the road blocks’ texture: lane lines, dashes, crosswalks and runway markings are drawn pixel-for-pixel into the asphalt, with no raised strips</li><li>Grass bends away from you as you walk through it and springs back along your trail; zombies, animals, people and cars push it too</li><li>Window trim no longer clips through chipped and broken blocks beside the window</li><li>Inventory: Close is in the top right, and tapping outside the panel closes it (also works for the trade and campfire panels)</li><li>Smoother: moving no longer re-scans the whole ray-traced lighting volume (only the new strip), the HUD only touches the page when something changes, and the flashlight casts a third fewer rays</li><li>Lighter: chunk meshes free their memory copy once they are on the graphics card, and each region drops its generation scratch data afterwards — memory growth while exploring fell by about two thirds</li><li>Quality of life: walk over loot bags to pick them up (setting in the menu), “+3 Ammo” pop-ups when you loot, hit and kill markers on the crosshair, a compass strip with your waypoint, the nearest military base and where you last died, and the map now marks military bases and your death spot</li><li>Fixed: soldiers are saved properly (a save with soldiers in it could break loading)</li></ul><h4>v16 · Nov 25, 2026 — the compounds</h4><ul><li>Corporate military bases out in the wilds: a walled compound with watchtowers, an HQ, barracks, an armory, a helipad and olive trucks, and the best loot in the game. About half are still held by a private security garrison that warns you off and opens fire inside the wall; shoot one and the whole unit comes for you. The rest were overrun and are full of the dead</li><li>Survivors now drive: some find a working car, run a few errands along the roads and park back home. Press Use on their car to drag them out (they won’t like it)</li><li>Survivors raid empty houses through the front door and come out with a full sack; bandit gangs build a log palisade round their camp, post by post</li><li>People find their way properly now: they path around walls, cars and furniture and open doors on the way instead of walking into them</li><li>Windshield wipers: Q (or the Bomb button) in a car sweeps the blood off the glass</li><li>Every car window cracks where it is hit: bullets, bat swings and side or rear impacts all leave spreading cracks on that pane</li><li>Porches line up with the block pixels: slab, posts, canopy and trim all sit on the 1/32 m texel grid</li><li>Creative: choose the weather from the menu (clear, rain, storm, fog, snow, or natural)</li><li>Developer mode tools: F2 heal, F3 +3 hours, F4 weather, F6 spawn zombie, F7 clear zombies, F8 teleport to crosshair, F9 god mode, F10 freeze time, plus menu buttons to go to a military base, spawn a car or survivor, a performance overlay and copy debug info; the readout now shows time, weather, what everyone is doing and nearby bases</li></ul><h4>v15.7 · Nov 25, 2026 — light &amp; chrome</h4><ul><li>Blood particles are red again (no more black specks)</li><li>Flashlight casts a perfect circle of light, ray-traced against the blocks and painted bright in chunky pixels — it stops at walls and leaves crisp shadows</li><li>Signs, posts, pumps, lamps, car bodies and other metal now carry a soft, blurry sky reflection that follows the time of day</li><li>Creative: sleep any time, anywhere, and a new “Sleep until morning” button in the menu skips straight to dawn</li></ul><h4>v15.6 · Nov 25, 2026 — ripples</h4><ul>
+    <h4>v17.1 · Nov 25, 2026 — blocks to the horizon</h4><ul><li>The far view is now made of blocks: distant land is built from real block columns (1 m near, 2 m further out) in each block’s true texture colour, with flat tops and crisp sides; neighbouring columns of the same height and colour merge into one big block, so it stays light to draw. Trees show a leafy crown over a darker trunk, towns show their roads and rooftops</li><li>New doors: pixel-art doors at exactly the block pixel size, so they line up with the wall around them. The classic panel door in four paints plus five new styles: red barn door, steel security door, French glass door, craftsman door and rustic strap door</li><li>Up to 12 hotbar slots (keys 1–9, 0, − and =). New Tactical pants (10 pockets, military bases) and Utility overalls (12 pockets, rare in malls, or sew them); creative mode gets all 12</li></ul><h4>v17 · Nov 25, 2026 — far view</h4><ul><li>Far view: the world now reaches 4x your render distance. Past the loaded chunks a light, low-detail terrain mesh carries the hills, rivers, towns and treelines out to the horizon; it builds a few rows a frame so it never stutters (toggle it next to Render distance)</li><li>The flashlight lights up blocks too, not just furniture and people: every block, zombie, animal and car in the beam is lit in chunky pixels, and walls cast crisp shadows</li><li>Road paint is now part of the road blocks’ texture: lane lines, dashes, crosswalks and runway markings are drawn pixel-for-pixel into the asphalt, with no raised strips</li><li>Grass bends away from you as you walk through it and springs back along your trail; zombies, animals, people and cars push it too</li><li>Window trim no longer clips through chipped and broken blocks beside the window</li><li>Inventory: Close is in the top right, and tapping outside the panel closes it (also works for the trade and campfire panels)</li><li>Smoother: moving no longer re-scans the whole ray-traced lighting volume (only the new strip), the HUD only touches the page when something changes, and the flashlight casts a third fewer rays</li><li>Lighter: chunk meshes free their memory copy once they are on the graphics card, and each region drops its generation scratch data afterwards — memory growth while exploring fell by about two thirds</li><li>Quality of life: walk over loot bags to pick them up (setting in the menu), “+3 Ammo” pop-ups when you loot, hit and kill markers on the crosshair, a compass strip with your waypoint, the nearest military base and where you last died, and the map now marks military bases and your death spot</li><li>Fixed: soldiers are saved properly (a save with soldiers in it could break loading)</li></ul><h4>v16 · Nov 25, 2026 — the compounds</h4><ul><li>Corporate military bases out in the wilds: a walled compound with watchtowers, an HQ, barracks, an armory, a helipad and olive trucks, and the best loot in the game. About half are still held by a private security garrison that warns you off and opens fire inside the wall; shoot one and the whole unit comes for you. The rest were overrun and are full of the dead</li><li>Survivors now drive: some find a working car, run a few errands along the roads and park back home. Press Use on their car to drag them out (they won’t like it)</li><li>Survivors raid empty houses through the front door and come out with a full sack; bandit gangs build a log palisade round their camp, post by post</li><li>People find their way properly now: they path around walls, cars and furniture and open doors on the way instead of walking into them</li><li>Windshield wipers: Q (or the Bomb button) in a car sweeps the blood off the glass</li><li>Every car window cracks where it is hit: bullets, bat swings and side or rear impacts all leave spreading cracks on that pane</li><li>Porches line up with the block pixels: slab, posts, canopy and trim all sit on the 1/32 m texel grid</li><li>Creative: choose the weather from the menu (clear, rain, storm, fog, snow, or natural)</li><li>Developer mode tools: F2 heal, F3 +3 hours, F4 weather, F6 spawn zombie, F7 clear zombies, F8 teleport to crosshair, F9 god mode, F10 freeze time, plus menu buttons to go to a military base, spawn a car or survivor, a performance overlay and copy debug info; the readout now shows time, weather, what everyone is doing and nearby bases</li></ul><h4>v15.7 · Nov 25, 2026 — light &amp; chrome</h4><ul><li>Blood particles are red again (no more black specks)</li><li>Flashlight casts a perfect circle of light, ray-traced against the blocks and painted bright in chunky pixels — it stops at walls and leaves crisp shadows</li><li>Signs, posts, pumps, lamps, car bodies and other metal now carry a soft, blurry sky reflection that follows the time of day</li><li>Creative: sleep any time, anywhere, and a new “Sleep until morning” button in the menu skips straight to dawn</li></ul><h4>v15.6 · Nov 25, 2026 — ripples</h4><ul>
       <li>Rain ripples: wet ground and puddles now ripple with rings spreading from falling drops and a slow wind swell, and the ray-traced reflections bend and wobble through them.</li>
       <li>Stop signs have STOP printed flat on the face in pixel letters, with a grey metal back.</li>
       <li>Run and jump together however you like: push the touch stick to its edge to run, double-tap W to sprint, and a running jump keeps its speed in the air.</li></ul>
@@ -598,7 +599,7 @@ const MATS=[['plank',B.PLANK],['stone',B.STONE],['dirt',B.DIRT],['metal',B.METAL
 // creative mode: every block, unlimited
 const CMATS=[['grass',B.GRASS],['dirt',B.DIRT],['stone',B.STONE],['coal',B.COAL],['iron',B.IRON],['conc',B.CONC],['asph',B.ASPH],['plank',B.PLANK],['log',B.LOG],['leaf',B.LEAF],['brick',B.BRICK],['metal',B.METAL],['glass',B.GLASS],['wall',B.WALL],['tile',B.TILEF],['roof',B.ROOF],['stairs',B.STPX],['frame',B.FRAME],['ladder',B.LADDER],['sludge',B.SLUDGE],['bedrock',B.BED],['gcap1',B.G25],['gcap2',B.G50],['gcap3',B.G75]];
 const matList=p=>p.creative?CMATS:MATS,curMat=p=>{const L=matList(p);return L[p.mat%L.length]};
-const LABEL={rod:'Fishing rod',fish:'Raw fish',cookedfish:'Grilled fish',batfix:'Bat repair',water:'Bottled water',dirtywater:'Dirty water',bottle:'Empty bottle',soda:'Soda',splint:'Splint',pills:'Antibiotics',batteries:'Batteries',shorts:'Shorts',slacks:'Slacks',jeans:'Jeans',schoolbag:'School backpack',hikepack:'Hiking pack',milpack:'Military rucksack',cigs:'Cigarettes',weed:'Marijuana',lswitch:'Light switch',lamp:'Lamp',wire:'Wire',wheel:'Wheel',engine:'Engine',battery:'Car battery',carradio:'Car radio',wrench:'Wrench',frame:'Wood frame',ladder:'Ladder',sludge:'Sewer sludge',bedrock:'Bedrock',gcap1:'Grass (¼ step)',gcap2:'Grass (½ step)',gcap3:'Grass (¾ step)',scrip:'Scrip',saw:'Chainsaw',grass:'Grass',conc:'Concrete',asph:'Asphalt',log:'Log',leaf:'Leaves',brick:'Brick',glass:'Glass',wall:'Drywall',tile:'Tile',roof:'Roof',veg:'Vegetables',stew:'Meat stew',broth:'Bone broth',jerky:'Jerky',roast:'Roast veg',hotbeans:'Hot beans',tnt:'Dynamite',pipebomb:'Pipe bomb',bunk:'Bunk bed',tent:'Tent',stairs:'Stairs',bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
+const LABEL={tactical:'Tactical pants',utility:'Utility overalls',rod:'Fishing rod',fish:'Raw fish',cookedfish:'Grilled fish',batfix:'Bat repair',water:'Bottled water',dirtywater:'Dirty water',bottle:'Empty bottle',soda:'Soda',splint:'Splint',pills:'Antibiotics',batteries:'Batteries',shorts:'Shorts',slacks:'Slacks',jeans:'Jeans',schoolbag:'School backpack',hikepack:'Hiking pack',milpack:'Military rucksack',cigs:'Cigarettes',weed:'Marijuana',lswitch:'Light switch',lamp:'Lamp',wire:'Wire',wheel:'Wheel',engine:'Engine',battery:'Car battery',carradio:'Car radio',wrench:'Wrench',frame:'Wood frame',ladder:'Ladder',sludge:'Sewer sludge',bedrock:'Bedrock',gcap1:'Grass (¼ step)',gcap2:'Grass (½ step)',gcap3:'Grass (¾ step)',scrip:'Scrip',saw:'Chainsaw',grass:'Grass',conc:'Concrete',asph:'Asphalt',log:'Log',leaf:'Leaves',brick:'Brick',glass:'Glass',wall:'Drywall',tile:'Tile',roof:'Roof',veg:'Vegetables',stew:'Meat stew',broth:'Bone broth',jerky:'Jerky',roast:'Roast veg',hotbeans:'Hot beans',tnt:'Dynamite',pipebomb:'Pipe bomb',bunk:'Bunk bed',tent:'Tent',stairs:'Stairs',bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
 // towns: a large one in the middle, smaller ones scattered through the wilds
 const towns=[];
 function townAt(x,z,m){for(const t of towns)if(x>=t.x0-m&&x<=t.x1+m&&z>=t.z0-m&&z<=t.z1+m)return t;return null}
@@ -2108,31 +2109,69 @@ const viewUnits=()=>RD*CS*VS;
 // generator's own height function and the town plans. It is rebuilt a few rows per frame in the background, so it never stalls a frame
 let FARV=true;try{FARV=localStorage.getItem('deadground-far')!=='0'}catch(e){}
 const farView=()=>viewUnits()*(FARV?4:1);
-const lodMat=new THREE.MeshLambertMaterial({vertexColors:true});
+const lodMat=new THREE.MeshLambertMaterial({vertexColors:true,flatShading:false});
 function gpuOnly(g){if(!g||!g.attributes)return g;const f=function(){this.array=null};for(const k in g.attributes){const a=g.attributes[k];if(a&&a.onUpload)a.onUpload(f)}if(g.index&&g.index.onUpload)g.index.onUpload(f);return g}
 let lodMesh=null,lodJob=null,lodC={x:1e9,z:1e9,rd:0,ox:0,oz:0,t:0,far:0};
-const LODC={grass:[.3,.46,.2],dry:[.52,.46,.26],snow:[.86,.88,.9],stone:[.47,.47,.46],water:[.18,.32,.42],road:[.17,.17,.19],conc:[.56,.55,.52],roof:[.32,.26,.24],leaf:[.17,.31,.14]};
-function lodGrass(){return curSeason===3?LODC.snow:curSeason===2?[.42,.4,.2]:curSeason===1?[.34,.48,.2]:LODC.grass}
-function lodSample(x,z){
-  if(inWin(x,z)){let y=Math.min(H-1,(hm(x,z)|0)+(townAt(x,z,2)?60:22));while(y>0&&!solid(x,y,z))y--;const b=get(x,y,z),bs=BASE_OF[b]||b;
-    const c=b===255?LODC.water:bs===B.GRASS||b>=23&&b<=25?lodGrass():bs===B.LEAF?LODC.leaf:BRGB[bs]||LODC.stone;return[y+1,c]}
-  const t=townAt(x,z,0);
-  if(t&&!t.air){if(isRoad(x,z))return[G+1,LODC.road];const lx=Math.floor((x-t.x0)/12),lz=Math.floor((z-t.z0)/12),h=h3(lx,913,lz);
-    if(h<.3)return[G+2,LODC.conc];return[G+2+Math.floor(4+h*(t.city?40:14)),h<.6?LODC.roof:LODC.conc]}
-  if(t)return[G+1,LODC.conc];
-  const n=natH(x,z),h=Math.floor(n.hf);if(n.wl&&h<n.wl)return[n.wl,LODC.water];
-  return[h+1,n.mm>.2&&h>G+18?(h>G+30?LODC.snow:LODC.stone):lodGrass()]}
-function lodStart(cx,cz){const R=Math.round(farView()/VS),S=8,N=Math.floor(R/S)*2+1,o=(N-1)/2;
-  lodJob={cx,cz,S,N,o,row:0,P:new Float32Array(N*N*3),C:new Float32Array(N*N*3),hole:Math.max(0,(RD-1.5)*CS*VS)}}
-function lodStep(budget){const J=lodJob,t0=performance.now();
-  while(J.row<J.N&&performance.now()-t0<budget){const j=J.row++;for(let i=0;i<J.N;i++){const x=J.cx+(i-J.o)*J.S,z=J.cz+(j-J.o)*J.S,[y,c]=lodSample(x,z),k=(j*J.N+i)*3;
-      J.P[k]=x*VS;J.P[k+1]=y*VS-.7;J.P[k+2]=z*VS;const v=.92+.16*h3(x>>3,77,z>>3);J.C[k]=c[0]*v;J.C[k+1]=c[1]*v;J.C[k+2]=c[2]*v}}
-  if(J.row<J.N)return;
-  const I=[],N=J.N,h2=J.hole*J.hole,cx=J.cx*VS,cz=J.cz*VS;
-  for(let j=0;j<N-1;j++)for(let i=0;i<N-1;i++){const a=j*N+i,b=a+1,c=a+N,d=c+1;let inner=true;for(const q of[a,b,c,d]){const dx=J.P[q*3]-cx,dz=J.P[q*3+2]-cz;if(dx*dx+dz*dz>h2){inner=false;break}}
-    if(inner)continue;I.push(a,c,b,b,c,d)}
-  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(J.P,3));g.setAttribute('color',new THREE.BufferAttribute(J.C,3));g.setIndex(I);g.computeVertexNormals();g.computeBoundingSphere();gpuOnly(g);
-  if(lodMesh){scene.remove(lodMesh);lodMesh.geometry.dispose()}lodMesh=new THREE.Mesh(g,lodMat);lodMesh.frustumCulled=false;lodMesh.renderOrder=-5;scene.add(lodMesh);lodJob=null}
+// colours come from the real textures: each block's top and side tiles are averaged straight off the texture atlas (refreshed every rebuild,
+// so seasons carry over), grass gets the same patchy tint the near grass has
+const LOD_TOP=new Float32Array(1024*3),LOD_SIDE=new Float32Array(1024*3);
+function lodPalette(){const T=atlasC.getContext('2d').getImageData(0,0,AW,AH).data,avg=t=>{let r=0,g=0,b=0;const tx=(t%ACOLS)*TS,ty=((t/ACOLS)|0)*TS;for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const o=((ty+y)*AW+tx+x)*4;r+=T[o];g+=T[o+1];b+=T[o+2]}const n=TS*TS*255;return[r/n,g/n,b/n]};
+  const cache={};const A=t=>cache[t]||(cache[t]=avg(t));
+  for(let b=0;b<256;b++){const tl=TILE_OF[b];if(!tl)continue;const top=A(tl[2]),sd=A(tl[0]);for(let q=0;q<4;q++){const k=(b*4+q)*3,tint=(b===1||b>=23&&b<=25)?[.86+q*.06,.9+q*.05,.82+q*.06]:[1,1,1];
+      for(let c=0;c<3;c++){LOD_TOP[k+c]=top[c]*tint[c];LOD_SIDE[k+c]=sd[c]*(b===1||b>=23&&b<=25?1:tint[c])}}}}
+// what a cell looks like: the top block (height and id) of the column at its centre, from the real world when it is loaded,
+// otherwise from the terrain generator (plus the town plans, rough buildings and treelines so the horizon isn't bare)
+const lodFar=new Map();
+function lodSample(x,z,out){
+  if(inWin(x,z)){let y=Math.min(H-1,(hm(x,z)|0)+(townAt(x,z,2)?60:22));while(y>0&&!solid(x,y,z)&&get(x,y,z)!==255)y--;let b=get(x,y,z);b=BASE_OF[b]||b;if(b>=23&&b<=25)b=1;if(SH[b]&&b!==255)b=B.PLANK;
+    out[0]=y+1;out[1]=b;out[2]=b===1?Math.min(3,Math.max(0,Math.round((gpatch(x,z)[1]-.86)/.06))):0;return}
+  const t=townAt(x,z,0);out[2]=0;
+  if(t&&!t.air){if(isRoad(x,z)){out[0]=G+1;out[1]=B.ASPH;return}const lx=Math.floor((x-t.x0)/14),lz=Math.floor((z-t.z0)/14),h=h3(lx,913,lz),e=((x-t.x0)%14+14)%14,f=((z-t.z0)%14+14)%14;
+    if(h<.25||e<2||f<2){out[0]=G+1;out[1]=h<.12?B.GRASS:B.CONC;return}out[0]=G+2+Math.floor(5+h*(t.city?38:10));out[1]=h<.55?B.ROOF:h<.8?B.BRICK:B.CONC;return}
+  if(t){out[0]=G+1;out[1]=B.CONC;return}
+  const ck=(x+65536)*131072+(z+65536),cv=lodFar.get(ck);if(cv!==undefined){out[0]=cv>>12;out[1]=(cv>>2)&1023;out[2]=cv&3;return}
+  lodNat(x,z,out);if(lodFar.size>300000)lodFar.clear();lodFar.set(ck,out[0]<<12|out[1]<<2|out[2])}
+function lodNat(x,z,out){out[2]=0;
+  const n=natH(x,z),h=Math.floor(n.hf);if(n.wl&&h<n.wl){out[0]=n.wl;out[1]=255;return}
+  if(n.mm>.2&&h>G+18){out[0]=h+1;out[1]=B.STONE;return}
+  const tr=h3(x>>2,4021,z>>2);if(tr<.07+.1*Math.max(0,n.mm)){out[0]=h+1+5+Math.floor(tr*60);out[1]=B.LEAF;return}
+  out[0]=h+1;out[1]=1;const g=h3(x>>3,77,z>>3);out[2]=g<.25?0:g<.5?1:g<.75?2:3}
+// one level of the far view: a grid of cells (cs blocks wide) around (cx,cz); cells for which skip() is true are left out (the near
+// world, or the finer level inside). Tops with the same height and colour merge into one big face, and so do runs of side faces
+function* lodLevel(J,L){const{cs,n,x0,z0}=L,Hh=L.h,K=L.k,P=J.P,N=J.N,C=J.C,I=J.I;
+  const quad=(ax,ay,az,bx,by,bz,cx,cy,cz,dx,dy,dz,nx,ny,nz,col,k)=>{const v=P.length/3;P.push(ax*VS,ay*VS-.08,az*VS,bx*VS,by*VS-.08,bz*VS,cx*VS,cy*VS-.08,cz*VS,dx*VS,dy*VS-.08,dz*VS);
+    for(let q=0;q<4;q++){N.push(nx,ny,nz);C.push(col[k],col[k+1],col[k+2])}I.push(v,v+1,v+2,v,v+2,v+3)};
+  const at=(i,j)=>i<0||j<0||i>=n||j>=n?-1:i+j*n,used=new Uint8Array(n*n);
+  // tops: greedy rectangles
+  for(let j=0;j<n;j++)for(let i=0;i<n;i++){const a=i+j*n;if(used[a]||Hh[a]<0)continue;const h=Hh[a],k=K[a];let w=1;while(i+w<n&&!used[a+w]&&Hh[a+w]===h&&K[a+w]===k)w++;
+    let d=1;grow:for(;j+d<n;d++){for(let q=0;q<w;q++){const b=a+q+d*n;if(used[b]||Hh[b]!==h||K[b]!==k)break grow}}
+    for(let dd=0;dd<d;dd++)for(let q=0;q<w;q++)used[a+q+dd*n]=1;const X0=x0+i*cs,Z0=z0+j*cs,X1=X0+w*cs,Z1=Z0+d*cs;
+    quad(X0,h,Z0,X0,h,Z1,X1,h,Z1,X1,h,Z0,0,1,0,LOD_TOP,k*3);if(i===n-1||((i+j)&63)===0)yield}
+  // sides: for every edge where the neighbour is lower (or missing: a skirt), a wall in the higher cell's side colour, merged along the edge
+  const lo=(a,b)=>b<0||Hh[b]<0?Hh[a]-10:Hh[b];
+  for(const[di,dj]of[[1,0],[-1,0],[0,1],[0,-1]]){
+    for(let line=0;line<n;line++){let run=null;
+      const flush=()=>{if(!run)return;const{s,e,top,k}=run;let bot=run.bot;
+        if((k>>2)===B.LEAF&&top-bot>4){const mid=top-4;emit(s,e,mid,bot,B.LOG*4);bot=mid}emit(s,e,top,bot,k);run=null};
+      const emit=(s,e,top,bot,k)=>{
+        if(di){const X=x0+(line+(di>0?1:0))*cs,Za=z0+s*cs,Zb=z0+(e+1)*cs;if(di>0)quad(X,top,Zb,X,bot,Zb,X,bot,Za,X,top,Za,1,0,0,LOD_SIDE,k*3);else quad(X,top,Za,X,bot,Za,X,bot,Zb,X,top,Zb,-1,0,0,LOD_SIDE,k*3)}
+        else{const Z=z0+(line+(dj>0?1:0))*cs,Xa=x0+s*cs,Xb=x0+(e+1)*cs;if(dj>0)quad(Xa,top,Z,Xa,bot,Z,Xb,bot,Z,Xb,top,Z,0,0,1,LOD_SIDE,k*3);else quad(Xb,top,Z,Xb,bot,Z,Xa,bot,Z,Xa,top,Z,0,0,-1,LOD_SIDE,k*3)}};
+      for(let t=0;t<n;t++){const i=di?line:t,j=di?t:line,a=i+j*n;let ok=false,top=0,bot=0,k=0;
+        if(Hh[a]>=0){const b=at(i+di,j+dj),l=lo(a,b);if(l<Hh[a]){ok=true;top=Hh[a];bot=l;k=K[a]}}
+        if(ok&&run&&run.top===top&&run.bot===bot&&run.k===k&&run.e===t-1)run.e=t;else{flush();if(ok)run={s:t,e:t,top,bot,k}}}
+      flush();yield}}}
+function lodStart(cx,cz){const RF=Math.round(farView()/VS),hole=Math.max(0,RD*CS-6),RA=Math.min(RF,Math.max(hole+48,200));lodPalette();
+  const mk=(cs,R)=>{const n=Math.ceil(2*R/cs);return{cs,n,x0:cx-Math.floor(n/2)*cs,z0:cz-Math.floor(n/2)*cs,h:new Int16Array(n*n),k:new Uint16Array(n*n),row:0}};
+  const A=mk(2,RA),Bv=mk(4,RF);A.skip=(x,z)=>(x-cx)*(x-cx)+(z-cz)*(z-cz)<hole*hole;Bv.skip=(x,z)=>Math.abs(x-cx)<RA-2&&Math.abs(z-cz)<RA-2;
+  lodJob={cx,cz,L:[A,Bv],li:0,P:[],N:[],C:[],I:[]}}
+function lodStep(budget){const J=lodJob,t0=performance.now(),o=[0,0,0];
+  while(J.li<J.L.length&&performance.now()-t0<budget){const L=J.L[J.li];
+    if(L.row<L.n){const j=L.row++;for(let i=0;i<L.n;i++){const x=L.x0+i*L.cs+(L.cs>>1),z=L.z0+j*L.cs+(L.cs>>1),a=i+j*L.n;if(L.skip(x,z)){L.h[a]=-1;continue}lodSample(x,z,o);L.h[a]=o[0];L.k[a]=o[1]*4+o[2]}}
+    else{if(!L.gen)L.gen=lodLevel(J,L);if(L.gen.next().done)J.li++}}
+  if(J.li<J.L.length)return;
+  const g=new THREE.BufferGeometry(),nv=J.P.length/3;g.setAttribute('position',new THREE.Float32BufferAttribute(J.P,3));g.setAttribute('normal',new THREE.Int8BufferAttribute(J.N.map(v=>v*127),3,true));
+  g.setAttribute('color',new THREE.Uint8BufferAttribute(J.C.map(v=>Math.min(255,v*255)),3,true));g.setIndex(nv>65535?new THREE.Uint32BufferAttribute(J.I,1):new THREE.Uint16BufferAttribute(J.I,1));g.computeBoundingSphere();gpuOnly(g);
+  if(lodMesh){scene.remove(lodMesh);lodMesh.geometry.dispose()}lodMesh=new THREE.Mesh(g,lodMat);lodMesh.frustumCulled=false;lodMesh.renderOrder=-5;scene.add(lodMesh);lodC.quads=J.I.length/6;lodJob=null}
 function lodTick(dt){if(!running||!players[0]){if(lodMesh)lodMesh.visible=false;return}
   if(!FARV){if(lodMesh)lodMesh.visible=false;return}if(lodMesh)lodMesh.visible=true;
   lodC.t+=dt;if(lodJob){lodStep(2.5);return}
@@ -2564,7 +2603,7 @@ const spawn=new V3((MAIN+2*P+6)*VS,(G+1)*VS,(MAIN+2*P+6)*VS);
 const DAYLEN=360;
 const START_INV=Object.assign(Object.fromEntries(Object.keys(LABEL).map(k=>[k,0])),{spikes:2,beartrap:1,ammo:12,food:2,bandage:1,plank:40});
 const CLOTHES={hardhat:{slot:'head',armor:.12,col:0xd8a820},helmet:{slot:'head',armor:.25,col:0x5f6466},jacket:{slot:'body',armor:.18,col:0x3a2416},vest:{slot:'body',armor:.32,col:0x1c2430},
-  hidecoat:{slot:'body',armor:.2,col:0x7a5a3a},scrapvest:{slot:'body',armor:.38,col:0x7c8184},cargo:{slot:'legs',armor:.1,col:0x5a5a3a,pk:8},riot:{slot:'legs',armor:.2,col:0x18181c,pk:4},
+  hidecoat:{slot:'body',armor:.2,col:0x7a5a3a},scrapvest:{slot:'body',armor:.38,col:0x7c8184},cargo:{slot:'legs',armor:.1,col:0x5a5a3a,pk:8},riot:{slot:'legs',armor:.2,col:0x18181c,pk:4},tactical:{slot:'legs',armor:.15,col:0x4a5038,pk:10},utility:{slot:'legs',armor:.08,col:0x3a5a7a,pk:12},
   shorts:{slot:'legs',armor:0,col:0x3a4a6a,pk:2},slacks:{slot:'legs',armor:.02,col:0x2a2a30,pk:3},jeans:{slot:'legs',armor:.05,col:0x2a3a5a,pk:4},
   schoolbag:{slot:'back',armor:0,col:0x2a4a9a,bag:[10,6]},hikepack:{slot:'back',armor:0,col:0x8a4a1a,bag:[12,8]},milpack:{slot:'back',armor:.04,col:0x4a5a3a,bag:[14,9]}};
 // your pockets are your hotbar: the pants you wear decide how many slots you get; your backpack decides how big your case is
@@ -2579,6 +2618,7 @@ const RECIPES=[
   {out:'hikepack',n:1,need:{schoolbag:1,cloth:6,scrap:2},label:'Upgrade backpack: hiking pack'},
   {out:'milpack',n:1,need:{hikepack:1,hide:3,metal:1,cloth:4},label:'Upgrade backpack: military rucksack'},
   {out:'cargo',n:1,need:{cloth:8,scrap:1},label:'Sew cargo pants (8 pockets)'},
+  {out:'utility',n:1,need:{cloth:12,scrap:3,hide:1},label:'Sew utility overalls (12 pockets)'},
   {out:'wire',n:6,need:{scrap:1},label:'Strip some wire'},
   {out:'lamp',n:1,need:{scrap:2,cloth:1},label:'Make a lamp'},
   {out:'lswitch',n:1,need:{scrap:1},label:'Make a light switch'},
@@ -2611,11 +2651,11 @@ const LOOT=[['water',10,1,2],['soda',6,1,2],['bottle',6,1,2],['batteries',6,1,2]
 const LOOTK={college:[['hikepack',10,1,1],['schoolbag',14,1,1],['weed',12,1,3],['cigs',12,1,2],['food',12,1,2],['jerky',8,1,2],['scrip',14,3,16],['cloth',10,1,2],['kit',3,1,1],['jeans',5,1,1],['bandage',5,1,1]],
   school:[['schoolbag',30,1,1],['cloth',14,1,2],['food',10,1,2],['scrip',12,2,10],['bandage',6,1,1],['jeans',6,1,1],['shorts',6,1,1],['cigs',5,1,1],['weed',3,1,2],['scrap',6,1,2]],
   gas:[['water',14,1,2],['soda',12,1,2],['fuel',40,1,2],['food',14,1,2],['jerky',8,1,2],['scrap',8,1,2],['scrip',10,3,12],['bandage',4,1,1],['kit',3,1,1],['hotbeans',4,1,1]],
-  mall:[['water',8,1,2],['soda',8,1,2],['jeans',10,1,1],['cargo',6,1,1],['shorts',6,1,1],['slacks',6,1,1],['schoolbag',6,1,1],['hikepack',4,1,1],['cigs',5,1,1],['cloth',24,1,3],['jacket',6,1,1],['cargo',6,1,1],['hardhat',4,1,1],['scrip',18,4,20],['food',10,1,2],['jerky',6,1,2],['bandage',6,1,1],['scrap',6,1,2]],
+  mall:[['water',8,1,2],['soda',8,1,2],['jeans',10,1,1],['cargo',6,1,1],['utility',2,1,1],['shorts',6,1,1],['slacks',6,1,1],['schoolbag',6,1,1],['hikepack',4,1,1],['cigs',5,1,1],['cloth',24,1,3],['jacket',6,1,1],['cargo',6,1,1],['hardhat',4,1,1],['scrip',18,4,20],['food',10,1,2],['jerky',6,1,2],['bandage',6,1,1],['scrap',6,1,2]],
   air:[['food',18,1,2],['jerky',10,1,2],['cloth',14,1,2],['scrip',16,4,16],['bandage',8,1,1],['kit',4,1,1],['jacket',3,1,1],['fuel',6,1,1]],grocery:[['water',22,1,3],['soda',14,1,3],['scrip',8,4,20],['veg',22,1,3],['food',46,1,3],['cloth',4,1,2],['fuel',5,1,1],['bandage',5,1,1],['scrap',6,1,2],['coal',4,1,2]],
   hardware:[['rod',6,1,1],['wrench',6,1,1],['battery',3,1,1],['saw',2,1,1],['tnt',3,1,1],['pipebomb',4,1,1],['scrap',22,1,4],['metal',14,1,2],['plank',12,2,5],['wood',8,1,3],['fuel',10,1,1],['kit',8,1,1],['beartrap',5,1,1],['spikes',5,1,1],['mine',2,1,1],['hardhat',6,1,1],['coal',6,1,3]],
   hospital:[['pills',20,1,2],['splint',8,1,1],['water',10,1,2],['bandage',44,1,3],['cloth',14,1,3],['food',6,1,1],['kit',3,1,1],['scrap',6,1,2],['ammo',5,2,6],['vest',2,1,1]],
-  military:[['ammo',40,12,30],['vest',8,1,1],['helmet',8,1,1],['kit',12,1,2],['pipebomb',10,1,2],['tnt',5,1,2],['mine',5,1,1],['pills',8,1,2],['splint',6,1,1],['bandage',16,2,4],['jerky',12,2,4],['water',10,1,3],['hikepack',5,1,1],['cargo',6,1,1],['fuel',8,1,2],['battery',4,1,1],['metal',8,1,3],['batteries',6,1,2],['scrip',10,10,40]],
+  military:[['tactical',6,1,1],['ammo',40,12,30],['vest',8,1,1],['helmet',8,1,1],['kit',12,1,2],['pipebomb',10,1,2],['tnt',5,1,2],['mine',5,1,1],['pills',8,1,2],['splint',6,1,1],['bandage',16,2,4],['jerky',12,2,4],['water',10,1,3],['hikepack',5,1,1],['cargo',6,1,1],['fuel',8,1,2],['battery',4,1,1],['metal',8,1,3],['batteries',6,1,2],['scrip',10,10,40]],
   school:[['food',20,1,2],['cloth',18,1,3],['scrap',12,1,2],['bandage',9,1,1],['jacket',4,1,1],['cargo',4,1,1],['ammo',5,2,5],['plank',6,1,3]]};
 const TOOLS=['Bat','Pistol','Pickaxe','Build','Place'];
 const TRAPS=[['spikes','Spike trap'],['beartrap','Bear trap'],['mine','Tripwire bomb'],['tnt','Dynamite'],['bed','Bed'],['bunk','Bunk bed'],['fire','Campfire'],['tent','Tent'],['lswitch','Light switch'],['lamp','Lamp'],['wire','Wire']];
@@ -2833,13 +2873,38 @@ function vehHit(v,x,z,yaw){const a=vehCircles(v,x,z,yaw);
     for(const p of a)for(const q of b)if(Math.hypot(p[0]-q[0],p[1]-q[1])<rr)return o}return null}
 
 // ---------------- doors
-const doorTex=tileTex(TILE.plank);doorTex.repeat.set(1,2);
+// doors are pixel art at the same density as the blocks: 32 px a metre, so a 1 x 2 m door is a 32 x 64 texture whose pixels line up with
+// the wall's. Six styles: the classic four-panel door (in four paints) plus barn, steel security, French glass, craftsman and rustic strap doors
+const DOOR_STYLES=[['panel',0x6a4a2e],['panel',0x56665a],['panel',0x7a3a2a],['panel',0x4a4a5a],['barn',0x8a2a22],['steel',0x6a7078],['french',0xe8e4da],['craftsman',0x7a5230],['rustic',0x6e5a44]];
+const doorTexCache=new Map();
+function doorTexture(style,col){const key=style+col;if(doorTexCache.has(key))return doorTexCache.get(key);
+  const W_=32,H_=64,c=document.createElement('canvas');c.width=W_;c.height=H_;const x=c.getContext('2d'),r=mulberry(col^style.length*7919),R_=()=>r();
+  const base=new THREE.Color(col),rgb=(k,m=1)=>`rgb(${Math.min(255,k.r*255*m)|0},${Math.min(255,k.g*255*m)|0},${Math.min(255,k.b*255*m)|0})`;
+  const P=(px,py,m=1,k=base)=>{x.fillStyle=rgb(k,m);x.fillRect(px,py,1,1)},Rc=(x0,y0,w,h,m=1,k=base)=>{x.fillStyle=rgb(k,m);x.fillRect(x0,y0,w,h)};
+  const wood=(x0,y0,w,h,k=base,vert=true,amt=.16)=>{for(let yy=y0;yy<y0+h;yy++)for(let xx=x0;xx<x0+w;xx++){const g=vert?Math.sin(xx*1.7+Math.floor(yy/9))*.04:Math.sin(yy*1.7+Math.floor(xx/9))*.04;P(xx,yy,1+(R_()-.5)*amt+g,k)}};
+  const bevel=(x0,y0,w,h,raised=true)=>{for(let k=0;k<w;k++){P(x0+k,y0,raised?1.22:.62);P(x0+k,y0+h-1,raised?.62:1.22)}for(let k=0;k<h;k++){P(x0,y0+k,raised?1.15:.66);P(x0+w-1,y0+k,raised?.66:1.15)}};
+  const glass=(x0,y0,w,h)=>{const g=new THREE.Color(0x2c4658);for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){const d=(xx+yy*.6)%9;P(x0+xx,y0+yy,(d<1.2?1.9:1)*(.85+yy/h*.3),g)}};
+  const knob=(kx,ky,k=new THREE.Color(0xc8a850))=>{P(kx,ky,1.25,k);P(kx+1,ky,1,k);P(kx,ky+1,.85,k);P(kx+1,ky+1,.6,k);P(kx-1,ky+4,.9,k);P(kx-1,ky+5,.7,k)};
+  if(style==='panel'){wood(0,0,32,64);Rc(0,0,32,1,.55);Rc(0,63,32,1,.5);Rc(0,0,1,64,.6);Rc(31,0,1,64,.5);
+    for(const[px,py,w,h]of[[4,4,11,24],[17,4,11,24],[4,34,11,25],[17,34,11,25]]){bevel(px,py,w,h,true);bevel(px+2,py+2,w-4,h-4,false)}knob(26,32)}
+  else if(style==='barn'){for(let b=0;b<4;b++){wood(b*8,0,8,64);Rc(b*8,0,1,64,.55)}const wht=new THREE.Color(0xe8e0d0);
+    for(const yy of[3,30,58]){Rc(2,yy,28,4,1,wht);Rc(2,yy+3,28,1,.75,wht)}for(let k=0;k<23;k++){Rc(3+k,29-k,3,1,1,wht);Rc(3+k,56-k,3,1,1,wht)}Rc(0,0,32,1,.5);knob(27,34,new THREE.Color(0x2a2a2a))}
+  else if(style==='steel'){for(let yy=0;yy<64;yy++)for(let xx=0;xx<32;xx++)P(xx,yy,.92+(R_()-.5)*.06+(xx===0||yy===0?.25:0)-(xx===31||yy===63?.3:0));
+    glass(11,8,10,12);for(let k=11;k<21;k+=3)Rc(k,8,1,12,.9);bevel(10,7,12,14,false);Rc(2,50,28,12,.8);for(const xx of[3,28])for(const yy of[51,60])P(xx,yy,1.4);
+    for(const yy of[2,22,42,61])for(const xx of[2,29])P(xx,yy,1.35);Rc(24,30,6,2,.55);Rc(27,31,2,5,.45);P(27,31,1.5)}
+  else if(style==='french'){Rc(0,0,32,64,1);bevel(0,0,32,64,true);for(let row=0;row<5;row++)for(let colm=0;colm<2;colm++){const gx=4+colm*13,gy=4+row*10;glass(gx,gy,11,8);bevel(gx-1,gy-1,13,10,false)}
+    Rc(2,54,28,8,.94);bevel(3,55,26,6,true);knob(26,33,new THREE.Color(0xb0b0b0))}
+  else if(style==='craftsman'){wood(0,0,32,64,base,false,.2);for(const gx of[4,13,22]){glass(gx,5,6,9);bevel(gx-1,4,8,11,false)}Rc(2,16,28,2,.6);Rc(2,15,28,1,1.25);
+    for(let k=0;k<3;k++){bevel(5,22+k*13,22,11,false);wood(6,23+k*13,20,9,base,true,.12)}knob(26,33,new THREE.Color(0x8a6a3a))}
+  else{for(let b=0;b<5;b++){const w=b===4?4:7;wood(b*7,0,w,64,base,true,.32);Rc(b*7,0,1,64,.45);for(let k=0;k<6;k++){const kx=b*7+1+((R_()*(w-2))|0),ky=(R_()*60)|0;P(kx,ky,.6)}}
+    const iron=new THREE.Color(0x26241f);for(const yy of[8,52]){Rc(0,yy,22,3,1,iron);Rc(0,yy,22,1,1.6,iron);for(let k=2;k<22;k+=5)P(k,yy+1,2.2,iron)}
+    for(let a=0;a<12;a++){const t=a/12*6.28;P(25+Math.round(Math.cos(t)*3),36+Math.round(Math.sin(t)*3),1.8,iron)}Rc(24,30,3,3,1.4,iron)}
+  const t=new THREE.CanvasTexture(c);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;doorTexCache.set(key,t);return t}
 function makeDoor(s){
   const pivot=new THREE.Group();pivot.position.set(s.x*VS,s.y*VS,(s.z+.5)*VS);
-  const c=[0x6a4a2e,0x56665a,0x7a3a2a,0x4a4a5a][RI(0,3)],dk=new THREE.Color(c).multiplyScalar(.7).getHex();
-  part(pivot,1,2,.1,c,.5,1,0).material=new THREE.MeshLambertMaterial({map:doorTex,color:new THREE.Color(c).lerp(new THREE.Color(0xffffff),.45)});
-  for(const sz of[-1,1]){part(pivot,.34,.7,.02,dk,.28,1.45,sz*.055);part(pivot,.34,.7,.02,dk,.72,1.45,sz*.055);part(pivot,.78,.6,.02,dk,.5,.5,sz*.055);
-    part(pivot,.06,.06,.05,0xb8a050,.88,1,sz*.07)}
+  const st=s.style!=null?DOOR_STYLES[s.style%DOOR_STYLES.length]:DOOR_STYLES[(h3(s.x,s.y*7,s.z)*DOOR_STYLES.length)|0],tex=doorTexture(st[0],st[1]);
+  const face=new THREE.MeshLambertMaterial({map:tex}),edge=lam(new THREE.Color(st[1]).multiplyScalar(.55).getHex());
+  const m=new THREE.Mesh(new THREE.BoxGeometry(1,2,.1),[edge,edge,edge,edge,face,face]);m.position.set(.5,1,0);m.castShadow=m.receiveShadow=true;pivot.add(m);
   scene.add(pivot);castBig(pivot,.3);
   const d={...s,pivot,open:false,ang:0,gone:false,cells:[]};
   for(let dx=0;dx<2;dx++)for(let dy=0;dy<4;dy++){d.cells.push([s.x+dx,s.y+dy,s.z]);doorMap.set(dkey(s.x+dx,s.y+dy,s.z),d)}
@@ -2884,7 +2949,7 @@ function makeHud(p){
   el.innerHTML=`<div class="hurt"></div><div class="cross"></div><div class="prompt"></div>
   <div class="inv"></div><div class="feed"></div>
   <div class="stats"><div class="bar hp"><i></i><span>HEALTH</span></div><div class="bar fd"><i></i><span>FOOD</span></div><div class="bar st"><i></i><span>STAMINA</span></div><div class="bar tp"><i></i><span>WARMTH</span></div><div class="bar wt"><i></i><span>WATER</span></div><div class="arm"></div><div class="cond"></div></div>
-  <div class="hot">${Array.from({length:HOTN},(_,k)=>`<div class="slot"><i class="k">${k+1}</i><img class="pi" alt=""><b></b><span></span></div>`).join('')}<div class="slot bagslot" title="Bag"><img class="pi" alt="" src="${tbIcon('bag')}"><b>Bag</b><span></span></div></div>
+  <div class="hot">${Array.from({length:HOTN},(_,k)=>`<div class="slot"><i class="k">${HOTLAB[k]}</i><img class="pi" alt=""><b></b><span></span></div>`).join('')}<div class="slot bagslot" title="Bag"><img class="pi" alt="" src="${tbIcon('bag')}"><b>Bag</b><span></span></div></div>
   <div class="veh hidden"><h3></h3><div class="bar fd"><i></i><span>FUEL</span></div><div class="bar hp"><i></i><span>CONDITION</span></div><div class="vs" style="margin-top:6px"></div></div>
   <button class="rspb" title="Stuck? Respawn now (&#96; key)">Respawn</button><button class="homeb" title="Save and go to the main menu">Main menu</button>
   <div class="dead hidden">You died<div class="rsp"></div><small></small></div>`;
@@ -3209,7 +3274,7 @@ function readInput(p){
     inp.f=k('KeyW')-k('KeyS');inp.s=k('KeyD')-k('KeyA');inp.turn=k('ArrowRight')-k('ArrowLeft');inp.look=k('ArrowUp')-k('ArrowDown');
     inp.jump=!!keys.Space;inp.sprint=!!(keys.ShiftLeft||keys.ShiftRight);inp.primary=mouseL;inp.place=mouseR;mouseR=false;inp.aim=mouseRH;
     inp.interact=pr('KeyE')||pr('KeyF');inp.matNext=pr('KeyR');inp.eat=pr('KeyG');inp.bandage=pr('KeyX');inp.menu=pr('Tab');inp.crouch=!!(keys.KeyC||keys.ControlLeft);if(pr('KeyC')){const t=performance.now();if(t-(p.cTap||0)<320)p.crawlKey=!p.crawlKey;p.cTap=t}if(p.crawlKey)inp.crawl=true;inp.torch=pr('KeyT');inp.view=pr('KeyV');inp.throw=pr('KeyQ');
-    for(let n=1;n<=pockets(p);n++)if(pr('Digit'+n))inp.tool=n-1;
+    for(let n=0;n<pockets(p);n++)if(pr(HOTKEYS[n]))inp.tool=n;
     if(wheel){const N=pockets(p);inp.tool=((p.hsel|0)+(wheel>0?1:N-1))%N;wheel=0}
     if(players.length===1)gpRead(0,inp);
     if(T.on){inp.f+=-T.my;inp.s+=T.mx;if(T.held.act)inp.primary=true;if(T.held.jump)inp.jump=true;if(T.run)inp.sprint=true;if(T.aim)inp.aim=true;inp.pad=true;
@@ -3837,7 +3902,7 @@ function updHud(p){
   h.el.style.left=(p.i*100/n)+'%';sW(h.el,(100/n)+'%');h.el.classList.toggle('narrow',innerWidth/n<900);
   sT(h.arm,armorOf(p)>0?`Armor ${Math.round(armorOf(p)*100)}%`:'');sW(h.hp,p.hp+'%');sW(h.fd,p.hunger+'%');sW(h.st,p.stamina+'%');sW(h.tp,p.temp+'%');if(h.wt)sW(h.wt,(p.thirst??100)+'%');if(h.cond){const I=p.inj||{},c=[];if(I.bleed>0)c.push('BLEEDING');if(I.infect>0)c.push('INFECTED');if(I.leg>.05)c.push('HURT LEG');if(I.arm>.05)c.push('HURT ARM');if(p.sick>0)c.push('SICK');if((p.tired||0)>75)c.push('EXHAUSTED');if((p.wet||0)>.4)c.push('SOAKED');const t=c.join(' · ');if(h.cond.textContent!==t)h.cond.textContent=t}h.tp.style.background=p.temp<30?'#d8e8ff':'';
   h.hurt.style.opacity=Math.min(.9,p.flash*1.5+(p.hp<25?.35:0));
-  {const N=pockets(p);if(h.pkN!==N){h.pkN=N;h.slots.forEach((s,k)=>s.style.display=k<N?'':'none');const hb=h.slots[0]&&h.slots[0].parentElement;if(hb&&hb.classList)hb.classList.toggle('many',N>6)}}
+  {const N=pockets(p);if(h.pkN!==N){h.pkN=N;h.slots.forEach((s,k)=>s.style.display=k<N?'':'none');const hb=h.slots[0]&&h.slots[0].parentElement;if(hb&&hb.classList){hb.classList.toggle('many',N>6);hb.classList.toggle('lots',N>9)}}}
   h.slots.forEach((s,k)=>{const b=p.hot[k],v=hotView(p,b);s.classList.toggle('on',k===p.hsel);s.classList.toggle('empty',!b);s.lastChild.classList.toggle('low',b==='Pistol'&&((p.mag|0)<3||p.jam)||b==='Bat'&&(p.batHP??100)<20);
     if(s.dataset.b!==String(b)){s.dataset.b=String(b);s.querySelector('b').textContent=v.name;const im=s.querySelector('img');if(v.icon)im.src=v.icon;else if(im.removeAttribute)im.removeAttribute("src")}s.lastChild.textContent=v.sub});
   const show=['scrip','spikes','beartrap','mine','ammo','food','bandage','scrap','cloth','fuel','kit','wood','plank','stone','dirt','coal','iron','metal'].filter(x=>p.inv[x]>0||x==='ammo'||x==='food');
@@ -4104,7 +4169,9 @@ kit:r=>{r(2,6,12,8,'#b0201c');r(2,6,12,1,'#d84a3a');r(6,3,4,1,'#2a2a2a');r(5,4,1
   hidecoat:r=>{r(4,2,8,13,'#8a6a40');r(1,3,3,10,'#8a6a40');r(12,3,3,10,'#8a6a40');r(7,3,2,12,'#6a5030');r(4,2,8,2,'#b8946a')},
   scrapvest:r=>{r(3,2,10,12,'#6a6e72');r(4,4,3,3,'#8a9094');r(9,7,3,3,'#9aa0a4');r(5,10,4,3,'#7a8084');r(6,2,4,2,'#3a3e42')},
   cargo:r=>{r(4,1,8,4,'#5a5a3a');r(4,5,3,10,'#5a5a3a');r(9,5,3,10,'#5a5a3a');r(4,8,2,3,'#4a4a2a');r(10,8,2,3,'#4a4a2a')},
-  riot:r=>{r(4,1,8,4,'#2a2e34');r(4,5,3,10,'#2a2e34');r(9,5,3,10,'#2a2e34');r(4,7,3,3,'#4a4e54');r(9,7,3,3,'#4a4e54')}};
+  riot:r=>{r(4,1,8,4,'#2a2e34');r(4,5,3,10,'#2a2e34');r(9,5,3,10,'#2a2e34');r(4,7,3,3,'#4a4e54');r(9,7,3,3,'#4a4e54')},
+  tactical:r=>{r(4,1,8,4,'#4a5038');r(4,5,3,10,'#4a5038');r(9,5,3,10,'#4a5038');r(4,6,2,2,'#363a28');r(10,6,2,2,'#363a28');r(4,9,3,3,'#363a28');r(9,9,3,3,'#363a28');r(4,1,8,1,'#2a2a20')},
+  utility:r=>{r(4,0,8,5,'#3a5a7a');r(5,0,1,2,'#c8a040');r(10,0,1,2,'#c8a040');r(4,5,3,10,'#3a5a7a');r(9,5,3,10,'#3a5a7a');r(6,2,4,3,'#2a4a6a');r(4,8,3,3,'#2a4a6a');r(9,8,3,3,'#2a4a6a');r(4,12,3,1,'#2a4a6a');r(9,12,3,1,'#2a4a6a')}};
 const PXSZ={BatW:[32,8]};
 function pxIcon(k){if(PXI[k])return PXI[k];try{const c=document.createElement('canvas'),z=PXSZ[k]||[16,16];c.width=z[0];c.height=z[1];const x=c.getContext('2d');
   const r=(a,b,w,h,col)=>{x.fillStyle='rgba(0,0,0,.55)';x.fillRect(a+1,b+1,w,h);x.fillStyle=col;x.fillRect(a,b,w,h)};(PXD[k]||PXD._)(r);PXI[k]=c.toDataURL()}catch(e){PXI[k]=''}return PXI[k]}
@@ -4115,8 +4182,8 @@ const CW=12,CH=8;
 const ITEM={wheel:[2,2,1],engine:[3,2,1],battery:[2,1,1],carradio:[2,1,1],wrench:[2,1,1],scrip:[1,1,999],saw:[3,1,1],veg:[1,1,6],stew:[1,1,2],broth:[1,1,2],jerky:[1,1,10],roast:[1,1,4],hotbeans:[1,1,2],tnt:[1,2,3],pipebomb:[1,1,4],bunk:[3,2,1],Pistol:[2,2,1],Bat:[4,1,1],Pickaxe:[2,2,1],ammo:[2,1,60],scrap:[1,1,10],cloth:[1,1,10],fuel:[2,2,1],food:[1,1,3],bandage:[1,1,3],wood:[2,1,10],plank:[2,1,20],
   dirt:[1,1,32],stone:[1,1,32],coal:[1,1,16],iron:[1,1,16],metal:[2,1,4],kit:[2,1,1],meat:[1,1,4],cooked:[1,1,4],hide:[2,2,3],bone:[1,1,8],
   rod:[1,4,1],fish:[2,1,4],cookedfish:[2,1,4],water:[1,2,4],dirtywater:[1,2,4],bottle:[1,2,4],soda:[1,1,6],splint:[1,2,2],pills:[1,1,6],batteries:[1,1,8],lswitch:[1,1,4],lamp:[1,2,2],wire:[1,1,32],spikes:[2,1,2],beartrap:[2,2,1],mine:[1,1,2],tent:[3,1,1],stairs:[1,1,16],bed:[3,2,1],fire:[2,1,2],
-  hardhat:[2,1,1],helmet:[2,2,1],jacket:[2,3,1],vest:[2,2,1],hidecoat:[2,3,1],scrapvest:[2,2,1],cargo:[2,3,1],riot:[2,3,1],shorts:[2,2,1],slacks:[2,3,1],jeans:[2,3,1],schoolbag:[3,3,1],hikepack:[3,4,1],milpack:[3,4,1],cigs:[1,1,4],weed:[1,1,8]};
-const DESC={rod:'Hold it at the edge of a river or pond and Use to cast. When the bobber dips, Use again to reel in.',fish:'Grill it at a campfire. Raw fish is risky.',cookedfish:'Flaky, smoky, filling.',water:'Clean water (+water). Leaves an empty bottle.',dirtywater:'River water. Boil it at a campfire, or drink it and maybe get sick.',bottle:'Fill it at a river or pond (Use), or stand in the rain.',soda:'Sugar and fizz. Some water, a little food.',splint:'Use it: injured arms and legs heal four times faster for a few minutes.',pills:'Antibiotics. Use them to cure an infected wound.',batteries:'Recharges your flashlight.',shorts:'2 pockets (2 hotbar slots).',slacks:'3 pockets (3 hotbar slots).',jeans:'4 pockets (4 hotbar slots).',cargo:'Cargo pants: 8 pockets (8 hotbar slots) and a little padding.',riot:'Riot pants: 4 pockets and solid padding.',schoolbag:'Wear it: case grows to 10 × 6. Upgrade it into a hiking pack.',hikepack:'Wear it: case grows to 12 × 8. Upgrade it into a military rucksack.',milpack:'Wear it: case grows to 14 × 9.',cigs:'Smoke one (Use): calms your nerves and steadies your aim for a minute, but costs a little health and makes you cough.',weed:'Smoke it (Use): everything slows and softens for a while, pain fades a little, and you get very hungry.',scrip:'Hand-stamped trade tokens: the money of the end of the world. Survivors and drifters buy and sell for scrip.',saw:'Runs on fuel cans. Press 1 again (or tap Tool) to switch between bat and saw; hold attack to cut. Limbs come off, and hold it on the torso to cut them in half. Also cuts wood.',veg:'Potatoes, carrots, onions. Better cooked.',stew:'Hearty: lots of food, health and warmth.',broth:'Hot drink. Warms you right up.',jerky:'Smoked meat. Light and keeps forever.',roast:'Roast vegetables.',hotbeans:'Warm beans straight from the can.',tnt:'Place it and run: a long fuse, then a big blast that tears through walls.',pipebomb:'Throwable. Short fuse, shrapnel.',bunk:'Two beds stacked. Place it to set your respawn point.',Pistol:'9 mm sidearm. Always with you.',Bat:'Ash bat with a taped grip. Always with you.',Pickaxe:'Digs dirt, stone and walls. Always with you.',
+  hardhat:[2,1,1],helmet:[2,2,1],jacket:[2,3,1],vest:[2,2,1],hidecoat:[2,3,1],scrapvest:[2,2,1],cargo:[2,3,1],riot:[2,3,1],tactical:[2,3,1],utility:[2,3,1],shorts:[2,2,1],slacks:[2,3,1],jeans:[2,3,1],schoolbag:[3,3,1],hikepack:[3,4,1],milpack:[3,4,1],cigs:[1,1,4],weed:[1,1,8]};
+const DESC={tactical:'Military combat trousers, pouches everywhere: 10 pockets, so 10 hotbar slots.',utility:'Work overalls with a bib, hammer loops and pockets on every surface: 12 pockets, the most you can carry on your hotbar.',rod:'Hold it at the edge of a river or pond and Use to cast. When the bobber dips, Use again to reel in.',fish:'Grill it at a campfire. Raw fish is risky.',cookedfish:'Flaky, smoky, filling.',water:'Clean water (+water). Leaves an empty bottle.',dirtywater:'River water. Boil it at a campfire, or drink it and maybe get sick.',bottle:'Fill it at a river or pond (Use), or stand in the rain.',soda:'Sugar and fizz. Some water, a little food.',splint:'Use it: injured arms and legs heal four times faster for a few minutes.',pills:'Antibiotics. Use them to cure an infected wound.',batteries:'Recharges your flashlight.',shorts:'2 pockets (2 hotbar slots).',slacks:'3 pockets (3 hotbar slots).',jeans:'4 pockets (4 hotbar slots).',cargo:'Cargo pants: 8 pockets (8 hotbar slots) and a little padding.',riot:'Riot pants: 4 pockets and solid padding.',schoolbag:'Wear it: case grows to 10 × 6. Upgrade it into a hiking pack.',hikepack:'Wear it: case grows to 12 × 8. Upgrade it into a military rucksack.',milpack:'Wear it: case grows to 14 × 9.',cigs:'Smoke one (Use): calms your nerves and steadies your aim for a minute, but costs a little health and makes you cough.',weed:'Smoke it (Use): everything slows and softens for a while, pain fades a little, and you get very hungry.',scrip:'Hand-stamped trade tokens: the money of the end of the world. Survivors and drifters buy and sell for scrip.',saw:'Runs on fuel cans. Press 1 again (or tap Tool) to switch between bat and saw; hold attack to cut. Limbs come off, and hold it on the torso to cut them in half. Also cuts wood.',veg:'Potatoes, carrots, onions. Better cooked.',stew:'Hearty: lots of food, health and warmth.',broth:'Hot drink. Warms you right up.',jerky:'Smoked meat. Light and keeps forever.',roast:'Roast vegetables.',hotbeans:'Warm beans straight from the can.',tnt:'Place it and run: a long fuse, then a big blast that tears through walls.',pipebomb:'Throwable. Short fuse, shrapnel.',bunk:'Two beds stacked. Place it to set your respawn point.',Pistol:'9 mm sidearm. Always with you.',Bat:'Ash bat with a taped grip. Always with you.',Pickaxe:'Digs dirt, stone and walls. Always with you.',
   ammo:'9 mm rounds.',scrap:'Bent metal and wire. Crafting and repairs.',cloth:'Rags. Bandages, tents and clothing.',fuel:'A can of petrol. Pour into a car.',food:'Canned beans. Restores hunger.',
   bandage:'Restores health.',wood:'Chopped logs.',plank:'Building planks.',dirt:'For building.',stone:'For building.',coal:'Fuel for fires and makeshift petrol.',iron:'Smelt into metal plates.',
   metal:'Armor, repairs and walls.',kit:'Fixes a wrecked vehicle.',meat:'Raw. Cook it at a campfire first.',cooked:'Cooked meat. Restores hunger and a little health.',hide:'Animal hide. Coats and dressings.',
@@ -4159,7 +4226,7 @@ $('#cGrid').addEventListener('pointermove',e=>{const d=caseDrag;if(!d||e.pointer
 function dragEnd(e){const d=caseDrag;if(!d)return;caseDrag=null;if(d.moved){const[tx,ty]=dragTarget(e);if(caseFits(menuP,d.s,tx,ty,d.r)){d.s.x=tx;d.s.y=ty;d.s.r=d.r;SND.pick()}}renderCase()}
 $('#cGrid').addEventListener('pointerup',dragEnd);$('#cGrid').addEventListener('pointercancel',dragEnd);
 $('#cGrid').addEventListener('contextmenu',e=>{e.preventDefault();if(caseDrag){caseDrag.r^=1;if(caseDrag.last)dragShow(caseDrag.last)}});
-addEventListener('keydown',e=>{if(menuP&&/^Digit[1-6]$/.test(e.code)&&!e.repeat){hotAssign(+e.code.slice(5)-1);return}if(menuP&&e.code==='KeyR'&&caseDrag){caseDrag.r^=1;if(caseDrag.last)dragShow(caseDrag.last)}});
+addEventListener('keydown',e=>{if(menuP&&HOTKEYS.includes(e.code)&&!e.repeat){const k=HOTKEYS.indexOf(e.code);if(k<pockets(menuP)){hotAssign(k);return}}if(menuP&&e.code==='KeyR'&&caseDrag){caseDrag.r^=1;if(caseDrag.last)dragShow(caseDrag.last)}});
 $('#cAct').addEventListener('click',e=>{const b=e.target.closest('button');const p=menuP;if(!b||!p)return;const s=caseSel,a=b.dataset.a;
   if(a==='org'){caseOrganize(p);SND.pick()}
   else if(s&&a==='rot'){const r=s.r^1;let ok=caseFits(p,s,s.x,s.y,r);if(ok)s.r=r;else{const old=[s.x,s.y,s.r];p.case.splice(p.case.indexOf(s),1);s.r=r;if(!casePlace(p,{...s})){p.case.push(s);[s.x,s.y,s.r]=old;msg(p,'No room to turn that')}else caseSel=p.case[p.case.length-1]}}
@@ -4489,7 +4556,8 @@ function updateAvatars(dt){const now=performance.now();for(const[k,a]of NET.av){
   else{b.legL.rotation.x=sw;b.legR.rotation.x=-sw;b.armL.rotation.x=-sw*.6;b.armR.rotation.x=a.tool===1?-1.4:-.5}}}
 // ---------------- hotbar: six slots, each bound to anything you carry (Minecraft-style). Bindings: 'Bat' 'Saw' 'Pistol' 'Pickaxe',
 // 'b:<block>' build with that block, 'p:<trap>' place that trap/bed/fire, 'i:<item>' eat/use/throw it, 'c:<n>' creative palette entry, null = bare hands
-const HOTN=8,HOT0=['Bat','Pistol','Pickaxe','b:plank','p:spikes',null,null,null];
+const HOTN=12,HOT0=['Bat','Pistol','Pickaxe','b:plank','p:spikes',null,null,null,null,null,null,null];
+const HOTKEYS=['Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9','Digit0','Minus','Equal'],HOTLAB=['1','2','3','4','5','6','7','8','9','0','-','='];
 function bindingFor(p,k){if(k==='Bat'||k==='Pistol'||k==='Pickaxe')return k;if(k==='saw')return'Saw';if(matList(p).some(m=>m[0]===k))return'b:'+k;if(TRAPS.some(t=>t[0]===k))return'p:'+k;if(FOODS[k]||k==='bandage'||k==='pipebomb'||k==='cigs'||k==='weed'||k==='splint'||k==='pills'||k==='rod')return'i:'+k;return null}
 function selectHot(p,s){p.hsel=s;const b=p.hot[s];p.hitem=null;
   if(b==='Bat'||b==='Saw'){p.tool=0;p.useSaw=b==='Saw'&&p.inv.saw>0}else if(b==='Pistol')p.tool=1;else if(b==='Pickaxe')p.tool=2;
@@ -5038,7 +5106,7 @@ function updateSleep(dt){
 }
 
 // ---------------- clothing on the player model
-const WARM={jacket:.45,hidecoat:.65,vest:.15,scrapvest:.1,cargo:.15,riot:.1,helmet:.05,hardhat:0};
+const WARM={jacket:.45,hidecoat:.65,vest:.15,scrapvest:.1,cargo:.15,riot:.1,tactical:.15,utility:.25,helmet:.05,hardhat:0};
 function indoors(p){const x=vc(p.pos.x),z=vc(p.pos.z),y0=vc(p.pos.y+1.8);for(let y=y0;y<Math.min(H,y0+16);y++)if(solid(x,y,z))return true;return false}
 function setBodyFP(p,on){if(p.fpBody===on)return;p.fpBody=on;p.body.g.traverse(o=>o.layers.set(on?0:1+p.i));p.body.head.traverse(o=>o.layers.set(1+p.i))}
 function updateClothes(p){const c=p.cl,set=(m,k)=>{m.visible=!!k;if(k)m.material.color.setHex(CLOTHES[k].col)};
@@ -5324,7 +5392,7 @@ function rumor(n,p){const opts=[],dirName=(dx,dz)=>{const a=Math.atan2(dx,-dz)*1
   return pick(opts)}
 // ---- scrip prices: what things are worth; traders sell at a markup and buy at a discount
 const VALUE={wheel:20,engine:60,battery:25,carradio:15,wrench:20,ammo:2,food:6,veg:3,meat:3,cooked:6,stew:14,broth:10,jerky:4,roast:5,hotbeans:7,bandage:10,fuel:14,kit:30,scrap:2,cloth:2,wood:1,plank:1,metal:8,coal:2,iron:3,stone:1,
-  pipebomb:15,tnt:30,mine:20,spikes:10,beartrap:16,saw:120,tent:25,bed:20,bunk:30,fire:6,hide:4,bone:1,hardhat:15,helmet:30,jacket:22,vest:40,hidecoat:30,scrapvest:35,cargo:18,riot:35};
+  pipebomb:15,tnt:30,mine:20,spikes:10,beartrap:16,saw:120,tent:25,bed:20,bunk:30,fire:6,hide:4,bone:1,hardhat:15,helmet:30,jacket:22,vest:40,hidecoat:30,scrapvest:35,cargo:18,riot:35,tactical:30,utility:24};
 const UNIT={ammo:10,scrap:5,cloth:5,wood:5,plank:10,stone:10,coal:5,bone:5};
 const buyPrice=k=>Math.ceil(VALUE[k]*(UNIT[k]||1)*1.3),sellPrice=k=>Math.max(1,Math.floor(VALUE[k]*(UNIT[k]||1)*.6));
 function shopOf(n){if(n.shop)return n.shop;const pool=n.kind==='bandit'?['ammo','ammo','pipebomb','tnt','fuel','kit','scrap','metal','helmet','vest','jerky','saw','beartrap']:['food','cooked','bandage','bandage','veg','ammo','fuel','cloth','stew','jacket','hardhat','broth','tent'];

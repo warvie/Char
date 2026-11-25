@@ -4,6 +4,13 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+
+## v17.1 — blocks to the horizon
+
+- **Far view** rebuilt as blocks: per-cell top block (id, height), colours averaged from the real texture tiles, greedy-merged tops and side runs; 2-block cells to ~100 m, 4-block cells beyond; built and meshed in 2.5 ms slices. Far terrain samples are cached.
+- **Doors:** 32x64 pixel-art textures (32 px/m, block density), six styles across nine variants.
+- **Hotbar:** limit 12 (keys 1–9, 0, −, =); Tactical pants (10) and Utility overalls (12).
+
 ## v17 — far view
 
 - **Far view:** a low-detail terrain mesh beyond the loaded chunks extends sight to 4x the render distance (toggle next to Render distance). It samples real blocks inside the loaded window and the generator's height function and town plans beyond it, and builds in 2.5 ms slices.
