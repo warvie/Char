@@ -329,7 +329,7 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>Developer mode <select id="devSel"><option value="0">Off</option><option value="1">On</option></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
-    <h4>v15.6 · Nov 25, 2026 — ripples</h4><ul>
+    <h4>v15.7 · Nov 25, 2026 — light &amp; chrome</h4><ul><li>Blood particles are red again (no more black specks)</li><li>Flashlight casts a perfect circle of light, ray-traced against the blocks and painted bright in chunky pixels — it stops at walls and leaves crisp shadows</li><li>Signs, posts, pumps, lamps, car bodies and other metal now carry a soft, blurry sky reflection that follows the time of day</li><li>Creative: sleep any time, anywhere, and a new “Sleep until morning” button in the menu skips straight to dawn</li></ul><h4>v15.6 · Nov 25, 2026 — ripples</h4><ul>
       <li>Rain ripples: wet ground and puddles now ripple with rings spreading from falling drops and a slow wind swell, and the ray-traced reflections bend and wobble through them.</li>
       <li>Stop signs have STOP printed flat on the face in pixel letters, with a grey metal back.</li>
       <li>Run and jump together however you like: push the touch stick to its edge to run, double-tap W to sprint, and a running jump keeps its speed in the air.</li></ul>
@@ -475,7 +475,7 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
   <h3>Workbench</h3>
   <div id="mRec"></div>
   <h3>World</h3>
-  <div class="row"><button id="mSave">Save now</button><button id="mRsp">Respawn (stuck?)</button><button id="mCreative">Creative: off</button><button id="mMain">Main menu</button><button id="mCode">Copy save code</button><label>Render distance <select id="rdSel2"></select></label><label>Graphics <select id="gfxSel2"></select></label><label>Pixel size <select id="pixSel2"></select></label><label>Developer mode <select id="devSel2"><option value="0">Off</option><option value="1">On</option></select></label></div>
+  <div class="row"><button id="mSave">Save now</button><button id="mRsp">Respawn (stuck?)</button><button id="mCreative">Creative: off</button><button id="mSleep" class="hidden">Sleep until morning</button><button id="mMain">Main menu</button><button id="mCode">Copy save code</button><label>Render distance <select id="rdSel2"></select></label><label>Graphics <select id="gfxSel2"></select></label><label>Pixel size <select id="pixSel2"></select></label><label>Developer mode <select id="devSel2"><option value="0">Off</option><option value="1">On</option></select></label></div>
   <textarea id="mCodeOut" class="hidden" rows="2" readonly></textarea>
   <p class="note" id="mSaveNote" style="margin:6px 0 0"></p>
   <div class="row" style="margin-top:14px"><button id="mEat">Eat</button><button id="mBand">Use bandage</button><button id="mClose" class="go" style="margin-left:auto">Close</button></div>
@@ -1479,6 +1479,35 @@ const bakCam=[0,1].map(()=>{const c=new THREE.PerspectiveCamera(100,1.65,.1,60);
 const mirRT=[0,1].map(()=>{const t=new THREE.WebGLRenderTarget(320,100);t.texture.wrapS=THREE.RepeatWrapping;t.texture.repeat.x=-1;t.texture.offset.x=1;return t});
 const bakRT=[0,1].map(()=>new THREE.WebGLRenderTarget(240,144));
 let carCamFrame=0;
+// ---------------- flashlight: a hard-edged circle of light, computed per texel (pixelated) and only where rays from the lamp actually reach
+const FLN=24,FLU={flTan:{value:Math.tan(.36)},flRange:{value:30}},FLT=[];
+for(const i of[0,1]){const d=new Uint8Array(FLN*FLN*4),t=new THREE.DataTexture(d,FLN,FLN,THREE.RGBAFormat);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.needsUpdate=true;FLT.push({d,t,f:0});
+  FLU['flOn'+i]={value:0};FLU['flPos'+i]={value:new V3()};FLU['flDir'+i]={value:new V3(0,0,-1)};FLU['flRt'+i]={value:new V3(1,0,0)};FLU['flUp'+i]={value:new V3(0,1,0)};FLU['flMap'+i]={value:t}}
+const FL_GLSL='uniform float flTan,flRange,flOn0,flOn1;uniform vec3 flPos0,flPos1,flDir0,flDir1,flRt0,flRt1,flUp0,flUp1;uniform sampler2D flMap0,flMap1;\n';
+const flBlock=i=>`if(flOn${i}>0.){vec3 Lv=Pq-flPos${i};float Ld=length(Lv);vec3 L=Lv/max(Ld,.001);float fz=dot(L,flDir${i});
+  if(fz>.3&&Ld<flRange){float u=dot(L,flRt${i})/fz/flTan,w=dot(L,flUp${i})/fz/flTan;
+    if(u*u+w*w<=1.){float hd=texture2D(flMap${i},vec2(u,w)*.5+.5).r*flRange;
+      if(Ld<=hd+.22){float nl=max(dot(normalize(vPxN),-L),0.);float lv=floor(clamp(nl*(1.15/(1.+Ld*Ld*.01)),0.,1.)*6.+.35)/6.;flAdd+=vec3(1.,.95,.8)*flOn${i}*lv*1.7;}}}}`;
+const FL_ADD=`{vec3 Pq=(floor(vPxW*16.-normalize(vPxN)*.01)+.5)/16.;vec3 flAdd=vec3(0.);${flBlock(0)}${flBlock(1)}gl_FragColor.rgb+=diffuseColor.rgb*flAdd;}`;
+const _fd=new V3(),_fr=new V3(),_fu=new V3(),_rd=new V3();
+function flashUpdate(){for(const i of[0,1]){const p=players[i],U=FLU,on=p&&p.torch&&!p.vehicle&&!(p.dead>0)&&((p.batt??100)>0||p.creative);
+  if(!on){U['flOn'+i].value=0;continue}
+  const eye=p.cam.position;p.cam.getWorldDirection(_fd);_fr.set(-_fd.z,0,_fd.x);if(_fr.lengthSq()<1e-6)_fr.set(1,0,0);_fr.normalize();_fu.crossVectors(_fr,_fd).normalize();
+  const src=new V3().copy(eye).addScaledVector(_fr,.18).addScaledVector(_fu,-.12);
+  U['flPos'+i].value.copy(src);U['flDir'+i].value.copy(_fd);U['flRt'+i].value.copy(_fr);U['flUp'+i].value.copy(_fu);
+  U['flOn'+i].value=(p.batt!=null&&p.batt<10&&!p.creative)?.5+Math.random()*.35:1;
+  // ray grid across the cone: every other frame, half the rows each time
+  const F=FLT[i],tn=U.flTan.value,R_=U.flRange.value;F.f^=1;
+  for(let j=F.f;j<FLN;j+=2)for(let k=0;k<FLN;k++){const u=(k+.5)/FLN*2-1,w=(j+.5)/FLN*2-1;const o=(j*FLN+k)*4;if(u*u+w*w>1.1){F.d[o]=0;continue}
+    _rd.copy(_fd).addScaledVector(_fr,u*tn).addScaledVector(_fu,w*tn).normalize();const h=rayVox(src,_rd,R_);F.d[o]=h?Math.min(255,Math.round(h.t/R_*255)+1):255}
+  F.t.needsUpdate=true}}
+// ---------------- blurry reflections for metal and signs: a tiny cube of the sky around you, repainted every few seconds
+const ENVC=[0,1,2,3,4,5].map(()=>{const c=document.createElement('canvas');c.width=c.height=8;return c}),ENV=new THREE.CubeTexture(ENVC);ENV.needsUpdate=true;let envT=0;
+function updEnv(dt){if((envT-=dt)>0)return;envT=4;const tp=skyMat.uniforms.top.value,hz=skyMat.uniforms.hor.value,dl=dayLight(),gr=[.16*dl+.02,.15*dl+.02,.12*dl+.02];
+  const rgb=(c,k=1)=>`rgb(${Math.min(255,c[0]*255*k)|0},${Math.min(255,c[1]*255*k)|0},${Math.min(255,c[2]*255*k)|0})`,T_=[tp.r,tp.g,tp.b],Hh=[hz.r,hz.g,hz.b];
+  ENVC.forEach((c,f)=>{const x=c.getContext('2d');if(f===2){x.fillStyle=rgb(T_);x.fillRect(0,0,8,8);return}if(f===3){x.fillStyle=rgb(gr);x.fillRect(0,0,8,8);return}
+    const g=x.createLinearGradient(0,0,0,8);g.addColorStop(0,rgb(T_));g.addColorStop(.48,rgb(Hh));g.addColorStop(.55,rgb(gr,1.3));g.addColorStop(1,rgb(gr));x.fillStyle=g;x.fillRect(0,0,8,8)});ENV.needsUpdate=true}
+function reflectify(m,r){if(!m||m.envMap)return m;m.envMap=ENV;m.combine=THREE.MixOperation;m.reflectivity=r;m.needsUpdate=true;return m}
 // bathroom mirrors: when you stand near one, a camera at your reflected eye (behind the glass) renders the room onto it, so you see yourself
 const bathCam=new THREE.PerspectiveCamera(50,.55/.72,.05,40);bathCam.layers.enableAll();bathCam.layers.disable(3);bathCam.layers.disable(4);
 const bathRT=new THREE.WebGLRenderTarget(176,232);bathRT.texture.wrapS=THREE.RepeatWrapping;bathRT.texture.repeat.x=-1;bathRT.texture.offset.x=1;
@@ -1552,7 +1581,7 @@ function updateRT(c){
 }
 const SHADOW_ORIG=THREE.ShaderChunk.shadowmask_pars_fragment;
 // shadow lookups snapped to the 1/32 m texture-pixel grid so every shadow edge is pixelated
-function pxShadows(m){if(!m||m.isMeshBasicMaterial||(m.userData&&m.userData.pxs))return m;(m.userData=m.userData||{}).pxs=1;const prev=m.onBeforeCompile;m.onBeforeCompile=(sh,r)=>{if(prev)prev.call(m,sh,r);
+function pxShadows(m){if(!m||m.isMeshBasicMaterial||(m.userData&&m.userData.pxs))return m;(m.userData=m.userData||{}).pxs=1;const prev=m.onBeforeCompile;m.onBeforeCompile=(sh,r)=>{if(prev)prev.call(m,sh,r);if(typeof FLU!=='undefined'){Object.assign(sh.uniforms,FLU)}
   sh.vertexShader='varying vec3 vPxW,vPxN;\n'+sh.vertexShader.replace('#include <project_vertex>','vPxW=(modelMatrix*vec4(transformed,1.)).xyz;vPxN=normalize(mat3(modelMatrix)*objectNormal);\n#include <project_vertex>');
   sh.fragmentShader=`varying vec3 vPxW,vPxN;
 #if defined(USE_SHADOWMAP)&&NUM_DIR_LIGHT_SHADOWS>0
@@ -1565,7 +1594,7 @@ float getShadowMask(){float s=1.;
   vec3 n=normalize(vPxN),q=(floor((vPxW-n*.004)*16.)+.5)/16.;DirectionalLightShadow ds=directionalLightShadows[0];
   s*=getShadow(directionalShadowMap[0],ds.shadowMapSize,ds.shadowBias,ds.shadowRadius,directionalShadowMatrix[0]*vec4(q+n*ds.shadowNormalBias,1.))*1.;
 #endif
-  return s;}`)};return m}
+  return s;}`);if(typeof FLU!=='undefined')sh.fragmentShader=FL_GLSL+sh.fragmentShader.replace('gl_FragColor = vec4( outgoingLight, diffuseColor.a );','gl_FragColor = vec4( outgoingLight, diffuseColor.a );\n'+FL_ADD)};return m}
 function installVmatShader(){vmat.onBeforeCompile=sh=>{
   Object.assign(sh.uniforms,RTU);
   sh.vertexShader='varying vec3 vRtW,vRtN;attribute vec4 aBl;attribute float aBlT;varying vec4 vBl;varying float vBlT;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvRtW=(modelMatrix*vec4(transformed,1.)).xyz;vRtN=normalize(mat3(modelMatrix)*objectNormal);vBl=aBl;vBlT=aBlT;');
@@ -1961,12 +1990,16 @@ function breakGlass(x,y,z){noise(new V3((x+.5)*VS,y*VS,(z+.5)*VS),26);
 // ---------------- furniture meshes: every piece in a chunk is merged into one vertex-coloured mesh
 const furnMeshes=[],FBUF=new Map(),furnMat=pxShadows(new THREE.MeshLambertMaterial({vertexColors:true}));
 // furniture gets a pixel grain (1/32 m texels, same as blocks), hashed in world space so it never stretches
-{const prev=furnMat.onBeforeCompile;furnMat.onBeforeCompile=(sh,r)=>{prev.call(furnMat,sh,r);sh.fragmentShader=sh.fragmentShader.replace('#include <color_fragment>',
-  '#include <color_fragment>\n{vec3 q=floor((vPxW-normalize(vPxN)*.002)*16.);float h=fract(sin(dot(q,vec3(12.9898,78.233,37.719)))*43758.5453);float h2=fract(sin(dot(floor(q/4.),vec3(7.13,3.71,5.17)))*24634.6345);diffuseColor.rgb*=.88+.14*h+.06*h2;}')}}
+furnMat.envMap=ENV;furnMat.combine=THREE.MixOperation;furnMat.reflectivity=.3;
+// furniture: per-texel grain, and the metal flag (red channel + 2) decoded so only metal pieces take the blurry sky reflection
+{const prev=furnMat.onBeforeCompile;furnMat.onBeforeCompile=(sh,r)=>{prev.call(furnMat,sh,r);
+  sh.fragmentShader=sh.fragmentShader.replace('#include <color_fragment>',
+    'float fMetal=step(1.5,vColor.r);diffuseColor.rgb*=vec3(vColor.r-2.*fMetal,vColor.g,vColor.b);\n{vec3 q=floor((vPxW-normalize(vPxN)*.002)*16.);float h=fract(sin(dot(q,vec3(12.9898,78.233,37.719)))*43758.5453);float h2=fract(sin(dot(floor(q/4.),vec3(7.13,3.71,5.17)))*24634.6345);diffuseColor.rgb*=.88+.14*h+.06*h2;}')
+    .replace('#include <envmap_fragment>',THREE.ShaderChunk.envmap_fragment.replace(/reflectivity/g,'(reflectivity*fMetal)'))}}
 const WOODS=[0x6b4a2e,0x8a6a44,0x4a3424,0x5a4030],FABRIC=[0x5a3a3a,0x3a4a5a,0x4a5a3a,0x6a5a48,0x3a3a42,0x6a4a30];
 const tmpCol=new THREE.Color();
 function fbuf(k){let b=FBUF.get(k);if(!b){b={P:[],N:[],C:[],I:[]};FBUF.set(k,b)}return b}
-const FBB=[0,0,0,0,0,0];let FBK=0;
+const FBB=[0,0,0,0,0,0];let FBK=0,FBMET=false;const REFL_F=new Set(['stop','rsign','gsign','spost','tlight','lamppost','pump','plane','swing','slide','lswitch','streetlight','hydrant','mailbox','pole']);
 function furnBuilder(wx,wy,wz,yaw){
   const k=FBK=slotOf(Math.floor(vc(wx)/CS),Math.floor(vc(wz)/CS)),b=fbuf(k),c=Math.cos(yaw),s=Math.sin(yaw);
   return(w,h,d,col,x,y,z,ry=0,rz=0)=>{ // box in local metres, origin at footprint floor centre, front = +z; rz rolls about local z
@@ -1974,7 +2007,7 @@ function furnBuilder(wx,wy,wz,yaw){
     for(const f of FACES){const n=b.P.length/3,sh=.75+f[4]*.25;
       let fnx=f[0],fny=f[1];if(rz){const cr=Math.cos(rz),sr=Math.sin(rz);fnx=f[0]*cr-f[1]*sr;fny=f[0]*sr+f[1]*cr}const nx0=fnx*c2+f[2]*s2,nz0=-fnx*s2+f[2]*c2,nx=nx0*c+nz0*s,nz=-nx0*s+nz0*c;
       for(const q of f[3]){let lx=(q[0]-.5)*w,ly=(q[1]-.5)*h,lz=(q[2]-.5)*d;if(rz){const cr=Math.cos(rz),sr=Math.sin(rz),t=lx*cr-ly*sr;ly=lx*sr+ly*cr;lx=t}ly+=y;const rx=lx*c2+lz*s2+x,rz2=-lx*s2+lz*c2+z;
-        const X=wx+rx*c+rz2*s,Y=wy+ly,Z=wz-rx*s+rz2*c;b.P.push(X,Y,Z);if(X<FBB[0])FBB[0]=X;if(Y<FBB[1])FBB[1]=Y;if(Z<FBB[2])FBB[2]=Z;if(X>FBB[3])FBB[3]=X;if(Y>FBB[4])FBB[4]=Y;if(Z>FBB[5])FBB[5]=Z;b.N.push(nx,fny,nz);b.C.push(cr*sh,cg*sh,cb*sh)}
+        const X=wx+rx*c+rz2*s,Y=wy+ly,Z=wz-rx*s+rz2*c;b.P.push(X,Y,Z);if(X<FBB[0])FBB[0]=X;if(Y<FBB[1])FBB[1]=Y;if(Z<FBB[2])FBB[2]=Z;if(X>FBB[3])FBB[3]=X;if(Y>FBB[4])FBB[4]=Y;if(Z>FBB[5])FBB[5]=Z;b.N.push(nx,fny,nz);b.C.push(cr*sh+(FBMET?2:0),cg*sh,cb*sh)}
       b.I.push(n,n+1,n+2,n,n+2,n+3)}};
 }
 const pick=a=>a[RI(0,a.length-1)];
@@ -2179,10 +2212,10 @@ function makeSign(sg){const c=document.createElement('canvas'),h=64,w=Math.round
   const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;
   const g=new THREE.Group(),hh=.9;g.position.set(sg.x,sg.y,sg.z);
   const back=new THREE.Mesh(box(sg.w+.12,hh+.12,.1),lam(0x2a2a2a));back.position.z=-.02;g.add(back);
-  const face=new THREE.Mesh(new THREE.PlaneGeometry(sg.w,hh),new THREE.MeshLambertMaterial({map:t}));face.position.z=-.075;face.rotation.y=Math.PI;g.add(face);
+  const face=new THREE.Mesh(new THREE.PlaneGeometry(sg.w,hh),new THREE.MeshLambertMaterial({map:t,envMap:ENV_LATE(),combine:THREE.MixOperation,reflectivity:.12}));face.position.z=-.075;face.rotation.y=Math.PI;g.add(face);
   if(sg.ry)g.rotation.y=sg.ry;if(rng()<.3)g.rotation.z=R(-.08,.08);scene.add(g);freeze(g);return g}
 const furnSeed=sp=>(Math.imul(Math.round(sp[1]*64),73856093)^Math.imul(Math.round(sp[3]*64),19349663)^Math.imul(Math.round(sp[2]*64),83492791)^sp[0].length)|0;
-function buildOne(sp){const sv=rng;rng=mulberry(furnSeed(sp));FBB[0]=FBB[1]=FBB[2]=1e9;FBB[3]=FBB[4]=FBB[5]=-1e9;buildFurn(sp);rng=sv;sp.bb=FBB.slice();sp.k=FBK}
+function buildOne(sp){const sv=rng;rng=mulberry(furnSeed(sp));FBMET=REFL_F.has(sp[0])||(typeof FMETAL!=='undefined'&&FMETAL.has(sp[0]));FBB[0]=FBB[1]=FBB[2]=1e9;FBB[3]=FBB[4]=FBB[5]=-1e9;buildFurn(sp);rng=sv;sp.bb=FBB.slice();sp.k=FBK}
 function buildFurnMeshes(list,only){
   for(const sp of list)if(!sp.gone&&(only==null||sp.k===only))buildOne(sp);
   if(only!=null&&!FBUF.has(only)&&furnMeshes[only]){scene.remove(furnMeshes[only]);furnMeshes[only].geometry.dispose();furnMeshes[only]=null}
@@ -2233,8 +2266,8 @@ function makeVM(){
 const PN=900,pPos=new Float32Array(PN*3).fill(-100),pVel=new Float32Array(PN*3),pCol=new Float32Array(PN*3),pLife=new Float32Array(PN),pBlood=new Uint8Array(PN);let pI=0;
 const pGeo=new THREE.BufferGeometry();
 pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));pGeo.setAttribute('color',new THREE.BufferAttribute(pCol,3));
-const pts=new THREE.Points(pGeo,new THREE.PointsMaterial({size:.14,vertexColors:true}));pts.frustumCulled=false;scene.add(pts);
-const RED=[.55,.02,.02],DUST=[.5,.47,.42];
+const pts=new THREE.Points(pGeo,new THREE.PointsMaterial({size:.14,vertexColors:true,fog:false}));pts.frustumCulled=false;scene.add(pts);
+const RED=[.86,.05,.04],DUST=[.5,.47,.42];
 function burst(p,n,force,col,up=2){for(let k=0;k<n;k++){const j=pI;pI=(pI+1)%PN;const o=j*3,s=.7+rng()*.5;pBlood[j]=col===RED?1:0;
   pPos[o]=p.x;pPos[o+1]=p.y;pPos[o+2]=p.z;pVel[o]=(rng()-.5)*force;pVel[o+1]=rng()*force*.6+up;pVel[o+2]=(rng()-.5)*force;
   pLife[j]=R(.6,1.6);pCol[o]=col[0]*s;pCol[o+1]=col[1]*s;pCol[o+2]=col[2]*s}}
@@ -2512,6 +2545,7 @@ function vbox(w,h,d){const k=w+','+h+','+d;if(vGeoC[k])return vGeoC[k];const g=n
 function vKind(c,body){if(c===body)return'paint';const r=(c>>16)&255,g=(c>>8)&255,b=c&255,l=(r+g+b)/765,sat=Math.max(r,g,b)-Math.min(r,g,b);
   if(l>.85&&r>200&&g>200&&b<190)return null;if(r>120&&g<40&&b<40)return null; // lamps
   if(l<.1)return'rubber';if(l<.2)return'plastic';if(sat<20&&l<.75)return'metal';if(sat<45&&l<.35)return'fabric';return'paint'}
+const ENV_LATE=()=>typeof ENV!=='undefined'?ENV:null;
 function vMat(c,kind){const key=c+kind;if(vMatC[key])return vMatC[key];const N=16,cv=document.createElement('canvas');cv.width=cv.height=N;const x=cv.getContext('2d'),r=mulberry(c^kind.length*7919),base=[(c>>16)&255,(c>>8)&255,c&255];
   const px=(i,j,k,t)=>{const q=t||base;x.fillStyle=`rgb(${Math.min(255,q[0]*k)|0},${Math.min(255,q[1]*k)|0},${Math.min(255,q[2]*k)|0})`;x.fillRect(i,j,1,1)};
   for(let j=0;j<N;j++)for(let i=0;i<N;i++){let k=1;
@@ -2520,7 +2554,7 @@ function vMat(c,kind){const key=c+kind;if(vMatC[key])return vMatC[key];const N=1
   if(kind==='paint'){for(let n=0;n<3;n++){const cx=r()*N|0,cy=r()*N|0;for(let q=0;q<2+r()*4;q++)px((cx+(r()*3|0))%N,(cy+(r()*2|0))%N,1,[110+r()*40,62+r()*20,34])} // rust
     for(let n=0;n<2;n++){let cx=r()*N|0,cy=r()*N|0;for(let q=0;q<5;q++){px(cx%N,cy%N,1.25);cx++;if(r()<.4)cy++}}} // scratches
   const t=new THREE.CanvasTexture(cv);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.RepeatWrapping;
-  const m=pxShadows(new THREE.MeshLambertMaterial({map:t}));m.userData.c=c;m.userData.kind=kind;return vMatC[key]=m}
+  const m=pxShadows(new THREE.MeshLambertMaterial({map:t}));m.userData.c=c;m.userData.kind=kind;if(kind==='metal'||kind==='paint'){m.envMap=ENV_LATE();m.combine=THREE.MixOperation;m.reflectivity=kind==='metal'?.26:.13}return vMatC[key]=m}
 function texVehicle(g,body){g.traverse(o=>{if(!o.isMesh||!o.material||o.material.isMeshBasicMaterial||o.material===glassMat||o.material.transparent)return;if(o.material.map&&!(o.material.userData&&o.material.userData.kind))return;
   const c=o.material.userData&&o.material.userData.c!=null?o.material.userData.c:o.material.color&&o.material.color.getHex?o.material.color.getHex():null;if(c==null)return;const k=vKind(c,body);if(!k)return;
   const P=o.geometry&&o.geometry.parameters;if(P&&P.width!=null&&P.depth!=null&&o.geometry.type==='BoxGeometry')o.geometry=vbox(P.width,P.height,P.depth);o.material=vMat(c,k)})}
@@ -3394,7 +3428,7 @@ function updatePlayer(p,dt){
   if(p.dead>0){const ops=respawnOpts(p);p.rspSel=(p.rspSel||0)%ops.length;if(inp.interact||inp.toolNext)p.rspSel=(p.rspSel+1)%ops.length;if(inp.jump&&p.dead<6.5)p.dead=.001;
     p.dead-=dt;if(p.dead<=0)respawn(p);p.cam.position.set(p.pos.x,p.pos.y+.4,p.pos.z);p.body.g.position.copy(p.pos);return}
   if(p.sleeping){const b=p.sleeping;
-    if(inp.interact||(dayLight()>=.35&&!sleepT)){p.sleeping=null;p.body.g.rotation.x=0;p.body.g.rotation.order='XYZ';settle(p,true);msg(p,'You get up')}
+    if(inp.interact||(dayLight()>=.35&&!sleepT&&!p.creative)){p.sleeping=null;p.body.g.rotation.x=0;p.body.g.rotation.order='XYZ';settle(p,true);msg(p,'You get up')}
     else{const c=Math.cos(b.yaw),sn=Math.sin(b.yaw);p.cam.position.set(b.pos.x-.65*sn,b.pos.y+.8,b.pos.z-.65*c);p.cam.rotation.set(.45,b.yaw+Math.PI,0);
       p.body.g.rotation.order='YXZ';p.body.g.rotation.set(-Math.PI/2,b.yaw,0);p.body.g.position.set(b.pos.x+.9*sn,b.pos.y+.5,b.pos.z+.9*c);
       p.vm.g.visible=false;p.outline.visible=false;p.light.intensity=0;p.hunger=Math.max(0,p.hunger-dt*.1);return}}
@@ -3460,7 +3494,7 @@ function updatePlayer(p,dt){
   const at=assistTarget(eye,dir,45,(p.pad?5:3.5)*Math.PI/180,false);p.onTarget=!!at;
   if(inp.interact)interact(p);
   // flashlight
-  p.light.intensity=p.torch&&((p.batt??100)>0||p.creative)?1.9*(p.batt<10?.5+Math.random()*.4:1):0;p.vm.g.visible=true;
+  p.light.intensity=0;p.vm.g.visible=true;
   p.light.position.copy(eye).addScaledVector(dir,.3);p.light.target.position.copy(eye).addScaledVector(dir,10);
   // view model + body
   const vm=p.vm;vm.items.forEach((m,n)=>m.visible=n===p.tool);if(vm.saw){const on=p.tool===0&&p.useSaw;vm.saw.visible=on;if(on)vm.items[0].visible=false;p.sawRev=Math.max(0,(p.sawRev||0)-.08);vm.saw.position.set((Math.random()-.5)*.012*p.sawRev,(Math.random()-.5)*.012*p.sawRev,0)}vm.blk.material.color.setHex(BCOL[curMat(p)[1]]);
@@ -3981,7 +4015,7 @@ function closeMenu(){
 function renderMenu(){
   const p=menuP;if(!p)return;
   $('#mTitle').textContent=`Attaché case — Player ${p.i+1}`;
-  renderCase();renderBoard();$('#mCreative').textContent=`Creative: ${p.creative?'on':'off'}`;
+  renderCase();renderBoard();$('#mCreative').textContent=`Creative: ${p.creative?'on':'off'}`;$('#mSleep').classList.toggle('hidden',!p.creative);
   $('#mRec').innerHTML=RECIPES.map((r,n)=>{const ok=Object.entries(r.need).every(([a,q])=>haveN(p,a)>=q);
     return`<div class="rec"><img class="ricon" alt="" src="${pxIcon(r.out)}"><div><b>${r.label}</b> → ${r.n} ${LABEL[r.out].toLowerCase()}<small>Needs ${Object.entries(r.need).map(([a,q])=>`<img class="rimg" alt="" src="${pxIcon(a)}">${q} ${LABEL[a].toLowerCase()}`).join(' + ')}</small></div><button data-r="${n}" ${ok?'':'disabled'}>Craft</button></div>`}).join('');
   const ar=Math.round(armorOf(p)*100);
@@ -4760,6 +4794,7 @@ function campsite(x,z,lit){const ty=topY(x,z);if(ty<0)return;const wx=(x+.5)*VS,
 }
 function nearestBed(p,r){let best=null,bd=r;for(const b of beds){const d=b.pos.distanceTo(p.pos);if(d<bd){bd=d;best=b}}return best}
 function trySleep(p,b){
+  if(p.creative){p.sleeping=b||{pos:p.pos.clone(),yaw:p.yaw,free:true};p.dig=null;msg(p,'You lie down and sleep through to morning…');return}
   if(dayLight()>=.35){p.spawnPt=new V3(b.pos.x+Math.cos(b.yaw)*.9,b.pos.y,b.pos.z-Math.sin(b.yaw)*.9);msg(p,'Respawn point set. You can only sleep once night falls');return}
   if(zombies.some(z=>!z.dead&&z.pos.distanceTo(p.pos)<10)||animals.some(a=>!a.dead&&a.A.hostile===true&&a.pos.distanceTo(p.pos)<10)){msg(p,"You can't sleep with something hunting this close");return}
   if(players.some(q=>q!==p&&q.sleeping===b)){msg(p,'Someone is already in this bed');return}
@@ -4769,7 +4804,7 @@ function updateSleep(dt){
   const alive=players.filter(p=>!(p.dead>0));
   if(!sleepT&&alive.length&&alive.every(p=>p.sleeping)){sleepT=2.4;$('#fade').style.opacity=1}
   if(sleepT){const prev=sleepT;sleepT=Math.max(0,sleepT-dt);
-    if(prev>1.2&&sleepT<=1.2){if(tDay>.5)day++;tDay=.03;
+    if(prev>1.2&&sleepT<=1.2){if(tDay>.5||(players.some(p=>p.creative)&&tDay>.04))day++;tDay=.03;
       for(const p of players){if(p.sleeping){p.sleeping=null;p.body.g.rotation.x=0;p.body.g.rotation.order='XYZ';settle(p,true)}p.hunger=Math.max(5,p.hunger-30);p.thirst=Math.max(5,(p.thirst??100)-35);p.tired=0;p.hp=Math.min(100,p.hp+50)}
       for(const z of zombies)if(!z.dead&&players.every(p=>z.pos.distanceTo(p.pos)>22)){scene.remove(z.g);z.gone=true}
       msg(null,`You wake at dawn. Day ${day}.`);$('#fade').style.opacity=0}}
@@ -5267,7 +5302,7 @@ function frame(){
   if(worldReady){updateWindow(false);const cs=running?players.map(p=>p.vehicle?p.vehicle.pos:p.pos):[spawn];streamChunks(cs,isTouch?2:4);cullT-=dt;if(cullT<=0){cullT=.5;cullEntities(cs)}
     if(running){saveT-=dt;if(saveT<=0){saveT=90;autoSave()}}}
   if(running&&!paused)update(dt);else{pressed.clear();T.pressed.clear()}
-  try{devTick()}catch(e){}
+  try{devTick()}catch(e){}try{if(running)flashUpdate();updEnv(dt)}catch(e){}
   if(!running){tDay+=dt/DAYLEN*.3;updSky()}
   grassTime.value=now/1000;adaptRes(dt);render();requestAnimationFrame(frame);
 }
@@ -5511,6 +5546,7 @@ $('#bCoop').onclick=()=>play(2);
 $('#bRand').onclick=()=>{$('#seedIn').value=String((Math.random()*1e9)|0)};
 $('#bLoad').onclick=()=>loadCode($('#codeIn').value);
 $('#bCont').onclick=()=>{try{loadCode(localStorage.getItem('deadground-save'))}catch(e){}};
+$('#mSleep').onclick=()=>{const p=menuP;if(!p||!p.creative)return;closeMenu&&closeMenu();for(const q of players)if(q.creative||players.length===1)trySleep(q,null);if(players.some(q=>!q.sleeping))msg(p,'Everyone needs to be asleep (or in creative) to skip the night')};
 $('#mCreative').onclick=()=>{const p=menuP;if(!p)return;p.creative=!p.creative;p.fly=false;msg(p,p.creative?'Creative mode: every block, unlimited, no damage. Double-tap jump to fly':'Survival mode');renderMenu()};
 $('#mRsp').onclick=()=>{const p=menuP;if(!p)return;if(p.vehicle)exitVehicle(p);respawn(p);closeMenu()};
 $('#mSave').onclick=async()=>{await autoSave();$('#mSaveNote').textContent='Saved in this browser.'};

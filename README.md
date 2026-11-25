@@ -62,6 +62,9 @@ To play from a link, turn on GitHub Pages: **Settings → Pages → Deploy from 
 - **Zombies differ at a glance:** heights from short to tall, thin to heavy builds, and outfits from tees, hoodies, flannel and overalls to suits, dresses, hospital gowns and police uniforms, with jeans, slacks or shorts, different shoes, and hair from bald and buzzed to long, ponytails, mohawks and patchy, plus beards.
 - **Tents** are pixel-built: a stepped ridge, a door flap, a rainfly with guy lines and stakes, and gear inside.
 - **Rain ripples:** wet ground and puddles ripple with rings spreading out from falling drops (each landing at its own moment) and a slow wind swell, drawn on the same pixel grid as everything else. The ripples bend the ray-traced reflections, so street lights and buildings wobble and smear in the puddles.
+- **Flashlight:** a perfect circle of light, ray-traced against the blocks each frame and painted in chunky pixel steps, so walls cut it off with crisp shadows
+- **Metal sheen:** signs, posts, pumps, lamps and car bodies carry a soft, blurry sky reflection that follows the time of day
+- **Red blood:** blood particles are bright red and ignore fog, so they never turn black
 - **Rain you can place:** the rain's volume follows the distance from your head to the nearest surface it's landing on (sampled in rings out to 15 m), so it's loud in the open, softer and muffled when there's a roof over you, quieter deep inside big buildings and silent underground.
 - **3D sound:** every sound in the world is placed where it happens. Volume falls off with distance, distant sounds lose their high end and pick up more echo, sounds pan as you turn your head, and sounds behind you are muffled. Zombie groans and their shuffling feet, doors, breaking glass, bandit gunfire, explosions, car alarms, campfire crackle and birds all come from their source; the eerie ambience comes from somewhere off in the dark.
 - **Sound** is all synthesized but modelled on the real thing: footsteps that change with the ground, a gunshot crack with room echo, an engine whose note follows its revs, rolling thunder, rain and gusting wind, and the roar of passing airliners.
@@ -140,6 +143,7 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 ## Pockets, backpacks and how you died
 
 - **Pockets are your hotbar:** the pants you wear decide how many hotbar slots you get — shorts 2, slacks 3, jeans 4, riot pants 4, cargo pants 8. You start with random pants.
+- **Creative mode** can sleep any time and anywhere; the menu has a *Sleep until morning* button that skips to dawn.
 - **Creative mode** has a bottomless case: 14 wide, it grows by rows as you pick things up and shrinks back when you empty it.
 - **Backpacks are your case:** no pack gives an 8 × 5 case; a school backpack 10 × 6; a hiking pack 12 × 8; a military rucksack 14 × 9. Schools are full of backpacks. Sew one from cloth, then upgrade the one you're wearing in the crafting list. Every recipe shows pictures of what it makes and needs.
 - **Death:** when you die, the game says how (eaten, shot by a named bandit, run over, starved, frozen, blown up…), to you, the other split-screen player and everyone online.
