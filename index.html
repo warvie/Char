@@ -48,7 +48,10 @@ details summary{cursor:pointer;color:var(--dim);font-weight:600;padding:6px 0}
 .cross{position:absolute;left:50%;top:50%;width:20px;height:20px;transform:translate(-50%,-50%)}
 .cross::before,.cross::after{content:"";position:absolute;background:rgba(235,230,216,.85);box-shadow:0 0 2px #000}
 .cross::before{left:9px;top:2px;width:2px;height:16px}
-.cross.on::before,.cross.on::after{background:#ff6b55}.cross::after{top:9px;left:2px;height:2px;width:16px}
+.cross.on::before,.cross.on::after{background:#ff6b55}
+.cross.hit,.cross.kill{transform:translate(-50%,-50%) rotate(45deg)}.cross.hit::before,.cross.hit::after{background:#fff!important}.cross.kill::before,.cross.kill::after{background:#ff3a2a!important}
+.pops{position:absolute;left:50%;top:56%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none;z-index:6}.pop{font:14px DGPixel,monospace;color:#f4e8b0;text-shadow:0 1px 0 #000,0 0 4px #000;opacity:0;animation:popUp 1.8s ease-out forwards}
+@keyframes popUp{0%{opacity:0;transform:translateY(8px)}12%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0;transform:translateY(-22px)}}.cross::after{top:9px;left:2px;height:2px;width:16px}
 .prompt{position:absolute;left:50%;top:calc(50% + 28px);transform:translateX(-50%);background:rgba(0,0,0,.6);padding:5px 12px;border-radius:3px;font-weight:600;white-space:nowrap;font-size:20px}
 .prompt:empty{display:none}
 .stats{position:absolute;left:16px;bottom:16px;width:min(220px,38%)}
@@ -84,11 +87,14 @@ details summary{cursor:pointer;color:var(--dim);font-weight:600;padding:6px 0}
 .dead small{font:600 20px DGPixel,'Pixelify Sans',sans-serif;color:var(--ink)}
 .rsp{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;justify-content:center}.rsp button{pointer-events:auto;font:20px DGPixel,'VT323',sans-serif;letter-spacing:.04em}.rsp button.on{background:var(--rust);border-color:#e0634c}
 .tag{position:absolute;top:14px;left:50%;transform:translateX(-50%);font:20px DGPixel,'VT323',sans-serif;letter-spacing:.05em;background:rgba(0,0,0,.55);padding:3px 12px;border-radius:3px}
+#compass{position:fixed;top:calc(38px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:6;pointer-events:none;width:300px;height:22px;image-rendering:pixelated;opacity:.9}
 #top{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:6;background:rgba(0,0,0,.7);padding:6px 18px;border-radius:0 0 6px 6px;font:20px DGPixel,'VT323',sans-serif;letter-spacing:.05em;white-space:nowrap}
 #top em{font-style:normal;color:var(--rust)}
 #split{position:fixed;top:0;bottom:0;left:50%;width:3px;margin-left:-1px;background:#000;z-index:6}
 /* menu */
 #menu .kit{max-width:720px}
+#mClose{position:fixed;top:calc(10px + env(safe-area-inset-top));right:max(calc(12px + env(safe-area-inset-right)),calc((100vw - 720px)/2 + 10px));z-index:26;padding:9px 16px;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+#mTitle{padding-right:120px}
 #menu h2{font-size:40px;color:var(--olive)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin:12px 0 18px}
 .grid div{background:#1d1a14;border:1px solid var(--line);padding:6px 10px;border-radius:3px;display:flex;justify-content:space-between;gap:8px;font-size:20px}
@@ -301,7 +307,7 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="huds"></div>
-<div id="top" class="hidden"></div>
+<div id="top" class="hidden"></div><canvas id="compass" class="hidden" width="300" height="22"></canvas>
 <div id="board" class="hidden"></div>
 <div id="talk" class="hidden"><h2 id="talkName"></h2><p id="talkLine" class="tline"></p><div id="talkOpts" class="topts"></div></div>
 <div id="cook" class="hidden"><h2>Campfire</h2><div id="cookList"></div><div class="row" style="margin-top:10px"><button id="cookClose" class="go" style="margin-left:auto">Done</button></div></div>
@@ -324,12 +330,13 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>World seed <input id="seedIn" inputmode="numeric" autocomplete="off"></label>
     <button id="bRand" type="button">Random seed</button>
     <label>Render distance <select id="rdSel"></select></label>
+    <label>Far view <select id="farSel"><option value="1">On (4x distance)</option><option value="0">Off</option></select></label>
     <label>Graphics <select id="gfxSel"></select></label>
     <label>Pixel size <select id="pixSel"></select></label>
     <label>Developer mode <select id="devSel"><option value="0">Off</option><option value="1">On</option></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
-    <h4>v16 · Nov 25, 2026 — the compounds</h4><ul><li>Corporate military bases out in the wilds: a walled compound with watchtowers, an HQ, barracks, an armory, a helipad and olive trucks, and the best loot in the game. About half are still held by a private security garrison that warns you off and opens fire inside the wall; shoot one and the whole unit comes for you. The rest were overrun and are full of the dead</li><li>Survivors now drive: some find a working car, run a few errands along the roads and park back home. Press Use on their car to drag them out (they won’t like it)</li><li>Survivors raid empty houses through the front door and come out with a full sack; bandit gangs build a log palisade round their camp, post by post</li><li>People find their way properly now: they path around walls, cars and furniture and open doors on the way instead of walking into them</li><li>Windshield wipers: Q (or the Bomb button) in a car sweeps the blood off the glass</li><li>Every car window cracks where it is hit: bullets, bat swings and side or rear impacts all leave spreading cracks on that pane</li><li>Porches line up with the block pixels: slab, posts, canopy and trim all sit on the 1/32 m texel grid</li><li>Creative: choose the weather from the menu (clear, rain, storm, fog, snow, or natural)</li><li>Developer mode tools: F2 heal, F3 +3 hours, F4 weather, F6 spawn zombie, F7 clear zombies, F8 teleport to crosshair, F9 god mode, F10 freeze time, plus menu buttons to go to a military base, spawn a car or survivor, a performance overlay and copy debug info; the readout now shows time, weather, what everyone is doing and nearby bases</li></ul><h4>v15.7 · Nov 25, 2026 — light &amp; chrome</h4><ul><li>Blood particles are red again (no more black specks)</li><li>Flashlight casts a perfect circle of light, ray-traced against the blocks and painted bright in chunky pixels — it stops at walls and leaves crisp shadows</li><li>Signs, posts, pumps, lamps, car bodies and other metal now carry a soft, blurry sky reflection that follows the time of day</li><li>Creative: sleep any time, anywhere, and a new “Sleep until morning” button in the menu skips straight to dawn</li></ul><h4>v15.6 · Nov 25, 2026 — ripples</h4><ul>
+    <h4>v17 · Nov 25, 2026 — far view</h4><ul><li>Far view: the world now reaches 4x your render distance. Past the loaded chunks a light, low-detail terrain mesh carries the hills, rivers, towns and treelines out to the horizon; it builds a few rows a frame so it never stutters (toggle it next to Render distance)</li><li>The flashlight lights up blocks too, not just furniture and people: every block, zombie, animal and car in the beam is lit in chunky pixels, and walls cast crisp shadows</li><li>Road paint is now part of the road blocks’ texture: lane lines, dashes, crosswalks and runway markings are drawn pixel-for-pixel into the asphalt, with no raised strips</li><li>Grass bends away from you as you walk through it and springs back along your trail; zombies, animals, people and cars push it too</li><li>Window trim no longer clips through chipped and broken blocks beside the window</li><li>Inventory: Close is in the top right, and tapping outside the panel closes it (also works for the trade and campfire panels)</li><li>Smoother: moving no longer re-scans the whole ray-traced lighting volume (only the new strip), the HUD only touches the page when something changes, and the flashlight casts a third fewer rays</li><li>Lighter: chunk meshes free their memory copy once they are on the graphics card, and each region drops its generation scratch data afterwards — memory growth while exploring fell by about two thirds</li><li>Quality of life: walk over loot bags to pick them up (setting in the menu), “+3 Ammo” pop-ups when you loot, hit and kill markers on the crosshair, a compass strip with your waypoint, the nearest military base and where you last died, and the map now marks military bases and your death spot</li><li>Fixed: soldiers are saved properly (a save with soldiers in it could break loading)</li></ul><h4>v16 · Nov 25, 2026 — the compounds</h4><ul><li>Corporate military bases out in the wilds: a walled compound with watchtowers, an HQ, barracks, an armory, a helipad and olive trucks, and the best loot in the game. About half are still held by a private security garrison that warns you off and opens fire inside the wall; shoot one and the whole unit comes for you. The rest were overrun and are full of the dead</li><li>Survivors now drive: some find a working car, run a few errands along the roads and park back home. Press Use on their car to drag them out (they won’t like it)</li><li>Survivors raid empty houses through the front door and come out with a full sack; bandit gangs build a log palisade round their camp, post by post</li><li>People find their way properly now: they path around walls, cars and furniture and open doors on the way instead of walking into them</li><li>Windshield wipers: Q (or the Bomb button) in a car sweeps the blood off the glass</li><li>Every car window cracks where it is hit: bullets, bat swings and side or rear impacts all leave spreading cracks on that pane</li><li>Porches line up with the block pixels: slab, posts, canopy and trim all sit on the 1/32 m texel grid</li><li>Creative: choose the weather from the menu (clear, rain, storm, fog, snow, or natural)</li><li>Developer mode tools: F2 heal, F3 +3 hours, F4 weather, F6 spawn zombie, F7 clear zombies, F8 teleport to crosshair, F9 god mode, F10 freeze time, plus menu buttons to go to a military base, spawn a car or survivor, a performance overlay and copy debug info; the readout now shows time, weather, what everyone is doing and nearby bases</li></ul><h4>v15.7 · Nov 25, 2026 — light &amp; chrome</h4><ul><li>Blood particles are red again (no more black specks)</li><li>Flashlight casts a perfect circle of light, ray-traced against the blocks and painted bright in chunky pixels — it stops at walls and leaves crisp shadows</li><li>Signs, posts, pumps, lamps, car bodies and other metal now carry a soft, blurry sky reflection that follows the time of day</li><li>Creative: sleep any time, anywhere, and a new “Sleep until morning” button in the menu skips straight to dawn</li></ul><h4>v15.6 · Nov 25, 2026 — ripples</h4><ul>
       <li>Rain ripples: wet ground and puddles now ripple with rings spreading from falling drops and a slow wind swell, and the ray-traced reflections bend and wobble through them.</li>
       <li>Stop signs have STOP printed flat on the face in pixel letters, with a grey metal back.</li>
       <li>Run and jump together however you like: push the touch stick to its edge to run, double-tap W to sprint, and a running jump keeps its speed in the air.</li></ul>
@@ -465,6 +472,7 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
   <canvas id="mapCv" width="448" height="448" style="width:min(82vmin,448px);height:min(82vmin,448px);image-rendering:pixelated;cursor:crosshair;border:2px solid #444"></canvas>
   <div class="row" style="justify-content:center;margin-top:8px"><button id="mapAuto" class="hidden">Cancel autopilot</button><button class="go" id="mapClose">Close</button></div></div></div>
 <div id="menu" class="screen hidden" style="background:rgba(0,0,0,.55)"><div class="kit">
+  <button id="mClose" class="go" aria-label="Close inventory">Close ✕</button>
   <h2 id="mTitle">Attaché case</h2>
   <div class="hotrow"><span>Hotbar — select an item, then a slot (or press 1–6). A slot with nothing selected is cleared.</span><div id="cHot"></div></div>
   <div class="case"><div class="cgrid" id="cGrid"></div><div class="cside"><div class="cname" id="cName"></div><p class="cdesc" id="cDesc"></p><div class="row" id="cAct"></div></div></div>
@@ -475,11 +483,11 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
   <h3>Workbench</h3>
   <div id="mRec"></div>
   <h3>World</h3>
-  <div class="row"><button id="mSave">Save now</button><button id="mRsp">Respawn (stuck?)</button><button id="mCreative">Creative: off</button><button id="mSleep" class="hidden">Sleep until morning</button><label id="mWxL" class="hidden">Weather <select id="mWx"><option value="">Natural</option><option value="clear">Clear</option><option value="rain">Rain</option><option value="storm">Storm</option><option value="fog">Fog</option><option value="snow">Snow</option></select></label><button id="mMain">Main menu</button><button id="mCode">Copy save code</button><label>Render distance <select id="rdSel2"></select></label><label>Graphics <select id="gfxSel2"></select></label><label>Pixel size <select id="pixSel2"></select></label><label>Developer mode <select id="devSel2"><option value="0">Off</option><option value="1">On</option></select></label></div>
+  <div class="row"><button id="mSave">Save now</button><button id="mRsp">Respawn (stuck?)</button><button id="mCreative">Creative: off</button><button id="mSleep" class="hidden">Sleep until morning</button><label id="mWxL" class="hidden">Weather <select id="mWx"><option value="">Natural</option><option value="clear">Clear</option><option value="rain">Rain</option><option value="storm">Storm</option><option value="fog">Fog</option><option value="snow">Snow</option></select></label><button id="mMain">Main menu</button><button id="mCode">Copy save code</button><label>Render distance <select id="rdSel2"></select></label><label>Far view <select id="farSel2"><option value="1">On (4x)</option><option value="0">Off</option></select></label><label>Graphics <select id="gfxSel2"></select></label><label>Pixel size <select id="pixSel2"></select></label><label>Auto-pickup <select id="alSel"><option value="1">On</option><option value="0">Off</option></select></label><label>Developer mode <select id="devSel2"><option value="0">Off</option><option value="1">On</option></select></label></div>
   <div class="row hidden" id="devRow"><b style="align-self:center;color:#9fd08a">Dev</b><button data-dev="heal">Heal + refill (F2)</button><button data-dev="time">+3 hours (F3)</button><button data-dev="wx">Next weather (F4)</button><button data-dev="zed">Spawn zombie (F6)</button><button data-dev="clear">Clear zombies (F7)</button><button data-dev="tp">Teleport to crosshair (F8)</button><button data-dev="god">God mode (F9)</button><button data-dev="freeze">Freeze time (F10)</button><button data-dev="base">Go to military base</button><button data-dev="car">Spawn car</button><button data-dev="npc">Spawn survivor</button><button data-dev="fps">Perf overlay</button><button data-dev="copy">Copy debug info</button></div>
   <textarea id="mCodeOut" class="hidden" rows="2" readonly></textarea>
   <p class="note" id="mSaveNote" style="margin:6px 0 0"></p>
-  <div class="row" style="margin-top:14px"><button id="mEat">Eat</button><button id="mBand">Use bandage</button><button id="mClose" class="go" style="margin-left:auto">Close</button></div>
+  <div class="row" style="margin-top:14px"><button id="mEat">Eat</button><button id="mBand">Use bandage</button></div>
 </div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -512,7 +520,7 @@ const vi=(x,y,z)=>(y*W+md(z))*W+md(x);
 function get(x,y,z){if(!inWin(x,z)||y<0)return 13;if(y>=H)return 0;return vox[(y*W+md(z))*W+md(x)]}
 const hm=(x,z)=>hmap[md(z)*W+md(x)];
 let REC=false;
-function setv(x,y,z,v){if(inB(x,y,z)){vox[(y*W+md(z))*W+md(x)]=v;if(REC){recEdit(x,y,z,v);rtDirty=true}}}
+function setv(x,y,z,v){if(inB(x,y,z)){vox[(y*W+md(z))*W+md(x)]=v;if(REC){recEdit(x,y,z,v);if(typeof rtEditQ!=='undefined'&&rtEditQ.length<600)rtEditQ.push(x,z);else rtDirty=true}}}
 const WATER=255,solid=(x,y,z)=>{const b=get(x,y,z);return b!==0&&b!==17&&b!==255};
 const vc=a=>Math.floor(a/VS);
 const B={GRASS:1,DIRT:2,STONE:3,COAL:4,IRON:5,CONC:6,ASPH:7,PLANK:8,LOG:9,LEAF:10,BRICK:11,METAL:12,BED:13,DOOR:14,GLASS:15,FRAME:16,LADDER:17,SLUDGE:18,WALL:19,FURN:20,TILEF:21,ROOF:22,G25:23,G50:24,G75:25,STPX:26,STNX:27,STPZ:28,STNZ:29};
@@ -637,7 +645,9 @@ function genRegion(Rg){
   // pass 2: fill every cell of the region's slot in the ring buffer (clearing whatever was there)
   genFill(Rg,topB,capQ,hh);
   restOfRegion(Rg);
+  dropGenScratch(Rg);
 }
+function dropGenScratch(Rg){Rg._wl=Rg._deck=Rg._road=Rg._trail=Rg._dash=Rg._edge=null}
 // ---------------- natural terrain: rolling hills, mountain ranges (ridged noise, far from towns), winding rivers and ponds
 const WL=G-2; // river water level
 function natH(x,z){const d=townDist(x,z),far=Math.min(1,d/16),wide=Math.min(1,d/50);
@@ -823,7 +833,7 @@ function paintRun(F,sp,lx,z0,L,w,col,dy){const n=Math.max(1,Math.round(L/.5)),sl
 // after road cells change, rebuild the street pieces that cover them
 function refreshPaint(x0,z0,x1,z1){const X0=x0*VS-.1,X1=(x1+1)*VS+.1,Z0=z0*VS-.1,Z1=(z1+1)*VS+.1,ks=new Set();
   for(const sp of furnSpecs)if(FLAT.has(sp[0])&&sp.bb&&!sp.gone&&sp.bb[0]<X1&&sp.bb[3]>X0&&sp.bb[2]<Z1&&sp.bb[5]>Z0)ks.add(sp.k);
-  for(const k of ks){FBUF.clear();buildFurnMeshes(furnSpecs,k)}}
+  if(ks.size)paintClear(x0-1,z0-1,x1+2,z1+2);for(const k of ks){FBUF.clear();buildFurnMeshes(furnSpecs,k)}}
 const STREETS=['MAIN','OAK','ELM','PINE','MAPLE','CEDAR','BIRCH','WALNUT','ASH','LAKE','HILL','PARK','MILL','CHURCH','RIVER','HIGH','1ST','2ND','3RD','4TH','5TH','6TH'];
 function roadDecor(T){if(T.air)return;const y=(G+1)*VS,ys=(G+2)*VS,n=Math.round((T.x1-T.x0-14)/P),big=T.n>=3;
   const nmX=[],nmZ=[];const pool=shuf(STREETS.slice());for(let i=0;i<=n;i++){nmX.push(pool[i%pool.length]+' ST');nmZ.push(pool[(i+n+1)%pool.length]+' AVE')}
@@ -1554,15 +1564,18 @@ const flBlock=i=>`if(flOn${i}>0.){vec3 Lv=Pq-flPos${i};float Ld=length(Lv);vec3 
       if(Ld<=hd+.22){float nl=max(dot(normalize(vPxN),-L),0.);float lv=floor(clamp(nl*(1.15/(1.+Ld*Ld*.01)),0.,1.)*6.+.35)/6.;flAdd+=vec3(1.,.95,.8)*flOn${i}*lv*1.7;}}}}`;
 const FL_ADD=`{vec3 Pq=(floor(vPxW*16.-normalize(vPxN)*.01)+.5)/16.;vec3 flAdd=vec3(0.);${flBlock(0)}${flBlock(1)}gl_FragColor.rgb+=diffuseColor.rgb*flAdd;}`;
 const _fd=new V3(),_fr=new V3(),_fu=new V3(),_rd=new V3();
+let flSweepT=0;
+function flSweep(){scene.traverse(o=>{const ms=o.isMesh&&o.material?(Array.isArray(o.material)?o.material:[o.material]):null;if(!ms)return;
+  for(const m of ms)if(m.isMeshLambertMaterial&&m!==vmat&&!(m.userData&&m.userData.pxs)&&!m.transparent){pxShadows(m);m.needsUpdate=true}})}
 function flashUpdate(){for(const i of[0,1]){const p=players[i],U=FLU,on=p&&p.torch&&!p.vehicle&&!(p.dead>0)&&((p.batt??100)>0||p.creative);
   if(!on){U['flOn'+i].value=0;continue}
   const eye=p.cam.position;p.cam.getWorldDirection(_fd);_fr.set(-_fd.z,0,_fd.x);if(_fr.lengthSq()<1e-6)_fr.set(1,0,0);_fr.normalize();_fu.crossVectors(_fr,_fd).normalize();
   const src=new V3().copy(eye).addScaledVector(_fr,.18).addScaledVector(_fu,-.12);
   U['flPos'+i].value.copy(src);U['flDir'+i].value.copy(_fd);U['flRt'+i].value.copy(_fr);U['flUp'+i].value.copy(_fu);
   U['flOn'+i].value=(p.batt!=null&&p.batt<10&&!p.creative)?.5+Math.random()*.35:1;
-  // ray grid across the cone: every other frame, half the rows each time
-  const F=FLT[i],tn=U.flTan.value,R_=U.flRange.value;F.f^=1;
-  for(let j=F.f;j<FLN;j+=2)for(let k=0;k<FLN;k++){const u=(k+.5)/FLN*2-1,w=(j+.5)/FLN*2-1;const o=(j*FLN+k)*4;if(u*u+w*w>1.1){F.d[o]=0;continue}
+  // ray grid across the cone: a third of the rows each frame
+  const F=FLT[i],tn=U.flTan.value,R_=U.flRange.value;F.f=((F.f|0)+1)%3;
+  for(let j=F.f;j<FLN;j+=3)for(let k=0;k<FLN;k++){const u=(k+.5)/FLN*2-1,w=(j+.5)/FLN*2-1;const o=(j*FLN+k)*4;if(u*u+w*w>1.1){F.d[o]=0;continue}
     _rd.copy(_fd).addScaledVector(_fr,u*tn).addScaledVector(_fu,w*tn).normalize();const h=rayVox(src,_rd,R_);F.d[o]=h?Math.min(255,Math.round(h.t/R_*255)+1):255}
   F.t.needsUpdate=true}}
 // ---------------- blurry reflections for metal and signs: a tiny cube of the sky around you, repainted every few seconds
@@ -1613,7 +1626,7 @@ function renderView(cam,i,x,y,w,h,under){
   if(!prevVP[i])prevVP[i]=_m4.clone();U.prevVP.value.copy(prevVP[i]);prevVP[i].copy(_m4);
   const dawn=Math.max(0,1-Math.min(Math.abs(tDay-.02),Math.abs(tDay-.5))*12),sn=Math.max(0,curSeason);
   U.camPos.value.copy(cam.position);U.fogCol.value.copy(scene.fog.color).lerp(_c1.setHex(0xffffff),.12*dl);
-  U.fogD.value=under?0:.011*(1+dawn*2.2)*[1,.8,1.6,1.25][sn]*(1+WX.amt*.6);
+  U.fogD.value=under?0:.011*Math.min(1,80/farView())*(1+dawn*2.2)*[1,.8,1.6,1.25][sn]*(1+WX.amt*.6);
   U.blur.value=GFX>1?.55:0;U.haze.value.copy(scene.fog.color);U.hazeK.value=under?0:.35;U.vig.value=under?.6:.35;
   // sun on screen and not hidden?
   cam.getWorldDirection(_v3b);let on=0;
@@ -1628,20 +1641,53 @@ const _c1=new THREE.Color();
 let rtDirty=true;
 const RTX_OK=renderer.capabilities.isWebGL2;
 const RTW={X:192,Z:192,ox:-9999,oz:-9999,t:0};
-const rtData=new Uint8Array(RTW.X*H*RTW.Z),hData=new Uint8Array(RTW.X*RTW.Z);
+let rtData=new Uint8Array(RTW.X*H*RTW.Z),rtB=new Uint8Array(RTW.X*H*RTW.Z),hData=new Uint8Array(RTW.X*RTW.Z),hB=new Uint8Array(RTW.X*RTW.Z);const rtEditQ=[];
 const rtTex=RTX_OK?new THREE.DataTexture3D(rtData,RTW.X,H,RTW.Z):null;
 if(rtTex){rtTex.format=THREE.RedFormat;rtTex.type=THREE.UnsignedByteType;rtTex.minFilter=rtTex.magFilter=THREE.NearestFilter;rtTex.unpackAlignment=1;rtTex.generateMipmaps=false}
 const hTex=new THREE.DataTexture(hData,RTW.X,RTW.Z,RTX_OK?THREE.RedFormat:THREE.LuminanceFormat);hTex.minFilter=hTex.magFilter=THREE.NearestFilter;hTex.unpackAlignment=1;hTex.generateMipmaps=false;
+// ---------------- road paint, drawn into the road blocks' own texture: every paint stripe is rasterised at texture-pixel resolution (16 px a block)
+// into per-block tiles; identical tiles share one slot in a paint atlas, and a window-sized index (ring-buffer coords) says which slot and at which
+// height each block top carries. The block shader looks the tile up on top faces, so the paint has no geometry of its own
+const PAINT_T=new Set(['lane','xwalk','rdash','redge','rwy']),PA=2048,PAH=4096,PAS=PA/16,PAINT_COL={0xd8b030:2,0xe0c020:3};
+const paintAtlasD=new Uint8Array(PA*PAH),paintAtlas=new THREE.DataTexture(paintAtlasD,PA,PAH,THREE.LuminanceFormat);paintAtlas.magFilter=paintAtlas.minFilter=THREE.NearestFilter;paintAtlas.generateMipmaps=false;paintAtlas.needsUpdate=true;
+const paintIdxD=new Uint8Array(W*W*4),paintIdx=new THREE.DataTexture(paintIdxD,W,W,THREE.RGBAFormat);paintIdx.magFilter=paintIdx.minFilter=THREE.NearestFilter;paintIdx.generateMipmaps=false;paintIdx.needsUpdate=true;
+const paintTiles=new Map(),paintSlots=new Map(),paintTouched=new Set();let paintNext=1;
+const PK16=new Uint16Array(32);const ptKey=(bx,bz)=>(bx+40000)*80000+(bz+40000);
+function paintRect(sp,w,d,col,lx,lz){const c=Math.cos(sp[4]),s=Math.sin(sp[4]),cx=sp[1]+lx*c+lz*s,cz=sp[3]-lx*s+lz*c,ax=[c,-s],az=[s,c],hw=w/2,hd=d/2,ci=PAINT_COL[col]||1,ty=Math.round(sp[2]/VS);
+  const ex=Math.abs(ax[0])*hw+Math.abs(az[0])*hd,ez=Math.abs(ax[1])*hw+Math.abs(az[1])*hd;
+  FBB[0]=Math.min(FBB[0],cx-ex);FBB[2]=Math.min(FBB[2],cz-ez);FBB[3]=Math.max(FBB[3],cx+ex);FBB[5]=Math.max(FBB[5],cz+ez);FBB[1]=Math.min(FBB[1],sp[2]);FBB[4]=Math.max(FBB[4],sp[2]+.02);
+  for(let px=Math.floor((cx-ex)*32);px<=Math.ceil((cx+ex)*32);px++)for(let pz=Math.floor((cz-ez)*32);pz<=Math.ceil((cz+ez)*32);pz++){const X=(px+.5)/32-cx,Z=(pz+.5)/32-cz;
+    if(Math.abs(X*ax[0]+Z*ax[1])>hw||Math.abs(X*az[0]+Z*az[1])>hd)continue;const bx=Math.floor(px/16),bz=Math.floor(pz/16),k=ptKey(bx,bz);let T=paintTiles.get(k);
+    if(!T){T={bx,bz,y:ty,pix:new Uint8Array(256)};paintTiles.set(k,T)}T.pix[(pz-bz*16)*16+(px-bx*16)]=ci;T.y=ty;paintTouched.add(k)}}
+function paintFlush(){if(!paintTouched.size)return;
+  // atlas full: start the slots over and re-file every tile currently in the window
+  if(paintNext+paintTouched.size>=PAS*PAH/16){paintSlots.clear();paintNext=1;for(const k of paintTiles.keys())paintTouched.add(k)}
+  for(const k of paintTouched){const T=paintTiles.get(k);if(!T)continue;const pk=PK16,q=T.pix;for(let i=0,j=0;i<256;i+=8,j++)pk[j]=q[i]|q[i+1]<<2|q[i+2]<<4|q[i+3]<<6|q[i+4]<<8|q[i+5]<<10|q[i+6]<<12|q[i+7]<<14;const h=String.fromCharCode.apply(null,pk);
+    let slot=paintSlots.get(h);if(slot==null){slot=paintNext++;paintSlots.set(h,slot);const sx=(slot%PAS)*16,sy=Math.floor(slot/PAS)*16;
+      for(let j=0;j<16;j++)for(let i=0;i<16;i++)paintAtlasD[(sy+j)*PA+sx+i]=T.pix[j*16+i];paintAtlas.needsUpdate=true}
+    if(!inWin(T.bx,T.bz))continue;const o=(md(T.bz)*W+md(T.bx))*4;paintIdxD[o]=slot&255;paintIdxD[o+1]=slot>>8;paintIdxD[o+2]=T.y&255;paintIdxD[o+3]=255}
+  paintTouched.clear();paintIdx.needsUpdate=true}
+function paintClear(x0,z0,x1,z1){for(const[k,T]of paintTiles)if(T.bx>=x0&&T.bx<x1&&T.bz>=z0&&T.bz<z1){paintTiles.delete(k);if(inWin(T.bx,T.bz)){const o=(md(T.bz)*W+md(T.bx))*4;paintIdxD[o+3]=0}}paintIdx.needsUpdate=true}
+const PAINTU={paintIdx:{value:paintIdx},paintAtlas:{value:paintAtlas},pW:{value:W}};
 const RTU={rtVox:{value:rtTex},hTex:{value:hTex},rtOrigin:{value:new V3()},rtSize:{value:new V3(RTW.X,H,RTW.Z)},sunDirU:{value:new V3(0,1,0)},sunK:{value:1},wet:{value:0},rtime:{value:0},rtSunN:{value:56},rtAOk:{value:1}};
+// the ray-tracing volume follows the camera in 16-block steps. Moving it shifts the data already there and only scans the newly exposed strips;
+// a block edit rescans just that column. (It used to rescan all 192x192 columns, 3.5 million cells, every 8 m.)
+function rtScanCol(x,z,ox,oz,R,Hd,full){const X=RTW.X,wx=ox+x,wz=oz+z;let top=0;if(full)for(let y=0;y<H;y++)R[x+X*(y+H*z)]=0;
+  if(inWin(wx,wz)){for(let y=H-1;y>=0;y--){const b=vox[vi(wx,y,wz)];if(b&&b!==17&&b!==20&&!isRub(b)){if(!top)top=y+1;if(!full)break;if(b!==15&&!SH[b])R[x+X*(y+H*z)]=255}}}
+  Hd[x+X*z]=top}
 function updateRT(c){
-  const ox=Math.floor(vc(c.x)/16)*16-RTW.X/2,oz=Math.floor(vc(c.z)/16)*16-RTW.Z/2,now=performance.now();
-  if(ox===RTW.ox&&oz===RTW.oz&&!(rtDirty&&now-RTW.t>500))return;
-  RTW.ox=ox;RTW.oz=oz;RTW.t=now;rtDirty=false;const X=RTW.X,Z=RTW.Z,full=GFX===3&&rtTex;
-  if(full)rtData.fill(0);
-  for(let z=0;z<Z;z++)for(let x=0;x<X;x++){const wx=ox+x,wz=oz+z;let top=0;
-    if(inWin(wx,wz)){for(let y=H-1;y>=0;y--){const b=vox[vi(wx,y,wz)];if(b&&b!==17&&b!==20&&!isRub(b)){if(!top)top=y+1;if(!full)break;if(b!==15&&!SH[b])rtData[x+X*(y+H*z)]=255}}}
-    hData[x+X*z]=top}
-  hTex.needsUpdate=true;if(full)rtTex.needsUpdate=true;RTU.rtOrigin.value.set(ox,0,oz);
+  const ox=Math.floor(vc(c.x)/16)*16-RTW.X/2,oz=Math.floor(vc(c.z)/16)*16-RTW.Z/2,now=performance.now(),X=RTW.X,Z=RTW.Z,full=GFX===3&&rtTex;
+  let up=false;
+  if(ox!==RTW.ox||oz!==RTW.oz||(rtDirty&&now-RTW.t>500)){
+    const dx=ox-RTW.ox,dz=oz-RTW.oz,shift=!rtDirty&&RTW.full===!!full&&Math.abs(dx)<X&&Math.abs(dz)<Z;RTW.t=now;rtDirty=false;
+    if(shift){const R=rtB,Hd=hB,S=rtData,SH_=hData;
+      for(let z=0;z<Z;z++){const sz=z+dz;for(let x=0;x<X;x++){const sx=x+dx;if(sx<0||sx>=X||sz<0||sz>=Z){rtScanCol(x,z,ox,oz,R,Hd,full);continue}Hd[x+X*z]=SH_[sx+X*sz]}
+        if(full&&sz>=0&&sz<Z){const x0=Math.max(0,-dx),x1=Math.min(X,X-dx);for(let y=0;y<H;y++){const d=X*(y+H*z),s0=X*(y+H*sz);R.set(S.subarray(s0+x0+dx,s0+x1+dx),d+x0)}}}
+      rtB=rtData;rtData=R;hB=hData;hData=Hd;if(rtTex)rtTex.image.data=rtData;hTex.image.data=hData}
+    else{for(let z=0;z<Z;z++)for(let x=0;x<X;x++)rtScanCol(x,z,ox,oz,rtData,hData,full)}
+    RTW.ox=ox;RTW.oz=oz;RTW.full=!!full;rtEditQ.length=0;up=true}
+  else if(rtEditQ.length&&now-RTW.t>120){RTW.t=now;for(let i=0;i<rtEditQ.length;i+=2){const x=rtEditQ[i]-ox,z=rtEditQ[i+1]-oz;if(x>=0&&z>=0&&x<X&&z<Z)rtScanCol(x,z,ox,oz,rtData,hData,full)}rtEditQ.length=0;up=true}
+  if(up){hTex.needsUpdate=true;if(full)rtTex.needsUpdate=true;RTU.rtOrigin.value.set(ox,0,oz)}
 }
 const SHADOW_ORIG=THREE.ShaderChunk.shadowmask_pars_fragment;
 // shadow lookups snapped to the 1/32 m texture-pixel grid so every shadow edge is pixelated
@@ -1660,9 +1706,9 @@ float getShadowMask(){float s=1.;
 #endif
   return s;}`);if(typeof FLU!=='undefined')sh.fragmentShader=FL_GLSL+sh.fragmentShader.replace('gl_FragColor = vec4( outgoingLight, diffuseColor.a );','gl_FragColor = vec4( outgoingLight, diffuseColor.a );\n'+FL_ADD)};return m}
 function installVmatShader(){vmat.onBeforeCompile=sh=>{
-  Object.assign(sh.uniforms,RTU);
+  Object.assign(sh.uniforms,RTU,PAINTU);
   sh.vertexShader='varying vec3 vRtW,vRtN;attribute vec4 aBl;attribute float aBlT;varying vec4 vBl;varying float vBlT;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvRtW=(modelMatrix*vec4(transformed,1.)).xyz;vRtN=normalize(mat3(modelMatrix)*objectNormal);vBl=aBl;vBlT=aBlT;');
-  sh.fragmentShader=`varying vec3 vRtW,vRtN;varying vec4 vBl;varying float vBlT;uniform vec3 rtOrigin,rtSize,sunDirU;uniform float sunK,wet,rtime,rtSunN,rtAOk;uniform sampler2D hTex;
+  sh.fragmentShader=`varying vec3 vRtW,vRtN;varying vec4 vBl;varying float vBlT;uniform sampler2D paintIdx,paintAtlas;uniform float pW;uniform vec3 rtOrigin,rtSize,sunDirU;uniform float sunK,wet,rtime,rtSunN,rtAOk;uniform sampler2D hTex;
 #ifdef RTX
 uniform highp sampler3D rtVox;
 #endif
@@ -1701,12 +1747,18 @@ float getShadowMask(){float s=1.;
       mUv+=vec2((alt.x-cur.x)/${ACOLS}.,-(alt.y-cur.y)/${AROWS}.);}}
   vec4 texelColor=texture2D(map,mUv);texelColor=mapTexelToLinear(texelColor);diffuseColor*=texelColor;
 #endif
+  if(vRtN.y>.5){vec2 bq=floor(vRtW.xz/.5+.0005);vec4 pi=texture2D(paintIdx,(mod(bq,pW)+.5)/pW);
+    if(pi.a>.5&&abs(pi.b*255.-vRtW.y/.5)<.06){float sl=floor(pi.r*255.+.5)+floor(pi.g*255.+.5)*256.;vec2 so=vec2(mod(sl,${PAS}.),floor(sl/${PAS}.))*16.;
+      vec2 tp=floor(fract(vRtW.xz/.5+.0005)*16.);float pv=floor(texture2D(paintAtlas,(so+tp+.5)/vec2(${PA}.,${PAH}.)).r*255.+.5);
+      if(pv>.5){vec3 pc=pv<1.5?vec3(.72,.71,.66):pv<2.5?vec3(.68,.45,.06):vec3(.74,.55,.02);float wear=.82+.18*fract(sin(dot(floor(vRtW.xz*32.),vec2(12.9898,78.233)))*43758.5453);diffuseColor.rgb=mix(diffuseColor.rgb,pc*(.75+.25*texelColor.r*1.6),wear);}}}
   if(wet>0.){vec2 hc=(vRtW.xz/.5-rtOrigin.xz)/rtSize.xz;float top=texture2D(hTex,hc).r*255.;float ex=(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)?1.:step(top-1.05,vRtW.y/.5+.02);
     diffuseColor.rgb*=1.-.4*wet*ex;}`)
     .replace('#include <aomap_fragment>',`#include <aomap_fragment>
 #ifdef RTX
   if(rtAOk>.5)reflectedLight.indirectDiffuse*=rtAO();
 #endif`);
+  // the flashlight beam lands on blocks too
+  if(typeof FLU!=='undefined'){Object.assign(sh.uniforms,FLU);sh.fragmentShader=FL_GLSL+sh.fragmentShader.replace('gl_FragColor = vec4( outgoingLight, diffuseColor.a );','gl_FragColor = vec4( outgoingLight, diffuseColor.a );\n'+FL_ADD.replace(/vPxW/g,'vRtW').replace(/vPxN/g,'vRtN'))}
 }};
 
 // frame-time governor aiming for 60 fps (16.7 ms): steps the costliest effects down one rung at a time when frames run long,
@@ -1891,7 +1943,17 @@ function gpatch(x,z){const S=12,fx=x/S,fz=z/S,ix=Math.floor(fx),iz=Math.floor(fz
   for(const[a,b,w]of[[0,0,(1-tx)*(1-tz)],[1,0,tx*(1-tz)],[0,1,(1-tx)*tz],[1,1,tx*tz]]){const c=GPAL[Math.floor(h3(ix+a,97,iz+b)*GPAL.length)];o[0]+=c[0]*w;o[1]+=c[1]*w;o[2]+=c[2]*w}return o}
 const grassTime={value:0};
 const grassMat=new THREE.MeshLambertMaterial({map:grassTex,alphaTest:.5,side:THREE.DoubleSide,vertexColors:true});
-grassMat.onBeforeCompile=sh=>{sh.uniforms.time=grassTime;sh.vertexShader='uniform float time;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nfloat sw=uv.y>.5?1.:0.;transformed.x+=sin(time*1.7+position.x*.6+position.z*.4)*.2*sw;transformed.z+=cos(time*1.3+position.x*.45)*.14*sw;')};
+// grass bends away from whatever walks, runs or drives through it, and springs back along the trail behind you
+const GPUSH=[];for(let i=0;i<10;i++)GPUSH.push(THREE.Vector4?new THREE.Vector4(0,0,0,0):{x:0,y:0,z:0,w:0});const grassPush={value:GPUSH},gTrail=[];
+grassMat.onBeforeCompile=sh=>{sh.uniforms.time=grassTime;sh.uniforms.gPush=grassPush;sh.vertexShader='uniform float time;uniform vec4 gPush[10];\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nfloat sw=uv.y>.5?1.:0.;transformed.x+=sin(time*1.7+position.x*.6+position.z*.4)*.2*sw;transformed.z+=cos(time*1.3+position.x*.45)*.14*sw;\nif(sw>.5){vec3 wq=position*.5;for(int i=0;i<10;i++){vec4 P=gPush[i];if(P.w<=0.)continue;vec2 d=wq.xz-P.xz;float l=length(d),k=clamp(1.-l/P.w,0.,1.)*step(abs(wq.y-.6-P.y),1.4);if(k>0.){vec2 dir=l>.001?d/l:vec2(1.,0.);transformed.xz+=dir*k*1.5;transformed.y-=k*k*1.15;}}}')};
+function grassPushTick(dt){if(!running)return;const L=[];
+  for(const p of players){if(p.dead>0)continue;if(p.vehicle){const v=p.vehicle;if(!v.two&&Math.abs(v.speed)>.3)L.push([v.pos.x,v.pos.y,v.pos.z,v.Wd*.9]);continue}L.push([p.pos.x,p.pos.y,p.pos.z,.85]);
+    const t=gTrail[p.i]||(gTrail[p.i]=[]);const last=t[t.length-1];if(!last||Math.hypot(last[0]-p.pos.x,last[2]-p.pos.z)>.45)t.push([p.pos.x,p.pos.y,p.pos.z,1]);for(const q of t)q[3]-=dt*.7;while(t.length&&t[0][3]<=0)t.shift();if(t.length>4)t.splice(0,t.length-4)}
+  for(const t of gTrail)if(t)for(const q of t)L.push([q[0],q[1],q[2],.8*q[3]]);
+  const c=players[0]&&players[0].pos;if(c){const near=[];for(const a of zombies)if(!a.dead&&Math.abs(a.pos.x-c.x)<20&&Math.abs(a.pos.z-c.z)<20)near.push(a);for(const a of animals)if(!a.dead&&Math.abs(a.pos.x-c.x)<20&&Math.abs(a.pos.z-c.z)<20)near.push(a);for(const a of npcs)if(!a.dead&&!a.car&&Math.abs(a.pos.x-c.x)<20&&Math.abs(a.pos.z-c.z)<20)near.push(a);
+    near.sort((a,b)=>Math.hypot(a.pos.x-c.x,a.pos.z-c.z)-Math.hypot(b.pos.x-c.x,b.pos.z-c.z));for(const a of near.slice(0,4))L.push([a.pos.x,a.pos.y,a.pos.z,.7]);
+    for(const v of vehicles)if(!v.driver&&v.npcD&&Math.abs(v.speed)>.3&&Math.abs(v.pos.x-c.x)<30&&Math.abs(v.pos.z-c.z)<30)L.push([v.pos.x,v.pos.y,v.pos.z,v.Wd*.9])}
+  for(let i=0;i<10;i++){const q=L[i],g=GPUSH[i];if(q){g.x=q[0];g.y=q[1];g.z=q[2];g.w=Math.max(0,q[3])}else g.w=0}}
 pxShadows(grassMat);
 // grass casts shadows too: a depth material with the same cut-out and sway, so blades throw pixel shadows that move with the wind
 const grassDepth=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking,map:grassTex,alphaTest:.5,side:THREE.DoubleSide});
@@ -1964,7 +2026,7 @@ function buildChunk(cx,cz){
       for(const r of[a,a+1.5708]){const dx=Math.cos(r)*ww,dz=Math.sin(r)*ww,n=TP.length/3;TP.push(ox-dx,yb,oz-dz,ox+dx,yb,oz+dz,ox+dx,yb+hh,oz+dz,ox-dx,yb+hh,oz-dz);TU.push(u0,0,u1,0,u1,1,u0,1);for(let q=0;q<4;q++)TC.push(sh*gc[0],sh*gc[1],sh*gc[2]);TI.push(n,n+1,n+2,n,n+2,n+3)}}
     let cr=1,cg=1,cb=1;const v=.88+.12*h3(x,y,z),tiles=rcap?TILE_OF[7]:TILE_OF[b];if(b===1||(b>=23&&b<=25&&!rcap)){const gc=gpatch(x,z);cr=gc[0];cg=gc[1];cb=gc[2]}
     const pr=paintRooms.length?roomsFor(cx,cz):null;
-    if(winIdx.size){const we=winIdx.get(i);if(we&&!(trimOff.size&&trimOff.has(x+','+y+','+z)))winTrim(we,x,y,z,x0,z0)}
+    if(winIdx.size&&!shp){const we=winIdx.get(i);if(we&&!(trimOff.size&&trimOff.has(x+','+y+','+z)))winTrim(we,x,y,z,x0,z0)}
     let curbN=0,curbP=0;if(b===6&&y===G+1&&isWalk(x,z)){for(const fi of[0,1,4,5]){const F_=FACES[fi];if(isRoad(x+F_[0],z+F_[2]))curbN|=1<<fi}if(curbN){const hh=h3(Math.floor(x/8),Math.floor(z/8),311);curbP=hh<.18?1:hh<.3?2:0}}
     if(!shp){for(let fi=0;fi<6;fi++){const o=nb[fi];if(isOpq(o)||(fi===2&&SH[o]&&BOTFULL[o]))continue;
         let t=tiles[fi],r=cr,g=cg,bb=cb;
@@ -1990,13 +2052,13 @@ function buildChunk(cx,cz){
   for(const arr of[chunkMeshes,glassMeshes,grassMeshes])if(arr[k]){scene.remove(arr[k]);arr[k].geometry.dispose();arr[k]=null}
   if(TP.length){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(TP,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(TU,2));g.setAttribute('color',new THREE.Float32BufferAttribute(TC,3));
     const nn=new Float32Array(TP.length);for(let i=1;i<nn.length;i+=3)nn[i]=1;g.setAttribute('normal',new THREE.BufferAttribute(nn,3));g.setIndex(TI);g.computeBoundingSphere();
-    const gm=new THREE.Mesh(g,grassMat);gm.scale.setScalar(VS);gm.receiveShadow=true;gm.castShadow=GFX>0;gm.customDepthMaterial=grassDepth;freeze(gm);scene.add(gm);grassMeshes[k]=gm}
+    gpuOnly(g);const gm=new THREE.Mesh(g,grassMat);gm.scale.setScalar(VS);gm.receiveShadow=true;gm.castShadow=GFX>0;gm.customDepthMaterial=grassDepth;freeze(gm);scene.add(gm);grassMeshes[k]=gm}
   if(mv){const g=new THREE.BufferGeometry();
     g.setAttribute('position',new THREE.BufferAttribute(mP.slice(0,mv*3),3));g.setAttribute('normal',new THREE.BufferAttribute(mN.slice(0,mv*3),3,true));
     g.setAttribute('color',new THREE.BufferAttribute(mC.slice(0,mv*3),3,true));g.setAttribute('uv',new THREE.BufferAttribute(mU.slice(0,mv*2),2,true));g.setAttribute('aBl',new THREE.BufferAttribute(mB.slice(0,mv*4),4,true));g.setAttribute('aBlT',new THREE.BufferAttribute(mT.slice(0,mv),1));
     g.setIndex(new THREE.BufferAttribute(mv>65535?mI.slice(0,mi):Uint16Array.from(mI.subarray(0,mi)),1));g.computeBoundingSphere();
-    const m=new THREE.Mesh(g,vmat);m.position.set((x0-1)*VS,0,(z0-1)*VS);m.scale.setScalar(VS/16);m.castShadow=GFX<3;m.receiveShadow=true;freeze(m);scene.add(m);chunkMeshes[k]=m}
-  if(GP.length){const gm=new THREE.Mesh(mkGeo(GP,GN,null,GI,GUV),gmat);gm.scale.setScalar(VS);gm.renderOrder=2;gm.receiveShadow=true;freeze(gm);scene.add(gm);glassMeshes[k]=gm}
+    gpuOnly(g);const m=new THREE.Mesh(g,vmat);m.position.set((x0-1)*VS,0,(z0-1)*VS);m.scale.setScalar(VS/16);m.castShadow=GFX<3;m.receiveShadow=true;freeze(m);scene.add(m);chunkMeshes[k]=m}
+  if(GP.length){const gm=new THREE.Mesh(gpuOnly(mkGeo(GP,GN,null,GI,GUV)),gmat);gm.scale.setScalar(VS);gm.renderOrder=2;gm.receiveShadow=true;freeze(gm);scene.add(gm);glassMeshes[k]=gm}
   loaded[k]=1;if(furnMeshes[k])furnMeshes[k].visible=true;
 }
 // painted drywall: rooms record their interior box and colour; wall faces looking into a room get plaster in that colour
@@ -2041,6 +2103,41 @@ function streamChunks(centers,budget){
   return want.length;
 }
 const viewUnits=()=>RD*CS*VS;
+// ---------------- far view: past the loaded chunks, a single low-detail terrain mesh (one vertex every 4 m) reaches 4x the render distance.
+// Inside the loaded window it samples the real blocks (so distant towns, hills and trees keep their silhouette); beyond it, the terrain
+// generator's own height function and the town plans. It is rebuilt a few rows per frame in the background, so it never stalls a frame
+let FARV=true;try{FARV=localStorage.getItem('deadground-far')!=='0'}catch(e){}
+const farView=()=>viewUnits()*(FARV?4:1);
+const lodMat=new THREE.MeshLambertMaterial({vertexColors:true});
+function gpuOnly(g){if(!g||!g.attributes)return g;const f=function(){this.array=null};for(const k in g.attributes){const a=g.attributes[k];if(a&&a.onUpload)a.onUpload(f)}if(g.index&&g.index.onUpload)g.index.onUpload(f);return g}
+let lodMesh=null,lodJob=null,lodC={x:1e9,z:1e9,rd:0,ox:0,oz:0,t:0,far:0};
+const LODC={grass:[.3,.46,.2],dry:[.52,.46,.26],snow:[.86,.88,.9],stone:[.47,.47,.46],water:[.18,.32,.42],road:[.17,.17,.19],conc:[.56,.55,.52],roof:[.32,.26,.24],leaf:[.17,.31,.14]};
+function lodGrass(){return curSeason===3?LODC.snow:curSeason===2?[.42,.4,.2]:curSeason===1?[.34,.48,.2]:LODC.grass}
+function lodSample(x,z){
+  if(inWin(x,z)){let y=Math.min(H-1,(hm(x,z)|0)+(townAt(x,z,2)?60:22));while(y>0&&!solid(x,y,z))y--;const b=get(x,y,z),bs=BASE_OF[b]||b;
+    const c=b===255?LODC.water:bs===B.GRASS||b>=23&&b<=25?lodGrass():bs===B.LEAF?LODC.leaf:BRGB[bs]||LODC.stone;return[y+1,c]}
+  const t=townAt(x,z,0);
+  if(t&&!t.air){if(isRoad(x,z))return[G+1,LODC.road];const lx=Math.floor((x-t.x0)/12),lz=Math.floor((z-t.z0)/12),h=h3(lx,913,lz);
+    if(h<.3)return[G+2,LODC.conc];return[G+2+Math.floor(4+h*(t.city?40:14)),h<.6?LODC.roof:LODC.conc]}
+  if(t)return[G+1,LODC.conc];
+  const n=natH(x,z),h=Math.floor(n.hf);if(n.wl&&h<n.wl)return[n.wl,LODC.water];
+  return[h+1,n.mm>.2&&h>G+18?(h>G+30?LODC.snow:LODC.stone):lodGrass()]}
+function lodStart(cx,cz){const R=Math.round(farView()/VS),S=8,N=Math.floor(R/S)*2+1,o=(N-1)/2;
+  lodJob={cx,cz,S,N,o,row:0,P:new Float32Array(N*N*3),C:new Float32Array(N*N*3),hole:Math.max(0,(RD-1.5)*CS*VS)}}
+function lodStep(budget){const J=lodJob,t0=performance.now();
+  while(J.row<J.N&&performance.now()-t0<budget){const j=J.row++;for(let i=0;i<J.N;i++){const x=J.cx+(i-J.o)*J.S,z=J.cz+(j-J.o)*J.S,[y,c]=lodSample(x,z),k=(j*J.N+i)*3;
+      J.P[k]=x*VS;J.P[k+1]=y*VS-.7;J.P[k+2]=z*VS;const v=.92+.16*h3(x>>3,77,z>>3);J.C[k]=c[0]*v;J.C[k+1]=c[1]*v;J.C[k+2]=c[2]*v}}
+  if(J.row<J.N)return;
+  const I=[],N=J.N,h2=J.hole*J.hole,cx=J.cx*VS,cz=J.cz*VS;
+  for(let j=0;j<N-1;j++)for(let i=0;i<N-1;i++){const a=j*N+i,b=a+1,c=a+N,d=c+1;let inner=true;for(const q of[a,b,c,d]){const dx=J.P[q*3]-cx,dz=J.P[q*3+2]-cz;if(dx*dx+dz*dz>h2){inner=false;break}}
+    if(inner)continue;I.push(a,c,b,b,c,d)}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(J.P,3));g.setAttribute('color',new THREE.BufferAttribute(J.C,3));g.setIndex(I);g.computeVertexNormals();g.computeBoundingSphere();gpuOnly(g);
+  if(lodMesh){scene.remove(lodMesh);lodMesh.geometry.dispose()}lodMesh=new THREE.Mesh(g,lodMat);lodMesh.frustumCulled=false;lodMesh.renderOrder=-5;scene.add(lodMesh);lodJob=null}
+function lodTick(dt){if(!running||!players[0]){if(lodMesh)lodMesh.visible=false;return}
+  if(!FARV){if(lodMesh)lodMesh.visible=false;return}if(lodMesh)lodMesh.visible=true;
+  lodC.t+=dt;if(lodJob){lodStep(2.5);return}
+  const p=players[0].pos,cx=Math.round(p.x/VS/32)*32,cz=Math.round(p.z/VS/32)*32;
+  if(Math.hypot(cx-lodC.x,cz-lodC.z)>=48||lodC.rd!==RD||lodC.ox!==OX||lodC.oz!==OZ||lodC.t>45){lodC={x:cx,z:cz,rd:RD,ox:OX,oz:OZ,t:0};lodStart(cx,cz)}}
 function setBlock(x,y,z,v){if(!inB(x,y,z))return;setv(x,y,z,v);rebuildAt(x,z);if((y===G||y===G+1)&&inTown(x,z))refreshPaint(x,z,x,z);if(y===G&&manholes.length)for(const m of manholes)if(x>=m.x&&x<=m.x+1&&z>=m.z&&z<=m.z+1)placeCover(m);if(NET.wr&&!NET.applying)netEdit('b',x,y,z,v)}
 function breakGlass(x,y,z){noise(new V3((x+.5)*VS,y*VS,(z+.5)*VS),26);
   const st=[[x,y,z]],done=new Set();let n=0;
@@ -2076,7 +2173,7 @@ function furnBuilder(wx,wy,wz,yaw){
 }
 const pick=a=>a[RI(0,a.length-1)];
 function buildFurn(sp){
-  const[type,wx,wy,wz,yaw]=sp,F=furnBuilder(wx,wy,wz,yaw),[fw,fd]=FD[type]||[1,1],W_=fw*VS,D_=fd*VS;
+  const[type,wx,wy,wz,yaw]=sp,F=PAINT_T.has(type)?((FBK=slotOf(Math.floor(vc(wx)/CS),Math.floor(vc(wz)/CS))),(w,h,d,col,x,y,z)=>paintRect(sp,w,d,col,x,z)):furnBuilder(wx,wy,wz,yaw),[fw,fd]=FD[type]||[1,1],W_=fw*VS,D_=fd*VS;
   const wood=pick(WOODS),fab=pick(FABRIC),dk=0x1a1814,white=0xd8d4c8;
   // little things that sit on tops: a candle (wax, wick, flame), a lava lamp (cone base, glass with blobs, cap)
   const candle=(x,y,z)=>{const h=R(.08,.16),c=pick([0xece4d2,0xd8c8a8,0xb83030,0xe8e0f0]);F(.05,h,.05,c,x,y+h/2,z);F(.008,.02,.008,0x1a1a1a,x,y+h+.01,z);F(.02,.035,.02,0xffd070,x,y+h+.035,z);F(.012,.02,.012,0xfff4c0,x,y+h+.03,z)};
@@ -2283,10 +2380,10 @@ function makeSign(sg){const c=document.createElement('canvas'),h=64,w=Math.round
 const furnSeed=sp=>(Math.imul(Math.round(sp[1]*64),73856093)^Math.imul(Math.round(sp[3]*64),19349663)^Math.imul(Math.round(sp[2]*64),83492791)^sp[0].length)|0;
 function buildOne(sp){const sv=rng;rng=mulberry(furnSeed(sp));FBMET=REFL_F.has(sp[0])||(typeof FMETAL!=='undefined'&&FMETAL.has(sp[0]));FBB[0]=FBB[1]=FBB[2]=1e9;FBB[3]=FBB[4]=FBB[5]=-1e9;buildFurn(sp);rng=sv;sp.bb=FBB.slice();sp.k=FBK}
 function buildFurnMeshes(list,only){
-  for(const sp of list)if(!sp.gone&&(only==null||sp.k===only))buildOne(sp);
+  for(const sp of list)if(!sp.gone&&(only==null||sp.k===only))buildOne(sp);paintFlush();
   if(only!=null&&!FBUF.has(only)&&furnMeshes[only]){scene.remove(furnMeshes[only]);furnMeshes[only].geometry.dispose();furnMeshes[only]=null}
   for(const[k,b]of FBUF){if(furnMeshes[k]){scene.remove(furnMeshes[k]);furnMeshes[k].geometry.dispose()}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(b.P,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(b.N,3));
-    g.setAttribute('color',new THREE.Float32BufferAttribute(b.C,3));g.setIndex(b.I);g.computeBoundingSphere();const m=new THREE.Mesh(g,furnMat);{const s0=list.find(q=>q.k===k);m.visible=s0?chunkReadyAt(s0[1],s0[3]):!!loaded[k]}m.castShadow=m.receiveShadow=true;freeze(m);scene.add(m);furnMeshes[k]=m}
+    g.setAttribute('color',new THREE.Float32BufferAttribute(b.C,3));g.setIndex(b.I);g.computeBoundingSphere();gpuOnly(g);const m=new THREE.Mesh(g,furnMat);{const s0=list.find(q=>q.k===k);m.visible=s0?chunkReadyAt(s0[1],s0[3]):!!loaded[k]}m.castShadow=m.receiveShadow=true;freeze(m);scene.add(m);furnMeshes[k]=m}
   FBUF.clear();
 }
 
@@ -2932,7 +3029,7 @@ function spawnOpen(){
     spawnZ(wx,(ty+1)*VS,wz);return;
   }
 }
-function killZombie(z,by,big){
+function killZombie(z,by,big){hitMark(by,true);
   z.dead=.001;burst(new V3(z.pos.x,z.pos.y+1.1,z.pos.z),big?60:35,6,RED,2.5);splat(z.pos,R(1.4,2.4));SND.hit();kills++;
   if(by)by.kills++;
   dropBag(z.pos,rollZLoot(z));
@@ -2951,7 +3048,7 @@ function crowd(dt){const B_=[],cell=new Map(),cp=players[0]?players[0].pos:null;
       const ov=(min-d)*Math.min(1,dt*14+.35),nx=dx/d,nz=dz/d,sa=wb/(wa+wb),sb=wa/(wa+wb);
       {const x=a.pos.x-nx*ov*sa,z=a.pos.z-nz*ov*sa;if(free(a,x,z,ra)){a.pos.x=x;a.pos.z=z}}{const x=b.pos.x+nx*ov*sb,z=b.pos.z+nz*ov*sb;if(free(b,x,z,rb)){b.pos.x=x;b.pos.z=z}}}}}}
 function knockZ(z,dir,f){const l=Math.hypot(dir.x,dir.z)||1;z.kx+=dir.x/l*f;z.kz+=dir.z/l*f;if(f>=5&&z.grounded!==false){z.vel.y=Math.max(z.vel.y,2.2);z.grounded=false}z.held=Math.max(z.held||0,f>=5?.45:.15)}
-function hurtZombie(z,dmg,dir,by){
+function hurtZombie(z,dmg,dir,by){hitMark(by,false);
   if(z.dead)return;z.hp-=dmg;knockZ(z,dir,6);z.chasing=true;
   burst(new V3(z.pos.x,z.pos.y+1.2,z.pos.z),16,4,RED,1.5);if(rng()<.35)splat(z.pos,R(.6,1.1));SND.hit();
   if(z.hp<=0)killZombie(z,by);
@@ -3046,7 +3143,7 @@ function updSky(){
   FOG_D.copy(FOG_SEASON[curSeason<0?1:curSeason]).lerp(tmpC.setHex(0x9aa0a4),WX.amt*.5);
   tmpC.copy(FOG_N).lerp(FOG_D,dl).lerp(FOG_S,dusk*(dl>.05?1:0));
   scene.fog.color.copy(tmpC);
-  const F=viewUnits();scene.fog.near=6+(F*.3-6)*dl;scene.fog.far=Math.min(36,F*.9)+(F*.95-Math.min(36,F*.9))*dl;
+  const F=farView();scene.fog.near=6+(F*.3-6)*dl;scene.fog.far=Math.min(36,F*.9)+(F*.95-Math.min(36,F*.9))*dl;
   hemi.intensity=(WX.type==='fog'?1.25:1)*(.025+.04*(.5+.5*Math.cos(day*.785))*(1-dl)+.66*dl)*(1-.35*WX.amt)+WX.flash*1.6;sun.intensity=.85*dl*(1-.7*WX.amt);if(WX.type==='fog'){scene.fog.far=Math.min(scene.fog.far,12+(1-WX.amt)*45);scene.fog.near=Math.min(scene.fog.near,2)}else{scene.fog.far*=1-.4*WX.amt;scene.fog.near*=1-.5*WX.amt}
 }
 
@@ -3178,7 +3275,7 @@ function damage(p,a,silent,cause){
   if(!silent){SND.hurt();p.flash=.6;burst(new V3(p.pos.x,p.pos.y+1.2,p.pos.z),10,3,RED);if(cause&&/zombie|dead|bitten|mauled|shot|run over/.test(cause)&&p.hp>0&&rng()<.55)injure(p,cause)}
   if(p.hp<=0){p.hp=0;p.dead=5;if(p.vehicle)exitVehicle(p);
     for(const key in p.inv)p.inv[key]=Math.floor(p.inv[key]/2);
-    splat(p.pos,2.2,true);burst(new V3(p.pos.x,p.pos.y+1,p.pos.z),50,5,RED);p.body.g.rotation.x=-Math.PI/2;p.dead=9;p.rspSel=0;
+    p.deathAt={x:p.pos.x,z:p.pos.z,day};splat(p.pos,2.2,true);burst(new V3(p.pos.x,p.pos.y+1,p.pos.z),50,5,RED);p.body.g.rotation.x=-Math.PI/2;p.dead=9;p.rspSel=0;
     p.nights=0;const c=p.lastCause||'died';p.deathCause=c;const me=c.replace(/^was /,'were ');
     msg(p,`You ${me}. You dropped half your supplies.`);const nm=players.length>1?`Player ${p.i+1}`:(NET.name||'You');if(players.length>1)for(const q of players)if(q!==p)msg(q,`${nm} ${c}`);
     if(p.i===0){NET.death={i:(NET.death?NET.death.i:0)+1,t:c}}p.lastCause=null}
@@ -3348,7 +3445,7 @@ function loot(p,c){
   c.looted=true;c.lid.position.set(.25,.75,0);c.lid.rotation.z=-.7;
   const T=LOOTK[c.kind]||LOOT,got={},n=RI(2,4)+(c.rich?2:0),tot=T.reduce((s,l)=>s+l[1],0);
   for(let i=0;i<n;i++){let r=rng()*tot;for(const l of T){r-=l[1];if(r<=0){const q=RI(l[2],l[3]);got[l[0]]=(got[l[0]]||0)+q;p.inv[l[0]]+=q;break}}}
-  SND.pick();msg(p,'Found: '+Object.entries(got).map(([a,q])=>`${q} ${LABEL[a].toLowerCase()}`).join(', '));
+  SND.pick();gainPop(p,got);msg(p,'Found: '+Object.entries(got).map(([a,q])=>`${q} ${LABEL[a].toLowerCase()}`).join(', '));
 }
 // ---------------- car parts: wheels, engine, battery and radio come off with the pickaxe and go back on with a wrench
 const PARTS=[['wheel','wheel'],['engine','engine'],['battery','battery'],['radio','carradio']];
@@ -3732,28 +3829,41 @@ function hitBlock(x,y,z,b,dmg){
 }
 
 // ---------------- HUD
+// HUD writers that touch the page only when the value actually changed (DOM writes force style and layout work)
+const sT=(e,v)=>{if(e&&e.__t!==v){e.__t=v;e.textContent=v}},sH=(e,v)=>{if(e&&e.__h!==v){e.__h=v;e.innerHTML=v}},sW=(e,v)=>{if(!e)return;if(typeof v==='string'&&v.endsWith('%')){const n=parseFloat(v);if(!isNaN(n))v=Math.round(n*2)/2+'%'}else if(typeof v==='number')v=Math.round(v*2)/2+'%';if(e.__w!==v){e.__w=v;e.style.width=v}};
 function updHud(p){
-  if(!(menuP===p&&caseDrag))caseSync(p);
+  {let sig='';for(const k in p.inv)if(p.inv[k])sig+=k+p.inv[k];if(sig!==p.invSig||menuP===p){p.invSig=sig;if(!(menuP===p&&caseDrag))caseSync(p)}}
   const h=p.hud,n=players.length;
-  h.el.style.left=(p.i*100/n)+'%';h.el.style.width=(100/n)+'%';h.el.classList.toggle('narrow',innerWidth/n<900);
-  h.arm.textContent=armorOf(p)>0?`Armor ${Math.round(armorOf(p)*100)}%`:'';h.hp.style.width=p.hp+'%';h.fd.style.width=p.hunger+'%';h.st.style.width=p.stamina+'%';h.tp.style.width=p.temp+'%';if(h.wt)h.wt.style.width=(p.thirst??100)+'%';if(h.cond){const I=p.inj||{},c=[];if(I.bleed>0)c.push('BLEEDING');if(I.infect>0)c.push('INFECTED');if(I.leg>.05)c.push('HURT LEG');if(I.arm>.05)c.push('HURT ARM');if(p.sick>0)c.push('SICK');if((p.tired||0)>75)c.push('EXHAUSTED');if((p.wet||0)>.4)c.push('SOAKED');const t=c.join(' · ');if(h.cond.textContent!==t)h.cond.textContent=t}h.tp.style.background=p.temp<30?'#d8e8ff':'';
+  h.el.style.left=(p.i*100/n)+'%';sW(h.el,(100/n)+'%');h.el.classList.toggle('narrow',innerWidth/n<900);
+  sT(h.arm,armorOf(p)>0?`Armor ${Math.round(armorOf(p)*100)}%`:'');sW(h.hp,p.hp+'%');sW(h.fd,p.hunger+'%');sW(h.st,p.stamina+'%');sW(h.tp,p.temp+'%');if(h.wt)sW(h.wt,(p.thirst??100)+'%');if(h.cond){const I=p.inj||{},c=[];if(I.bleed>0)c.push('BLEEDING');if(I.infect>0)c.push('INFECTED');if(I.leg>.05)c.push('HURT LEG');if(I.arm>.05)c.push('HURT ARM');if(p.sick>0)c.push('SICK');if((p.tired||0)>75)c.push('EXHAUSTED');if((p.wet||0)>.4)c.push('SOAKED');const t=c.join(' · ');if(h.cond.textContent!==t)h.cond.textContent=t}h.tp.style.background=p.temp<30?'#d8e8ff':'';
   h.hurt.style.opacity=Math.min(.9,p.flash*1.5+(p.hp<25?.35:0));
   {const N=pockets(p);if(h.pkN!==N){h.pkN=N;h.slots.forEach((s,k)=>s.style.display=k<N?'':'none');const hb=h.slots[0]&&h.slots[0].parentElement;if(hb&&hb.classList)hb.classList.toggle('many',N>6)}}
   h.slots.forEach((s,k)=>{const b=p.hot[k],v=hotView(p,b);s.classList.toggle('on',k===p.hsel);s.classList.toggle('empty',!b);s.lastChild.classList.toggle('low',b==='Pistol'&&((p.mag|0)<3||p.jam)||b==='Bat'&&(p.batHP??100)<20);
     if(s.dataset.b!==String(b)){s.dataset.b=String(b);s.querySelector('b').textContent=v.name;const im=s.querySelector('img');if(v.icon)im.src=v.icon;else if(im.removeAttribute)im.removeAttribute("src")}s.lastChild.textContent=v.sub});
   const show=['scrip','spikes','beartrap','mine','ammo','food','bandage','scrap','cloth','fuel','kit','wood','plank','stone','dirt','coal','iron','metal'].filter(x=>p.inv[x]>0||x==='ammo'||x==='food');
-  h.inv.innerHTML=show.map(x=>`<span>${LABEL[x]}</span><b>${p.inv[x]}</b>`).join('');
+  sH(h.inv,show.map(x=>`<span>${LABEL[x]}</span><b>${p.inv[x]}</b>`).join(''));
   if(isTouch&&p.i===0)touchLabels(p);
-  h.prompt.textContent=isTouch&&p.vehicle?'':promptFor(p); // on phones the car panel sits where the prompt would; the Use button gets you out
+  sT(h.prompt,isTouch&&p.vehicle?'':promptFor(p)); // on phones the car panel sits where the prompt would; the Use button gets you out
   h.cross.style.display=p.vehicle||p.dead>0||p.adsK>.6?'none':'';h.cross.classList.toggle('on',p.onTarget);
   const v=p.vehicle;h.veh.classList.toggle('hidden',!v);
-  if(v){h.vt.textContent=v.name+(v.driver===p?'':' · passenger');h.vf.style.width=(v.pedal?0:v.fuel)+'%';h.vh.style.width=Math.max(0,v.hp)+'%';h.vs.textContent=`${Math.round(Math.abs(v.speed)*3.6)} km/h${v.broken?' · WRECKED':!v.pedal&&v.fuel<=0?' · NO FUEL':''}`}
+  if(v){h.vt.textContent=v.name+(v.driver===p?'':' · passenger');sW(h.vf,(v.pedal?0:v.fuel)+'%');sW(h.vh,Math.max(0,v.hp)+'%');h.vs.textContent=`${Math.round(Math.abs(v.speed)*3.6)} km/h${v.broken?' · WRECKED':!v.pedal&&v.fuel<=0?' · NO FUEL':''}`}
   h.dead.classList.toggle('hidden',!(p.dead>0));
   if(p.dead>0){const ops=respawnOpts(p),key=ops.join('|')+(p.rspSel||0);
     if(h.rspKey!==key){h.rspKey=key;h.rsp.innerHTML=ops.map((o,i)=>`<button data-i="${i}" class="${i===(p.rspSel||0)?'on':''}">${o}</button>`).join('');
       h.rsp.querySelectorAll('button').forEach(b=>b.onclick=()=>{p.rspSel=+b.dataset.i;p.dead=.001})}
     h.deadS.textContent=`${p.deathCause?'You '+p.deathCause.replace(/^was /,'were ')+'. ':''}Respawn in ${Math.ceil(p.dead)}… ${p.k.use} to switch, ${p.i?'N':'Space'} or click to go now`}
 }
+// compass strip: heading, plus markers for your waypoint, the nearest military base and where you last died
+function drawCompass(){const cv=$('#compass');const p=players[0];const on=running&&p&&!(p.dead>0)&&!menuP&&!mapOpen&&players.length===1;cv.classList.toggle('hidden',!on);if(!on)return;
+  const x=cv.getContext('2d'),Wc=cv.width,Hc=cv.height,k=Wc/Math.PI,yaw=p.vehicle?(p.vehicle.yaw+Math.PI):p.yaw,rel=a=>Math.atan2(Math.sin(a-yaw),Math.cos(a-yaw)),X=a=>Wc/2-rel(a)*k;
+  x.clearRect(0,0,Wc,Hc);x.fillStyle='rgba(0,0,0,.55)';x.fillRect(0,0,Wc,Hc);x.font='12px DGPixel,monospace';x.textAlign='center';x.textBaseline='middle';
+  for(let d=0;d<24;d++){const a=-d*Math.PI/12,xx=X(a);if(Math.abs(rel(a))>Math.PI/2)continue;const L=['N','','','NE'.slice(0,0),'','','E','','','','','','S','','','','','','W','','','','',''][d];
+    if(d%6===0){x.fillStyle=d===0?'#ff7a5a':'#f0ead8';x.fillText(['N','E','S','W'][d/6],xx,Hc/2+1)}else{x.fillStyle='rgba(240,234,216,.45)';x.fillRect(xx|0,d%3===0?6:9,1,d%3===0?10:4)}}
+  const mark=(wx,wz,col,ch)=>{const a=Math.atan2(-(wx-p.pos.x),-(wz-p.pos.z)),r=rel(a),xx=Math.max(4,Math.min(Wc-4,Wc/2-r*k));x.fillStyle=col;x.fillText(ch,xx,Hc/2+1);const dist=Math.hypot(wx-p.pos.x,wz-p.pos.z);if(Math.abs(r)<.25){x.font='10px DGPixel,monospace';x.fillText(Math.round(dist)+'m',xx,Hc-3);x.font='12px DGPixel,monospace'}};
+  const v=p.vehicle,T=v&&v.auto||p.wp;if(T)mark(T.x,T.z,'#ffd040','◆');
+  let bm=null,bd=400;for(const Rg of regions.values())if(Rg.spec&&Rg.spec.milSpecs)for(const m of Rg.spec.milSpecs){const cx=(m[0]+m[2])/2*VS,cz=(m[1]+m[3])/2*VS,d=Math.hypot(cx-p.pos.x,cz-p.pos.z);if(d<bd){bd=d;bm=[cx,cz,m[5]]}}
+  if(bm)mark(bm[0],bm[1],bm[2]?'#ff5a40':'#d8d870','▣');if(p.deathAt)mark(p.deathAt.x,p.deathAt.z,'#ff3030','✕');
+  x.fillStyle='#f0ead8';x.fillRect(Wc/2,0,1,4)}
 function updTop(){
   const hr=(tDay*24+6)%24,hh=Math.floor(hr),mm=Math.floor((hr-hh)*60/10)*10;
   const night=dayLight()<.25;
@@ -4025,7 +4135,7 @@ function caseSync(p){if(!p.case)p.case=[];const C=p.case,drop={};
     for(const s of C)if(s.k===k){s.n=Math.min(max,rest);rest-=s.n}
     for(let i=C.length-1;i>=0;i--)if(C[i].k===k&&C[i].n<=0)C.splice(i,1);
     while(rest>0){const s={k,n:Math.min(max,rest)};if(!casePlace(p,s)){drop[k]=rest;p.inv[k]-=rest;break}rest-=s.n}}
-  if(Object.keys(drop).length){dropBag(p.pos.clone(),drop);msg(p,'No room in your case. Dropped: '+Object.entries(drop).map(([k,q])=>`${q} ${LABEL[k].toLowerCase()}`).join(', '))}}
+  if(Object.keys(drop).length){const bg=dropBag(p.pos.clone(),drop);if(bg)bg.noAuto=true;msg(p,'No room in your case. Dropped: '+Object.entries(drop).map(([k,q])=>`${q} ${LABEL[k].toLowerCase()}`).join(', '))}}
 function caseOrganize(p){const all=p.case.slice().sort((a,b)=>{const A=isz(a.k),B=isz(b.k);return B[0]*B[1]-A[0]*A[1]||a.k.localeCompare(b.k)});p.case=[];const lost=[];
   for(const s of all)if(!casePlace(p,s))lost.push(s);for(const s of lost){s.x=-1;p.case.push(s)}caseSync(p)}
 let caseSel=null,caseDrag=null;
@@ -4108,6 +4218,8 @@ $('#mWear').addEventListener('click',e=>{const b=e.target.closest('button');if(!
 $('#mEat').onclick=()=>{if(menuP){eat(menuP);renderMenu()}};
 $('#mBand').onclick=()=>{if(menuP){heal(menuP);renderMenu()}};
 $('#mClose').onclick=closeMenu;
+{const M=$('#menu');let downOut=false;M.addEventListener('pointerdown',e=>{downOut=e.target===M&&!caseDrag});M.addEventListener('click',e=>{if(e.target===M&&downOut&&!caseDrag)closeMenu();downOut=false})}
+addEventListener('pointerdown',e=>{if(talkP&&!$('#talk').contains(e.target))closeTalk();else if(cookP&&!$('#cook').contains(e.target))closeCook()},true);
 // pause menu: unstick or teleport (bed, crossroads, nearest or random town, your partner)
 function tpTargets(p){const T=[];if(p.spawnPt)T.push(['Your bed',()=>p.spawnPt.clone()]);T.push(['Crossroads',()=>{const v=spawn.clone();v.x+=p.i*1.5;return v}]);
   const tc=t=>{const k=Math.floor(t.n/2);return new V3((t.x0+P*k+6)*VS,(G+1)*VS,(t.z0+P*k+6)*VS)},px=p.pos.x/VS,pz=p.pos.z/VS,dist=t=>Math.hypot((t.x0+t.x1)/2-px,(t.z0+t.z1)/2-pz);
@@ -4511,7 +4623,7 @@ function addHole(mesh,point,normal){
 function burstDir(p,dir,n){for(let k=0;k<n;k++){const j=pI;pI=(pI+1)%PN;const o=j*3,s=.7+rng()*.5;pBlood[j]=1;
   pPos[o]=p.x;pPos[o+1]=p.y;pPos[o+2]=p.z;pVel[o]=dir.x*R(3,7)+R(-1,1);pVel[o+1]=(dir.y||0)*4+R(0,2.5);pVel[o+2]=dir.z*R(3,7)+R(-1,1);
   pLife[j]=R(.5,1.3);pCol[o]=RED[0]*s;pCol[o+1]=RED[1]*s;pCol[o+2]=RED[2]*s}}
-function hitPart(h,dir,dmg,by,bullet){
+function hitPart(h,dir,dmg,by,bullet){hitMark(by,false);
   const z=h.z;if(z.dead)return;
   if(bullet)addHole(h.mesh,h.point,h.normal);
   burstDir(h.point,dir,bullet?16:10);burst(h.point,6,2,RED,1);SND.hit();z.chasing=true;knockZ(z,dir,bullet?2.2:7);
@@ -4646,6 +4758,8 @@ function drawMap(p){const cv=$('#mapCv'),x=cv.getContext('2d'),N=cv.width,S=W/N,
   x.putImageData(img,0,0);const px=q=>(q/VS-OX)/S,pz=q=>(q/VS-OZ)/S;
   x.font='bold 11px monospace';x.textAlign='center';for(const t of towns){const cx=((t.x0+t.x1)/2-OX)/S,cz=((t.z0+t.z1)/2-OZ)/S;if(cx<0||cz<0||cx>N||cz>N)continue;x.fillStyle='rgba(0,0,0,.6)';const L=townName(t).toUpperCase();x.fillText(L,cx+1,cz+1);x.fillStyle=t.city?'#ffd070':'#f0e0b0';x.fillText(L,cx,cz)}
   for(const v of vehicles)if(v.ev){x.fillStyle='#40c0ff';x.fillRect(px(v.pos.x)-2,pz(v.pos.z)-2,4,4)}
+  for(const Rg of regions.values())if(Rg.spec&&Rg.spec.milSpecs)for(const m of Rg.spec.milSpecs){const a=(m[0]-OX)/S,b=(m[1]-OZ)/S,w=(m[2]-m[0])/S,hh=(m[3]-m[1])/S;if(a+w<0||b+hh<0||a>N||b>N)continue;x.strokeStyle=m[5]?'#ff5a40':'#c8c860';x.lineWidth=2;x.strokeRect(a,b,w,hh);x.fillStyle='rgba(0,0,0,.65)';x.fillText(m[6]+(m[5]?' (held)':''),a+w/2+1,b-3);x.fillStyle=m[5]?'#ff8a70':'#e8e8a0';x.fillText(m[6]+(m[5]?' (held)':''),a+w/2,b-4)}
+  if(p&&p.deathAt){const a=px(p.deathAt.x),b=pz(p.deathAt.z);x.strokeStyle='#ff3030';x.lineWidth=2.5;x.beginPath();x.moveTo(a-5,b-5);x.lineTo(a+5,b+5);x.moveTo(a+5,b-5);x.lineTo(a-5,b+5);x.stroke();x.fillStyle='#ff8070';x.fillText('you died here',a,b-8)}
   const v=p&&p.vehicle,T=v&&v.auto||p&&p.wp;if(T){x.strokeStyle='#ffd040';x.lineWidth=2;x.beginPath();x.arc(px(T.x),pz(T.z),6,0,6.3);x.stroke()}
   if(p){const a=p.vehicle?p.vehicle.yaw:p.yaw+Math.PI,cx=px(p.pos.x),cz=pz(p.pos.z);x.fillStyle='#ff4030';x.beginPath();x.moveTo(cx+Math.sin(a)*7,cz+Math.cos(a)*7);x.lineTo(cx+Math.sin(a+2.5)*5,cz+Math.cos(a+2.5)*5);x.lineTo(cx+Math.sin(a-2.5)*5,cz+Math.cos(a-2.5)*5);x.fill()}
   const ev=v&&v.ev&&v.driver===p;$('#mapNote').textContent=ev?(v.auto?'Autopilot is driving. Click somewhere else to change course.':'Click anywhere on the map and the car drives you there. Touch the controls to take over.'):'Click to drop a waypoint. In a self-driving Volta (blue squares), click and it drives you there.';
@@ -4738,13 +4852,21 @@ function dropBag(pos,items,hide){
   else{part(g,.36,.3,.28,0x5e4c32,0,.15,0);part(g,.13,.09,.13,0x4a3a26,0,.34,0);part(g,.38,.04,.3,0x2a2018,0,.21,0)}
   g.position.set(pos.x+R(-.2,.2),pos.y,pos.z+R(-.2,.2));g.rotation.y=rng()*6;scene.add(g);
   const n=Object.values(items).reduce((a,b)=>a+b,0);
-  bags.push({g,pos:g.position,items,t:0,label:hide?`the carcass (${n} items)`:`loot bag (${n} items)`});
+  const bag={g,pos:g.position,items,t:0,label:hide?`the carcass (${n} items)`:`loot bag (${n} items)`};bags.push(bag);
   if(bags.length>60){const b=bags.shift();scene.remove(b.g)}
-}
+  return bag}
 function nearestBag(p,r){let best=null,bd=r;for(const b of bags){const d=Math.hypot(b.pos.x-p.pos.x,b.pos.y-p.pos.y,b.pos.z-p.pos.z);if(d<bd){bd=d;best=b}}return best}
-function takeBag(p,b){for(const[k,q]of Object.entries(b.items))p.inv[k]+=q;scene.remove(b.g);bags=bags.filter(x=>x!==b);SND.pick();
+function takeBag(p,b){for(const[k,q]of Object.entries(b.items))p.inv[k]+=q;gainPop(p,b.items);scene.remove(b.g);bags=bags.filter(x=>x!==b);SND.pick();
   msg(p,'Took: '+Object.entries(b.items).map(([a,q])=>`${q} ${LABEL[a].toLowerCase()}`).join(', '))}
-function updateBags(dt){for(const b of bags){b.t+=dt;if(curSeason!==3&&rng()<dt*1.5&&players.some(p=>p.pos.distanceTo(b.pos)<12))burst(new V3(b.pos.x+R(-.3,.3),b.pos.y+R(.3,.8),b.pos.z+R(-.3,.3)),1,.8,[.04,.04,.04],.6);const sx=vc(b.pos.x),sz=vc(b.pos.z);if(!solid(sx,vc(b.pos.y-.05),sz))b.pos.y-=dt*3;if(b.t>400){scene.remove(b.g);b.gone=true}}bags=bags.filter(b=>!b.gone)}
+// quality of life
+let autoLoot=true;try{autoLoot=localStorage.getItem('deadground-autoloot')!=='0'}catch(e){}
+function hitMark(by,kill){if(!by||!by.hud||!by.hud.cross)return;const c=by.hud.cross;c.classList.remove('hit','kill');void c.offsetWidth;c.classList.add(kill?'kill':'hit');clearTimeout(c.__hm);c.__hm=setTimeout(()=>c.classList.remove('hit','kill'),kill?320:170)}
+function gainPop(p,items){if(!p||!p.hud||!p.hud.el)return;const t=Object.entries(items).filter(([,q])=>q>0).map(([k,q])=>`+${q} ${LABEL[k]||k}`);if(!t.length)return;
+  const box=p.hud.pops||(p.hud.pops=(()=>{const d=document.createElement('div');d.className='pops';p.hud.el.appendChild(d);return d})());
+  t.slice(0,6).forEach((s,i)=>{const e=document.createElement('div');e.className='pop';e.textContent=s;e.style.animationDelay=(i*.09)+'s';box.appendChild(e);setTimeout(()=>e.remove(),1900+i*90)})}
+{const el=$('#alSel');if(el){el.value=autoLoot?'1':'0';el.addEventListener('change',()=>{autoLoot=el.value==='1';try{localStorage.setItem('deadground-autoloot',autoLoot?'1':'0')}catch(e){}})}}
+function autoPickup(){if(!autoLoot)return;for(const p of players){if(p.dead>0||p.vehicle||p.sleeping)continue;for(const b of bags){if(b.noAuto||b.t<1.2)continue;if(Math.hypot(b.pos.x-p.pos.x,b.pos.z-p.pos.z)<1.1&&Math.abs(b.pos.y-p.pos.y)<1.3){takeBag(p,b);return}}}}
+function updateBags(dt){autoPickup();for(const b of bags){b.t+=dt;if(curSeason!==3&&rng()<dt*1.5&&players.some(p=>p.pos.distanceTo(b.pos)<12))burst(new V3(b.pos.x+R(-.3,.3),b.pos.y+R(.3,.8),b.pos.z+R(-.3,.3)),1,.8,[.04,.04,.04],.6);const sx=vc(b.pos.x),sz=vc(b.pos.z);if(!solid(sx,vc(b.pos.y-.05),sz))b.pos.y-=dt*3;if(b.t>400){scene.remove(b.g);b.gone=true}}bags=bags.filter(b=>!b.gone)}
 
 // ---------------- wild animals
 let animals=[];
@@ -4785,7 +4907,7 @@ function animalRay(eye,dir,far){let best=null,bt=far;for(const a of animals){if(
   const t=raySphere(eye,dir,c,r);if(t>0&&t<bt){bt=t;best=a}}return best?{a:best,t:bt}:null}
 function nearestAnimalInFront(p,dir,range){let best=null,bd=range;for(const a of animals){if(a.dead)continue;const dx=a.pos.x-p.pos.x,dz=a.pos.z-p.pos.z,d=Math.hypot(dx,dz);
   if(d>bd||Math.abs(a.pos.y-p.pos.y)>1.6)continue;const fl=Math.hypot(dir.x,dir.z)||1;if((dx*dir.x+dz*dir.z)/((d||1)*fl)<.65)continue;best=a;bd=d}return best}
-function hurtAnimal(a,dmg,dir,by){
+function hurtAnimal(a,dmg,dir,by){hitMark(by,false);
   if(a.dead)return;a.hp-=dmg;a.flee=7;a.angry=10;{const l=Math.hypot(dir.x,dir.z)||1,f=a.A.size[0]>1?3:6;a.kx=(a.kx||0)+dir.x/l*f;a.kz=(a.kz||0)+dir.z/l*f}
   burst(new V3(a.pos.x,a.pos.y+a.A.leg+a.A.size[1]/2,a.pos.z),14,3,RED,1.5);SND.hit();
   if(a.hp<=0){a.dead=.001;splat(a.pos,R(.8,1.6));const it={};for(const[k,[lo,hi]]of Object.entries(a.A.drops)){const q=RI(lo,hi);if(q)it[k]=q}
@@ -4988,7 +5110,7 @@ function rosterForRegion(Rg){
     else if(r<.58){const nights=RI(4,45);roster.push({name:makeName(used),kind:'survivor',reg:Rg.key,homeI:i,alive:true,out:null,hp:85,kills:RI(nights>>1,nights*2),pk:rng()<.15?1:0,nights})}});
   Rg.zpop=zInit(Rg);
   for(const m of milSpecs)if(m[5]){const cx=(m[0]+m[2])>>1,cz=(m[1]+m[3])>>1;for(let i=0,n=RI(5,7);i<n;i++){const nights=RI(20,90);
-    roster.push({name:pick(['Pvt. ','Cpl. ','Sgt. ','Spc. ','Lt. '])+pick(FIRST)+' '+pick(LAST),kind:'soldier',reg:Rg.key,camp:[cx,cz,m[4]],base:m.slice(0,5),unit:m[6],alive:true,out:null,hp:130,kills:RI(nights,nights*3),pk:RI(0,4),nights})}}
+    roster.push({name:pick(['Pvt. ','Cpl. ','Sgt. ','Spc. ','Lt. '])+pick(FIRST)+' '+pick(LAST),kind:'soldier',reg:Rg.key,camp:[cx,cz,m[4]],base:m.slice(0,5),unit:m[6],alive:true,out:null,hp:130,kills:RI(nights>>2,nights),pk:RI(0,4),nights})}}
   const X0=Rg.rx*RS,Z0=Rg.rz*RS;
   for(let g=0,t=0,ng=rng()<.45?0:rng()<.85?1:2;g<ng&&t<80;t++){const x=RI(X0+30,X0+RS-31),z=RI(Z0+30,Z0+RS-31);if(inTown(x,z)||townDist(x,z)<40||milSpecs.some(m=>x>m[0]-20&&x<m[2]+20&&z>m[1]-20&&z<m[3]+20))continue;const ty=topY(x,z);if(ty!==hm(x,z)||get(x,ty,z)===B.LEAF)continue;
     g++;campSpecs.push([x,z,1,0]);const fr=rng()<.4; // some armed groups are drifters who mean no harm
@@ -5176,7 +5298,7 @@ function soldierTick(n,dt){const b=n.rec&&n.rec.base;if(!b)return;n.warnT=(n.war
 function npcShot(n,tx,ty,tz){const d=Math.hypot(tx-n.pos.x,tz-n.pos.z);const near=players.some(p=>p.pos.distanceTo(n.pos)<60);
   if(players.some(p=>p.pos.distanceTo(n.pos)<120))playAt(new V3(n.pos.x,n.pos.y+1.4,n.pos.z),()=>SND.shot())
   burst(new V3(n.pos.x+Math.sin(n.g.rotation.y)*.5,n.pos.y+1.35,n.pos.z+Math.cos(n.g.rotation.y)*.5),3,1,[1,.8,.3],.5);alertZombies(n.pos,30);n.aimT=.4}
-function hurtNPC(n,dmg,dir,by){
+function hurtNPC(n,dmg,dir,by){hitMark(by,false);
   if(n.dead||n.kid)return;n.hp-=dmg;if(dir){const l=Math.hypot(dir.x,dir.z)||1;n.kx=(n.kx||0)+dir.x/l*6;n.kz=(n.kz||0)+dir.z/l*6}burst(new V3(n.pos.x,n.pos.y+1.2,n.pos.z),14,3,RED,1.5);SND.hit();
   if(by&&players.includes(by)&&(n.kind==='survivor'||n.rec&&n.rec.friendly)&&!n.hostileTo){n.hostileTo=by;msg(by,`${n.name} turns on you!`)}
   if(by&&players.includes(by)&&n.kind==='soldier'){let a=false;for(const o of npcs)if(o.kind==='soldier'&&!o.dead&&o.rec&&n.rec&&o.rec.unit===n.rec.unit&&!o.hostileTo){o.hostileTo=by;a=true}if(a)msg(by,`${n.name}: "Contact! Weapons free!"`)}
@@ -5474,11 +5596,11 @@ function render(){
   fitView();const w=VW,h=VH;renderer.setScissorTest(true);
   const cen=running?players.map(p=>p.vehicle?p.vehicle.pos:p.pos):[spawn];updateShadowCam(cen);updateRT(cen[0]);
   RTU.sunDirU.value.copy(SUN_DIR);RTU.sunK.value=clamp(sun.intensity*1.5,0,1);RTU.wet.value=WX.wet;RTU.rtime.value=performance.now()/1000;
-  if(!running){const t=performance.now()/1000*.05;introCam.position.set(spawn.x+Math.cos(t)*48,32,spawn.z+Math.sin(t)*48);introCam.lookAt(spawn.x,12,spawn.z);introCam.far=viewUnits()+60;
+  if(!running){const t=performance.now()/1000*.05;introCam.position.set(spawn.x+Math.cos(t)*48,32,spawn.z+Math.sin(t)*48);introCam.lookAt(spawn.x,12,spawn.z);introCam.far=farView()+60;
     introCam.aspect=w/h;introCam.updateProjectionMatrix();renderView(introCam,0,0,0,w,h,false);return}
   const n=players.length,vw=w/n;
   const sv=[hemi.intensity,sun.intensity,scene.fog.near,scene.fog.far,scene.fog.color.getHex()];
-  players.forEach((p,i)=>{p.cam.aspect=vw/h;p.cam.far=viewUnits()+30;p.cam.updateProjectionMatrix();
+  players.forEach((p,i)=>{p.cam.aspect=vw/h;p.cam.far=farView()+30;p.cam.updateProjectionMatrix();
     const under=underground(p.cam.position);
     if(under){hemi.intensity=.05;sun.intensity=0;scene.fog.near=1;scene.fog.far=22;scene.fog.color.setHex(0x040504)}
     else{hemi.intensity=sv[0];sun.intensity=sv[1];scene.fog.near=sv[2];scene.fog.far=sv[3];scene.fog.color.setHex(sv[4])}
@@ -5541,7 +5663,7 @@ function frame(){
   if(worldReady){updateWindow(false);const cs=running?players.map(p=>p.vehicle?p.vehicle.pos:p.pos):[spawn];streamChunks(cs,isTouch?2:4);cullT-=dt;if(cullT<=0){cullT=.5;cullEntities(cs)}
     if(running){saveT-=dt;if(saveT<=0){saveT=90;autoSave()}}}
   if(running&&!paused)update(dt);else{pressed.clear();T.pressed.clear()}
-  try{devTick()}catch(e){}try{if(running)flashUpdate();updEnv(dt)}catch(e){}
+  try{devTick()}catch(e){}try{lodTick(dt);grassPushTick(dt);drawCompass();if(running){flashUpdate();if((flSweepT-=dt)<=0){flSweepT=3;flSweep()}}updEnv(dt)}catch(e){}
   if(!running){tDay+=dt/DAYLEN*.3;updSky()}
   grassTime.value=now/1000;adaptRes(dt);render();requestAnimationFrame(frame);
 }
@@ -5586,7 +5708,7 @@ function lzd(src,out){let ip=0,op=0;while(ip<src.length){const t=src[ip++];let l
 const baseCell=(y,cq,h,tb,wx,z)=>y===0?13:y<h-7?(y<h-8?ORE(h3(wx,y,z))||3:3):y<h?(tb===3?3:2):y===h?(cq?(tb===7?7:2):tb):y===h+1&&cq?22+cq:0;
 function regionBase(R,writeH){const X0=R.rx*RS,Z0=R.rz*RS;
   if(R.base){if(writeH){const hc=R.base[3];for(let z=0;z<RS;z++){const o=md(Z0+z)*W;for(let x=0;x<RS;x++)hmap[o+md(X0+x)]=hc[z*RS+x]}}return R.base}
-  const RR=RS*RS,tb=new Uint8Array(RR),cq=new Uint8Array(RR),hh=new Int16Array(RR);regionHeights(R,tb,cq,hh);const hc=new Int16Array(RR);for(let z=0;z<RS;z++){const o=md(Z0+z)*W;for(let x=0;x<RS;x++)hc[z*RS+x]=hmap[o+md(X0+x)]}
+  const RR=RS*RS,tb=new Uint8Array(RR),cq=new Uint8Array(RR),hh=new Int16Array(RR);regionHeights(R,tb,cq,hh);dropGenScratch(R);const hc=new Int16Array(RR);for(let z=0;z<RS;z++){const o=md(Z0+z)*W;for(let x=0;x<RS;x++)hc[z*RS+x]=hmap[o+md(X0+x)]}
   return R.base=[tb,cq,hh,hc]}
 function rleEncode(R){const X0=R.rx*RS,Z0=R.rz*RS,[tb,cqa,hh]=regionBase(R,false);let o=0;
   for(let y=0;y<H;y++)for(let z=Z0;z<Z0+RS;z++){let i=(y*W+md(z))*W+md(X0),c=(z-Z0)*RS;for(let x=X0;x<X0+RS;x++,i++,c++){const v=vox[i],cq=cqa[c],h=hh[c]-(cq?1:0);
@@ -5646,7 +5768,7 @@ function gatherState(R){const st={c:[],d:'',vh:[],b:[],f:[],tr:[],zp:R.zpop|0,fg
   for(const f of fires)if(f.user&&inReg(R,f.pos.x,f.pos.z))st.f.push([r2(f.pos.x),r2(f.pos.y),r2(f.pos.z)]);
   for(const t of traps)if(inReg(R,t.pos.x,t.pos.z))st.tr.push([t.type,r2(t.pos.x),r2(t.pos.y),r2(t.pos.z),t.armed?1:0,t.uses]);
   R.st=st}
-function unloadRegion(R,keep=true){
+function unloadRegion(R,keep=true){paintClear(R.rx*RS,R.rz*RS,(R.rx+1)*RS,(R.rz+1)*RS);
   if(keep)gatherState(R);
   const out=o=>inReg(R,o.position?o.position.x:o.pos.x,o.position?o.position.z:o.pos.z),gone=o=>{scene.remove(o)};
   crates=crates.filter(c=>{if(c.reg===R){gone(c.g);return false}return true});
@@ -5739,7 +5861,7 @@ function collectState(){
       i:Object.fromEntries(Object.entries(p.inv).filter(e=>e[1]>0)),s:p.spawnPt?[r2(p.spawnPt.x),r2(p.spawnPt.y),r2(p.spawnPt.z)]:0})),
     // only regions you changed or met people in are stored; everything else regrows from the seed
     r:[...regions.values()].filter(R=>R.edits.size||!emptySt(R.st)||R.rosterDone).map(R=>[R.rx,R.rz,R.edits.size?packEdits(R.edits):'',emptySt(R.st)?(R.zpop!=null?{zp:R.zpop}:0):R.st,R.rosterDone?1:0]),
-    ro:roster.map(r=>[r.reg,r.kind==='bandit'?1:r.kind==='family'?2:0,r.kind==='bandit'?r.camp:r.homeI,r.name,r.alive?1:0,r.kills,r.pk,r.nights,Math.round(r.out?r.out.hp:r.hp),r.role||0,r.fam||0,r.need||0,r.helped|0,r.friendly?1:0])};
+    ro:roster.map(r=>[r.reg,r.kind==='bandit'?1:r.kind==='family'?2:r.kind==='soldier'?3:0,r.kind==='bandit'?r.camp:r.kind==='soldier'?[r.camp,r.base,r.unit]:r.homeI,r.name,r.alive?1:0,r.kills,r.pk,r.nights,Math.round(r.out?r.out.hp:r.hp),r.role||0,r.fam||0,r.need||0,r.helped|0,r.friendly?1:0])};
 }
 async function zip(u,mode){if(!window.CompressionStream)return null;try{const st=new Blob([u]).stream().pipeThrough(mode?new DecompressionStream('deflate-raw'):new CompressionStream('deflate-raw'));return new Uint8Array(await new Response(st).arrayBuffer())}catch(e){return null}}
 async function encodeSave(){const raw=new TextEncoder().encode(JSON.stringify(collectState()));const z=await zip(raw,0);return z?'DG1z'+b64(z):'DG1r'+b64(raw)}
@@ -5754,7 +5876,7 @@ function applyState(st){
   else{
     for(const R of regions.values())if(R.live)unloadRegion(R,false);regions.clear();roster.length=0;rosterNames.clear();
     for(const[rx,rz,e,rst,rd]of st.r||[]){const R=reg(rx,rz);if(e)R.edits=unpackEdits(e);if(rst){R.st=Object.assign({c:[],d:'',vh:[],b:[],f:[],tr:[]},rst);if(rst.zp!=null)R.zpop=rst.zp}R.rosterDone=!!rd;R.visited=true}
-    for(const a of st.ro||[]){const r={reg:a[0],kind:['survivor','bandit','family'][a[1]],name:a[3],alive:!!a[4],out:null,kills:a[5],pk:a[6],nights:a[7],hp:a[8]};if(a[9])r.role=a[9];if(a[10])r.fam=a[10];if(a[11])r.need=a[11];if(a[12])r.helped=a[12];if(a[13])r.friendly=true;if(a[1]===1)r.camp=a[2];else r.homeI=a[2];roster.push(r);rosterNames.add(r.name)}
+    for(const a of st.ro||[]){const r={reg:a[0],kind:['survivor','bandit','family','soldier'][a[1]]||'survivor',name:a[3],alive:!!a[4],out:null,kills:a[5],pk:a[6],nights:a[7],hp:a[8]};if(a[9])r.role=a[9];if(a[10])r.fam=a[10];if(a[11])r.need=a[11];if(a[12])r.helped=a[12];if(a[13])r.friendly=true;if(a[1]===1)r.camp=a[2];else if(a[1]===3){r.camp=a[2][0];r.base=a[2][1];r.unit=a[2][2]}else r.homeI=a[2];roster.push(r);rosterNames.add(r.name)}
   }
   day=st.day;tDay=st.t;kills=st.k||0;
   st.p.forEach((s,i)=>{const p=players[i];if(!p)return;p.pos.set(s.x,s.y+.05,s.z);p.yaw=s.a;p.hp=s.hp;p.hunger=s.hu;p.kills=s.k||0;p.pk=s.pk|0;p.nights=s.n|0;p.eye=p.pos.y+1.6;
@@ -5774,6 +5896,7 @@ async function loadCode(code){
   let st;try{st=await decodeSave(code)}catch(e){setMsg(e.message);return}
   withSeed(st.seed,()=>{loadingSave=true;startGame(Math.max(1,st.p.length));applyState(st);msg(null,`Save loaded — day ${day}`)})}
 // render distance pickers
+for(const id of['#farSel','#farSel2']){const el=$(id);el.value=FARV?'1':'0';el.addEventListener('change',()=>{FARV=el.value==='1';$('#farSel').value=$('#farSel2').value=el.value;try{localStorage.setItem('deadground-far',FARV?'1':'0')}catch(e){}})}
 for(const id of['#rdSel','#rdSel2']){const el=$(id);el.innerHTML=[4,6,8,10].map(v=>`<option value="${v}">${v} chunks (${v*CS*VS} m)</option>`).join('');el.value=String(RD);
   el.addEventListener('change',()=>{RD=Math.min(10,+el.value);$('#rdSel').value=$('#rdSel2').value=String(RD);try{localStorage.setItem('deadground-rd',String(RD))}catch(e){}})}
 for(const id of['#pixSel','#pixSel2']){const el=$(id);el.innerHTML=[[1,'Smooth'],[2,'Pixel ×2'],[3,'Pixel ×3'],[4,'Pixel ×4']].map(([v,n])=>`<option value="${v}">${n}</option>`).join('');el.value=String(PIX);

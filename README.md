@@ -3,6 +3,20 @@
 A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns, hunt in the wilds, dig into caves, build walls before nightfall, and get an old car running.
 
 
+
+## v17 — far view
+
+- **Far view:** a low-detail terrain mesh beyond the loaded chunks extends sight to 4x the render distance (toggle next to Render distance). It samples real blocks inside the loaded window and the generator's height function and town plans beyond it, and builds in 2.5 ms slices.
+- **Flashlight** lights blocks (the block shader now has the beam) and every Lambert material in the scene.
+- **Road paint** is rasterised at 16 px per block into deduplicated tiles in a paint atlas; the block shader draws it on road tops. No paint geometry.
+- **Grass** bends away from players, their trail, nearby zombies/animals/people and moving cars (vertex shader, 10 pushers).
+- **Window trim** isn't drawn on chipped/rubble blocks.
+- **Inventory:** Close button top right; tap outside to close (also trade/campfire panels).
+- **Performance:** ray-trace volume shifts instead of full rescans (and rescans only edited columns); HUD writes only on change; flashlight rays cut by a third.
+- **Memory:** chunk/glass/grass/furniture/far-view geometry releases its CPU copy after GPU upload; per-region generation scratch is dropped after generation.
+- **QoL:** auto-pickup of loot bags (menu setting), pickup pop-ups, hit/kill crosshair markers, compass strip (waypoint, nearest base, death spot), map marks bases and death spot.
+- **Fix:** soldiers are saved and loaded correctly.
+
 ## v16 — the compounds
 
 - **Military bases:** walled corporate compounds in the wilds (watchtowers, HQ, barracks, armory, helipad, trucks) with military-grade loot. Garrisoned ones warn you off and shoot anyone inside the wall; overrun ones are full of zombies.
