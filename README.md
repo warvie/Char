@@ -10,6 +10,9 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v17.7 — real trunks far away
+- Far-view trees: trunks are drawn at the real trunk width (25 cm stem, 1-block log or 2x2 old trunk) from the actual log columns when loaded, or one block-wide trunk per generated tree patch further out; crowns are separate floating boxes with an underside, and dead trees are bare trunks.
+
 ## v17.6 — trim on the grid
 
 - WRECT/DRECT on whole block pixels (1/8 block), outward-snapped; pieces abut instead of overlapping; plinths/sill 2 px deep, others 1 px.
