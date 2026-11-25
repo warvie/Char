@@ -147,6 +147,7 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 
 - **Blood** splashes onto the windshield and the exact front panels that hit a zombie, and streaks back along the hood.
 - **Visible damage:** dents push panels back and bend them, scuffs show bare metal and rust, the windshield cracks in spider-webs, and hard hits tear off bumpers and lights, which stay lying in the road. Abandoned wrecks already show their damage.
+- **Damage where you're hit:** front-end hits take out the headlights first, then crack the radiator and wreck the engine (a sick engine is slower, smokes and stalls; a dead one must be replaced), and hard hits crush the battery. Rear-end hits split the fuel tank, which then leaks. Side hits bend wheels. The windshield only cracks when something actually strikes the glass: a wall tall enough to reach it, a taller vehicle, or a zombie thrown onto it at speed. A repair kit fixes the radiator, tank, battery and lights.
 - **Crashing through things:** hit a wall fast enough and glass, drywall, planks and doors give way, and at higher speed brick and concrete too. Furniture in the way goes flying.
 - **Construction machines:** bulldozers push slowly through anything; excavators dig a bucket of ground in front of them when you hold attack; dump trucks are fast and heavy.
 - **Self-driving cars** (the rare Volta S): press M (or Map in the pause menu) and click anywhere. The car steers itself there, keeping to paved roads and backing out of dead ends. Touching the controls takes over.

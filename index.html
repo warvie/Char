@@ -326,6 +326,10 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>Pixel size <select id="pixSel"></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
+    <h4>v15.4 · Nov 25, 2026 — crash damage</h4><ul>
+      <li>Cars break where they're hit. Front ends lose headlights, then the radiator and engine (slower, smoking, stalling, finally dead), and in hard hits the battery. Rear ends split the fuel tank so it leaks. Side hits bend wheels. A repair kit patches it all up; a wrecked engine has to be replaced.</li>
+      <li>The windshield only cracks when something actually hits the glass: a wall or object tall enough to reach it, a bigger vehicle, or a zombie thrown up onto it at speed.</li>
+      <li>Stop signs are proper pixel octagons with a white rim.</li></ul>
     <h4>v15.3 · Nov 25, 2026 — weight and contact</h4><ul>
       <li>Real knockback: a bat hit throws a zombie back about two metres with a little hop and a stagger before it can come at you again; bullets shove them; animals and people get knocked back too.</li>
       <li>Attackers come right up to arm's length to hit you, but no longer walk into you.</li>
@@ -2025,7 +2029,10 @@ function buildFurn(sp){
   case'lane':{const L=sp[5].L;for(const sx of[-.09,.09])paintRun(F,sp,sx,-L/2,L,.1,0xd8b030,0);for(const sx of[-2.75,2.75])paintRun(F,sp,sx,-L/2-2.5,L+5,.12,0xdcdad2,0);break}
   case'xwalk':{for(let k=0;k<7;k++)paintRun(F,sp,-2.55+k*.85,-1,2,.42,0xdcdad2,0);for(let k=0;k<6;k++)if(roadAt(sp,.2+k*.5,1.35,0))F(.5,.012,.3,0xdcdad2,.2+k*.5,.006,1.35);break}
   case'curb':{const{L,paint}=sp[5];const n=Math.round(L/.5);for(let i=0;i<n;i++){const z=-L/2+(i+.5)*L/n;if(!roadAt(sp,0,z,1))continue;const pt=paint&&(z>L/2-2.6||z<-L/2+2.6);F(.2,.52,L/n,pt?paint:0xb4b0a8,0,.26,z);F(.22,.04,L/n,pt?paint:0xc4c0b8,0,.52,z)}break}
-  case'stop':{const red=0xb81c1c,pole=0x8a8c8e;F(.07,2.5,.07,pole,0,1.25,0);for(const r of[Math.PI/8,3*Math.PI/8])F(.68,.68,.025,red,0,2.15,.05,0,r);
+  case'stop':{const red=0xb81c1c,pole=0x8a8c8e,px=.0425;F(.07,2.5,.07,pole,0,1.25,0);
+    // a regular octagon drawn in pixels: 16 rows, the corners cut back one pixel per row (45 degrees), a 1-pixel white rim behind
+    const oct=(n,cut,col,z,dz)=>{for(let j=0;j<n;j++){const e=Math.min(j,n-1-j),ins=Math.max(0,cut-e),w=(n-2*ins)*px;F(w,px,dz,col,0,2.15+(j-(n-1)/2)*px,z)}};
+    oct(18,6,0xf0ece4,.04,.02);oct(16,5,red,.05,.025);
     sunTxt(F,'STOP',0,2.15,.068,.024,0xf0ece4);
     const nm=sp[5].names;if(nm){F(1.3,.2,.03,0x1e6a3a,0,2.62,0);sunTxt(F,nm[0],0,2.62,.017,.02,0xf0f0e8);F(1.3,.2,.03,0x1e6a3a,0,2.86,0,Math.PI/2);sunTxt(F,nm[1],0,2.86,.017,.02,0xf0f0e8,Math.PI/2);F(.06,.5,.06,pole,0,2.74,0)}break}
   case'tlight':{const dk=0x2e3032,{lit,names}=sp[5];F(.16,5,.16,dk,0,2.5,0);F(3.6,.11,.11,dk,-1.8,4.75,0);
@@ -3236,7 +3243,7 @@ function stripCar0(p,v,pt){v.hp=Math.max(0,v.hp-6);sNoise(.15,900,.5);burst(pt,6
   if(!PARTS.some(([k])=>P[k]>0)&&v.hp<=0&&!v.broken){v.broken=true;msg(p,`The ${v.name.toLowerCase()} is stripped to the shell`)}}
 function missingPart(p,v){const P=vparts(v),F=fullParts(v);for(const[k,item]of PARTS)if((P[k]|0)<(F[k]|0)&&p.inv[item]>0)return[k,item];return null}
 function fitPart(p,v){const m=missingPart(p,v);if(!m)return false;if(!(p.inv.wrench>0)){msg(p,`You need a wrench to fit the ${LABEL[m[1]].toLowerCase()} (2 scrap + 1 metal plate)`);return true}
-  p.inv[m[1]]--;vparts(v)[m[0]]++;showWheels(v);SND.place();msg(p,`Fitted a ${LABEL[m[1]].toLowerCase()} to the ${v.name.toLowerCase()}`);return true}
+  p.inv[m[1]]--;vparts(v)[m[0]]++;if(v.ph){if(m[0]==='engine')v.ph.engine=100;if(m[0]==='battery'){v.ph.battery=100;v.deadBatt=false}}showWheels(v);SND.place();msg(p,`Fitted a ${LABEL[m[1]].toLowerCase()} to the ${v.name.toLowerCase()}`);return true}
 // ---------------- car radio: three stations synthesized on the fly, through a small lowpassed speaker
 const STATIONS=['Off','KDRG 88.1 — oldies','WRCK 101.7 — rock','Emergency broadcast'];let radioNext=0,radioStep=0,radioBus=null,radioSt=0,radioPhrase=null;
 function toggleRadio(p,v){if(!vparts(v).radio){msg(p,'No radio in this one');return}v.radioOn=((v.radioOn|0)+1)%STATIONS.length;msg(p,`Radio: ${STATIONS[v.radioOn]}`);radioNext=0;radioStep=0;radioPhrase=null;sNoise(.2,2400,.08,'bandpass')}
@@ -3286,7 +3293,8 @@ function useVehicle(p,v){
   if(v.flat>0&&p.inv.wheel>0&&!p.creative){p.inv.wheel--;v.flat--;const w=v.wheels.find(w=>w.scale.y<.9);if(w){w.scale.y/=.82;w.position.y+=.06}SND.place();msg(p,'Changed the flat tyre');return}
   if(v.deadBatt&&!p.creative){if(p.inv.battery>0){p.inv.battery--;v.deadBatt=false;v.batt=100;SND.place();msg(p,'Swapped in a fresh car battery');return}}
   if(v.lightsOn&&!v.deadBatt){v.lightsOn=false}
-  if(p.creative&&(v.broken||v.hp<100||(!v.pedal&&v.fuel<100)||v.flat||v.deadBatt)){v.deadBatt=false;v.batt=100;while(v.flat>0)flatTyre0Fix(v);v.hp=100;v.broken=false;v.fuel=100;SND.place();msg(p,`Creative: ${v.name.toLowerCase()} repaired and refuelled`)}
+  if(v.ph&&!p.creative&&(v.ph.engine<100||v.ph.lights<100||v.ph.fuel<100||v.ph.battery<100)&&p.inv.kit>0&&vparts(v).engine>0){p.inv.kit--;v.ph=null;v.leak=false;v.deadBatt=false;SND.place();msg(p,'Patched the radiator, taped the tank, swapped the bulbs: the car runs right again');return}
+  if(p.creative&&(v.broken||v.hp<100||(!v.pedal&&v.fuel<100)||v.flat||v.deadBatt||v.ph)){v.deadBatt=false;v.batt=100;v.ph=null;v.leak=false;while(v.flat>0)flatTyre0Fix(v);v.hp=100;v.broken=false;v.fuel=100;SND.place();msg(p,`Creative: ${v.name.toLowerCase()} repaired and refuelled`)}
   if(v.broken){if(p.inv.kit>0){p.inv.kit--;v.hp=100;v.broken=false;SND.place();msg(p,`Repaired the ${v.name.toLowerCase()}`)}
     else msg(p,`The ${v.name.toLowerCase()} is wrecked — needs a repair kit (3 scrap + 1 metal plate)`);return}
   if(!v.pedal&&v.fuel<60&&p.inv.fuel>0){p.inv.fuel--;v.fuel=Math.min(100,v.fuel+40);SND.pick();msg(p,`Poured a fuel can in (${Math.round(v.fuel)}%)`);return}
@@ -3454,10 +3462,10 @@ function updateVehicle(v,dt){
   if(v.auto&&d){if(thr||steer||brake){v.auto=null;msg(d,'Autopilot off — you have the wheel')}else{const A=autoDrive(v);thr=A[0];steer=A[1];brake=A[2]}}
   if(d&&d.creative){v.fuel=100;if(v.broken||v.hp<100){v.hp=100;v.broken=false}}
   v.thr=thr;try{carFurn(v,d);if(VT[v.type].dig)digTick(v,d,dt)}catch(e){}
-  const canGo=!v.broken&&(v.pedal||v.fuel>0)&&partsOk(v)&&!v.deadBatt;if(d&&v.deadBatt&&thr&&!v.dbMsg){v.dbMsg=1;msg(d,'Click… click. The battery is dead — fit a car battery (pull one from another car with the pickaxe)')}
+  try{partsTick(v,dt)}catch(e){}const canGo=!v.broken&&(v.pedal||v.fuel>0)&&partsOk(v)&&!v.deadBatt&&!(v.stall>0);if(d&&v.deadBatt&&thr&&!v.dbMsg){v.dbMsg=1;msg(d,'Click… click. The battery is dead — fit a car battery (pull one from another car with the pickaxe)')}
   if(canGo&&thr)v.speed+=thr*v.acc*dt*(thr*v.speed<0?2.2:1);
   v.speed*=Math.pow(brake?.03:(thr&&canGo?.9:.5),dt);
-  v.speed=clamp(v.speed,-5,v.maxS*(1-.22*Math.min(3,v.flat|0)));if(v.flat&&Math.abs(v.speed)>2)steer+=.12*Math.sign(v.speed);if(Math.abs(v.speed)<.05&&!thr)v.speed=0;
+  v.speed=clamp(v.speed,-5,v.maxS*(1-.22*Math.min(3,v.flat|0))*(v.ph?(v.ph.engine<25?.5:v.ph.engine<60?.78:1):1));if(v.flat&&Math.abs(v.speed)>2)steer+=.12*Math.sign(v.speed);if(Math.abs(v.speed)<.05&&!thr)v.speed=0;
   if(d&&canGo&&!v.pedal&&!v.ev)v.fuel=Math.max(0,v.fuel-dt*(.08+Math.abs(v.speed)*.04));
   if(v.pedal&&d&&thr){d.hunger=Math.max(0,d.hunger-dt*.03*(1+Math.abs(v.speed)/v.maxS));if(v.IN.crank)v.IN.crank.rotation.x-=v.speed*dt*1.6}
   if(d&&!v.pedal&&v.fuel<=0&&!v.warned){v.warned=true;msg(d,'Engine sputters out — tank empty')}if(v.fuel>0)v.warned=false;
@@ -3469,9 +3477,10 @@ function updateVehicle(v,dt){
     const sx=Math.cos(v.yaw)*v.Wd*.45,sz=-Math.sin(v.yaw)*v.Wd*.45;
     const g3=groundUnder(nx+fx*s*v.L*.45+sx,nz+fz*s*v.L*.45+sz,v.gy),g4=groundUnder(nx+fx*s*v.L*.45-sx,nz+fz*s*v.L*.45-sz,v.gy);
     if(Math.max(g1,g2,g3,g4)>v.gy+2){
-      const imp=Math.abs(v.speed);if(!ramThrough(v,s,imp,d)){if(imp>5){v.hp-=imp*2.2;SND.crash();if(d)d.flash=.3;carDamage(v,imp,s)}v.speed*=-.25}
+      const imp=Math.abs(v.speed);if(!ramThrough(v,s,imp,d)){if(imp>5){v.hp-=imp*2.2;SND.crash();if(d)d.flash=.3;carDamage(v,imp,s);
+        const fx=Math.sin(v.yaw)*s,fz=Math.cos(v.yaw)*s,X=vc(v.pos.x+fx*(v.L/2+.4)),Z=vc(v.pos.z+fz*(v.L/2+.4)),tall=s>0&&(get(X,v.gy+4,Z)||get(X,v.gy+5,Z))?true:false;partDamage(v,imp,s>0?'front':'rear',tall)}v.speed*=-.25}
     }else{const o=vehHit(v,nx,nz,v.yaw);
-      if(o){const imp=Math.abs(v.speed);if(imp>4){v.hp-=imp*1.6;o.hp-=imp*1.3;SND.crash();carDamage(v,imp,s);carDamage(o,imp*.8,-1);burst(new V3((v.pos.x+o.pos.x)/2,v.pos.y+.9,(v.pos.z+o.pos.z)/2),14,4,[.9,.7,.3],2);if(d)d.flash=.35}
+      if(o){const imp=Math.abs(v.speed);if(imp>4){v.hp-=imp*1.6;o.hp-=imp*1.3;SND.crash();carDamage(v,imp,s);carDamage(o,imp*.8,-1);partDamage(v,imp,hitZone(v,o.pos.x,o.pos.z),o.VH>v.VH+.4&&imp>9);partDamage(o,imp*.8,hitZone(o,v.pos.x,v.pos.z),v.VH>o.VH+.4&&imp>9);burst(new V3((v.pos.x+o.pos.x)/2,v.pos.y+.9,(v.pos.z+o.pos.z)/2),14,4,[.9,.7,.3],2);if(d)d.flash=.35}
         if(!o.driver&&imp>2)carAlarm(o);if(o.type!=='bus'&&!o.driver){const ax=o.pos.x-v.pos.x,az=o.pos.z-v.pos.z,l=Math.hypot(ax,az)||1,push=Math.min(.35,imp*dt*.6)*(v.two?.2:1);
           if(!vehHit(o,o.pos.x+ax/l*push,o.pos.z+az/l*push,o.yaw)){o.pos.x+=ax/l*push;o.pos.z+=az/l*push;o.yaw+=R(-.02,.02)*imp*.2}}
         v.speed*=-.3}
@@ -3512,7 +3521,7 @@ function updateVehicle(v,dt){
       o.cam.lookAt(v.pos.x,v.pos.y+1.2,v.pos.z);
     }
     o.yaw=v.yaw+Math.PI;
-    if(o===v.driver&&(dayLight()<.35||o.torch)){o.light.intensity=2.4;o.light.position.set(v.pos.x+fx*v.L*.5,v.pos.y+1,v.pos.z+fz*v.L*.5);o.light.target.position.set(v.pos.x+fx*14,v.pos.y-.5,v.pos.z+fz*14)}
+    if(o===v.driver&&(dayLight()<.35||o.torch)&&(!v.ph||v.ph.lights>30)){o.light.intensity=2.4*(v.ph&&v.ph.lights<60?.55+Math.random()*.2:1);o.light.position.set(v.pos.x+fx*v.L*.5,v.pos.y+1,v.pos.z+fz*v.L*.5);o.light.target.position.set(v.pos.x+fx*14,v.pos.y-.5,v.pos.z+fz*14)}
   }
 }
 
@@ -4414,28 +4423,47 @@ function crackWS(v,n){const W=v.wsh;if(!W)return;if(!W.crk){const cv=document.cr
     if(rng()<.6){const r=R(2,4);for(let a=0;a<6.3;a+=.5)if(rng()<.7)x.fillRect(cx+Math.cos(a)*r|0,cy+Math.sin(a)*r|0,1,1)}}
   C.tx.needsUpdate=true}
 const carJunk=[];
+// ---------------- where a car is hit decides what breaks: front ends take the lights, radiator, engine and battery; rear ends split the tank; side hits bend wheels;
+// the windshield only cracks when something actually strikes the glass
+function vph(v){return v.ph||(v.ph={engine:100,battery:100,fuel:100,lights:100})}
+function hitZone(v,px,pz){const dx=px-v.pos.x,dz=pz-v.pos.z,f=dx*Math.sin(v.yaw)+dz*Math.cos(v.yaw),l=dx*Math.cos(v.yaw)-dz*Math.sin(v.yaw);return Math.abs(f)/(v.L/2)>=Math.abs(l)/(v.Wd/2)?(f>0?'front':'rear'):(l>0?'right':'left')}
+function partDamage(v,imp,zone,tall){if(v.two||v.pedal||imp<3)return;const P=vph(v),d=v.driver,say=t=>{if(d)msg(d,t)};
+  if(zone==='front'){const wl=P.lights;P.lights=Math.max(0,P.lights-imp*9);if(wl>30&&P.lights<=30)say('A headlight smashes.');
+    const we=P.engine;P.engine=Math.max(0,P.engine-imp*(imp>10?3.2:1.4));if(imp>9)P.battery=Math.max(0,P.battery-imp*2.2);
+    if(we>=60&&P.engine<60)say('The engine starts knocking — the radiator is cracked. Slower, and it will smoke.');
+    if(we>=25&&P.engine<25)say('Steam pours out from under the hood. The engine is dying.');
+    if(we>0&&P.engine<=0){vparts(v).engine=0;say('The engine is wrecked. Fit a new one (pull one from another car).')}
+    if(imp>12&&rng()<.3)flatTyre(v)}
+  else if(zone==='rear'){const wf=P.fuel;P.fuel=Math.max(0,P.fuel-imp*4.5);if(wf>=70&&P.fuel<70&&!v.ev){v.leak=true;say('Fuel is leaking from a split tank!')}}
+  else if(imp>6&&rng()<.55)flatTyre(v);
+  if(P.battery<=0&&!v.deadBatt){v.deadBatt=true;say('The battery is crushed. Fit a new one.')}
+  if(tall&&imp>7&&v.wsh)crackWS(v,Math.min(4,Math.round(imp/6)))}
+// what a damaged car does: a sick engine is slow, smokes and stalls; a split tank drains; broken lights don't light
+function partsTick(v,dt){const P=v.ph;if(!P)return;
+  if(v.leak&&v.fuel>0)v.fuel=Math.max(0,v.fuel-dt*.12);
+  if(v.driver&&!v.pedal&&P.engine<60&&Math.abs(v.thr||0)>.1&&(v.smT=(v.smT||0)-dt)<=0){v.smT=P.engine<25?.12:.3;burst(new V3(v.pos.x+Math.sin(v.yaw)*v.L*.38,v.pos.y+1.1,v.pos.z+Math.cos(v.yaw)*v.L*.38),2,1,P.engine<25?[.25,.25,.25]:[.7,.7,.7],.9)}
+  if(v.driver&&P.engine<25&&!v.stall&&rng()<dt*.06){v.stall=1.8;msg(v.driver,'The engine stalls… and coughs back to life.')}if(v.stall>0){v.stall-=dt;if(v.stall<=0)v.stall=0}}
 function carDamage(v,imp,fw){if(v.two||imp<3)return;const ps=frontParts(v,fw,.15),k=Math.min(1,imp/12);
   for(let i=0;i<Math.min(5,1+Math.floor(imp/5))&&ps.length;i++){const m=pick(ps);
     // dent: pushed back toward the cabin and bent a little; paint scraped off to grey metal and rust
     m.position.z-=fw*Math.min(.1,imp*.005);m.rotation.x+=R(-.07,.07)*k;m.rotation.z+=R(-.05,.05)*k;m.rotation.y+=R(-.04,.04)*k;
     splat3(m,rng()<.5?2:0,rng()<.5?1:-1,[0x6a6a6a,0x4a4a4a,0x7a5a3a,0x3a3a3a],R(.04,.1),RI(1,3))}
-  if(imp>8)crackWS(v,Math.min(4,Math.round(imp/7)));
   if(imp>13&&rng()<.55){const loose=ps.filter(o=>o.position.y<1.1&&Math.abs(o.position.z)>v.L*.38);if(loose.length){const m=pick(loose);v.g.updateMatrixWorld(true);const wp=m.getWorldPosition(new V3());v.g.remove(m);
     m.position.set(wp.x+R(-.6,.6),v.pos.y+.08,wp.z+R(-.6,.6));m.rotation.set(R(-.25,.25),v.yaw+R(-.8,.8),R(-.25,.25));scene.add(m);carJunk.push(m);if(carJunk.length>40)scene.remove(carJunk.shift())}}}
 // crashing hard enough smashes through walls, glass and furniture; bulldozers push through anything at a crawl
 const RAMSOFT=new Set([B.GLASS,B.PLANK,B.LEAF,B.WALL,B.FRAME,B.LOG,B.DIRT,B.GRASS,B.LADDER,B.ROOF]);
 function ramThrough(v,s,imp,d){const D_=VT[v.type],doz=D_.dozer&&s>0,now=performance.now();if(now<(v.ramT||0)){if(doz)v.speed=Math.min(v.speed,.3);return true}if(!doz&&imp<8.5)return false;
-  const fx=Math.sin(v.yaw)*s,fz=Math.cos(v.yaw)*s,rx=Math.cos(v.yaw),rz=-Math.sin(v.yaw),hw=v.Wd/2,top=v.gy+Math.ceil(v.VH/VS);let broke=0;
+  const fx=Math.sin(v.yaw)*s,fz=Math.cos(v.yaw)*s,rx=Math.cos(v.yaw),rz=-Math.sin(v.yaw),hw=v.Wd/2,top=v.gy+Math.ceil(v.VH/VS);let broke=0,tallHit=false;
   for(let a=-hw;a<=hw+.01;a+=VS)for(const ah of[v.L/2+.25,v.L/2+.7]){const X=vc(v.pos.x+fx*ah+rx*a),Z=vc(v.pos.z+fz*ah+rz*a);
     for(let y=v.gy+1;y<=top;y++){const b=get(X,y,Z);if(!b||b===B.BED||b===255)continue;const base=BASE_OF[b]||b,soft=RAMSOFT.has(base)||isRub(b);
-      if(!doz&&!soft&&imp<17)continue;const lvl=soft||imp>23?4:(LVL[b]|0)+1+(imp>19?1:0);setBlock(X,y,Z,worsen(b,X,y,Z,lvl));broke++}}
+      if(!doz&&!soft&&imp<17)continue;const lvl=soft||imp>23?4:(LVL[b]|0)+1+(imp>19?1:0);setBlock(X,y,Z,worsen(b,X,y,Z,lvl));broke++;if(y>=v.gy+4)tallHit=true}}
   const ptx=v.pos.x+fx*(v.L/2+.4),ptz=v.pos.z+fz*(v.L/2+.4);for(const sp of furnSpecs){const b=sp.bb;if(!b||sp.gone||FLAT.has(sp[0]))continue;if(ptx>b[0]-.3&&ptx<b[3]+.3&&ptz>b[2]-.3&&ptz<b[5]+.3&&b[1]<v.pos.y+v.VH&&b[4]>v.pos.y){breakFurn(d||players[0],sp,new V3(ptx,v.pos.y+.8,ptz),true);broke++}}
   if(!broke)return false;
-  if(doz){v.speed=Math.min(v.speed,1.1);v.ramT=now+170}else{v.speed*=.62;v.hp-=imp*.3;v.ramT=now+120;if(d)d.flash=.22;carDamage(v,imp*.8,s);SND.crash();SND.glass&&SND.glass()}
+  if(doz){v.speed=Math.min(v.speed,1.1);v.ramT=now+170}else{v.speed*=.62;v.hp-=imp*.3;v.ramT=now+120;if(d)d.flash=.22;carDamage(v,imp*.8,s);partDamage(v,imp*.7,s>0?'front':'rear',tallHit&&s>0);SND.crash();SND.glass&&SND.glass()}
   burst(new V3(ptx,v.pos.y+1,ptz),12,3,[.62,.58,.52],1.6);return true}
 // furniture is not solid to cars: hit it fast and it goes flying in pieces
 function carFurn(v,d){if(Math.abs(v.speed)<6||!d)return;const s=Math.sign(v.speed),x=v.pos.x+Math.sin(v.yaw)*s*(v.L/2+.2),z=v.pos.z+Math.cos(v.yaw)*s*(v.L/2+.2);
-  for(const sp of furnSpecs){const b=sp.bb;if(!b||sp.gone||FLAT.has(sp[0])||sp[0]==='plane')continue;if(x>b[0]&&x<b[3]&&z>b[2]&&z<b[5]&&b[1]<v.pos.y+1.6&&b[4]>v.pos.y+.1){breakFurn(d,sp,new V3(x,v.pos.y+.8,z),true);v.speed*=.85;v.hp-=1;carDamage(v,Math.abs(v.speed)*.4,s)}}}
+  for(const sp of furnSpecs){const b=sp.bb;if(!b||sp.gone||FLAT.has(sp[0])||sp[0]==='plane')continue;if(x>b[0]&&x<b[3]&&z>b[2]&&z<b[5]&&b[1]<v.pos.y+1.6&&b[4]>v.pos.y+.1){breakFurn(d,sp,new V3(x,v.pos.y+.8,z),true);v.speed*=.85;v.hp-=1;carDamage(v,Math.abs(v.speed)*.4,s);partDamage(v,Math.abs(v.speed)*.35,s>0?'front':'rear',s>0&&b[4]>v.pos.y+1.15&&Math.abs(v.speed)>9)}}}
 // the excavator: hold attack to dig a bucket of ground out in front
 function digTick(v,d,dt){if(!d||!d.inp||!d.inp.primary){if(v.g.userData.arm)v.g.userData.arm.rotation.x*=.9;return}const now=performance.now(),arm=v.g.userData.arm;if(arm)arm.rotation.x=Math.sin(now*.004)*.35;
   if(now<(v.digT||0))return;v.digT=now+550;const fx=Math.sin(v.yaw),fz=Math.cos(v.yaw),cx=v.pos.x+fx*4.4,cz=v.pos.z+fz*4.4;let n=0;
@@ -4469,7 +4497,7 @@ function drawMap(p){const cv=$('#mapCv'),x=cv.getContext('2d'),N=cv.width,S=W/N,
   const ev=v&&v.ev&&v.driver===p;$('#mapNote').textContent=ev?(v.auto?'Autopilot is driving. Click somewhere else to change course.':'Click anywhere on the map and the car drives you there. Touch the controls to take over.'):'Click to drop a waypoint. In a self-driving Volta (blue squares), click and it drives you there.';
   $('#mapAuto').classList.toggle('hidden',!(v&&v.auto))}
 function carHitZombie(z,v,d){const s=Math.abs(v.speed),fx=Math.sin(v.yaw)*Math.sign(v.speed),fz=Math.cos(v.yaw)*Math.sign(v.speed),dir={x:fx*2,z:fz*2};
-  v.hp-=.4+s*.07;v.speed*=s>9?.93:.85;if(d)d.flash=.12+s*.006;SND.hit();carBlood(v,Math.round(1+s*.22),s);wsBlood(v,Math.round(2+s*.5),s);
+  v.hp-=.4+s*.07;v.speed*=s>9?.93:.85;if(d)d.flash=.12+s*.006;SND.hit();carBlood(v,Math.round(1+s*.22),s);wsBlood(v,Math.round(2+s*.5),s);partDamage(v,s*.32,v.speed>=0?'front':'rear',v.speed>=0&&s>9&&!v.two);
   if(s<5){z.kx+=fx*s*1.2;z.kz+=fz*s*1.2;z.chasing=true;z.hp-=s*3;burst(new V3(z.pos.x,z.pos.y+1.1,z.pos.z),10,3,RED,1.2);if(z.hp<=0)killZombie(z,d);return}
   const dmg=s*s*.6;z.hp-=dmg;
   // limbs: torn clean off, or snapped through the middle, more often the faster the hit
