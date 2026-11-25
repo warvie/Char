@@ -326,6 +326,9 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>Pixel size <select id="pixSel"></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
+    <h4>v15.1 · Nov 24, 2026 — walls and 3D sound</h4><ul>
+      <li>Fixed the real cause of buildings appearing with furniture, doors and curtains but no walls: regions loaded in the background were dropping every wall, floor and roof block. Tested across 26 region crossings with no missing buildings.</li>
+      <li>3D sound: everything in the world now sounds like it is where it is. Volume falls off with distance, far sounds lose their crispness and echo more, sounds pan left and right as you turn, and things behind you are muffled. Zombies shuffle audibly as they get close, campfires crackle, doors, glass, gunfire, explosions, alarms and birds come from their real direction, and the eerie noises come from somewhere out in the dark.</li></ul>
     <h4>v15 · Nov 24, 2026 — a better-built world, and fishing</h4><ul>
       <li>Fixed buildings that showed their furniture, doors and curtains with no walls: nothing in a chunk shows until its walls and floor are built, and a chunk slot can no longer be mistaken for a different place.</li>
       <li>Fixed roads in a second world following the first world's town layout.</li>
@@ -1917,7 +1920,7 @@ function breakGlass(x,y,z){noise(new V3((x+.5)*VS,y*VS,(z+.5)*VS),26);
     burst(new V3((a+.5)*VS,(b+.5)*VS,(c+.5)*VS),5,3,[.7,.85,.9],1);done.add(Math.floor(a/CS)+','+Math.floor(c/CS));
     for(const f of FACES)st.push([a+f[0],b+f[1],c+f[2]])}
   for(const key of done){const[cx,cz]=key.split(',').map(Number);rb(cx,cz)}
-  rebuildAt(x,z);SND.glass();
+  rebuildAt(x,z);playAt(new V3((x+.5)*VS,y*VS,(z+.5)*VS),()=>SND.glass());
 }
 
 // ---------------- furniture meshes: every piece in a chunk is merged into one vertex-coloured mesh
@@ -2275,7 +2278,15 @@ function initAudio(){if(AC)return;try{AC=new(window.AudioContext||window.webkitA
   // weather beds: rain (filtered white noise) and wind (brown noise, slowly moving filter)
   for(const k of['rain','wind','jet']){const s=AC.createBufferSource();s.buffer=k==='rain'?nbuf:bbuf;s.loop=true;const f=AC.createBiquadFilter();f.type=k==='rain'?'highpass':'lowpass';f.frequency.value=k==='rain'?1400:380;
     const g=AC.createGain();g.gain.value=0;s.connect(f).connect(g).connect(master);s.start();amb[k]={g,f}}}catch(e){AC=null}}
-const sOut=rv=>{if(rv&&verb){const g=AC.createGain();g.gain.value=1;g.connect(master);const s=AC.createGain();s.gain.value=rv;g.connect(s).connect(verb);return g}return master};
+let sAt=null;const _sv=new V3(),_sf=new V3(),_sr=new V3();
+function sOutAt(rv){const c=players[0]&&players[0].cam;if(!c)return null;c.getWorldDirection(_sf);_sr.set(-_sf.z,0,_sf.x).normalize();_sv.copy(sAt).sub(c.position);const d=Math.max(.01,_sv.length());_sv.multiplyScalar(1/d);
+  const g=AC.createGain(),gain=(d<2?1:Math.pow(2/d,1.15))*sMul,behind=_sv.dot(_sf)<-.2;g.gain.value=gain;
+  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=Math.max(500,18000*Math.exp(-d/40))*(behind?.65:1);lp.Q.value=.5;
+  let tail=g.connect(lp);if(AC.createStereoPanner){const pn=AC.createStereoPanner();pn.pan.value=clamp(_sv.dot(_sr)*.9,-.9,.9);tail=tail.connect(pn)}
+  tail.connect(master);if(verb){const sd=AC.createGain();sd.gain.value=Math.min(1.1,(rv||0)+d/60);tail.connect(sd).connect(verb)}return g}
+// play a sound effect as coming from a place in the world
+let sMul=1;function playAt(pos,fn,mul=1){if(!pos)return fn();sAt=pos;sMul=mul;try{fn()}finally{sAt=null;sMul=1}}
+const sOut=rv=>{if(sAt){const n=sOutAt(rv);if(n)return n}if(rv&&verb){const g=AC.createGain();g.gain.value=1;g.connect(master);const s=AC.createGain();s.gain.value=rv;g.connect(s).connect(verb);return g}return master};
 function sNoise(dur,freq,vol,type='lowpass',q=.8,rv=.3,brown,delay=0){if(!AC)return;const t=AC.currentTime+delay,s=AC.createBufferSource();s.buffer=brown?bbuf:nbuf;const f=AC.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q;
   const g=AC.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);s.connect(f).connect(g).connect(sOut(rv));s.start(t,Math.random()*1.4);s.stop(t+dur+.05)}
 function sTone(f0,f1,dur,vol,type='sawtooth',rv=.2,delay=0){if(!AC)return;const t=AC.currentTime+delay,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(1,f1),t+dur);
@@ -2600,7 +2611,7 @@ function makeDoor(s){
 function toggleDoor(d,p){
   if(d.open){if(d.cells.some(c=>blockedByEntity(c[0],c[1],c[2]))){if(p)msg(p,'Something is in the doorway');return}for(const c of d.cells)setv(c[0],c[1],c[2],B.DOOR);d.open=false}
   else{for(const c of d.cells)setv(c[0],c[1],c[2],0);d.open=true}
-  SND.creak();
+  {const c=d.cells[0];playAt(new V3((c[0]+.5)*VS,(c[1]+1)*VS,(c[2]+.5)*VS),()=>SND.creak())}
 }
 function destroyDoor(d){
   if(d.gone)return;d.gone=true;scene.remove(d.pivot);
@@ -3525,7 +3536,8 @@ function updateZombie(z,dt,night){
   if(!cu.legL)z.legL.rotation.x=z.crawl?0:s*.6;if(!cu.legR)z.legR.rotation.x=z.crawl?0:-s*.6;
   if(!cu.armL)z.armL.rotation.x=-1.4+Math.sin(z.walk*(z.crawl?2:.5))*(z.crawl?.5:.15)-z.lunge*.5;if(!cu.armR)z.armR.rotation.x=-1.4-Math.sin(z.walk*(z.crawl?2:.5))*(z.crawl?.5:.15)-z.lunge*.5;
   if(!cu.head)z.head.rotation.z=Math.sin(z.walk*.3)*.2;
-  z.gro-=dt;if(z.gro<=0){z.gro=R(4,11);if(bd<26)SND.groan(1-bd/26)}
+  if(bd<18){if(z.spx==null){z.spx=z.pos.x;z.spz=z.pos.z}if(Math.hypot(z.pos.x-z.spx,z.pos.z-z.spz)>.75){z.spx=z.pos.x;z.spz=z.pos.z;playAt(z.pos,()=>{sNoise(.12,R(200,360),.35,'lowpass',.9,.1,true);if(rng()<.3)sNoise(.2,R(900,1400),.08,'bandpass',1.5,.1)})}}
+  z.gro-=dt;if(z.gro<=0){z.gro=R(4,11);if(bd<40)playAt(new V3(z.pos.x,z.pos.y+1.5,z.pos.z),()=>SND.groan(1))}
   if(bd>75&&!z.chasing&&players.every(p=>z.pos.distanceTo(p.pos)>75)){scene.remove(z.g);z.gone=true}
 }
 
@@ -4021,7 +4033,7 @@ function nearestTrap(p,r){let best=null,bd=r;for(const t of traps){const d=Math.
 function pickTrap(p,t){t.gone=true;scene.remove(t.g);traps=traps.filter(x=>x!==t);p.inv[t.type]++;SND.pick();msg(p,`Picked up the ${t.name.toLowerCase()}`)}
 function explode(pos,pw=1){if(NET.wr&&!NET.applying)netEdit('x',Math.round(pos.x*10),Math.round(pos.y*10),Math.round(pos.z*10),Math.round(pw*10));const _na=NET.applying;NET.applying=true;try{return explode0(pos,pw)}finally{NET.applying=_na}}
 function explode0(pos,pw=1){noise(pos,120*pw);
-  SND.boom();const c=new V3(pos.x,pos.y+.4,pos.z);burst(c,60*pw,9*pw,[1,.55,.1],3);burst(c,40*pw,6*pw,DUST,4);flashT=Math.max(flashT,.25*pw);for(const p of players){const d=p.pos.distanceTo(pos);if(d<30*pw)p.shake=Math.max(p.shake||0,(1-d/(30*pw))*.6*pw)}
+  playAt(pos,()=>SND.boom());const c=new V3(pos.x,pos.y+.4,pos.z);burst(c,60*pw,9*pw,[1,.55,.1],3);burst(c,40*pw,6*pw,DUST,4);flashT=Math.max(flashT,.25*pw);for(const p of players){const d=p.pos.distanceTo(pos);if(d<30*pw)p.shake=Math.max(p.shake||0,(1-d/(30*pw))*.6*pw)}
   for(const z of zombies){if(z.dead)continue;const d=z.pos.distanceTo(pos);if(d<4.2*pw){const dx=(z.pos.x-pos.x)/(d||1),dz=(z.pos.z-pos.z)/(d||1);if(d<3.2*pw)dismember(z,RI(1,3),{x:dx*3,z:dz*3});hurtZombie(z,190*(1-d/(4.6*pw)),{x:dx*2,z:dz*2},null)}}
   for(const a of animals){if(a.dead)continue;const d=a.pos.distanceTo(pos);if(d<4*pw)hurtAnimal(a,150*(1-d/(4.6*pw)),{x:0,z:0},null)}
   for(const n of npcs){if(n.dead)continue;const d=n.pos.distanceTo(pos);if(d<4*pw)hurtNPC(n,150*(1-d/(4.6*pw)),{x:0,z:0},null)}
@@ -4847,7 +4859,7 @@ function survivorAI(n,dt,night){ // returns [wx,wz,speed,faceTarget]
 
 function npcHostileTo(n,p){return(n.kind==='bandit'&&!(n.rec&&n.rec.friendly))||n.hostileTo===p}
 function npcShot(n,tx,ty,tz){const d=Math.hypot(tx-n.pos.x,tz-n.pos.z);const near=players.some(p=>p.pos.distanceTo(n.pos)<60);
-  if(near){const v=Math.max(.05,1-Math.min(...players.map(p=>p.pos.distanceTo(n.pos)))/60);sNoise(.25,2000,.8*v);sTone(150,40,.12,.3*v,'square')}
+  if(players.some(p=>p.pos.distanceTo(n.pos)<120))playAt(new V3(n.pos.x,n.pos.y+1.4,n.pos.z),()=>SND.shot())
   burst(new V3(n.pos.x+Math.sin(n.g.rotation.y)*.5,n.pos.y+1.35,n.pos.z+Math.cos(n.g.rotation.y)*.5),3,1,[1,.8,.3],.5);alertZombies(n.pos,30);n.aimT=.4}
 function hurtNPC(n,dmg,dir,by){
   if(n.dead||n.kid)return;n.hp-=dmg;burst(new V3(n.pos.x,n.pos.y+1.2,n.pos.z),14,3,RED,1.5);SND.hit();
@@ -5041,26 +5053,26 @@ function makeBird(dark){const g=new THREE.Group(),c=dark?0x1a1a1c:0x4a4038,mat=n
   const wl=new THREE.Group(),wr=new THREE.Group();wl.position.x=-.05;wr.position.x=.05;const ml=new THREE.Mesh(box(.36,.02,.16),mat),mr=new THREE.Mesh(box(.36,.02,.16),mat);ml.position.x=-.18;mr.position.x=.18;wl.add(ml);wr.add(mr);g.add(wl,wr);g.userData={wl,wr,ph:Math.random()*6};scene.add(g);return g}
 function updBirds(dt){const cp=viewPos(),dl=dayLight();flockT-=dt;
   if(flockT<=0&&flocks.length<2&&dl>.35){flockT=R(25,70);const a=rng()*6.28,dir=new V3(Math.sin(a),0,Math.cos(a)),n=RI(4,11),dark=rng()<.5,start=cp.clone().addScaledVector(dir,-90).add(new V3(dir.z,0,-dir.x).multiplyScalar(R(-40,40)));start.y=cp.y+R(18,40);
-    const F={dir,pos:start,t:0,birds:[],sp:R(7,11)};for(let i=0;i<n;i++){const b=makeBird(dark),row=Math.ceil(i/2),side=i%2?1:-1;b.userData.off=new V3(side*row*1.4+R(-.3,.3),R(-.6,.6),-row*1.6);F.birds.push(b)}flocks.push(F);if(rng()<.5)try{for(let k=0;k<3;k++)sTone(R(2400,3200),R(1800,2600),.09,.03,'sine',.4,.15*k+R(0,.1))}catch(e){}}
+    const F={dir,pos:start,t:0,birds:[],sp:R(7,11)};for(let i=0;i<n;i++){const b=makeBird(dark),row=Math.ceil(i/2),side=i%2?1:-1;b.userData.off=new V3(side*row*1.4+R(-.3,.3),R(-.6,.6),-row*1.6);F.birds.push(b)}flocks.push(F);if(rng()<.5)try{playAt(start,()=>{for(let k=0;k<3;k++)sTone(R(2400,3200),R(1800,2600),.09,.03,'sine',.4,.15*k+R(0,.1))},25)}catch(e){}}
   for(let i=flocks.length-1;i>=0;i--){const F=flocks[i];F.t+=dt;F.pos.addScaledVector(F.dir,F.sp*dt);F.pos.y+=Math.sin(F.t*.6)*.05;const yaw=Math.atan2(F.dir.x,F.dir.z),c=Math.cos(yaw),s=Math.sin(yaw);
     for(const b of F.birds){const o=b.userData.off;_skyP.set(F.pos.x+o.x*c+o.z*s,F.pos.y+o.y,F.pos.z-o.x*s+o.z*c);fitSky(b,_skyP);b.rotation.y=yaw;const f=Math.sin(F.t*13+b.userData.ph)*.7;b.userData.wl.rotation.z=f;b.userData.wr.rotation.z=-f}
     if(F.t>30){for(const b of F.birds)scene.remove(b);flocks.splice(i,1)}}}
 // eerie ambience: far-off moans carried on the wind, metal groaning, a door banging somewhere, a dog howling, the wind whistling through broken windows
 let eerieT=12;
 function updEerie(dt){if(!AC||!running)return;eerieT-=dt;if(eerieT>0)return;const night=dayLight()<.3;eerieT=night?R(7,16):R(14,32);const p=players[0];if(p&&underground(p.pos))return;
-  const k=rng();try{
+  const k=rng(),ea=rng()*6.28,ep=new V3(p.pos.x+Math.sin(ea)*R(14,24),p.pos.y+R(0,3),p.pos.z+Math.cos(ea)*R(14,24));sAt=ep;sMul=7;try{
   if(k<.22){const f=R(110,170);sVoice(f,f*R(.6,.8),R(1.6,2.6),.05,R(420,620),R(900,1200),.9,.4)}
   else if(k<.38){sTone(R(70,110),R(55,80),R(1.8,3),.03,'triangle',.85);sNoise(1.4,R(300,500),.05,'bandpass',8,.8)}
   else if(k<.5){for(let i=0;i<RI(2,4);i++)sNoise(.09,R(180,260),.28,'lowpass',.9,.8,true,i*R(.35,.7))}
   else if(k<.62&&night){const f=R(520,640);sTone(f*.8,f,.5,.035,'sine',.9);sTone(f,f*.7,1.6,.035,'sine',.9,.5)}
   else if(k<.82){sNoise(R(2.5,4.5),R(900,1500),.06,'bandpass',R(10,18),.6)}
-  else{sNoise(R(3,5),R(160,240),.09,'lowpass',.7,.7,true)}}catch(e){}}
+  else{sNoise(R(3,5),R(160,240),.09,'lowpass',.7,.7,true)}}catch(e){}sAt=null;sMul=1}
 // ---------------- car alarms, flat tyres, flat batteries
 function carAlarm(v){if(v.two||v.driver)return;if(v.alarmable===undefined)v.alarmable=rng()<.3;if(!v.alarmable||v.alarmT>0)return;v.alarmT=22;v.alarmable=false;
   for(const p of players)if(p.pos.distanceTo(v.pos)<40)msg(p,'A car alarm starts wailing! Every zombie for blocks around just heard that.')}
 function vehRealism(dt){const cp=viewPos();
   for(const v of vehicles){
-    if(v.alarmT>0){v.alarmT-=dt;v.alT=(v.alT||0)-dt;if(v.alT<=0){v.alT=.45;const d=v.pos.distanceTo(cp),vol=Math.max(0,.09*(1-d/80));if(vol>.004)try{sTone(v.alarmHi?460:360,v.alarmHi?470:350,.36,vol,'square',.15)}catch(e){}v.alarmHi=!v.alarmHi;if((v.alN=(v.alN||0)+1)%4===0)noise(v.pos,75)}}
+    if(v.alarmT>0){v.alarmT-=dt;v.alT=(v.alT||0)-dt;if(v.alT<=0){v.alT=.45;const d=v.pos.distanceTo(cp);if(d<120)try{playAt(v.pos,()=>sTone(v.alarmHi?460:360,v.alarmHi?470:350,.36,.35,'square',.15))}catch(e){}v.alarmHi=!v.alarmHi;if((v.alN=(v.alN||0)+1)%4===0)noise(v.pos,75)}}
     // tyres: rubble, broken glass and spike traps puncture them at speed
     if(v.driver&&!v.pedal&&Math.abs(v.speed)>4){const b=get(vc(v.pos.x),v.gy,vc(v.pos.z)),b1=get(vc(v.pos.x),v.gy+1,vc(v.pos.z));if((isRub(b)||isRub(b1)||traps.some(t=>t.type==='spikes'&&t.pos.distanceTo(v.pos)<v.L/2))&&rng()<dt*1.2)flatTyre(v)}
     // headlights left on drain the battery
@@ -5070,7 +5082,8 @@ function flatTyre(v){if(!v.wheels)return;const w=v.wheels.find(w=>w.scale.y>.9);
 // ---------------- noise travels: gunshots, explosions, alarms, engines and lit windows at night pull the dead toward the source
 function noise(pos,r){alertZombies(pos,r)}
 let lampNoiseT=4;
-function realismTick(dt){for(const p of players)try{fishTick(p,dt)}catch(e){}try{vehRealism(dt)}catch(e){}
+let crackT=0;
+function realismTick(dt){if((crackT-=dt)<=0){crackT=R(.15,.5);const cp=viewPos();for(const f of fires){const fp=f.pos||f.g&&f.g.position;if(fp&&fp.distanceTo(cp)<14&&f.lit!==false){playAt(fp,()=>sNoise(R(.02,.05),R(1400,3600),R(.15,.35),'bandpass',2,.15));if(rng()<.15)playAt(fp,()=>sNoise(.4,240,.12,'lowpass',.8,.2,true))}}}for(const p of players)try{fishTick(p,dt)}catch(e){}try{vehRealism(dt)}catch(e){}
   // engines: running vehicles are loud
   for(const v of vehicles)if(v.driver&&!v.pedal&&(v.nT=(v.nT||0)-dt)<=0){v.nT=1.2;noise(v.pos,14+Math.abs(v.speed)*1.6)}
   // lit rooms at night draw attention
@@ -5278,7 +5291,9 @@ function rebuildGlobals(){for(const k of SPEC_KEYS)SCRATCH[k].length=0;
   for(const[x,y,z,ax,tc,door]of winSpecs)for(let du=0;du<4;du++)for(let dv=0;dv<5;dv++){if(du>0&&du<3&&(door?dv<4:dv>0&&dv<4))continue;const L=(door?DCELL:WCELL)[dv*4+du];if(!L.length)continue;
     winIdx.set(vi(ax?x+du:x,y+dv,ax?z:z+du),{L,ax,tc})}}
 let winQ=[],winTarget=null,winNew=[];
-function winStep(){const op=winQ.shift();if(op[0]==='u')unloadRegion(op[1]);else loadRegion(op[1]);if(winQ.length)rebuildGlobals();
+function winStep(){const op=winQ.shift();if(op[0]==='u')unloadRegion(op[1]);
+  // a region is generated inside the window it will live in: block writes outside the current window are dropped, so point the window there while it loads
+  else{const so=[OX,OZ];[OX,OZ]=winTarget;planTowns();try{loadRegion(op[1])}finally{[OX,OZ]=so;planTowns()}}if(winQ.length)rebuildGlobals();
   if(!winQ.length){const[nox,noz]=winTarget;winTarget=null;OX=nox;OZ=noz;planTowns();blockDmg.clear();rebuildGlobals();evictCache();const n=RS/CS;for(const N of winNew){const cx0=N.rx*n,cz0=N.rz*n;for(let dz=-1;dz<=n;dz++)for(let dx=-1;dx<=n;dx++){if(dx>=0&&dx<n&&dz>=0&&dz<n)continue;const k=slotOf(cx0+dx,cz0+dz);if(loaded[k])dirtyC.add(k)}}winNew=[];rtDirty=true;RTW.ox=-1e9}}
 function setWindow(nox,noz,force,stagger){
   if(stagger&&!force){const want=new Set(),wx=nox/RS,wz=noz/RS;for(let dz=0;dz<3;dz++)for(let dx=0;dx<3;dx++)want.add(rkey(wx+dx,wz+dz));
