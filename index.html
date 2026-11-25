@@ -326,6 +326,9 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>Pixel size <select id="pixSel"></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
+    <h4>v15.2 · Nov 25, 2026 — rain and windows</h4><ul>
+      <li>Rain is as loud as it should be for where you are: it follows the distance to the nearest surface the rain is actually landing on. Full in the open, softer and muffled under a roof, quieter still deep inside big buildings, silent underground.</li>
+      <li>Window sides: the inside edges of window openings are now drawn as the window frame in the building's trim colour instead of dark shadowed wall.</li></ul>
     <h4>v15.1 · Nov 24, 2026 — walls and 3D sound</h4><ul>
       <li>Fixed the real cause of buildings appearing with furniture, doors and curtains but no walls: regions loaded in the background were dropping every wall, floor and roof block. Tested across 26 region crossings with no missing buildings.</li>
       <li>3D sound: everything in the world now sounds like it is where it is. Volume falls off with distance, far sounds lose their crispness and echo more, sounds pan left and right as you turn, and things behind you are muffled. Zombies shuffle audibly as they get close, campfires crackle, doors, glass, gunfire, explosions, alarms and birds come from their real direction, and the eerie noises come from somewhere out in the dark.</li></ul>
@@ -1844,7 +1847,9 @@ function buildChunk(cx,cz){
     if(!shp){for(let fi=0;fi<6;fi++){const o=nb[fi];if(isOpq(o)||(fi===2&&SH[o]&&BOTFULL[o]))continue;
         let t=tiles[fi],r=cr,g=cg,bb=cb;
         let rm=null;if(pr&&(fi<2||fi>3)&&(b===19||b===6||b===11)){rm=roomAt(pr,x+FACES[fi][0],y,z+FACES[fi][2]);if(rm){t=TILE.wall;r=rm.c[0];g=rm.c[1];bb=rm.c[2]}}
-        quad(x,y,z,x0,z0,fi,FULLBOX[0],t,r,g,bb,v*FACES[fi][4]);
+        // the inside faces of a window opening (the reveals around the glass) are the window frame: trim-coloured and lit, not shadowy wall
+        let sh=v*FACES[fi][4];if(o===15){const we2=winIdx.size?winIdx.get(i):null,tc=TRIMC[we2?we2.tc:0]||TRIMC[0];t=TILE.trim;r=tc[0];g=tc[1];bb=tc[2];sh=Math.max(sh,1.02)}
+        quad(x,y,z,x0,z0,fi,FULLBOX[0],t,r,g,bb,sh);
         if(rm&&(y===rm.y0||y===rm.y1)&&!(trimOff.size&&trimOff.has(x+','+y+','+z))){const bot=y===rm.y0,tc=TRIMC[rm.trim];
           // baseboard: 2/16 deep x 6/16 tall + 3/16 bevelled cap; crown: 2-step moulding
           const parts=bot?[[2/16,0,6/16],[3/16,6/16,7/16]]:[[2/16,12/16,1],[3/16,14/16,1],[1/16,11/16,12/16]];
@@ -5032,6 +5037,12 @@ function updFlyer(dt){flyT-=dt;const cp=viewPos();
   if(amb.jet&&AC){const t=AC.currentTime,v=Math.max(0,1-d/1500);amb.jet.g.gain.setTargetAtTime(v*v*.5,t,.6);amb.jet.f.frequency.setTargetAtTime(120+v*380,t,.6)}
   if(flyer.t>40){scene.remove(flyer.g);flyer=null;flyT=R(140,320)}}
 // ---------------- clouds, birds and the eerie soundscape
+// rain probe: rings of sample columns around your head; each column's top surface is where the rain lands there
+let rainD=1.6,rainRoof=false,rainT=0;
+function rainProbe(){const p=players[0];if(!p)return;const ex=p.pos.x,ey=p.pos.y+1.6,ez=p.pos.z;let best=1e9,roof=false;
+  for(const r of[0,.8,1.8,3,4.5,6.5,9,12,15])for(let k=0,n=r?12:1;k<n;k++){const a=k/n*6.283+r*.37,x=ex+Math.sin(a)*r,z=ez+Math.cos(a)*r,X=vc(x),Z=vc(z);if(!inWin(X,Z))continue;let y=H-1;while(y>0&&!get(X,y,Z))y--;
+    const sy=(y+1)*VS,d=Math.hypot(x-ex,sy-ey,z-ez);if(r===0&&sy>ey+.2)roof=true;if(d<best)best=d}
+  rainD=best;rainRoof=roof}
 const _skyP=new V3();
 function fitSky(o,P,base=1){const c=players[0]&&players[0].cam;if(!c){o.position.copy(P);return}const lim=c.far*.78,d=P.distanceTo(c.position),k=Math.min(1,lim/Math.max(d,1e-3));o.position.copy(c.position).lerp(P,k);o.scale.setScalar(k*base)}
 // clouds: slabs of chunky pixel cloud high overhead, drifting with the wind and tiled around the viewer; greyer and darker in storms and at night
@@ -5128,7 +5139,11 @@ function update(dt){
   updParticles(dt);
   let es=0;for(const v of vehicles)if(v.driver&&!v.pedal)es=Math.max(es,Math.abs(v.speed)+1);
   if(engG){let rpm=0;for(const v of vehicles)if(v.driver&&!v.pedal)rpm=Math.max(rpm,v.rpm||.15);const on=es>0,f=26+rpm*95,t=AC.currentTime;engG.gain.setTargetAtTime(on?.09:0,t,.1);eng.frequency.setTargetAtTime(f,t,.05);eng._sub.frequency.setTargetAtTime(f/2,t,.05);eng._lfo.frequency.setTargetAtTime(f/2,t,.05);engLP.frequency.setTargetAtTime(300+rpm*900,t,.08)}
-  if(amb.rain){const t=AC.currentTime,rn=(WX.type==='rain'||WX.type==='storm')?WX.amt:0,under=players[0]&&underground(players[0].pos);amb.rain.g.gain.setTargetAtTime(under?0:rn*.22,t,.5);amb.wind.g.gain.setTargetAtTime(under?0:(.03+Math.abs(WX.wind)*.025+(WX.type==='storm'?.08:0)),t,.8);amb.wind.f.frequency.setTargetAtTime(260+Math.sin(t*.3)*120+Math.abs(WX.wind)*40,t,.5)}
+  if(amb.rain){const t=AC.currentTime,rn=(WX.type==='rain'||WX.type==='storm')?WX.amt:0,under=players[0]&&underground(players[0].pos);
+    // the rain's loudness follows the distance to the nearest surface it's landing on; a roof right overhead sounds muffled and drummy
+    if(rn>0&&(rainT-=1/60)<=0){rainT=.25;rainProbe()}
+    if(!amb.rain.lp){const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=16000;lp.Q.value=.6;try{amb.rain.f.disconnect();amb.rain.f.connect(lp).connect(amb.rain.g);amb.rain.lp=lp}catch(e){amb.rain.lp=lp}}
+    const near=clamp(1.9/(1+rainD*.55),0,1.15);amb.rain.g.gain.setTargetAtTime(rn*.22*near*(under?.5:1),t,.35);amb.rain.lp.frequency.setTargetAtTime(rainRoof?Math.max(700,2400-rainD*300):16000,t,.35);amb.wind.g.gain.setTargetAtTime(under?0:(.03+Math.abs(WX.wind)*.025+(WX.type==='storm'?.08:0)),t,.8);amb.wind.f.frequency.setTargetAtTime(260+Math.sin(t*.3)*120+Math.abs(WX.wind)*40,t,.5)}
   hudT-=dt;if(hudT<=0){hudT=.1;players.forEach(updHud);updTop();if(boardOpen&&(boardT=(boardT||0)+1)%5===0)renderBoard()}else players.forEach(p=>{p.hud.hurt.style.opacity=Math.min(.9,p.flash*1.5+(p.hp<25?.35:0))});
   pressed.clear();T.pressed.clear();
 }
