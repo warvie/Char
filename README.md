@@ -6,6 +6,15 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+
+## v17.3 — lights in the dark
+
+- **Dynamic lights:** 12 per-pixel lights (omni, spot, interior-box) injected into every shader; outdoor lights skip fragments under a roof (height map), interior lights stay in their building box; inverse-square falloff with smooth cut-off; wet-ground specular glints.
+- **Sources:** wired lamps, campfires, street lamps after dark, vehicle head/tail/brake lights, occupied homes at night (windows glow via the glass shader), garrisoned-base floodlights, flares, muzzle flashes, explosions, lightning.
+- **Post:** eye adaptation (exposure), night-vision mode; pixel halo sprites around light sources.
+- **Items:** road flare (loot; lights and attracts zombies for 2 min), night-vision goggles (head slot; auto-on in the dark, uses flashlight batteries).
+- **Pixel standard corrected to 16 px/m** (the block atlas is reduced in 2x2 steps): doors 16x32 and 2 px thick, signs 14 px tall, blood/grass reduced in 2x2 steps, glass layers 16 px/m, road paint sampled in 2x2 steps, 16 px tiles span 1 m, shader grids at 1/16 m.
+
 ## v17.2 — one pixel size
 
 - Global pixel standard: 32 texels per metre on a world grid aligned with the blocks.
