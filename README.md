@@ -8,6 +8,15 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+
+## v17.5 — mops and rain
+
+- **Blood on blocks:** splats/puddles/wall spatter are recorded 1/16 m stain pixels on block faces (40k pool with free list), following the surface and running over edges; old transparent decal planes no longer used for blood.
+- **Blood on entities:** painted into a per-part copy of the part's pixel texture (wraps across faces); clean pixels restored by scrubbing.
+- **Mop:** loot/craftable; Use scrubs stains near the looked-at point, a car (and windshield), a person, or yourself.
+- **Rain:** fades and removes stains open to the sky, scrubs bloodied parts outdoors, clears windshields.
+- **Controls:** F = flashlight (T too), E = use; touch Light button.
+
 ## v17.4 — no real circles
 
 - Round meshes replaced with pixel geometry (`pxRound` stepped discs/rings extruded in whole pixels, `pxCone` stepped cones, merged into one box mesh with metre UVs): wheels, hubs, steering wheel, gauges, manholes, flames, spikes, pipe bombs.
