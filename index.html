@@ -326,6 +326,10 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>Pixel size <select id="pixSel"></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
+    <h4>v15.3 · Nov 25, 2026 — weight and contact</h4><ul>
+      <li>Real knockback: a bat hit throws a zombie back about two metres with a little hop and a stagger before it can come at you again; bullets shove them; animals and people get knocked back too.</li>
+      <li>Attackers come right up to arm's length to hit you, but no longer walk into you.</li>
+      <li>Zombies, animals, survivors and players bump into each other instead of overlapping: crowds jostle, and you can't walk through a horde.</li></ul>
     <h4>v15.2 · Nov 25, 2026 — rain and windows</h4><ul>
       <li>Rain is as loud as it should be for where you are: it follows the distance to the nearest surface the rain is actually landing on. Full in the open, softer and muffled under a roof, quieter still deep inside big buildings, silent underground.</li>
       <li>Window sides: the inside edges of window openings are now drawn as the window frame in the building's trim colour instead of dark shadowed wall, and the edges of the trim casing outside are trim-coloured too (they were picking up a dark texture).</li></ul>
@@ -2803,8 +2807,22 @@ function killZombie(z,by,big){
   if(by)by.kills++;
   dropBag(z.pos,rollZLoot(z));
 }
+// knockback: an impulse that carries the body back, a little hop off the ground for hard hits, and a short stagger before it can come again
+function crowd(dt){const B_=[],cell=new Map(),cp=players[0]?players[0].pos:null;
+  const add=(e,r,w,kind)=>{if(cp&&Math.abs(e.pos.x-cp.x)+Math.abs(e.pos.z-cp.z)>60)return;const i=B_.length;B_.push([e,r,w,kind]);const k=Math.floor(e.pos.x)+','+Math.floor(e.pos.z);let l=cell.get(k);if(!l)cell.set(k,l=[]);l.push(i)};
+  for(const z of zombies)if(!z.dead&&!z.tumble)add(z,z.crawl?.32:.3,1,'z');for(const a of animals)if(!a.dead)add(a,Math.max(.22,a.A.hw),a.A.size[0]>1?3:.6,'a');for(const n of npcs)if(!n.dead)add(n,n.kid?.2:.3,1,'n');
+  for(const p of players)if(p.dead<=0&&!p.vehicle&&!p.sleeping)add(p,.3,4,'p');
+  const free=(e,x,z,r)=>!hit(x,e.pos.y+.06,z,r,1.5);
+  for(let i=0;i<B_.length;i++){const[a,ra,wa,ka]=B_[i],cx=Math.floor(a.pos.x),cz=Math.floor(a.pos.z);
+    for(let ox=-1;ox<=1;ox++)for(let oz=-1;oz<=1;oz++){const l=cell.get((cx+ox)+','+(cz+oz));if(!l)continue;for(const j of l){if(j<=i)continue;const[b,rb,wb,kb]=B_[j];
+      if(Math.abs(a.pos.y-b.pos.y)>1.4)continue;let dx=b.pos.x-a.pos.x,dz=b.pos.z-a.pos.z,d=Math.hypot(dx,dz);
+      // something attacking a player keeps a little more room: close enough to hit, never inside them
+      const min=ra+rb+((ka==='p'&&kb!=='p')||(kb==='p'&&ka!=='p')?.15:0);if(d>=min)continue;if(d<1e-4){dx=Math.random()-.5;dz=Math.random()-.5;d=Math.hypot(dx,dz)}
+      const ov=(min-d)*Math.min(1,dt*14+.35),nx=dx/d,nz=dz/d,sa=wb/(wa+wb),sb=wa/(wa+wb);
+      {const x=a.pos.x-nx*ov*sa,z=a.pos.z-nz*ov*sa;if(free(a,x,z,ra)){a.pos.x=x;a.pos.z=z}}{const x=b.pos.x+nx*ov*sb,z=b.pos.z+nz*ov*sb;if(free(b,x,z,rb)){b.pos.x=x;b.pos.z=z}}}}}}
+function knockZ(z,dir,f){const l=Math.hypot(dir.x,dir.z)||1;z.kx+=dir.x/l*f;z.kz+=dir.z/l*f;if(f>=5&&z.grounded!==false){z.vel.y=Math.max(z.vel.y,2.2);z.grounded=false}z.held=Math.max(z.held||0,f>=5?.45:.15)}
 function hurtZombie(z,dmg,dir,by){
-  if(z.dead)return;z.hp-=dmg;z.kx+=dir.x*5;z.kz+=dir.z*5;z.chasing=true;
+  if(z.dead)return;z.hp-=dmg;knockZ(z,dir,6);z.chasing=true;
   burst(new V3(z.pos.x,z.pos.y+1.2,z.pos.z),16,4,RED,1.5);if(rng()<.35)splat(z.pos,R(.6,1.1));SND.hit();
   if(z.hp<=0)killZombie(z,by);
 }
@@ -3518,9 +3536,9 @@ function updateZombie(z,dt,night){
   let sp=z.chasing?(night?z.spd*1.7:z.spd):z.alertT>0?z.spd*1.1:.8;
   if(z.held>0){z.held-=dt;sp=0}else if(z.slow>0){z.slow-=dt;sp*=.35}
   if(z.crawl){sp*=.35;z.g.rotation.x+=(1.45-z.g.rotation.x)*Math.min(1,dt*5)}
-  let vx=wx*sp+z.kx,vz=wz*sp+z.kz;z.kx*=Math.pow(.02,dt);z.kz*=Math.pow(.02,dt);
-  for(const o of zombies){if(o===z||o.dead)continue;const dx=z.pos.x-o.pos.x,dz=z.pos.z-o.pos.z,d2=dx*dx+dz*dz;if(d2<.5&&d2>1e-4){vx+=dx/d2*.3;vz+=dz/d2*.3}}
-  if(tgt&&bd<1.1){vx*=.2;vz*=.2}
+  // walking stops at arm's length (they attack from there); knockback is added on top and is never damped by that
+  let wsp=sp;if(tgt&&bd<.95&&Math.abs(tgt.pos.y-z.pos.y)<1.6)wsp=0;else if(tgt&&bd<1.25)wsp*=.35;
+  let vx=wx*wsp+z.kx,vz=wz*wsp+z.kz;z.kx*=Math.pow(.03,dt);z.kz*=Math.pow(.03,dt);
   z.vel.x=vx;z.vel.z=vz;z.vel.y=Math.max(-18,z.vel.y-24*dt);
   const blocked=moveEnt(z,dt,.3,1.8);vehPush(z,.3,1.8);
   const pushing=z.chasing||z.alertT>0;
@@ -4354,7 +4372,7 @@ function burstDir(p,dir,n){for(let k=0;k<n;k++){const j=pI;pI=(pI+1)%PN;const o=
 function hitPart(h,dir,dmg,by,bullet){
   const z=h.z;if(z.dead)return;
   if(bullet)addHole(h.mesh,h.point,h.normal);
-  burstDir(h.point,dir,bullet?16:10);burst(h.point,6,2,RED,1);SND.hit();z.chasing=true;z.kx+=dir.x*2;z.kz+=dir.z*2;
+  burstDir(h.point,dir,bullet?16:10);burst(h.point,6,2,RED,1);SND.hit();z.chasing=true;knockZ(z,dir,bullet?2.2:7);
   const pn=h.part;
   if(pn==='head'){const d=dmg*3*(z.outfit==='helmet'?.45:z.outfit==='hardhat'?.75:1);z.lhp.head-=d;z.hp-=d*.5;
     if(z.lhp.head<=0){sever(z,'head',dir);killZombie(z,by);if(by)msg(by,'Headshot');return}}
@@ -4574,7 +4592,7 @@ function animalRay(eye,dir,far){let best=null,bt=far;for(const a of animals){if(
 function nearestAnimalInFront(p,dir,range){let best=null,bd=range;for(const a of animals){if(a.dead)continue;const dx=a.pos.x-p.pos.x,dz=a.pos.z-p.pos.z,d=Math.hypot(dx,dz);
   if(d>bd||Math.abs(a.pos.y-p.pos.y)>1.6)continue;const fl=Math.hypot(dir.x,dir.z)||1;if((dx*dir.x+dz*dir.z)/((d||1)*fl)<.65)continue;best=a;bd=d}return best}
 function hurtAnimal(a,dmg,dir,by){
-  if(a.dead)return;a.hp-=dmg;a.flee=7;a.angry=10;a.vel.x+=dir.x*3;a.vel.z+=dir.z*3;
+  if(a.dead)return;a.hp-=dmg;a.flee=7;a.angry=10;{const l=Math.hypot(dir.x,dir.z)||1,f=a.A.size[0]>1?3:6;a.kx=(a.kx||0)+dir.x/l*f;a.kz=(a.kz||0)+dir.z/l*f}
   burst(new V3(a.pos.x,a.pos.y+a.A.leg+a.A.size[1]/2,a.pos.z),14,3,RED,1.5);SND.hit();
   if(a.hp<=0){a.dead=.001;splat(a.pos,R(.8,1.6));const it={};for(const[k,[lo,hi]]of Object.entries(a.A.drops)){const q=RI(lo,hi);if(q)it[k]=q}
     dropBag(a.pos,it,true);if(by)msg(by,`Killed a ${a.type} — search the carcass`)}
@@ -4591,7 +4609,7 @@ function updateAnimal(a,dt,night){
   else if(tgt&&!A.hostile&&(bd<13||a.flee>0)){const dx=a.pos.x-tgt.pos.x,dz=a.pos.z-tgt.pos.z,l=Math.hypot(dx,dz)||1;wx=dx/l;wz=dz/l;sp=A.run}
   else{a.wT-=dt;if(a.wT<=0){a.wT=R(2,7);a.wD=rng()<.3?-1:rng()*6.283}if(a.wD>=0){wx=Math.cos(a.wD);wz=Math.sin(a.wD)}}
   a.vel.x+=(wx*sp-a.vel.x)*Math.min(1,dt*6);a.vel.z+=(wz*sp-a.vel.z)*Math.min(1,dt*6);a.vel.y=Math.max(-18,a.vel.y-24*dt);
-  const blocked=moveEnt(a,dt,A.hw,A.h);vehPush(a,A.hw,A.h);if(blocked&&a.grounded){a.vel.y=7;if(!hostile)a.wD=rng()*6.283}
+  const akx=a.kx||0,akz=a.kz||0;a.vel.x+=akx;a.vel.z+=akz;const blocked=moveEnt(a,dt,A.hw,A.h);a.vel.x-=akx;a.vel.z-=akz;a.kx=akx*Math.pow(.03,dt);a.kz=akz*Math.pow(.03,dt);vehPush(a,A.hw,A.h);if(blocked&&a.grounded&&Math.hypot(akx,akz)<1){a.vel.y=7;if(!hostile)a.wD=rng()*6.283}
   const v=Math.hypot(a.vel.x,a.vel.z);
   if(v>.1){const ty=Math.atan2(a.vel.x,a.vel.z);let d=ty-a.g.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));a.g.rotation.y+=d*Math.min(1,dt*8)}
   a.walk+=dt*v*(a.type==='rabbit'?5:2.6);const s=Math.sin(a.walk);a.legs.forEach((l,i)=>l.rotation.x=(i%2?s:-s)*Math.min(.8,v*.25));
@@ -4868,7 +4886,7 @@ function npcShot(n,tx,ty,tz){const d=Math.hypot(tx-n.pos.x,tz-n.pos.z);const nea
   if(players.some(p=>p.pos.distanceTo(n.pos)<120))playAt(new V3(n.pos.x,n.pos.y+1.4,n.pos.z),()=>SND.shot())
   burst(new V3(n.pos.x+Math.sin(n.g.rotation.y)*.5,n.pos.y+1.35,n.pos.z+Math.cos(n.g.rotation.y)*.5),3,1,[1,.8,.3],.5);alertZombies(n.pos,30);n.aimT=.4}
 function hurtNPC(n,dmg,dir,by){
-  if(n.dead||n.kid)return;n.hp-=dmg;burst(new V3(n.pos.x,n.pos.y+1.2,n.pos.z),14,3,RED,1.5);SND.hit();
+  if(n.dead||n.kid)return;n.hp-=dmg;if(dir){const l=Math.hypot(dir.x,dir.z)||1;n.kx=(n.kx||0)+dir.x/l*6;n.kz=(n.kz||0)+dir.z/l*6}burst(new V3(n.pos.x,n.pos.y+1.2,n.pos.z),14,3,RED,1.5);SND.hit();
   if(by&&players.includes(by)&&(n.kind==='survivor'||n.rec&&n.rec.friendly)&&!n.hostileTo){n.hostileTo=by;msg(by,`${n.name} turns on you!`)}
   if(n.hp<=0){n.dead=.001;splat(n.pos,R(1.2,2),true);n.rec.alive=false;n.rec.out=null;if(by&&players.includes(by))by.pk=(by.pk|0)+1;const it={ammo:RI(3,10),scrip:RI(4,30)};if(rng()<.5)it.food=1;if(rng()<.4)it.bandage=1;if(rng()<.4)it.scrap=RI(1,3);if(rng()<.25)it[['jacket','vest','cargo','hardhat'][RI(0,3)]]=1;
     dropBag(n.pos,it);if(by)msg(by,n.kind==='bandit'?`Bandit down — search the bag`:`${n.name} is dead`);if(!by&&(n.unarmed||n.infected))n.rise=R(5,9)}
@@ -4979,7 +4997,7 @@ function updateNPC(n,dt,night){
     }
   n.greet-=dt;
   n.vel.x+=(wx*sp-n.vel.x)*Math.min(1,dt*8);n.vel.z+=(wz*sp-n.vel.z)*Math.min(1,dt*8);n.vel.y=Math.max(-18,n.vel.y-24*dt);
-  const blocked=moveEnt(n,dt,n.kid?.2:.3,n.kid?1.1:1.8);vehPush(n,.3,1.8);if(blocked&&n.grounded){n.vel.y=7.6;if(!tp&&!tz)n.wD=rng()*6.283}
+  const nkx=n.kx||0,nkz=n.kz||0;n.vel.x+=nkx;n.vel.z+=nkz;const blocked=moveEnt(n,dt,n.kid?.2:.3,n.kid?1.1:1.8);n.vel.x-=nkx;n.vel.z-=nkz;n.kx=nkx*Math.pow(.03,dt);n.kz=nkz*Math.pow(.03,dt);vehPush(n,.3,1.8);if(blocked&&n.grounded){n.vel.y=7.6;if(!tp&&!tz)n.wD=rng()*6.283}
   const tx=face?face.x-n.pos.x:n.vel.x,tzz=face?face.z-n.pos.z:n.vel.z;
   if(Math.abs(tx)+Math.abs(tzz)>.05){let d=Math.atan2(tx,tzz)-n.g.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));n.g.rotation.y+=d*Math.min(1,dt*8)}
   const v=Math.hypot(n.vel.x,n.vel.z);n.walk+=dt*v*2.6;const s=Math.sin(n.walk)*Math.min(.7,v*.25);
@@ -5130,6 +5148,7 @@ function update(dt){
   for(const v of vehicles)updateVehicle(v,dt);
   flashT=Math.max(0,flashT-dt);$('#flash').style.opacity=Math.min(.85,flashT*3.5);updateDoors(dt);updateTraps(dt);updateCooking(dt);updateBombs(dt);updateDrops(dt);for(const p of players)p.shake=Math.max(0,(p.shake||0)-dt*1.5);updateGibs(dt);updateFires(dt);updateBags(dt);
   for(const a of animals)updateAnimal(a,dt,night);animals=animals.filter(a=>!a.gone);
+  try{crowd(dt)}catch(e){}
   for(const n of npcs)updateNPC(n,dt,night);npcs=npcs.filter(n=>!n.gone);npcT-=dt;if(npcT<=0){npcT=3;spawnNPCsNear()}
   animT-=dt;if(animT<=0){animT=6;if(animals.filter(a=>!a.dead).length<14)spawnAnimal(true)}
   updateSleep(dt);applySeason();updateWeather(dt);for(const p of players)updFx(p,dt);

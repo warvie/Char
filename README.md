@@ -171,6 +171,12 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 
 Craft a fishing rod (2 planks, 1 cloth, 1 scrap) or find one in a hardware store. Put it in a pocket, stand at the edge of a river or pond facing the water and Use to cast. The bobber floats where it lands. When it dips (you'll hear a splash), Use again within a couple of seconds to reel in: usually a bass, trout or catfish, sometimes junk. Grill fish at a campfire; raw fish is risky, and both spoil overnight.
 
+## Combat feel
+
+- **Knockback:** a bat hit throws a zombie back about 2 m with a small hop and a short stagger, so it can't walk straight back in; a pistol round shoves it about half a metre. Animals and people are knocked back too (big animals less).
+- **Reach, not overlap:** anything attacking you walks up to arm's length (about 0.8 m) and swings from there, never into your body.
+- **Bodies collide:** zombies, animals, survivors and players push each other apart instead of passing through, without being pushed into walls. Players are heavy, so a crowd jostles you rather than shoving you around, but you can't walk through a horde.
+
 ## Surviving
 
 - **A limited number of zombies:** each region starts with so many walkers (towns hold the most). Kill them and they're gone; the top bar shows how many are still out there. New ones only come from people who turn.
