@@ -10,6 +10,13 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v17.8 — nothing dark in the beam
+- Flashlight origin moved to the eye so every visible pixel in the cone is reachable; the occlusion map is re-cast in full whenever the view moves and dilated (each texel keeps the farthest hit of its 3x3 neighbourhood) with a distance-scaled tolerance, so silhouettes and slanted floors never fall into false shadow.
+- Beam rays (`flRay`/`rayVoxIf`) pass glass, leaves, ladders, water, shaped blocks and branches; only full opaque cubes stop them.
+- Minimum light step for any lit pixel in range; double-sided faces use |N·L|.
+- Transparent Lambert materials (glass, cracks, decals) and window-glass blocks (gmat) get the beam; instanced meshes (blood stains) use the instance transform for the beam's world position.
+- Portrait touch: Light button at 40% height so it clears the feed.
+
 ## v17.7 — real trunks far away
 - Far-view trees: trunks are drawn at the real trunk width (25 cm stem, 1-block log or 2x2 old trunk) from the actual log columns when loaded, or one block-wide trunk per generated tree patch further out; crowns are separate floating boxes with an underside, and dead trees are bare trunks.
 
