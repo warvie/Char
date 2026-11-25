@@ -139,6 +139,7 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 ## Pockets, backpacks and how you died
 
 - **Pockets are your hotbar:** the pants you wear decide how many hotbar slots you get — shorts 2, slacks 3, jeans 4, riot pants 4, cargo pants 8. You start with random pants.
+- **Creative mode** has a bottomless case: 14 wide, it grows by rows as you pick things up and shrinks back when you empty it.
 - **Backpacks are your case:** no pack gives an 8 × 5 case; a school backpack 10 × 6; a hiking pack 12 × 8; a military rucksack 14 × 9. Schools are full of backpacks. Sew one from cloth, then upgrade the one you're wearing in the crafting list. Every recipe shows pictures of what it makes and needs.
 - **Death:** when you die, the game says how (eaten, shot by a named bandit, run over, starved, frozen, blown up…), to you, the other split-screen player and everyone online.
 - **Cigarettes** bring your stamina back at a small cost to health. **Marijuana** slows and softens everything for a while, eases pain a little, and makes you very hungry.
@@ -167,6 +168,10 @@ Performance: chunk streaming, packed vertices (16 bytes instead of 44, about 60%
 - **Weather:** rain soaks you, and wet clothes make you colder until you dry off by a fire. Snow slows you down and shows your footprints. Fog shrinks how far you can see to a few metres.
 - **Decay:** each day weeds creep further onto the roads, and abandoned cars rust and their tyres go flat.
 - **Cars:** about 3 in 10 parked cars have an alarm that wails when bumped or stripped, calling every zombie nearby. Rubble and spike traps blow out tyres (slower, pulls to one side; fit a spare wheel). Leave the headlights on at night and the battery goes flat (fit a car battery).
+
+## Developer mode
+
+Turn it on from the start screen or the in-game menu. A panel at the top shows what's under the crosshair: a block (name, id, coordinates, chipped or not), a zombie (outfit, health, chasing or wandering, which body part), an animal, a person, a vehicle (health, fuel, engine/battery/tank/lights condition, flat tyres) or furniture, plus your position, cell, region, the town you're in, frame rate and zombie count.
 
 ## Fishing
 

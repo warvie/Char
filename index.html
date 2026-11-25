@@ -93,6 +93,8 @@ details summary{cursor:pointer;color:var(--dim);font-weight:600;padding:6px 0}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin:12px 0 18px}
 .grid div{background:#1d1a14;border:1px solid var(--line);padding:6px 10px;border-radius:3px;display:flex;justify-content:space-between;gap:8px;font-size:20px}
 #mapCv{position:static!important;display:block;margin:0 auto;inset:auto!important;z-index:auto}
+#devHud{position:fixed;top:44px;left:50%;transform:translateX(-50%);z-index:40;pointer-events:none;background:rgba(0,0,0,.62);color:#cfe8c0;font:12px/1.35 ui-monospace,Menlo,Consolas,monospace;padding:5px 9px;border:1px solid #3a5a30;white-space:pre-wrap;width:max-content;max-width:min(560px,36vw);overflow:hidden}
+#cGrid{flex:none}.case{max-height:calc(100vh - 140px);overflow-y:auto}
 .ricon{width:32px;height:32px;image-rendering:pixelated;background:#1a2416;border:1px solid #3a4a30;padding:2px}.rimg{width:14px;height:14px;image-rendering:pixelated;vertical-align:-3px;margin:0 2px 0 4px}#mRec .rec{grid-template-columns:auto minmax(0,1fr) auto}
 .hot.many .slot{width:40px}@media(orientation:portrait){body.touch .hot.many{left:50%!important;gap:2px;padding:3px}body.touch .hot.many .slot{width:calc((100vw - 40px)/9)!important;padding:2px 0!important}body.touch .hot.many .slot span{font-size:7px}body.touch .hot.many .slot b{font-size:14px}}body.touch .hot.many .slot{width:41px}body.touch .hot.many{gap:3px}
 @media(orientation:landscape) and (max-width:720px){body.touch .hot.many .slot{width:33px;padding:2px 1px}body.touch .hot.many .slot span{font-size:8px}body.touch .hot.many{gap:2px;padding:3px}}
@@ -324,8 +326,13 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>Render distance <select id="rdSel"></select></label>
     <label>Graphics <select id="gfxSel"></select></label>
     <label>Pixel size <select id="pixSel"></select></label>
+    <label>Developer mode <select id="devSel"><option value="0">Off</option><option value="1">On</option></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
+    <h4>v15.5 · Nov 25, 2026 — developer mode, curbs</h4><ul>
+      <li>Developer mode (start screen or in-game menu): shows exactly what's under your crosshair: the block and its id and coordinates, a zombie's outfit, health and state, an animal, a person, a vehicle's part condition, or a piece of furniture, plus your position, region, town and frame rate.</li>
+      <li>Curbs are part of the sidewalk now: the outermost sidewalk block wears a proper kerb-stone texture with a bevelled edge (some painted yellow or red near corners) instead of a separate strip.</li>
+      <li>Creative mode has a bottomless backpack that grows as you collect things and shrinks again when you empty it.</li></ul>
     <h4>v15.4 · Nov 25, 2026 — crash damage</h4><ul>
       <li>Cars break where they're hit. Front ends lose headlights, then the radiator and engine (slower, smoking, stalling, finally dead), and in hard hits the battery. Rear ends split the fuel tank so it leaks. Side hits bend wheels. A repair kit patches it all up; a wrecked engine has to be replaced.</li>
       <li>The windshield only cracks when something actually hits the glass: a wall or object tall enough to reach it, a bigger vehicle, or a zombie thrown up onto it at speed.</li>
@@ -448,6 +455,7 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
   <div class="row" style="justify-content:center;margin-top:14px"><button id="pMap">Map (M)</button><button id="pRsp">Respawn (unstuck)</button><button id="pMenu">Main menu</button></div>
   <p class="note" style="margin:14px 0 6px">Teleport to</p><div class="row" id="pTp" style="justify-content:center"></div></div></div>
 
+<div id="devHud" class="hidden"></div>
 <div id="map" class="screen hidden" style="background:rgba(0,0,0,.72)"><div class="kit" style="text-align:center;max-width:560px">
   <h2 style="font-size:32px;color:var(--rust);margin:0 0 4px">Map</h2><p class="note" id="mapNote" style="margin:0 0 8px"></p>
   <canvas id="mapCv" width="448" height="448" style="width:min(82vmin,448px);height:min(82vmin,448px);image-rendering:pixelated;cursor:crosshair;border:2px solid #444"></canvas>
@@ -463,7 +471,7 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
   <h3>Workbench</h3>
   <div id="mRec"></div>
   <h3>World</h3>
-  <div class="row"><button id="mSave">Save now</button><button id="mRsp">Respawn (stuck?)</button><button id="mCreative">Creative: off</button><button id="mMain">Main menu</button><button id="mCode">Copy save code</button><label>Render distance <select id="rdSel2"></select></label><label>Graphics <select id="gfxSel2"></select></label><label>Pixel size <select id="pixSel2"></select></label></div>
+  <div class="row"><button id="mSave">Save now</button><button id="mRsp">Respawn (stuck?)</button><button id="mCreative">Creative: off</button><button id="mMain">Main menu</button><button id="mCode">Copy save code</button><label>Render distance <select id="rdSel2"></select></label><label>Graphics <select id="gfxSel2"></select></label><label>Pixel size <select id="pixSel2"></select></label><label>Developer mode <select id="devSel2"><option value="0">Off</option><option value="1">On</option></select></label></div>
   <textarea id="mCodeOut" class="hidden" rows="2" readonly></textarea>
   <p class="note" id="mSaveNote" style="margin:6px 0 0"></p>
   <div class="row" style="margin-top:14px"><button id="mEat">Eat</button><button id="mBand">Use bandage</button><button id="mClose" class="go" style="margin-left:auto">Close</button></div>
@@ -756,11 +764,11 @@ function roadDecor(T){if(T.air)return;const y=(G+1)*VS,ys=(G+2)*VS,n=Math.round(
     // segments leaving this intersection toward +z (on the x-road) and toward +x (on the z-road)
     if(j<n&&!(T.mg&&T.mg.has(i+','+j))){const cx=(ix+6)*VS,z0=(iz+12)*VS,z1=(iz+P)*VS,L=z1-z0,cz=(z0+z1)/2;
       add(['lane',cx,y,cz,0,{L:L-5.4}]);add(['xwalk',cx,y,z0+1.2,0,{}]);add(['xwalk',cx,y,z1-1.2,Math.PI,{}]);
-      for(const sd of[-1,1]){const ex=sd<0?ix*VS:(ix+12)*VS;add(['curb',ex+sd*.09,y,cz,0,{L,paint:rng()<.45?(rng()<.5?0xd8b030:0xb02a22):0}]);
+      for(const sd of[-1,1]){const ex=sd<0?ix*VS:(ix+12)*VS;{const _c=rng()<.45&&rng()}
         if(rng()<.4){const vx=sd<0?ix-2:ix+13,vz=iz+12+RI(8,P-22);add(['rsign',(vx+.5)*VS,ys,(vz+.5)*VS,sd<0?Math.PI:0,{k:pick(['speed','speed','noparking','oneway','yield'])}])}}}
     if(i<n){const cz=(iz+6)*VS,x0=(ix+12)*VS,x1=(ix+P)*VS,L=x1-x0,cx=(x0+x1)/2;
       add(['lane',cx,y,cz,Math.PI/2,{L:L-5.4}]);add(['xwalk',x0+1.2,y,cz,Math.PI/2,{}]);add(['xwalk',x1-1.2,y,cz,-Math.PI/2,{}]);
-      for(const sd of[-1,1]){const ez=sd<0?iz*VS:(iz+12)*VS;add(['curb',cx,y,ez+sd*.09,Math.PI/2,{L,paint:rng()<.45?(rng()<.5?0xd8b030:0xb02a22):0}]);
+      for(const sd of[-1,1]){const ez=sd<0?iz*VS:(iz+12)*VS;{const _c=rng()<.45&&rng()}
         if(rng()<.4){const vz=sd<0?iz-2:iz+13,vx=ix+12+RI(8,P-22);add(['rsign',(vx+.5)*VS,ys,(vz+.5)*VS,sd<0?Math.PI/2:-Math.PI/2,{k:pick(['speed','speed','noparking','oneway','yield'])}])}}}
     // control at the crossing: traffic lights in bigger towns, otherwise a four-way stop
     const kind=big&&rng()<.75?'tlight':rng()<.85?'stop':null;if(!kind)continue;const lit=RI(0,2);
@@ -1622,7 +1630,7 @@ const BRGB=BCOL.map(c=>{const k=new THREE.Color(c);return[k.r,k.g,k.b]});
 // 32px tiles: each tile spans a 2x2 group of voxels (1 m), every voxel face shows one quarter, so patterns run across blocks
 const TS=32,ACOLS=8,AROWS=4,AW=TS*ACOLS,AH=TS*AROWS;
 const atlasC=document.createElement('canvas');atlasC.width=AW;atlasC.height=AH;
-const TILE={water:25,grassTop:0,grassSide:1,dirt:2,stone:3,coal:4,iron:5,conc:6,asph:7,plank:8,bark:9,logTop:10,leaf:11,brick:12,metal:13,bed:14,glass:15,frame:16,sludge:17,wall:18,tilef:19,dirtTop:20,asphTop:21,roofTop:22,roofSide:23,trim:24};
+const TILE={curbTop:26,curbSide:27,water:25,grassTop:0,grassSide:1,dirt:2,stone:3,coal:4,iron:5,conc:6,asph:7,plank:8,bark:9,logTop:10,leaf:11,brick:12,metal:13,bed:14,glass:15,frame:16,sludge:17,wall:18,tilef:19,dirtTop:20,asphTop:21,roofTop:22,roofSide:23,trim:24};
 let drawSeason=()=>{},realism=()=>{},down8=()=>{};
 {
   const ctx=atlasC.getContext('2d'),tr=mulberry(seed^0x5eed),rr=()=>tr(),A=TS*TS/256;
@@ -1639,6 +1647,8 @@ let drawSeason=()=>{},realism=()=>{},down8=()=>{};
   for(const [t,c] of[[TILE.coal,[28,28,30]],[TILE.iron,[176,122,86]]]){noise(t,106,106,104,.2);blob(t,3,12,92,92,90);blob(t,5,9,...c)}
   noise(TILE.conc,140,137,128,.1);blob(TILE.conc,3,12,128,124,116);specks(TILE.conc,10,118,114,106,.1);crack(TILE.conc,96,94,88,22);
   for(let x=0;x<TS;x++){px(TILE.conc,x,15,118,114,106);px(TILE.conc,15,x,118,114,106)} // 1 m slab joints
+  noise(TILE.curbTop,166,164,158,.08);specks(TILE.curbTop,14,140,138,132,.08);for(let x=0;x<TS;x++){px(TILE.curbTop,x,0,196,194,188);px(TILE.curbTop,x,31,196,194,188);px(TILE.curbTop,0,x,150,148,142);px(TILE.curbTop,31,x,150,148,142)}
+  noise(TILE.curbSide,150,148,142,.09);specks(TILE.curbSide,10,128,126,120,.08);for(let x=0;x<TS;x++){for(const[y,k]of[[0,1.28],[1,1.2],[2,1.1],[3,1.02],[4,.9]])px(TILE.curbSide,x,y,150*k,148*k,142*k);for(let y=24;y<32;y++)px(TILE.curbSide,x,y,112,110,106)}for(let y=0;y<24;y++){px(TILE.curbSide,0,y,124,122,116);px(TILE.curbSide,31,y,124,122,116)}
   noise(TILE.asph,46,46,50,.28);specks(TILE.asph,22,92,92,94,.15);specks(TILE.asph,6,30,30,32,.1);crack(TILE.asph,30,30,32,20);
   // planks: boards 4 px (12.5 cm) tall running the full metre, staggered butt joints
   for(let y=0;y<TS;y++){const board=y>>2,joint=(board*11)%TS,base=[139,106,64].map(v=>v*(.84+((board*37)%5)*.05));for(let x=0;x<TS;x++){
@@ -1853,8 +1863,10 @@ function buildChunk(cx,cz){
     let cr=1,cg=1,cb=1;const v=.88+.12*h3(x,y,z),tiles=rcap?TILE_OF[7]:TILE_OF[b];if(b===1||(b>=23&&b<=25&&!rcap)){const gc=gpatch(x,z);cr=gc[0];cg=gc[1];cb=gc[2]}
     const pr=paintRooms.length?roomsFor(cx,cz):null;
     if(winIdx.size){const we=winIdx.get(i);if(we&&!(trimOff.size&&trimOff.has(x+','+y+','+z)))winTrim(we,x,y,z,x0,z0)}
+    let curbN=0,curbP=0;if(b===6&&y===G+1&&isWalk(x,z)){for(const fi of[0,1,4,5]){const F_=FACES[fi];if(isRoad(x+F_[0],z+F_[2]))curbN|=1<<fi}if(curbN){const hh=h3(Math.floor(x/8),Math.floor(z/8),311);curbP=hh<.18?1:hh<.3?2:0}}
     if(!shp){for(let fi=0;fi<6;fi++){const o=nb[fi];if(isOpq(o)||(fi===2&&SH[o]&&BOTFULL[o]))continue;
         let t=tiles[fi],r=cr,g=cg,bb=cb;
+        if(curbN&&(fi===2||curbN&(1<<fi))){t=fi===2?TILE.curbTop:TILE.curbSide;if(curbP&&fi!==2){if(curbP===1){r=1.35;g=1.12;bb=.42}else{r=1.2;g=.5;bb=.42}}}
         let rm=null;if(pr&&(fi<2||fi>3)&&(b===19||b===6||b===11)){rm=roomAt(pr,x+FACES[fi][0],y,z+FACES[fi][2]);if(rm){t=TILE.wall;r=rm.c[0];g=rm.c[1];bb=rm.c[2]}}
         // the inside faces of a window opening (the reveals around the glass) are the window frame: trim-coloured and lit, not shadowy wall
         let sh=v*FACES[fi][4];if(o===15){const we2=winIdx.size?winIdx.get(i):null,tc=TRIMC[we2?we2.tc:0]||TRIMC[0];t=TILE.trim;r=tc[0];g=tc[1];bb=tc[2];sh=Math.max(sh,1.02)}
@@ -2351,7 +2363,7 @@ const CLOTHES={hardhat:{slot:'head',armor:.12,col:0xd8a820},helmet:{slot:'head',
   schoolbag:{slot:'back',armor:0,col:0x2a4a9a,bag:[10,6]},hikepack:{slot:'back',armor:0,col:0x8a4a1a,bag:[12,8]},milpack:{slot:'back',armor:.04,col:0x4a5a3a,bag:[14,9]}};
 // your pockets are your hotbar: the pants you wear decide how many slots you get; your backpack decides how big your case is
 const pockets=p=>p.creative?HOTN:((CLOTHES[p.wear.legs]||{}).pk||2);
-const caseW=p=>((CLOTHES[p&&p.wear.back]||{}).bag||[8,5])[0],caseH=p=>((CLOTHES[p&&p.wear.back]||{}).bag||[8,5])[1];
+const caseW=p=>p&&p.creative?14:((CLOTHES[p&&p.wear.back]||{}).bag||[8,5])[0],caseH=p=>p&&p.creative?(p.cH||9):((CLOTHES[p&&p.wear.back]||{}).bag||[8,5])[1];
 const armorOf=p=>Math.min(.7,['head','body','legs'].reduce((s,k)=>s+(p.wear[k]?CLOTHES[p.wear[k]].armor:0),0));
 const RECIPES=[
   {out:'rod',n:1,need:{plank:2,cloth:1,scrap:1},label:'Make a fishing rod'},
@@ -3884,7 +3896,9 @@ const TOOLITEMS=['Pistol','Bat','Pickaxe'];
 const isz=(k,r)=>{const d=ITEM[k]||[1,1,10];return r?[d[1],d[0]]:[d[0],d[1]]};
 function caseFits(p,s,x,y,r){const[w,h]=isz(s.k,r);if(x<0||y<0||x+w>caseW(p)||y+h>caseH(p))return false;
   for(const o of p.case){if(o===s||o.x<0)continue;const[ow,oh]=isz(o.k,o.r);if(x<o.x+ow&&o.x<x+w&&y<o.y+oh&&o.y<y+h)return false}return true}
-function casePlace(p,s){for(const r of[0,1])for(let y=0;y<caseH(p);y++)for(let x=0;x<caseW(p);x++)if(caseFits(p,s,x,y,r)){s.x=x;s.y=y;s.r=r;p.case.push(s);return true}return false}
+function casePlace(p,s){for(let grow=0;grow<200;grow++){for(const r of[0,1])for(let y=0;y<caseH(p);y++)for(let x=0;x<caseW(p);x++)if(caseFits(p,s,x,y,r)){s.x=x;s.y=y;s.r=r;p.case.push(s);return true}
+    if(!p.creative)return false;p.cH=(p.cH||9)+3}return false}
+function caseTrim(p){if(!p.creative)return;let m=0;for(const s of p.case){const[w,h]=isz(s.k,s.r);m=Math.max(m,s.y+h)}p.cH=Math.max(9,m+2)}
 // keep the case in step with the counts in p.inv; whatever doesn't fit is dropped at your feet
 function caseSync(p){if(!p.case)p.case=[];const C=p.case,drop={};
   for(const t of TOOLITEMS)if(!C.some(s=>s.k===t))casePlace(p,{k:t,n:1,tool:1});
@@ -3896,7 +3910,7 @@ function caseSync(p){if(!p.case)p.case=[];const C=p.case,drop={};
 function caseOrganize(p){const all=p.case.slice().sort((a,b)=>{const A=isz(a.k),B=isz(b.k);return B[0]*B[1]-A[0]*A[1]||a.k.localeCompare(b.k)});p.case=[];const lost=[];
   for(const s of all)if(!casePlace(p,s))lost.push(s);for(const s of lost){s.x=-1;p.case.push(s)}caseSync(p)}
 let caseSel=null,caseDrag=null;
-function renderCase(){const p=menuP;if(!p)return;const G=$('#cGrid'),cw=caseW(p),chh=caseH(p);G.parentElement.style.setProperty('--cs',`min(34px,calc((100vw - 70px)/${Math.max(12,cw)}))`);G.style.width=`calc(var(--cs)*${cw})`;G.style.height=`calc(var(--cs)*${chh})`;caseSync(p);renderCaseHot();
+function renderCase(){const p=menuP;if(!p)return;caseTrim(p);const G=$('#cGrid'),cw=caseW(p),chh=caseH(p);G.parentElement.style.setProperty('--cs',`min(34px,calc((100vw - 70px)/${Math.max(12,cw)}))`);G.style.width=`calc(var(--cs)*${cw})`;G.style.height=`calc(var(--cs)*${chh})`;caseSync(p);renderCaseHot();
   G.innerHTML=p.case.filter(s=>s.x>=0).map((s,i)=>{const[w,h]=isz(s.k,s.r),max=(ITEM[s.k]||[1,1,10])[2];
     return`<div class="ci${s===caseSel?' sel':''}" data-i="${p.case.indexOf(s)}" style="left:calc(var(--cs)*${s.x});top:calc(var(--cs)*${s.y});width:calc(var(--cs)*${w});height:calc(var(--cs)*${h})"><img alt="" src="${pxIcon(s.k==="Bat"?"BatW":s.k)}" class="${s.r?'rot':''}" style="${s.r?`width:calc(var(--cs)*${h});height:calc(var(--cs)*${w})`:''}">${s.tool?'':`<b>${max>1?s.n:''}</b>`}</div>`}).join('');
   const s=caseSel&&p.case.includes(caseSel)?caseSel:null,used=p.case.reduce((a,o)=>{const[w,h]=isz(o.k);return a+(o.x>=0?w*h:0)},0);
@@ -5216,11 +5230,31 @@ function cullEntities(cs){const F=(viewUnits()+6)**2,vis=(o,px,pz)=>{let m=1e9;c
   for(const R of regions.values())if(R.live)for(const o of R.objs||[])vis(o);
   crates.forEach(c=>vis(c.g));doors.forEach(d=>{if(!d.gone)vis(d.pivot)});beds.forEach(b=>vis(b.g));fires.forEach(f=>vis(f.g));traps.forEach(t=>vis(t.g));bags.forEach(b=>vis(b.g));decals.forEach(o=>vis(o));
   vehicles.forEach(v=>{if(!v.driver&&!v.pass)vis(v.g)});manObjs.forEach(o=>o.userData.c?vis(o,o.userData.c[0],o.userData.c[1]):vis(o))}
+
+// ---------------- developer mode: what's under the crosshair, and where you are
+let DEV=false;try{DEV=localStorage.getItem('deadground-dev')==='1'}catch(e){}
+for(const id of['#devSel','#devSel2']){const el=$(id);if(!el)continue;el.value=DEV?'1':'0';el.addEventListener('change',()=>{DEV=el.value==='1';for(const j of['#devSel','#devSel2'])if($(j))$(j).value=el.value;try{localStorage.setItem('deadground-dev',DEV?'1':'0')}catch(e){}$('#devHud').classList.toggle('hidden',!DEV||!running)})}
+const BKEY={};for(const k in B)BKEY[B[k]]=k.toLowerCase();
+function blockName(b){if(b===255)return'water';if(b>=180&&b<=224)return'rubble';if(b>=225)return'branch';const base=BASE_OF[b]||b,n=BKEY[base]||('block '+b);return base!==b?n+' (chipped)':n}
+function rayBox(O,d,bb,max){let t0=0,t1=max;for(let a=0;a<3;a++){const o=[O.x,O.y,O.z][a],dv=[d.x,d.y,d.z][a],lo=bb[a],hi=bb[a+3];if(Math.abs(dv)<1e-9){if(o<lo||o>hi)return-1;continue}let ta=(lo-o)/dv,tb=(hi-o)/dv;if(ta>tb)[ta,tb]=[tb,ta];t0=Math.max(t0,ta);t1=Math.min(t1,tb);if(t0>t1)return-1}return t0}
+let devT=0,devFps=60,devLast=performance.now();
+function devTick(){const now=performance.now(),fd=now-devLast;devLast=now;devFps+=(1000/Math.max(1,fd)-devFps)*.05;const el=$('#devHud');if(!DEV||!running||!players[0]){if(!el.classList.contains('hidden'))el.classList.add('hidden');return}
+  el.classList.remove('hidden');if((devT-=fd)>0)return;devT=150;const p=players[0],c=p.cam,eye=c.position.clone(),dir=new V3();c.getWorldDirection(dir);const max=40;let best=null;
+  const vh=rayVox(eye,dir,max);if(vh)best={t:vh.t,txt:`Block: ${blockName(get(vh.x,vh.y,vh.z))}  id ${get(vh.x,vh.y,vh.z)}  at ${vh.x},${vh.y},${vh.z}`};
+  const take=(t,txt)=>{if(t>=0&&(!best||t<best.t))best={t,txt}};
+  try{const zh=zombieRay(eye,dir,max);if(zh){const z=zh.z;take(zh.t??eye.distanceTo(zh.point),`Zombie: ${z.style||'?'} ${z.legStyle||''}  hp ${Math.round(z.hp)}  ${z.chasing?'chasing':'wandering'}  hit: ${zh.part||'body'}`)}}catch(e){}
+  try{const ah=animalRay(eye,dir,max);if(ah){const a=ah.a||ah;take(ah.t??eye.distanceTo(a.pos),`Animal: ${a.type}  hp ${Math.round(a.hp)}${a.angry>0?'  angry':''}${a.flee>0?'  fleeing':''}`)}}catch(e){}
+  try{const nh=npcRay(eye,dir,max);if(nh){const n=nh.n||nh;take(nh.t??eye.distanceTo(n.pos),`Person: ${n.name||'?'} (${n.kind||'?'})  hp ${Math.round(n.hp)}${n.hostileTo?'  hostile':''}`)}}catch(e){}
+  try{const vr=vehRay(eye,dir,max);if(vr){const v=vr.v||vr,P=v.ph;take(vr.t??eye.distanceTo(v.pos),`Vehicle: ${v.name}  hp ${Math.round(v.hp)}  fuel ${Math.round(v.fuel)}${P?`  engine ${Math.round(P.engine)} battery ${Math.round(P.battery)} tank ${Math.round(P.fuel)} lights ${Math.round(P.lights)}`:''}${v.flat?'  flats '+v.flat:''}`)}}catch(e){}
+  for(const sp of furnSpecs){if(!sp.bb||sp.gone||FLAT.has(sp[0]))continue;const dx=sp[1]-eye.x,dz=sp[3]-eye.z;if(dx*dx+dz*dz>max*max)continue;const t=rayBox(eye,dir,sp.bb,max);if(t>=0)take(t,`Furniture: ${sp[0]}${sp.user?' (placed)':''}${sp.on?' (on)':''}`)}
+  const R=regAt(vc(p.pos.x),vc(p.pos.z)),T=townAt(vc(p.pos.x),vc(p.pos.z),0);
+  el.textContent=`${best?best.txt+`  (${best.t.toFixed(1)} m)`:'Looking at: sky'}\npos ${p.pos.x.toFixed(1)}, ${p.pos.y.toFixed(1)}, ${p.pos.z.toFixed(1)}  cell ${vc(p.pos.x)},${vc(p.pos.y)},${vc(p.pos.z)}  region ${R?R.key:'?'}${T?'  in '+townName(T):''}  ${Math.round(devFps)} fps  zombies ${zombies.length}`}
 function frame(){
   const now=performance.now(),dt=Math.min(.05,(now-clockT)/1000);clockT=now;
   if(worldReady){updateWindow(false);const cs=running?players.map(p=>p.vehicle?p.vehicle.pos:p.pos):[spawn];streamChunks(cs,isTouch?2:4);cullT-=dt;if(cullT<=0){cullT=.5;cullEntities(cs)}
     if(running){saveT-=dt;if(saveT<=0){saveT=90;autoSave()}}}
   if(running&&!paused)update(dt);else{pressed.clear();T.pressed.clear()}
+  try{devTick()}catch(e){}
   if(!running){tDay+=dt/DAYLEN*.3;updSky()}
   grassTime.value=now/1000;adaptRes(dt);render();requestAnimationFrame(frame);
 }
