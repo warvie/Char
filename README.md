@@ -7,6 +7,13 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+
+## v17.4 — no real circles
+
+- Round meshes replaced with pixel geometry (`pxRound` stepped discs/rings extruded in whole pixels, `pxCone` stepped cones, merged into one box mesh with metre UVs): wheels, hubs, steering wheel, gauges, manholes, flames, spikes, pipe bombs.
+- Sky sun/moon on an angular pixel grid with stepped glow; lens flare, halos (one texel per block pixel) and NVG eyepiece pixelated with hard edges.
+- Furniture yaw squared to 90 degrees and every axis-aligned furniture box snapped to the 1/16 m grid (min 1 px); `part()` sizes/offsets snapped to whole pixels.
+
 ## v17.3 — lights in the dark
 
 - **Dynamic lights:** 12 per-pixel lights (omni, spot, interior-box) injected into every shader; outdoor lights skip fragments under a roof (height map), interior lights stay in their building box; inverse-square falloff with smooth cut-off; wet-ground specular glints.

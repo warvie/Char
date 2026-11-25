@@ -337,7 +337,7 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>Developer mode <select id="devSel"><option value="0">Off</option><option value="1">On</option></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
-    <h4>v17.3 · Nov 25, 2026 — lights in the dark</h4><ul><li>New lighting system: up to 12 lights at a time, worked out per block pixel on everything (blocks, furniture, people, cars, glass), with realistic inverse-square falloff. Lights indoors stay in their building and outdoor lights don’t shine through walls into rooms</li><li>Everything that should glow now lights its surroundings: wired lamps, campfires (flickering), working street lamps after dark (a few flicker), headlights and tail lights on every car with someone in it or its lights left on (brake lights brighten), lit rooms in occupied homes at night with glowing windows, floodlights on garrisoned military bases, muzzle flashes, explosions and lightning strikes</li><li>Realistic touches: light halos around bright sources at night, glints of lamplight on wet ground in the rain, and eye adaptation — stepping from a dark room into daylight dazzles for a moment and your eyes slowly open up in the dark</li><li>New loot: road flares (gas stations, hardware stores, military bases). Strike one and drop it: it burns red for two minutes and lights the area, but the dead come to the light</li><li>New clothing: night-vision goggles (head slot, military bases). In the dark they switch on by themselves and turn the night bright green, running off your flashlight batteries</li><li>Pixel size corrected: the blocks’ real pixel is 1/16 m, not 1/32 m. Doors are redrawn at 16 x 32 block pixels and their slab is two pixels thick so the faces sit on the grid; signs, blood, glass, grass, road paint, body and vehicle textures and the shader grids now all match</li></ul><h4>v17.2 · Nov 25, 2026 — one pixel size</h4><ul><li>Everything now uses the blocks’ pixel size, 32 texture pixels a metre: people, zombies, animals, cars, tools, crates, beds, bags, decor, signs, blood, glass cracks, the windshield and the grass</li><li>Nothing is untextured any more: every flat-coloured part gets a pixel texture by what it is (painted metal, bare metal, plastic, rubber, wood, cloth); only glowing lamps stay plain</li><li>Things that stay put are textured from their world position, so their pixels sit on the same grid as the blocks around them. Things that move carry their pixels with them</li><li>Signs are redrawn at block resolution with crisp bitmap lettering and sit on the pixel grid (no more tilted signs)</li><li>Blood splats come in whole-metre decals snapped to the grid; grass and flowers are redrawn at twice the detail to match</li><li>Furniture grain, the flashlight’s pixels, pixel shadows and rain ripples were at half resolution (1/16 m) and now match the blocks (1/32 m)</li></ul><h4>v17.1 · Nov 25, 2026 — blocks to the horizon</h4><ul><li>The far view is now made of blocks: distant land is built from real block columns (1 m near, 2 m further out) in each block’s true texture colour, with flat tops and crisp sides; neighbouring columns of the same height and colour merge into one big block, so it stays light to draw. Trees show a leafy crown over a darker trunk, towns show their roads and rooftops</li><li>New doors: pixel-art doors at exactly the block pixel size, so they line up with the wall around them. The classic panel door in four paints plus five new styles: red barn door, steel security door, French glass door, craftsman door and rustic strap door</li><li>Up to 12 hotbar slots (keys 1–9, 0, − and =). New Tactical pants (10 pockets, military bases) and Utility overalls (12 pockets, rare in malls, or sew them); creative mode gets all 12</li></ul><h4>v17 · Nov 25, 2026 — far view</h4><ul><li>Far view: the world now reaches 4x your render distance. Past the loaded chunks a light, low-detail terrain mesh carries the hills, rivers, towns and treelines out to the horizon; it builds a few rows a frame so it never stutters (toggle it next to Render distance)</li><li>The flashlight lights up blocks too, not just furniture and people: every block, zombie, animal and car in the beam is lit in chunky pixels, and walls cast crisp shadows</li><li>Road paint is now part of the road blocks’ texture: lane lines, dashes, crosswalks and runway markings are drawn pixel-for-pixel into the asphalt, with no raised strips</li><li>Grass bends away from you as you walk through it and springs back along your trail; zombies, animals, people and cars push it too</li><li>Window trim no longer clips through chipped and broken blocks beside the window</li><li>Inventory: Close is in the top right, and tapping outside the panel closes it (also works for the trade and campfire panels)</li><li>Smoother: moving no longer re-scans the whole ray-traced lighting volume (only the new strip), the HUD only touches the page when something changes, and the flashlight casts a third fewer rays</li><li>Lighter: chunk meshes free their memory copy once they are on the graphics card, and each region drops its generation scratch data afterwards — memory growth while exploring fell by about two thirds</li><li>Quality of life: walk over loot bags to pick them up (setting in the menu), “+3 Ammo” pop-ups when you loot, hit and kill markers on the crosshair, a compass strip with your waypoint, the nearest military base and where you last died, and the map now marks military bases and your death spot</li><li>Fixed: soldiers are saved properly (a save with soldiers in it could break loading)</li></ul><h4>v16 · Nov 25, 2026 — the compounds</h4><ul><li>Corporate military bases out in the wilds: a walled compound with watchtowers, an HQ, barracks, an armory, a helipad and olive trucks, and the best loot in the game. About half are still held by a private security garrison that warns you off and opens fire inside the wall; shoot one and the whole unit comes for you. The rest were overrun and are full of the dead</li><li>Survivors now drive: some find a working car, run a few errands along the roads and park back home. Press Use on their car to drag them out (they won’t like it)</li><li>Survivors raid empty houses through the front door and come out with a full sack; bandit gangs build a log palisade round their camp, post by post</li><li>People find their way properly now: they path around walls, cars and furniture and open doors on the way instead of walking into them</li><li>Windshield wipers: Q (or the Bomb button) in a car sweeps the blood off the glass</li><li>Every car window cracks where it is hit: bullets, bat swings and side or rear impacts all leave spreading cracks on that pane</li><li>Porches line up with the block pixels: slab, posts, canopy and trim all sit on the 1/32 m texel grid</li><li>Creative: choose the weather from the menu (clear, rain, storm, fog, snow, or natural)</li><li>Developer mode tools: F2 heal, F3 +3 hours, F4 weather, F6 spawn zombie, F7 clear zombies, F8 teleport to crosshair, F9 god mode, F10 freeze time, plus menu buttons to go to a military base, spawn a car or survivor, a performance overlay and copy debug info; the readout now shows time, weather, what everyone is doing and nearby bases</li></ul><h4>v15.7 · Nov 25, 2026 — light &amp; chrome</h4><ul><li>Blood particles are red again (no more black specks)</li><li>Flashlight casts a perfect circle of light, ray-traced against the blocks and painted bright in chunky pixels — it stops at walls and leaves crisp shadows</li><li>Signs, posts, pumps, lamps, car bodies and other metal now carry a soft, blurry sky reflection that follows the time of day</li><li>Creative: sleep any time, anywhere, and a new “Sleep until morning” button in the menu skips straight to dawn</li></ul><h4>v15.6 · Nov 25, 2026 — ripples</h4><ul>
+    <h4>v17.4 · Nov 25, 2026 — no real circles</h4><ul><li>Every round thing is now a pixel circle built from whole block pixels: car wheels and hubs, steering wheels, dashboard gauges, manhole covers and rims, campfire flames, trap spikes and pipe bombs</li><li>The sun and moon are pixel discs with their glow in stepped rings; lens flares, light halos and the night-vision eyepiece are pixelated with hard edges</li><li>No more staggered pixels: furniture now sits square to the block grid and every furniture box is snapped to whole block pixels, so its edges fall on the same pixel lines as the blocks; parts of people, animals, cars and decor are sized and placed in whole pixels too</li></ul><h4>v17.3 · Nov 25, 2026 — lights in the dark</h4><ul><li>New lighting system: up to 12 lights at a time, worked out per block pixel on everything (blocks, furniture, people, cars, glass), with realistic inverse-square falloff. Lights indoors stay in their building and outdoor lights don’t shine through walls into rooms</li><li>Everything that should glow now lights its surroundings: wired lamps, campfires (flickering), working street lamps after dark (a few flicker), headlights and tail lights on every car with someone in it or its lights left on (brake lights brighten), lit rooms in occupied homes at night with glowing windows, floodlights on garrisoned military bases, muzzle flashes, explosions and lightning strikes</li><li>Realistic touches: light halos around bright sources at night, glints of lamplight on wet ground in the rain, and eye adaptation — stepping from a dark room into daylight dazzles for a moment and your eyes slowly open up in the dark</li><li>New loot: road flares (gas stations, hardware stores, military bases). Strike one and drop it: it burns red for two minutes and lights the area, but the dead come to the light</li><li>New clothing: night-vision goggles (head slot, military bases). In the dark they switch on by themselves and turn the night bright green, running off your flashlight batteries</li><li>Pixel size corrected: the blocks’ real pixel is 1/16 m, not 1/32 m. Doors are redrawn at 16 x 32 block pixels and their slab is two pixels thick so the faces sit on the grid; signs, blood, glass, grass, road paint, body and vehicle textures and the shader grids now all match</li></ul><h4>v17.2 · Nov 25, 2026 — one pixel size</h4><ul><li>Everything now uses the blocks’ pixel size, 32 texture pixels a metre: people, zombies, animals, cars, tools, crates, beds, bags, decor, signs, blood, glass cracks, the windshield and the grass</li><li>Nothing is untextured any more: every flat-coloured part gets a pixel texture by what it is (painted metal, bare metal, plastic, rubber, wood, cloth); only glowing lamps stay plain</li><li>Things that stay put are textured from their world position, so their pixels sit on the same grid as the blocks around them. Things that move carry their pixels with them</li><li>Signs are redrawn at block resolution with crisp bitmap lettering and sit on the pixel grid (no more tilted signs)</li><li>Blood splats come in whole-metre decals snapped to the grid; grass and flowers are redrawn at twice the detail to match</li><li>Furniture grain, the flashlight’s pixels, pixel shadows and rain ripples were at half resolution (1/16 m) and now match the blocks (1/32 m)</li></ul><h4>v17.1 · Nov 25, 2026 — blocks to the horizon</h4><ul><li>The far view is now made of blocks: distant land is built from real block columns (1 m near, 2 m further out) in each block’s true texture colour, with flat tops and crisp sides; neighbouring columns of the same height and colour merge into one big block, so it stays light to draw. Trees show a leafy crown over a darker trunk, towns show their roads and rooftops</li><li>New doors: pixel-art doors at exactly the block pixel size, so they line up with the wall around them. The classic panel door in four paints plus five new styles: red barn door, steel security door, French glass door, craftsman door and rustic strap door</li><li>Up to 12 hotbar slots (keys 1–9, 0, − and =). New Tactical pants (10 pockets, military bases) and Utility overalls (12 pockets, rare in malls, or sew them); creative mode gets all 12</li></ul><h4>v17 · Nov 25, 2026 — far view</h4><ul><li>Far view: the world now reaches 4x your render distance. Past the loaded chunks a light, low-detail terrain mesh carries the hills, rivers, towns and treelines out to the horizon; it builds a few rows a frame so it never stutters (toggle it next to Render distance)</li><li>The flashlight lights up blocks too, not just furniture and people: every block, zombie, animal and car in the beam is lit in chunky pixels, and walls cast crisp shadows</li><li>Road paint is now part of the road blocks’ texture: lane lines, dashes, crosswalks and runway markings are drawn pixel-for-pixel into the asphalt, with no raised strips</li><li>Grass bends away from you as you walk through it and springs back along your trail; zombies, animals, people and cars push it too</li><li>Window trim no longer clips through chipped and broken blocks beside the window</li><li>Inventory: Close is in the top right, and tapping outside the panel closes it (also works for the trade and campfire panels)</li><li>Smoother: moving no longer re-scans the whole ray-traced lighting volume (only the new strip), the HUD only touches the page when something changes, and the flashlight casts a third fewer rays</li><li>Lighter: chunk meshes free their memory copy once they are on the graphics card, and each region drops its generation scratch data afterwards — memory growth while exploring fell by about two thirds</li><li>Quality of life: walk over loot bags to pick them up (setting in the menu), “+3 Ammo” pop-ups when you loot, hit and kill markers on the crosshair, a compass strip with your waypoint, the nearest military base and where you last died, and the map now marks military bases and your death spot</li><li>Fixed: soldiers are saved properly (a save with soldiers in it could break loading)</li></ul><h4>v16 · Nov 25, 2026 — the compounds</h4><ul><li>Corporate military bases out in the wilds: a walled compound with watchtowers, an HQ, barracks, an armory, a helipad and olive trucks, and the best loot in the game. About half are still held by a private security garrison that warns you off and opens fire inside the wall; shoot one and the whole unit comes for you. The rest were overrun and are full of the dead</li><li>Survivors now drive: some find a working car, run a few errands along the roads and park back home. Press Use on their car to drag them out (they won’t like it)</li><li>Survivors raid empty houses through the front door and come out with a full sack; bandit gangs build a log palisade round their camp, post by post</li><li>People find their way properly now: they path around walls, cars and furniture and open doors on the way instead of walking into them</li><li>Windshield wipers: Q (or the Bomb button) in a car sweeps the blood off the glass</li><li>Every car window cracks where it is hit: bullets, bat swings and side or rear impacts all leave spreading cracks on that pane</li><li>Porches line up with the block pixels: slab, posts, canopy and trim all sit on the 1/32 m texel grid</li><li>Creative: choose the weather from the menu (clear, rain, storm, fog, snow, or natural)</li><li>Developer mode tools: F2 heal, F3 +3 hours, F4 weather, F6 spawn zombie, F7 clear zombies, F8 teleport to crosshair, F9 god mode, F10 freeze time, plus menu buttons to go to a military base, spawn a car or survivor, a performance overlay and copy debug info; the readout now shows time, weather, what everyone is doing and nearby bases</li></ul><h4>v15.7 · Nov 25, 2026 — light &amp; chrome</h4><ul><li>Blood particles are red again (no more black specks)</li><li>Flashlight casts a perfect circle of light, ray-traced against the blocks and painted bright in chunky pixels — it stops at walls and leaves crisp shadows</li><li>Signs, posts, pumps, lamps, car bodies and other metal now carry a soft, blurry sky reflection that follows the time of day</li><li>Creative: sleep any time, anywhere, and a new “Sleep until morning” button in the menu skips straight to dawn</li></ul><h4>v15.6 · Nov 25, 2026 — ripples</h4><ul>
       <li>Rain ripples: wet ground and puddles now ripple with rings spreading from falling drops and a slow wind swell, and the ray-traced reflections bend and wobble through them.</li>
       <li>Stop signs have STOP printed flat on the face in pixel letters, with a grey metal back.</li>
       <li>Run and jump together however you like: push the touch stick to its edge to run, double-tap W to sprint, and a running jump keeps its speed in the air.</li></ul>
@@ -1461,8 +1461,11 @@ const skyMat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:
   fragmentShader:`uniform vec3 top,hor,sunDir,sunCol;uniform float night,sunUp;varying vec3 vDir;
   float h21(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}
   void main(){vec3 d=normalize(vDir);float h=max(d.y,0.);vec3 c=mix(hor,top,pow(h,.55));c=mix(c,hor*.85,smoothstep(0.,-.25,d.y));
-    float s=max(dot(d,sunDir),0.);c+=sunCol*(smoothstep(.9993,.9997,s)*2.+pow(s,180.)*.7+pow(s,10.)*.18)*sunUp;
-    float m=max(dot(d,-sunDir),0.);c+=vec3(.85,.88,.95)*smoothstep(.9994,.9997,m)*night;
+    vec3 sd=normalize(sunDir),t1=normalize(abs(sd.y)>.95?cross(sd,vec3(1.,0.,0.)):cross(sd,vec3(0.,1.,0.))),t2=cross(t1,sd);const float PS=.0055;
+    float s=0.,m=0.;{float k=dot(d,sd);vec2 a=vec2(dot(d,t1),dot(d,t2));a=(floor(a/PS)+.5)*PS;vec3 dq=normalize(sd*max(k,0.)+t1*a.x+t2*a.y);s=k>0.?max(dot(dq,sd),0.):0.;
+      vec2 b=vec2(dot(d,-t1),dot(d,t2));b=(floor(b/PS)+.5)*PS;vec3 dm=normalize(-sd*max(-k,0.)-t1*b.x+t2*b.y);m=k<0.?max(dot(dm,-sd),0.):0.;}
+    float glow=floor((pow(s,180.)*.7+pow(s,10.)*.18)*10.)/10.;c+=sunCol*(step(.9995,s)*2.+glow)*sunUp;
+    c+=vec3(.85,.88,.95)*step(.99955,m)*night;
     vec3 q=floor(d*320.);float st=step(.9975,h21(q))*smoothstep(.05,.3,d.y)*night;c+=vec3(st)*(.6+.4*h21(q+1.));
     gl_FragColor=vec4(c,1.);}`});
 const sky=new THREE.Mesh(new THREE.SphereGeometry(1,24,14),skyMat);sky.frustumCulled=false;sky.renderOrder=-10;scene.add(sky);scene.background=null;
@@ -1477,7 +1480,7 @@ const postMat=new THREE.ShaderMaterial({defines:{RAYS:24,MB:1,SSR:22,AO:1},depth
   float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hn(i),hn(i+vec2(1.,0.)),f.x),mix(hn(i+vec2(0.,1.)),hn(i+1.),f.x),f.y);}
   float sky(vec2 p){return step(.99999,texture2D(tDepth,clamp(p,0.,1.)).x);}
   float lum(vec3 c){return dot(c,vec3(.299,.587,.114));}
-  float disc(vec2 p,float r){return smoothstep(r,r*.55,length(p*vec2(aspect,1.)));}
+  float disc(vec2 p,float r){float l=length(p*vec2(aspect,1.));return step(l,r)*(l<r*.6?1.:.55);}
   void main(){vec2 uv=vUv;float d=texture2D(tDepth,uv).x;vec3 col=texture2D(tColor,uv).rgb;
     // edge-aware smoothing (cheap FXAA-style): blend toward neighbours across strong luma edges
     vec3 cn=texture2D(tColor,uv+vec2(0.,px.y)).rgb,cs=texture2D(tColor,uv-vec2(0.,px.y)).rgb,ce=texture2D(tColor,uv+vec2(px.x,0.)).rgb,cw=texture2D(tColor,uv-vec2(px.x,0.)).rgb;
@@ -1515,9 +1518,9 @@ const postMat=new THREE.ShaderMaterial({defines:{RAYS:24,MB:1,SSR:22,AO:1},depth
       float nR=min(float(RAYS),uRays);vec2 dl=(uv-sunUV)/nR*.9,p=uv;float il=1.,acc=0.;for(int i=0;i<RAYS;i++){if(float(i)>=nR)break;p-=dl;acc+=sky(p)*il;il*=.955;}
       col+=sunCol*acc/nR*rays*sunOn;
       float vis=(sky(sunUV)+sky(sunUV+vec2(.012,0.))+sky(sunUV-vec2(.012,0.))+sky(sunUV+vec2(0.,.012))+sky(sunUV-vec2(0.,.012)))/5.;
-      if(flare>0.&&vis>0.){vec2 ax=vec2(.5)-sunUV;vec3 fc=vec3(0.);
+      if(flare>0.&&vis>0.){vec2 ax=vec2(.5)-sunUV;vec3 fc=vec3(0.);vec2 uv0=uv;vec2 uv=(floor(uv0/(px*4.))+.5)*(px*4.);
         fc+=vec3(1.,.8,.5)*disc(uv-(sunUV+ax*.55),.035)*.35;fc+=vec3(.5,.8,1.)*disc(uv-(sunUV+ax*1.1),.06)*.22;fc+=vec3(.9,.5,1.)*disc(uv-(sunUV+ax*1.45),.025)*.4;
-        fc+=vec3(.6,1.,.6)*disc(uv-(sunUV+ax*1.8),.09)*.12;        fc+=sunCol*exp(-length((uv-sunUV)*vec2(aspect,1.))*7.)*.55;
+        fc+=vec3(.6,1.,.6)*disc(uv-(sunUV+ax*1.8),.09)*.12;        fc+=sunCol*floor(exp(-length((uv-sunUV)*vec2(aspect,1.))*7.)*8.)/8.*.55;
         float an=atan(uv.y-sunUV.y,(uv.x-sunUV.x)*aspect);fc+=sunCol*pow(abs(cos(an*6.)),24.)*exp(-length((uv-sunUV)*vec2(aspect,1.))*14.)*.4;
         col+=fc*flare*sunOn*vis;}}
   #if AO
@@ -1533,7 +1536,7 @@ const postMat=new THREE.ShaderMaterial({defines:{RAYS:24,MB:1,SSR:22,AO:1},depth
     // eye adaptation, then night-vision goggles: amplified green phosphor with sensor noise, scanlines and a round eyepiece
     col*=expo;
     if(nvg>.01){float l=dot(col,vec3(.3,.59,.11));float g=pow(l*3.2,.62)+.05;float nz=fract(sin(dot(floor(uv/px*.5)+time*61.,vec2(12.9898,78.233)))*43758.5453);g*=.85+.3*nz;g*=.9+.1*step(.5,fract(uv.y/px.y*.5));
-      vec3 nv=vec3(.22,1.,.32)*g;float r=length((uv-.5)*vec2(aspect,1.));nv*=smoothstep(.62,.48,r);col=mix(col,nv,nvg);}
+      vec3 nv=vec3(.22,1.,.32)*g;vec2 qb=(floor(uv/(px*4.))+.5)*(px*4.);float r=length((qb-.5)*vec2(aspect,1.));nv*=step(r,.55);col=mix(col,nv,nvg);}
     // filmic tone curve (ACES fit), blended so the image keeps its brightness
     {vec3 x=col*1.18;vec3 ac=clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),0.,1.);col=mix(col,ac,.55);}
     col=mix(col,col*col*(3.-2.*col),.18);
@@ -2249,15 +2252,21 @@ const WOODS=[0x6b4a2e,0x8a6a44,0x4a3424,0x5a4030],FABRIC=[0x5a3a3a,0x3a4a5a,0x4a
 const tmpCol=new THREE.Color();
 function fbuf(k){let b=FBUF.get(k);if(!b){b={P:[],N:[],C:[],I:[]};FBUF.set(k,b)}return b}
 const FBB=[0,0,0,0,0,0];let FBK=0,FBMET=false;const REFL_F=new Set(['stop','rsign','gsign','spost','tlight','lamppost','pump','plane','swing','slide','lswitch','streetlight','hydrant','mailbox','pole']);
+// furniture sits square to the block grid and every box is snapped to whole block pixels (1/16 m), so its edges fall on the same pixel
+// lines as the blocks; only parts deliberately tilted (ry/rz) keep their angle
+const pxSnap=v=>Math.round(v*16)/16,PXS=1/16;
 function furnBuilder(wx,wy,wz,yaw){
-  const k=FBK=slotOf(Math.floor(vc(wx)/CS),Math.floor(vc(wz)/CS)),b=fbuf(k),c=Math.cos(yaw),s=Math.sin(yaw);
+  yaw=Math.round(yaw/(Math.PI/2))*(Math.PI/2);
+  const k=FBK=slotOf(Math.floor(vc(wx)/CS),Math.floor(vc(wz)/CS)),b=fbuf(k),c=Math.round(Math.cos(yaw)),s=Math.round(Math.sin(yaw));
   return(w,h,d,col,x,y,z,ry=0,rz=0)=>{ // box in local metres, origin at footprint floor centre, front = +z; rz rolls about local z
-    tmpCol.setHex(col);const v=.88+rng()*.16,cr=tmpCol.r*v,cg=tmpCol.g*v,cb=tmpCol.b*v,c2=Math.cos(ry),s2=Math.sin(ry);
+    const n0=b.P.length;tmpCol.setHex(col);const v=.88+rng()*.16,cr=tmpCol.r*v,cg=tmpCol.g*v,cb=tmpCol.b*v,c2=Math.cos(ry),s2=Math.sin(ry);
     for(const f of FACES){const n=b.P.length/3,sh=.75+f[4]*.25;
       let fnx=f[0],fny=f[1];if(rz){const cr=Math.cos(rz),sr=Math.sin(rz);fnx=f[0]*cr-f[1]*sr;fny=f[0]*sr+f[1]*cr}const nx0=fnx*c2+f[2]*s2,nz0=-fnx*s2+f[2]*c2,nx=nx0*c+nz0*s,nz=-nx0*s+nz0*c;
       for(const q of f[3]){let lx=(q[0]-.5)*w,ly=(q[1]-.5)*h,lz=(q[2]-.5)*d;if(rz){const cr=Math.cos(rz),sr=Math.sin(rz),t=lx*cr-ly*sr;ly=lx*sr+ly*cr;lx=t}ly+=y;const rx=lx*c2+lz*s2+x,rz2=-lx*s2+lz*c2+z;
         const X=wx+rx*c+rz2*s,Y=wy+ly,Z=wz-rx*s+rz2*c;b.P.push(X,Y,Z);if(X<FBB[0])FBB[0]=X;if(Y<FBB[1])FBB[1]=Y;if(Z<FBB[2])FBB[2]=Z;if(X>FBB[3])FBB[3]=X;if(Y>FBB[4])FBB[4]=Y;if(Z>FBB[5])FBB[5]=Z;b.N.push(nx,fny,nz);b.C.push(cr*sh+(FBMET?2:0),cg*sh,cb*sh)}
-      b.I.push(n,n+1,n+2,n,n+2,n+3)}};
+      b.I.push(n,n+1,n+2,n,n+2,n+3)}
+    if(!rz&&Math.abs(Math.sin(ry*2))<1e-3){for(let a=0;a<3;a++){let mn=1e9,mx=-1e9;for(let i=n0+a;i<b.P.length;i+=3){mn=Math.min(mn,b.P[i]);mx=Math.max(mx,b.P[i])}
+      let s0=pxSnap(mn),s1=pxSnap(mx);if(s1-s0<PXS)s1=s0+PXS;const mid=(mn+mx)/2;for(let i=n0+a;i<b.P.length;i+=3)b.P[i]=b.P[i]<mid?s0:s1}}};
 }
 const pick=a=>a[RI(0,a.length-1)];
 function buildFurn(sp){
@@ -2482,7 +2491,7 @@ const box=(w,h,d)=>{const k=w+','+h+','+d;return geoC[k]||(geoC[k]=new THREE.Box
 const lam=c=>matC[c]||(matC[c]=pxShadows(new THREE.MeshLambertMaterial({color:c})));
 function partKind(c){const r=(c>>16)&255,g=(c>>8)&255,b=c&255,l=(r+g+b)/765,sat=Math.max(r,g,b)-Math.min(r,g,b);if(l>.85&&r>200&&g>190&&b<190)return null;if(r>200&&g<60&&b<60)return'paint';if(r>120&&g>70&&b<90&&r-b>60&&l<.6&&l>.18)return'wood';if(sat>60&&l>.25)return'fabric';
   if(l<.09)return'rubber';if(l<.16)return'plastic';if(sat<18&&l<.8)return'metal';return'plain'}
-function part(par,w,h,d,c,x,y,z){const k=typeof vMat==='function'?partKind(c):null,m=new THREE.Mesh(k?vbox(w,h,d):box(w,h,d),k?vMat(c,k):lam(c));m.position.set(x,y,z);m.userData.dims=[w,h,d];par.add(m);return m}
+function part(par,w,h,d,c,x,y,z){w=Math.max(PXS,pxSnap(w));h=Math.max(PXS,pxSnap(h));d=Math.max(PXS,pxSnap(d));x=pxSnap(x);y=pxSnap(y);z=pxSnap(z);const k=typeof vMat==='function'?partKind(c):null,m=new THREE.Mesh(k?vbox(w,h,d):box(w,h,d),k?vMat(c,k):lam(c));m.position.set(x,y,z);m.userData.dims=[w,h,d];par.add(m);return m}
 function limb(par,w,h,d,c,x,y,z){const g=new THREE.Group();g.position.set(x,y,z);part(g,w,h,d,c,0,-h/2,0);par.add(g);return g}
 function makeHuman(o){
   const g=new THREE.Group();
@@ -2714,15 +2723,31 @@ const TRAPS=[['spikes','Spike trap'],['beartrap','Bear trap'],['mine','Tripwire 
 const crateMat=new THREE.MeshLambertMaterial({map:tileTex(TILE.plank),color:0xb08a60}),stashMat=new THREE.MeshLambertMaterial({map:tileTex(TILE.metal),color:0x7a8a60});
 function makeCrate(x,y,z,rich){const g=new THREE.Group();part(g,.9,.6,.6,0,0,.3,0).material=rich?stashMat:crateMat;part(g,.92,.07,.62,0x333333,0,.15,0);part(g,.92,.07,.62,0x333333,0,.45,0);
   const lid=part(g,.92,.08,.62,0x5a4228,0,.64,0);g.position.set(x,y,z);g.rotation.y=rich?(rng()<.5?0:Math.PI/2):rng()*Math.PI;scene.add(g);castBig(g,.3);return{g,lid,looted:false,pos:g.position,rich}}
-const wheelGeo=new THREE.CylinderGeometry(.38,.38,.3,14).rotateZ(Math.PI/2),hubGeo=new THREE.CylinderGeometry(.2,.2,.32,10).rotateZ(Math.PI/2);
-const torusGeo=new THREE.TorusGeometry(.18,.024,6,20),circGeo=new THREE.CircleGeometry(1,20).rotateY(Math.PI),ringGeo=new THREE.RingGeometry(.86,1,24).rotateY(Math.PI);
+// ---------------- no real circles: round things are built from whole block pixels (1/16 m). pxRound makes a stepped disc (or ring) of pixel
+// columns, extruded by a whole number of pixels; the result is one merged box mesh with metre UVs, so its texture pixels match too
+function pxBoxes(boxes){const P=[],N=[],UV=[],I=[];for(const[x0,y0,z0,x1,y1,z1]of boxes){
+    const F=[[[1,0,0],[[x1,y0,z1],[x1,y0,z0],[x1,y1,z0],[x1,y1,z1]]],[[-1,0,0],[[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]]],[[0,1,0],[[x0,y1,z1],[x1,y1,z1],[x1,y1,z0],[x0,y1,z0]]],
+      [[0,-1,0],[[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]]],[[0,0,1],[[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]]],[[0,0,-1],[[x1,y0,z0],[x0,y0,z0],[x0,y1,z0],[x1,y1,z0]]]];
+    for(const[n,q]of F){const v=P.length/3;for(const c of q){P.push(...c);N.push(...n);const ax=Math.abs(n[0])?[c[2],c[1]]:Math.abs(n[1])?[c[0],c[2]]:[c[0],c[1]];UV.push(ax[0],ax[1])}I.push(v,v+1,v+2,v,v+2,v+3)}}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(UV,2));g.setIndex(I);g.computeBoundingSphere&&g.computeBoundingSphere();(g.userData||(g.userData={})).pxL=1;return g}
+// a stepped disc of radius R pixels (ring if rin>0), L pixels deep along axis ('x','y','z'), centred on the origin
+const pxRoundC={};
+function pxRound(R,L,axis='z',rin=0){const key=[R,L,axis,rin].join(',');if(pxRoundC[key])return pxRoundC[key];const B=[],h=L*PXS/2;
+  for(let i=-R;i<R;i++){const c=i+.5;let lo=null;for(let j=-R;j<=R;j++){const cj=j+.5,d=Math.hypot(c,cj),inside=j<R&&d<=R+.02&&d>=rin-.02;
+      if(inside&&lo===null)lo=j;if((!inside||j===R)&&lo!==null){const a0=i*PXS,a1=(i+1)*PXS,b0=lo*PXS,b1=(inside&&j===R?j+1:j)*PXS;
+        B.push(axis==='z'?[a0,b0,-h,a1,b1,h]:axis==='x'?[-h,b0,a0,h,b1,a1]:[a0,-h,b0,a1,h,b1]);lo=null}}}
+  return pxRoundC[key]=pxBoxes(B)}
+// a stepped cone / flame: layers one pixel tall, each a pixel disc a little smaller than the one below
+function pxCone(R,Hp){const B=[];for(let k=0;k<Hp;k++){const r=Math.max(.5,R*(1-k/Hp)),Ri=Math.ceil(r);for(let i=-Ri;i<Ri;i++)for(let j=-Ri;j<Ri;j++){if(Math.hypot(i+.5,j+.5)>r+.02)continue;B.push([i*PXS,k*PXS,j*PXS,(i+1)*PXS,(k+1)*PXS,(j+1)*PXS])}}return pxBoxes(B)}
+const wheelGeo=pxRound(6,5,'x'),hubGeo=pxRound(3,6,'x');
+const torusGeo=pxRound(3,1,'z',2),circGeo=null,ringGeo=null;
 const glassMat=new THREE.MeshLambertMaterial({color:0x22313a,transparent:true,opacity:.42});
 const basic=c=>matC['b'+c]||(matC['b'+c]=new THREE.MeshBasicMaterial({color:c}));
 const dsm=c=>matC['d'+c]||(matC['d'+c]=new THREE.MeshBasicMaterial({color:c,side:THREE.DoubleSide}));
 function dial(par,x,y,z,r,tick){
   const g=new THREE.Group();g.position.set(x,y,z);par.add(g);
-  const f=new THREE.Mesh(circGeo,dsm(0x0c0c0c));f.scale.setScalar(r);g.add(f);
-  const rg=new THREE.Mesh(ringGeo,dsm(0xd8d2c0));rg.scale.setScalar(r);rg.position.z=-.002;g.add(rg);
+  const Rp=Math.max(2,Math.round(r*16));const f=new THREE.Mesh(pxRound(Rp-1,1,'z'),dsm(0x0c0c0c));f.position.z=.03;g.add(f);
+  const rg=new THREE.Mesh(pxRound(Rp,1,'z',Rp-1),dsm(0xd8d2c0));rg.position.z=.03;g.add(rg);
   for(let i=0;i<=tick;i++){const a=2.3-i/tick*4.6,t=new THREE.Mesh(box(r*.05,r*.22,.004),basic(0xd8d2c0));t.position.set(-Math.sin(a)*r*.72,Math.cos(a)*r*.72,-.003);t.rotation.z=-a;t.rotation.z=a;g.add(t)}
   const n=new THREE.Group();n.position.z=-.006;g.add(n);const nm=new THREE.Mesh(box(r*.06,r*.8,.004),basic(0xff5530));nm.position.y=r*.38;n.add(nm);
   return n;
@@ -4375,7 +4400,7 @@ function ladderAt(e){
   const x0=vc(e.pos.x-.3),x1=vc(e.pos.x+.3-1e-4),y0=vc(e.pos.y),y1=vc(e.pos.y+1.7),z0=vc(e.pos.z-.3),z1=vc(e.pos.z+.3-1e-4);
   for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)if(get(x,y,z)===B.LADDER)return true;return false;
 }
-const manGeo=new THREE.CylinderGeometry(.44,.44,.06,20),manRing=new THREE.RingGeometry(.41,.75,24),manShaft=new THREE.CylinderGeometry(.41,.41,.5,20,1,true);
+const manGeo=pxRound(7,1,'y'),manRing=pxRound(12,1,'y',7),manShaft=pxRound(7,8,'y',6);
 const manCovered=m=>get(m.x,G,m.z)===B.METAL;
 function placeCover(m){const c=m.cov,top=(G+1)*VS;if(!c)return;if(manCovered(m)){c.position.set((m.x+1)*VS,top+.03,(m.z+1)*VS);c.rotation.z=0}else{c.position.set(m.x*VS+(m.alongZ?1.55:.5)+.25,top+.03,m.z*VS+(m.alongZ?.5:1.55)+.25);c.rotation.z=.05}if(c.updateMatrix){c.updateMatrix();c.updateMatrixWorld(true)}}
 function nearestManhole(p,r){let b=null,bd=r;for(const m of manholes){const d=Math.hypot((m.x+1)*VS-p.pos.x,(m.z+1)*VS-p.pos.z);if(d<bd&&Math.abs((G+1)*VS-p.pos.y)<1){bd=d;b=m}}return b}
@@ -4388,19 +4413,19 @@ function makeManhole(m){
   for(let y=bot+.25;y<top+.3;y+=.3)part(g,.66,.04,.04,0x6a6a6a,.5,y,.07);
   scene.add(g);
   // round iron collar over the square shaft, so the opening reads as a circle
-  const ring=new THREE.Mesh(manRing,lam(0x4a4642));ring.material.side=THREE.DoubleSide;ring.rotation.x=-Math.PI/2;ring.position.set(VS,top+.012,VS);ring.receiveShadow=true;g.add(ring);
-  const sh=new THREE.Mesh(manShaft,lam(0x34302c));sh.material.side=THREE.DoubleSide;sh.position.set(VS,top-.25,VS);g.add(sh);
+  const ring=new THREE.Mesh(manRing,lam(0x4a4642));ring.position.set(VS,top-.03125,VS);ring.receiveShadow=true;g.add(ring);
+  const sh=new THREE.Mesh(manShaft,lam(0x34302c));sh.position.set(VS,top-.25,VS);g.add(sh);
   const c=new THREE.Mesh(manGeo,lam(0x3a3430));c.receiveShadow=c.castShadow=true;scene.add(c);m.cov=c;placeCover(m);freeze(c);freeze(g);manObjs.push(c);g.position.y=0;g.userData.c=[m.x*VS+.5,m.z*VS+.5];manObjs.push(g);
   for(let i=0;i<4;i++)part(c,.7,.02,.04,0x2a2622,0,.035,-.24+i*.16);
 }
 
 // ---------------- traps
 let traps=[];
-const coneGeo=new THREE.ConeGeometry(.045,.32,5),pipeGeo=new THREE.CylinderGeometry(.07,.07,.42,10).rotateZ(Math.PI/2);
+const coneGeo=pxBoxes([[-PXS,0,-PXS,PXS,PXS,PXS],[0,PXS,0,PXS,PXS*5,PXS]]),pipeGeo=pxRound(1,7,'x');
 function makeTrapMesh(t){
   const g=new THREE.Group();
   if(t.type==='spikes'){part(g,.95,.06,.95,0x5a4228,0,.03,0);
-    for(let i=0;i<4;i++)for(let j=0;j<4;j++){const c=new THREE.Mesh(coneGeo,lam((i*j)%3===1?0x6a1515:0x8f8f8f));c.position.set(-.33+i*.22,.2,-.33+j*.22);g.add(c)}}
+    for(let i=0;i<4;i++)for(let j=0;j<4;j++){const c=new THREE.Mesh(coneGeo,lam((i*j)%3===1?0x6a1515:0x8f8f8f));c.position.set(Math.round((-.33+i*.22)*16)/16,.0625,Math.round((-.33+j*.22)*16)/16);g.add(c)}}
   else if(t.type==='beartrap'){part(g,.52,.03,.52,0x2e2e2e,0,.02,0);part(g,.12,.06,.12,0x444444,0,.05,0);
     t.jaws=[];for(const sz of[-1,1]){const j=new THREE.Group();j.position.y=.05;g.add(j);part(j,.48,.02,.03,0x555555,0,0,sz*.22);
       for(let i=0;i<6;i++)part(j,.03,.02,.06,0x777777,-.2+i*.08,0,sz*.19);t.jaws.push(j)}}
@@ -5056,11 +5081,11 @@ function updateAnimal(a,dt,night){
 
 // ---------------- campfires
 let fires=[];const fireLights=[0,1].map(()=>{const l=new THREE.PointLight(0xff8a30,0,11,1.4);scene.add(l);return l});
-const flameGeo=new THREE.ConeGeometry(.16,.5,6);
+const flameGeos=[pxCone(3,8),pxCone(2,6),pxCone(1,4)];
 function makeFire(x,y,z){const g=new THREE.Group();
   for(let i=0;i<8;i++){const a=i/8*6.283;part(g,.16,.12,.16,0x6a6a66,Math.cos(a)*.38,.06,Math.sin(a)*.38)}
   const l1=part(g,.62,.09,.09,0x3a2a1a,0,.1,0);l1.rotation.y=.6;const l2=part(g,.62,.09,.09,0x3a2a1a,0,.15,0);l2.rotation.y=-.6;
-  const fl=[];for(const[c,sc,ox]of[[0xff5a10,1,0],[0xffa020,.7,.06],[0xffe080,.42,-.05]]){const f=new THREE.Mesh(flameGeo,basic(c));f.scale.setScalar(sc);f.position.set(ox,.25*sc+.12,0);g.add(f);fl.push(f)}
+  const fl=[];for(const[c,gi,ox]of[[0xff5a10,0,0],[0xffa020,1,.0625],[0xffe080,2,-.0625]]){const f=new THREE.Mesh(flameGeos[gi],basic(c));f.position.set(ox,.125,0);g.add(f);fl.push(f)}
   g.position.set(x,y,z);scene.add(g);const f={g,pos:g.position,fl};fires.push(f);return f}
 function nearestFire(p,r){let best=null,bd=r;for(const f of fires){const d=f.pos.distanceTo(p.pos);if(d<bd){bd=d;best=f}}return best}
 // ---- cooking: pick a recipe at a campfire; it simmers in a pot on the flames, then lands in your case
@@ -5593,12 +5618,13 @@ function dlPulse(pos,r,c,life,free){dlTrans.push({x:pos.x,y:pos.y,z:pos.z,r,c,t:
 function bldBoxAt(x,y,z){for(const Rg of regions.values()){if(!Rg.live||!Rg.spec)continue;for(const h of Rg.spec.homes)if(bIn(h,x,z)){const g=h.g*VS,top=(h.g+(h.floors||1)*FH+1)*VS;if(y<g-.5||y>top+.5)continue;return[(h.x0+.5)*VS,g+.4,(h.z0+.5)*VS,(h.x1+.5)*VS,top,(h.z1+.5)*VS]}}return null}
 function dlLamps(){if(dlLampCache&&(dlTime-dlLampT)<2)return dlLampCache;dlLampT=dlTime;const out=[],cp=viewPos();
   for(const Rg of regions.values()){if(!Rg.live||!Rg.spec)continue;for(const sp of Rg.spec.furnSpecs){if(sp[0]!=='lamppost'||sp.gone)continue;const d=Math.hypot(sp[1]-cp.x,sp[3]-cp.z);if(d>70)continue;
-      const hs=h3(Math.round(sp[1]*4),71,Math.round(sp[3]*4));if(hs>.72)continue;const c=Math.cos(sp[4]),sn=Math.sin(sp[4]);out.push({x:sp[1]+.62*sn,y:sp[2]+3.9,z:sp[3]+.62*c,fl:hs>.62})}}
+      const hs=h3(Math.round(sp[1]*4),71,Math.round(sp[3]*4));if(hs>.72)continue;const yw=Math.round(sp[4]/(Math.PI/2))*(Math.PI/2),c=Math.round(Math.cos(yw)),sn=Math.round(Math.sin(yw));out.push({x:sp[1]+.625*sn,y:sp[2]+3.9,z:sp[3]+.625*c,fl:hs>.62})}}
   return dlLampCache=out}
 // halos: small pixel glows around bright sources after dark (and around fires, flares and flashes at any time)
-const haloTex=(()=>{const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');for(let j=0;j<16;j++)for(let i=0;i<16;i++){const d=Math.hypot(i-7.5,j-7.5)/7.5;if(d>1)continue;x.fillStyle=`rgba(255,255,255,${Math.pow(1-d,2.2)})`;x.fillRect(i,j,1,1)}
-  const t=new THREE.CanvasTexture(c);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;return t})();
-const halos=THREE.Sprite?Array.from({length:12},()=>{const m=new THREE.Sprite(new THREE.SpriteMaterial({map:haloTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));m.visible=false;m.renderOrder=7;scene.add(m);return m}):[];
+const haloTexC={};function haloTex(R){R=Math.max(2,Math.min(28,R|0));if(haloTexC[R])return haloTexC[R];const N=R*2,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const d=Math.hypot(i+.5-R,j+.5-R)/R;if(d>1)continue;const a=d<.25?.9:d<.5?.5:d<.75?.24:.09;x.fillStyle=`rgba(255,255,255,${a})`;x.fillRect(i,j,1,1)}
+  const t=new THREE.CanvasTexture(c);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;return haloTexC[R]=t}
+const halos=THREE.Sprite?Array.from({length:12},()=>{const m=new THREE.Sprite(new THREE.SpriteMaterial({map:haloTex(8),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));m.visible=false;m.renderOrder=7;scene.add(m);return m}):[];
 let eyeExpo=1,nvgOn=0,indoorK=0,indoorT=0;
 function dlTick(dt){dlTime+=dt;const U=FLU,cp=viewPos(),dl=dayLight(),dark=1-dl,L=[];
   const add=(x,y,z,r,c,o)=>{const d=Math.hypot(x-cp.x,y-cp.y,z-cp.z);if(d>r+60)return;const k=c[0]+c[1]+c[2];L.push({x,y,z,r,c,o:o||{},s:k*(r+3)/(5+d)})};
@@ -5622,7 +5648,7 @@ function dlTick(dt){dlTime+=dt;const U=FLU,cp=viewPos(),dl=dayLight(),dark=1-dl,
     const ind=!l.o.box&&l.o.free;P.x=l.x;P.y=l.y;P.z=l.z;P.w=ind?-l.r:l.r;C.x=l.c[0];C.y=l.c[1];C.z=l.c[2];
     if(l.o.box){C.w=-1;D.x=l.o.box[0];D.y=l.o.box[1];D.z=l.o.box[2];Bx.x=l.o.box[3];Bx.y=l.o.box[4];Bx.z=l.o.box[5]}
     else if(l.o.dir){C.w=l.o.cone;D.x=l.o.dir[0];D.y=l.o.dir[1];D.z=l.o.dir[2]}else C.w=0;
-    if(hl){const hk=(l.o.halo||0)*(l.o.big||l.o.halo>.85?1:Math.min(1,dark*1.6));hl.visible=hk>.05;if(hl.visible){hl.position.set(l.x,l.y,l.z);const sz=(.5+l.r*.045)*hk*(l.o.big?2:1);hl.scale.set(sz,sz,1);const m=Math.max(l.c[0],l.c[1],l.c[2])||1;hl.material.color.setRGB(l.c[0]/m,l.c[1]/m,l.c[2]/m);hl.material.opacity=Math.min(1,.55*hk)}}}
+    if(hl){const hk=(l.o.halo||0)*(l.o.big||l.o.halo>.85?1:Math.min(1,dark*1.6));hl.visible=hk>.05;if(hl.visible){hl.position.set(pxSnap(l.x),pxSnap(l.y),pxSnap(l.z));const Rp=Math.max(2,Math.round((.5+l.r*.045)*hk*(l.o.big?2:1)*8)),tx=haloTex(Rp);if(hl.material.map!==tx){hl.material.map=tx;hl.material.needsUpdate=true}const sz=Rp*2/16;hl.scale.set(sz,sz,1);const m=Math.max(l.c[0],l.c[1],l.c[2])||1;hl.material.color.setRGB(l.c[0]/m,l.c[1]/m,l.c[2]/m);hl.material.opacity=Math.min(1,.55*hk)}}}
   // eye adaptation: stepping from a dark room into daylight is blinding for a moment, and eyes slowly open up in the dark
   const p=players[0];if(p&&running){if((indoorT-=dt)<=0){indoorT=.25;let roof=0;const x=vc(p.pos.x),z=vc(p.pos.z),y0=vc(p.pos.y+1.7);for(let y=y0+1;y<Math.min(H,y0+24);y++)if(solid(x,y,z)){roof=1;break}indoorK=roof}
     const lum=Math.max(.02,dl*(indoorK?.3:1)*(1-.4*WX.amt)+(p.torch?.08:0)+(L.length?Math.min(.15,L[0].s*.004):0));const tgt=clamp(Math.pow(.45/lum,.32),.85,1.55);
