@@ -10,6 +10,11 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v17.9 — light reaches what it sees
+- Per-light occlusion maps for the 12 dynamic lights: 48x48 octahedral rays (`dlOccTick`, `flRay`) cached by position, refined with 8 sub-rays per texel, stored at 96x96 with half-texel widening in one 384x288 atlas (`dlOcc`, origins in `dlO`); invalidated by `dlEdit` on block changes. Replaces the height-map roof test and the lamp box clip; home lights keep their box and also light what they see outside.
+- Player-driven headlights go through the dynamic lights instead of a per-vertex three.js SpotLight.
+- Sun shadow-map test is hard per block pixel and lit if the centre or any adjacent shadow texel sees the sun (`pxSunSh`), replacing soft PCF.
+
 ## v17.8 — nothing dark in the beam
 - Flashlight origin moved to the eye so every visible pixel in the cone is reachable; the occlusion map is re-cast in full whenever the view moves and dilated (each texel keeps the farthest hit of its 3x3 neighbourhood) with a distance-scaled tolerance, so silhouettes and slanted floors never fall into false shadow.
 - Beam rays (`flRay`/`rayVoxIf`) pass glass, leaves, ladders, water, shaped blocks and branches; only full opaque cubes stop them.
