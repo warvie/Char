@@ -329,6 +329,10 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>Developer mode <select id="devSel"><option value="0">Off</option><option value="1">On</option></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
+    <h4>v15.6 · Nov 25, 2026 — ripples</h4><ul>
+      <li>Rain ripples: wet ground and puddles now ripple with rings spreading from falling drops and a slow wind swell, and the ray-traced reflections bend and wobble through them.</li>
+      <li>Stop signs have STOP printed flat on the face in pixel letters, with a grey metal back.</li>
+      <li>Run and jump together however you like: push the touch stick to its edge to run, double-tap W to sprint, and a running jump keeps its speed in the air.</li></ul>
     <h4>v15.5 · Nov 25, 2026 — developer mode, curbs</h4><ul>
       <li>Developer mode (start screen or in-game menu): shows exactly what's under your crosshair: the block and its id and coordinates, a zombie's outfit, health and state, an animal, a person, a vehicle's part condition, or a piece of furniture, plus your position, region, town and frame rate.</li>
       <li>Curbs are part of the sidewalk now: the outermost sidewalk block wears a proper kerb-stone texture with a bevelled edge (some painted yellow or red near corners) instead of a separate strip.</li>
@@ -1413,12 +1417,17 @@ const postMat=new THREE.ShaderMaterial({defines:{RAYS:24,MB:1,SSR:22,AO:1},depth
       vec3 N=normalize(cross(Px-P,Py-P));if(N.y<0.)N=-N;
       if(N.y>.82){vec2 tq=floor(P.xz*16.+.001);P.xz=(tq+.5)/16.;vec2 hc=(P.xz/.5-hOrigin.xz)/hSize.xz;float top=texture2D(tHeight,hc).r*255.*.5;float ex=(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)?1.:step(top-.55,P.y);
         float pud=smoothstep(.4,.8,vn(P.xz*.32)+.2*wet),k=wet*ex*(.3+.7*pud);
-        if(k>.01){vec3 V=normalize(P-camPos),Rr=reflect(V,vec3(0.,1.,0.));Rr.xz+=(vec2(vn(floor(P.xz*16.)+floor(rtm*8.)),vn(floor(P.zx*16.)-floor(rtm*7.)))-.5)*.05*wet;Rr=normalize(Rr);
+        if(k>.01){vec3 V=normalize(P-camPos),Rr=reflect(V,vec3(0.,1.,0.));
+          vec2 rip=vec2(0.);vec2 q=P.xz*1.6;vec2 cb=floor(q);
+          for(int j=-1;j<=1;j++)for(int i=-1;i<=1;i++){vec2 c=cb+vec2(float(i),float(j));float h=fract(sin(dot(c,vec2(127.1,311.7)))*43758.5453),h2=fract(sin(dot(c,vec2(269.5,183.3)))*43758.5453);
+            vec2 ctr=c+vec2(h,h2);float t=fract(rtm*(.6+.6*h)+h2);vec2 dv=q-ctr;float dd=length(dv),rr=t*1.1,e=(dd-rr)*5.;rip+=dv/(dd+.001)*sin((dd-rr)*24.)*exp(-e*e)*(1.-t)*(1.-t);}
+          rip+=vec2(sin(P.x*3.1+rtm*1.7+P.z*1.3),cos(P.z*2.7-rtm*1.3+P.x*.9))*.18;
+          Rr.xz+=rip*.11*wet*(.35+.65*pud);Rr=normalize(Rr);
           vec3 hcol=fogCol*1.05,R0=P+vec3(0.,.02,0.);float stp=.3;
           for(int i=0;i<SSR;i++){if(float(i)>=uSsr)break;R0+=Rr*stp;stp*=1.17;vec4 cp=VPm*vec4(R0,1.);if(cp.w<=0.)break;vec2 su=cp.xy/cp.w*.5+.5;if(su.x<0.||su.x>1.||su.y<0.||su.y>1.)break;
             float sd=texture2D(tDepth,su).x;if(sd>.99999)continue;vec3 SP=recon(su,sd);if(length(SP-camPos)<length(R0-camPos)-.04&&length(SP-R0)<stp*2.){hcol=texture2D(tColor,su).rgb;break;}}
           float fr=.2+.8*pow(1.-max(-V.y,0.),5.);col=mix(col,hcol,k*fr*.85);
-          float gl=step(.982,fract(sin(dot(tq,vec2(12.9898,78.233))+floor(rtm*7.))*43758.5453));col+=vec3(.55,.6,.65)*gl*k;}}}
+          float gl=step(.982,fract(sin(dot(tq,vec2(12.9898,78.233))+floor(rtm*7.))*43758.5453));col+=vec3(.55,.6,.65)*gl*k;col+=vec3(.32,.35,.4)*smoothstep(.45,.95,length(rip))*k*.55;}}}
   #endif
     // ambient ground fog: thicker low down, drifting noise, reconstructed from depth
     if(fogD>0.){vec4 w2=invVP*vec4(uv*2.-1.,min(d,.99995)*2.-1.,1.);w2/=w2.w;float dist=length(w2.xyz-camPos),hg=max(w2.y-fogBase,0.);
@@ -2044,8 +2053,9 @@ function buildFurn(sp){
   case'stop':{const red=0xb81c1c,pole=0x8a8c8e,px=.0425;F(.07,2.5,.07,pole,0,1.25,0);
     // a regular octagon drawn in pixels: 16 rows, the corners cut back one pixel per row (45 degrees), a 1-pixel white rim behind
     const oct=(n,cut,col,z,dz)=>{for(let j=0;j<n;j++){const e=Math.min(j,n-1-j),ins=Math.max(0,cut-e),w=(n-2*ins)*px;F(w,px,dz,col,0,2.15+(j-(n-1)/2)*px,z)}};
-    oct(18,6,0xf0ece4,.04,.02);oct(16,5,red,.05,.025);
-    sunTxt(F,'STOP',0,2.15,.068,.024,0xf0ece4);
+    oct(16,5,0x8a8c90,.027,.004);oct(18,6,0xf0ece4,.04,.02);oct(16,5,red,.05,.025);
+    const GL={S:['111','100','111','001','111'],T:['111','010','010','010','010'],O:['111','101','101','101','111'],P:['111','101','111','100','100']};
+    'STOP'.split('').forEach((ch,li)=>GL[ch].forEach((row,ry)=>row.split('').forEach((bit,rx)=>{if(bit==='1')F(px,px,.003,0xf0ece4,(li*4+rx-7)*px,2.15+(2-ry)*px,.0644)})));
     const nm=sp[5].names;if(nm){F(1.3,.2,.03,0x1e6a3a,0,2.62,0);sunTxt(F,nm[0],0,2.62,.017,.02,0xf0f0e8);F(1.3,.2,.03,0x1e6a3a,0,2.86,0,Math.PI/2);sunTxt(F,nm[1],0,2.86,.017,.02,0xf0f0e8,Math.PI/2);F(.06,.5,.06,pole,0,2.74,0)}break}
   case'tlight':{const dk=0x2e3032,{lit,names}=sp[5];F(.16,5,.16,dk,0,2.5,0);F(3.6,.11,.11,dk,-1.8,4.75,0);
     for(const hx of[-2.2,-3.4]){F(.34,.95,.3,0x1a1a1a,hx,4.2,0);[[0xe8301c,0x4a1210],[0xe8b81c,0x4a3a10],[0x2ae060,0x10401c]].forEach(([on,off],k)=>{F(.22,.22,.03,k===lit?on:off,hx,4.5-k*.3,.16);F(.28,.04,.12,0x1a1a1a,hx,4.62-k*.3,.22)})}
@@ -3413,7 +3423,9 @@ function updatePlayer(p,dt){
   const lk=(p.aim?.55:1)*(p.onTarget&&p.pad?.6:1);p.yaw-=inp.turn*2.4*dt*lk;p.pitch=clamp(p.pitch+inp.look*1.8*dt*lk,-1.5,1.5);
   const fx=-Math.sin(p.yaw),fz=-Math.cos(p.yaw),rx=Math.cos(p.yaw),rz=-Math.sin(p.yaw);
   let mx=fx*inp.f+rx*inp.s,mz=fz*inp.f+rz*inp.s;const l=Math.hypot(mx,mz);if(l>1){mx/=l;mz/=l}
-  const lg=p.inj?p.inj.leg:0,sprint=inp.sprint&&!p.aim&&p.stamina>3&&l>.1&&inp.f>0&&lg<.5;
+  if(inp.pad&&T.on&&Math.hypot(T.mx||0,T.my||0)>.93&&inp.f>.5)inp.sprint=true;
+  if(!inp.pad&&p.i===0){const w=!!keys.KeyW,now=performance.now();if(w&&!p.wPrev){if(now-(p.wTap||0)<280)p.wRun=true;p.wTap=now}if(!w)p.wRun=false;p.wPrev=w;if(p.wRun)inp.sprint=true}
+  const lg=p.inj?p.inj.leg:0,sprint=(inp.sprint&&!p.aim&&p.stamina>3&&l>.1&&inp.f>0&&lg<.5)||(!p.grounded&&p.airSprint&&l>.1);
   p.stamina=clamp(p.stamina+(sprint?-20:13)*dt,0,100);
   // crouch (C / Ctrl): 1.05 m tall, slow and quiet - fits through a 1.5 m window opening once the glass is out
   // crawling: flat on your belly (45 cm tall) fits through half-metre gaps; you only get up when there's room
@@ -3430,7 +3442,8 @@ function updatePlayer(p,dt){
   if(!p.creative)p.fly=false;
   if(p.fly){const fs=sprint?18:9;p.vel.x=mx*fs;p.vel.z=mz*fs;p.vel.y=(inp.jump?1:0)*8-(inp.crouch?1:0)*8;p.crouch=false}
   else if(p.swim){p.vel.x*=.55;p.vel.z*=.55;p.vel.y=inp.jump?3:Math.max(p.vel.y,-1.6)}
-  else if(inp.jump&&p.grounded){p.vel.y=8.2;p.grounded=false}
+  else if(inp.jump&&p.grounded){p.vel.y=8.2;p.grounded=false;p.airSprint=sprint}
+  if(p.grounded&&p.vel.y<=0)p.airSprint=false;
   if(ladderAt(p)){p.vel.y=(inp.jump||inp.f>0)?3.4:inp.f<0?-3.4:-.5;p.grounded=true}
   moveEnt(p,dt,.3,PH);vehPush(p,.3,PH);
   if(p.pos.y<-4)respawn(p);
