@@ -2,6 +2,16 @@
 
 A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns, hunt in the wilds, dig into caves, build walls before nightfall, and get an old car running.
 
+
+## v16 — the compounds
+
+- **Military bases:** walled corporate compounds in the wilds (watchtowers, HQ, barracks, armory, helipad, trucks) with military-grade loot. Garrisoned ones warn you off and shoot anyone inside the wall; overrun ones are full of zombies.
+- **NPCs:** survivors drive cars (Use on their car drags them out), raid empty houses, and path around walls, cars and furniture, opening doors as they go. Bandit gangs build log palisades round their camps.
+- **Cars:** Q / Bomb in a car toggles the wipers, which clear blood from the windshield. Every window cracks where it's hit: bullets, bat swings, side and rear impacts.
+- **Porches** sit on the block texture-pixel grid.
+- **Creative:** pick the weather in the menu.
+- **Developer mode:** F2 heal · F3 +3 h · F4 weather · F6 spawn zombie · F7 clear zombies · F8 teleport to crosshair · F9 god mode · F10 freeze time, plus menu buttons (go to base, spawn car/survivor, perf overlay, copy debug info) and a richer readout.
+
 ## Play
 
 Open `index.html` in a modern browser (Chrome, Edge, Firefox, Safari). It needs an internet connection the first time to load Three.js from cdnjs.
