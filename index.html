@@ -337,7 +337,7 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>Developer mode <select id="devSel"><option value="0">Off</option><option value="1">On</option></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
-    <h4>v17.1 · Nov 25, 2026 — blocks to the horizon</h4><ul><li>The far view is now made of blocks: distant land is built from real block columns (1 m near, 2 m further out) in each block’s true texture colour, with flat tops and crisp sides; neighbouring columns of the same height and colour merge into one big block, so it stays light to draw. Trees show a leafy crown over a darker trunk, towns show their roads and rooftops</li><li>New doors: pixel-art doors at exactly the block pixel size, so they line up with the wall around them. The classic panel door in four paints plus five new styles: red barn door, steel security door, French glass door, craftsman door and rustic strap door</li><li>Up to 12 hotbar slots (keys 1–9, 0, − and =). New Tactical pants (10 pockets, military bases) and Utility overalls (12 pockets, rare in malls, or sew them); creative mode gets all 12</li></ul><h4>v17 · Nov 25, 2026 — far view</h4><ul><li>Far view: the world now reaches 4x your render distance. Past the loaded chunks a light, low-detail terrain mesh carries the hills, rivers, towns and treelines out to the horizon; it builds a few rows a frame so it never stutters (toggle it next to Render distance)</li><li>The flashlight lights up blocks too, not just furniture and people: every block, zombie, animal and car in the beam is lit in chunky pixels, and walls cast crisp shadows</li><li>Road paint is now part of the road blocks’ texture: lane lines, dashes, crosswalks and runway markings are drawn pixel-for-pixel into the asphalt, with no raised strips</li><li>Grass bends away from you as you walk through it and springs back along your trail; zombies, animals, people and cars push it too</li><li>Window trim no longer clips through chipped and broken blocks beside the window</li><li>Inventory: Close is in the top right, and tapping outside the panel closes it (also works for the trade and campfire panels)</li><li>Smoother: moving no longer re-scans the whole ray-traced lighting volume (only the new strip), the HUD only touches the page when something changes, and the flashlight casts a third fewer rays</li><li>Lighter: chunk meshes free their memory copy once they are on the graphics card, and each region drops its generation scratch data afterwards — memory growth while exploring fell by about two thirds</li><li>Quality of life: walk over loot bags to pick them up (setting in the menu), “+3 Ammo” pop-ups when you loot, hit and kill markers on the crosshair, a compass strip with your waypoint, the nearest military base and where you last died, and the map now marks military bases and your death spot</li><li>Fixed: soldiers are saved properly (a save with soldiers in it could break loading)</li></ul><h4>v16 · Nov 25, 2026 — the compounds</h4><ul><li>Corporate military bases out in the wilds: a walled compound with watchtowers, an HQ, barracks, an armory, a helipad and olive trucks, and the best loot in the game. About half are still held by a private security garrison that warns you off and opens fire inside the wall; shoot one and the whole unit comes for you. The rest were overrun and are full of the dead</li><li>Survivors now drive: some find a working car, run a few errands along the roads and park back home. Press Use on their car to drag them out (they won’t like it)</li><li>Survivors raid empty houses through the front door and come out with a full sack; bandit gangs build a log palisade round their camp, post by post</li><li>People find their way properly now: they path around walls, cars and furniture and open doors on the way instead of walking into them</li><li>Windshield wipers: Q (or the Bomb button) in a car sweeps the blood off the glass</li><li>Every car window cracks where it is hit: bullets, bat swings and side or rear impacts all leave spreading cracks on that pane</li><li>Porches line up with the block pixels: slab, posts, canopy and trim all sit on the 1/32 m texel grid</li><li>Creative: choose the weather from the menu (clear, rain, storm, fog, snow, or natural)</li><li>Developer mode tools: F2 heal, F3 +3 hours, F4 weather, F6 spawn zombie, F7 clear zombies, F8 teleport to crosshair, F9 god mode, F10 freeze time, plus menu buttons to go to a military base, spawn a car or survivor, a performance overlay and copy debug info; the readout now shows time, weather, what everyone is doing and nearby bases</li></ul><h4>v15.7 · Nov 25, 2026 — light &amp; chrome</h4><ul><li>Blood particles are red again (no more black specks)</li><li>Flashlight casts a perfect circle of light, ray-traced against the blocks and painted bright in chunky pixels — it stops at walls and leaves crisp shadows</li><li>Signs, posts, pumps, lamps, car bodies and other metal now carry a soft, blurry sky reflection that follows the time of day</li><li>Creative: sleep any time, anywhere, and a new “Sleep until morning” button in the menu skips straight to dawn</li></ul><h4>v15.6 · Nov 25, 2026 — ripples</h4><ul>
+    <h4>v17.2 · Nov 25, 2026 — one pixel size</h4><ul><li>Everything now uses the blocks’ pixel size, 32 texture pixels a metre: people, zombies, animals, cars, tools, crates, beds, bags, decor, signs, blood, glass cracks, the windshield and the grass</li><li>Nothing is untextured any more: every flat-coloured part gets a pixel texture by what it is (painted metal, bare metal, plastic, rubber, wood, cloth); only glowing lamps stay plain</li><li>Things that stay put are textured from their world position, so their pixels sit on the same grid as the blocks around them. Things that move carry their pixels with them</li><li>Signs are redrawn at block resolution with crisp bitmap lettering and sit on the pixel grid (no more tilted signs)</li><li>Blood splats come in whole-metre decals snapped to the grid; grass and flowers are redrawn at twice the detail to match</li><li>Furniture grain, the flashlight’s pixels, pixel shadows and rain ripples were at half resolution (1/16 m) and now match the blocks (1/32 m)</li></ul><h4>v17.1 · Nov 25, 2026 — blocks to the horizon</h4><ul><li>The far view is now made of blocks: distant land is built from real block columns (1 m near, 2 m further out) in each block’s true texture colour, with flat tops and crisp sides; neighbouring columns of the same height and colour merge into one big block, so it stays light to draw. Trees show a leafy crown over a darker trunk, towns show their roads and rooftops</li><li>New doors: pixel-art doors at exactly the block pixel size, so they line up with the wall around them. The classic panel door in four paints plus five new styles: red barn door, steel security door, French glass door, craftsman door and rustic strap door</li><li>Up to 12 hotbar slots (keys 1–9, 0, − and =). New Tactical pants (10 pockets, military bases) and Utility overalls (12 pockets, rare in malls, or sew them); creative mode gets all 12</li></ul><h4>v17 · Nov 25, 2026 — far view</h4><ul><li>Far view: the world now reaches 4x your render distance. Past the loaded chunks a light, low-detail terrain mesh carries the hills, rivers, towns and treelines out to the horizon; it builds a few rows a frame so it never stutters (toggle it next to Render distance)</li><li>The flashlight lights up blocks too, not just furniture and people: every block, zombie, animal and car in the beam is lit in chunky pixels, and walls cast crisp shadows</li><li>Road paint is now part of the road blocks’ texture: lane lines, dashes, crosswalks and runway markings are drawn pixel-for-pixel into the asphalt, with no raised strips</li><li>Grass bends away from you as you walk through it and springs back along your trail; zombies, animals, people and cars push it too</li><li>Window trim no longer clips through chipped and broken blocks beside the window</li><li>Inventory: Close is in the top right, and tapping outside the panel closes it (also works for the trade and campfire panels)</li><li>Smoother: moving no longer re-scans the whole ray-traced lighting volume (only the new strip), the HUD only touches the page when something changes, and the flashlight casts a third fewer rays</li><li>Lighter: chunk meshes free their memory copy once they are on the graphics card, and each region drops its generation scratch data afterwards — memory growth while exploring fell by about two thirds</li><li>Quality of life: walk over loot bags to pick them up (setting in the menu), “+3 Ammo” pop-ups when you loot, hit and kill markers on the crosshair, a compass strip with your waypoint, the nearest military base and where you last died, and the map now marks military bases and your death spot</li><li>Fixed: soldiers are saved properly (a save with soldiers in it could break loading)</li></ul><h4>v16 · Nov 25, 2026 — the compounds</h4><ul><li>Corporate military bases out in the wilds: a walled compound with watchtowers, an HQ, barracks, an armory, a helipad and olive trucks, and the best loot in the game. About half are still held by a private security garrison that warns you off and opens fire inside the wall; shoot one and the whole unit comes for you. The rest were overrun and are full of the dead</li><li>Survivors now drive: some find a working car, run a few errands along the roads and park back home. Press Use on their car to drag them out (they won’t like it)</li><li>Survivors raid empty houses through the front door and come out with a full sack; bandit gangs build a log palisade round their camp, post by post</li><li>People find their way properly now: they path around walls, cars and furniture and open doors on the way instead of walking into them</li><li>Windshield wipers: Q (or the Bomb button) in a car sweeps the blood off the glass</li><li>Every car window cracks where it is hit: bullets, bat swings and side or rear impacts all leave spreading cracks on that pane</li><li>Porches line up with the block pixels: slab, posts, canopy and trim all sit on the 1/32 m texel grid</li><li>Creative: choose the weather from the menu (clear, rain, storm, fog, snow, or natural)</li><li>Developer mode tools: F2 heal, F3 +3 hours, F4 weather, F6 spawn zombie, F7 clear zombies, F8 teleport to crosshair, F9 god mode, F10 freeze time, plus menu buttons to go to a military base, spawn a car or survivor, a performance overlay and copy debug info; the readout now shows time, weather, what everyone is doing and nearby bases</li></ul><h4>v15.7 · Nov 25, 2026 — light &amp; chrome</h4><ul><li>Blood particles are red again (no more black specks)</li><li>Flashlight casts a perfect circle of light, ray-traced against the blocks and painted bright in chunky pixels — it stops at walls and leaves crisp shadows</li><li>Signs, posts, pumps, lamps, car bodies and other metal now carry a soft, blurry sky reflection that follows the time of day</li><li>Creative: sleep any time, anywhere, and a new “Sleep until morning” button in the menu skips straight to dawn</li></ul><h4>v15.6 · Nov 25, 2026 — ripples</h4><ul>
       <li>Rain ripples: wet ground and puddles now ripple with rings spreading from falling drops and a slow wind swell, and the ray-traced reflections bend and wobble through them.</li>
       <li>Stop signs have STOP printed flat on the face in pixel letters, with a grey metal back.</li>
       <li>Run and jump together however you like: push the touch stick to its edge to run, double-tap W to sprint, and a running jump keeps its speed in the air.</li></ul>
@@ -1490,7 +1490,7 @@ const postMat=new THREE.ShaderMaterial({defines:{RAYS:24,MB:1,SSR:22,AO:1},depth
     // rain: wet, sky-exposed flat surfaces reflect the scene (screen-space), with puddles and ripples
     if(wet>.01&&d<.99999){vec3 P=recon(uv,d),Px=recon(uv+vec2(px.x,0.),texture2D(tDepth,uv+vec2(px.x,0.)).x),Py=recon(uv+vec2(0.,px.y),texture2D(tDepth,uv+vec2(0.,px.y)).x);
       vec3 N=normalize(cross(Px-P,Py-P));if(N.y<0.)N=-N;
-      if(N.y>.82){vec2 tq=floor(P.xz*16.+.001);P.xz=(tq+.5)/16.;vec2 hc=(P.xz/.5-hOrigin.xz)/hSize.xz;float top=texture2D(tHeight,hc).r*255.*.5;float ex=(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)?1.:step(top-.55,P.y);
+      if(N.y>.82){vec2 tq=floor(P.xz*32.+.001);P.xz=(tq+.5)/32.;vec2 hc=(P.xz/.5-hOrigin.xz)/hSize.xz;float top=texture2D(tHeight,hc).r*255.*.5;float ex=(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)?1.:step(top-.55,P.y);
         float pud=smoothstep(.4,.8,vn(P.xz*.32)+.2*wet),k=wet*ex*(.3+.7*pud);
         if(k>.01){vec3 V=normalize(P-camPos),Rr=reflect(V,vec3(0.,1.,0.));
           vec2 rip=vec2(0.);vec2 q=P.xz*1.6;vec2 cb=floor(q);
@@ -1563,10 +1563,31 @@ const flBlock=i=>`if(flOn${i}>0.){vec3 Lv=Pq-flPos${i};float Ld=length(Lv);vec3 
   if(fz>.3&&Ld<flRange){float u=dot(L,flRt${i})/fz/flTan,w=dot(L,flUp${i})/fz/flTan;
     if(u*u+w*w<=1.){float hd=texture2D(flMap${i},vec2(u,w)*.5+.5).r*flRange;
       if(Ld<=hd+.22){float nl=max(dot(normalize(vPxN),-L),0.);float lv=floor(clamp(nl*(1.15/(1.+Ld*Ld*.01)),0.,1.)*6.+.35)/6.;flAdd+=vec3(1.,.95,.8)*flOn${i}*lv*1.7;}}}}`;
-const FL_ADD=`{vec3 Pq=(floor(vPxW*16.-normalize(vPxN)*.01)+.5)/16.;vec3 flAdd=vec3(0.);${flBlock(0)}${flBlock(1)}gl_FragColor.rgb+=diffuseColor.rgb*flAdd;}`;
+const FL_ADD=`{vec3 Pq=(floor(vPxW*32.-normalize(vPxN)*.01)+.5)/32.;vec3 flAdd=vec3(0.);${flBlock(0)}${flBlock(1)}gl_FragColor.rgb+=diffuseColor.rgb*flAdd;}`;
 const _fd=new V3(),_fr=new V3(),_fu=new V3(),_rd=new V3();
 let flSweepT=0;
-function flSweep(){scene.traverse(o=>{const ms=o.isMesh&&o.material?(Array.isArray(o.material)?o.material:[o.material]):null;if(!ms)return;
+// ---------------- one pixel size for everything: 32 texture pixels a metre, like the blocks.
+// Every opaque mesh gets a pixel texture (untextured colours get one by kind: paint, metal, plastic, rubber, wood, cloth) and UVs measured in metres.
+// Things that move (people, zombies, animals, cars, tools) are mapped in their own frame so the pixels stay on them; everything that stays put is
+// mapped from its world position, so its pixels sit on the same grid as the blocks around it
+const PX_DONE=new WeakSet();let pxBudget=0,pxBacklog=false;
+function pxEntRoots(){const S=new Set(),add=o=>{if(o)S.add(o)};for(const v of vehicles)add(v.g);for(const z of zombies)add(z.g);for(const a of animals)add(a.g);for(const n of npcs)add(n.g);
+  for(const b of bags)add(b.g);for(const d of doors)add(d.pivot);for(const p of players){add(p.body&&p.body.g);add(p.cam)}if(typeof NET!=='undefined'&&NET.av)for(const a of NET.av.values())add(a.m&&a.m.g);return S}
+function pxUV(g,M){const P=g.attributes.position,N=g.attributes.normal,n=P.count,uv=new Float32Array(n*2),v=new V3(),nn=new V3();let mn=[1e9,1e9,1e9];
+  if(!M){for(let i=0;i<n;i++){mn[0]=Math.min(mn[0],P.getX(i));mn[1]=Math.min(mn[1],P.getY(i));mn[2]=Math.min(mn[2],P.getZ(i))}}
+  for(let i=0;i<n;i++){v.set(P.getX(i),P.getY(i),P.getZ(i));nn.set(N.getX(i),N.getY(i),N.getZ(i));
+    if(M){v.applyMatrix4(M);nn.transformDirection(M)}else{v.x-=mn[0];v.y-=mn[1];v.z-=mn[2]}
+    const ax=Math.abs(nn.x),ay=Math.abs(nn.y),az=Math.abs(nn.z);let a,b;if(ax>=ay&&ax>=az){a=v.z;b=v.y}else if(ay>=az){a=v.x;b=v.z}else{a=v.x;b=v.y}uv[i*2]=a;uv[i*2+1]=b}
+  const out=g.clone();out.setAttribute('uv',new THREE.BufferAttribute(uv,2));return out}
+function pxMesh(o,moving){if(!o.isMesh||PX_DONE.has(o))return;if(pxBudget<=0){pxBacklog=true;return}pxBudget--;PX_DONE.add(o);let m=o.material;
+  if(!m||Array.isArray(m)||!m.isMeshLambertMaterial||m.transparent||m===vmat||m===furnMat||m===grassMat||m===lodMat||m===glassMat||m.vertexColors||o.userData.noPx)return;
+  if(m.map&&m.map.wrapS!==THREE.RepeatWrapping)return; // hand-drawn art that fits its face exactly (doors, signs)
+  if(!m.map){const c=m.color&&m.color.getHex(),k=c==null?null:partKind(c);if(!k||(m.emissive&&m.emissive.getHex()))return;const nm=vMat(c,k);o.material=nm;m=nm}
+  const g=o.geometry;if(!g||!g.attributes||!g.attributes.position||!g.attributes.normal)return;
+  if(moving){if(g.userData.pxL)return;const P=g.parameters;if(g.type==='BoxGeometry'&&P&&P.width!=null){o.geometry=vbox(P.width,P.height,P.depth);return}const ng=pxUV(g,null);ng.userData.pxL=1;o.geometry=ng}
+  else{o.updateWorldMatrix(true,false);o.geometry=pxUV(g,o.matrixWorld)}}
+function pxSweep(){pxBudget=600;pxBacklog=false;const E=pxEntRoots();for(const r of scene.children){if(pxBudget<=0){pxBacklog=true;break}if(PX_DONE.has(r)&&!r.children.length)continue;const mv=E.has(r)||!!(r.userData&&r.userData.ent);r.traverse(o=>pxMesh(o,mv))}}
+function flSweep(){try{pxSweep()}catch(e){}scene.traverse(o=>{const ms=o.isMesh&&o.material?(Array.isArray(o.material)?o.material:[o.material]):null;if(!ms)return;
   for(const m of ms)if(m.isMeshLambertMaterial&&m!==vmat&&!(m.userData&&m.userData.pxs)&&!m.transparent){pxShadows(m);m.needsUpdate=true}})}
 function flashUpdate(){for(const i of[0,1]){const p=players[i],U=FLU,on=p&&p.torch&&!p.vehicle&&!(p.dead>0)&&((p.batt??100)>0||p.creative);
   if(!on){U['flOn'+i].value=0;continue}
@@ -1702,7 +1723,7 @@ uniform mat4 directionalShadowMatrix[NUM_DIR_LIGHT_SHADOWS];
 float getShadowMask(){float s=1.;
 #if defined(USE_SHADOWMAP)&&NUM_DIR_LIGHT_SHADOWS>0
   ${SHADOW_ORIG.includes('receiveShadow')?'if(!receiveShadow)return 1.;':''}
-  vec3 n=normalize(vPxN),q=(floor((vPxW-n*.004)*16.)+.5)/16.;DirectionalLightShadow ds=directionalLightShadows[0];
+  vec3 n=normalize(vPxN),q=(floor((vPxW-n*.004)*32.)+.5)/32.;DirectionalLightShadow ds=directionalLightShadows[0];
   s*=getShadow(directionalShadowMap[0],ds.shadowMapSize,ds.shadowBias,ds.shadowRadius,directionalShadowMatrix[0]*vec4(q+n*ds.shadowNormalBias,1.))*1.;
 #endif
   return s;}`);if(typeof FLU!=='undefined')sh.fragmentShader=FL_GLSL+sh.fragmentShader.replace('gl_FragColor = vec4( outgoingLight, diffuseColor.a );','gl_FragColor = vec4( outgoingLight, diffuseColor.a );\n'+FL_ADD)};return m}
@@ -1920,23 +1941,27 @@ function tileTex(tile,rep=1){const c=document.createElement('canvas');c.width=c.
 
 const vmat=new THREE.MeshLambertMaterial({vertexColors:true,map:atlas});installVmatShader();
 // grass tufts: crossed alpha-tested quads on top of grass blocks, swaying in the wind
-const grassC=document.createElement('canvas');grassC.width=64;grassC.height=12;const grassTex=new THREE.CanvasTexture(grassC);grassTex.magFilter=grassTex.minFilter=THREE.NearestFilter;grassTex.generateMipmaps=false;
+const grassC=document.createElement('canvas');grassC.width=128;grassC.height=24;const grassTex=new THREE.CanvasTexture(grassC);grassTex.magFilter=grassTex.minFilter=THREE.NearestFilter;grassTex.generateMipmaps=false;
 // 8 cut-out sprites side by side: two grasses, five wildflowers, clover. Flowers fade to seed heads in autumn
 const GSLOTS=8;
-function drawGrassTex(s){const g=grassC.getContext('2d');g.clearRect(0,0,64,12);const C=[[78,124,52],[96,108,62],[150,112,54],[200,206,214]][s],r=mulberry(seed^77),autumn=s===2;
-  const px=(x,y,c)=>{g.fillStyle=`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;g.fillRect(x|0,y|0,1,1)},sh=k=>C.map(v=>v*k);
-  // same texel size as the blocks: each sprite is 8 x 12 texture pixels on a quad one block wide and 1.5 tall
-  const blades=(ox,n,hmin,hmax)=>{for(let i=0;i<n;i++){const x=ox+(r()*8|0),h=hmin+(r()*(hmax-hmin+1)|0);for(let y=0;y<h;y++)px(x,11-y,sh(.72+.45*y/h))}};
-  blades(0,6,5,12);blades(8,8,7,12);
-  const flower=(ox,petal,center,kind)=>{blades(ox,3,3,6);for(const fx of[1,5]){const h=7+(r()*3|0),x=ox+fx+(r()*2|0);for(let y=0;y<h;y++)px(x,11-y,sh(.8));const cy=11-h;
-      if(autumn){px(x,cy,[120,96,60]);continue}
-      if(kind==='daisy'){px(x-1,cy,petal);px(x+1,cy,petal);px(x,cy-1,petal);px(x,cy,center)}
-      else if(kind==='poppy'){px(x-1,cy,petal);px(x+1,cy,petal);px(x,cy-1,petal);px(x,cy,[40,20,20])}
-      else if(kind==='dand'){px(x,cy,petal);px(x-1,cy,petal);px(x+1,cy,petal);px(x,cy-1,petal)}
-      else if(kind==='bell'){px(x+1,cy,petal);px(x+1,cy+1,center);px(x-1,cy+2,petal)}
-      else{px(x,cy,petal);px(x,cy-1,center);px(x,cy-2,petal)}}};
-  flower(16,[236,234,224],[230,196,60],'daisy');flower(24,[200,34,30],0,'poppy');flower(32,[236,200,50],0,'dand');flower(40,[90,110,210],[60,70,160],'bell');flower(48,[150,110,200],[120,80,170],'lav');
-  for(let i=0;i<7;i++)px(56+(r()*8|0),9+(r()*3|0),sh(.95));if(!autumn){px(58,8,[240,236,232]);px(61,9,[240,236,232])}
+function drawGrassTex(s){const g=grassC.getContext('2d');g.clearRect(0,0,128,24);const C=[[78,124,52],[96,108,62],[150,112,54],[200,206,214]][s],r=mulberry(seed^77),autumn=s===2;
+  const px=(x,y,c)=>{if(y<0)return;g.fillStyle=`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;g.fillRect(x|0,y|0,1,1)},sh=k=>C.map(v=>v*k),B=23;
+  // same texel size as the blocks (32 px a metre): each sprite is 16 x 24 pixels on a quad one block wide and 1.5 blocks tall
+  const blade=(x,h,lean)=>{let fx=x;for(let y=0;y<h;y++){px(fx,B-y,sh(.66+.5*y/h));if(y>h*.45&&r()<.28)fx+=lean;}};
+  const blades=(ox,n,hmin,hmax)=>{for(let i=0;i<n;i++){const x=ox+1+(r()*14|0),h=hmin+(r()*(hmax-hmin+1)|0);blade(x,h,r()<.5?-1:1)}};
+  blades(0,11,9,24);blades(16,15,13,24);
+  const head=(x,y,petal,center,kind)=>{
+    if(kind==='daisy'){for(const[dx,dy]of[[-2,0],[2,0],[0,-2],[0,2],[-1,-1],[1,-1],[-1,1],[1,1]])px(x+dx,y+dy,petal);px(x,y,center);px(x+1,y,center);px(x,y+1,center)}
+    else if(kind==='poppy'){for(let dy=-1;dy<=1;dy++)for(let dx=-2;dx<=2;dx++)if(Math.abs(dx)+Math.abs(dy)<3)px(x+dx,y+dy,petal);px(x,y-2,petal);px(x,y,[40,20,20])}
+    else if(kind==='dand'){for(let dy=-2;dy<=1;dy++)for(let dx=-2;dx<=2;dx++)if(dx*dx+dy*dy<5)px(x+dx,y+dy,dx*dx+dy*dy<2?[220,170,30]:petal)}
+    else if(kind==='bell'){px(x+1,y,petal);px(x+2,y+1,petal);px(x+1,y+1,petal);px(x+1,y+2,center);px(x+2,y+2,center);px(x-1,y+3,petal);px(x-2,y+4,petal);px(x-1,y+4,center)}
+    else{for(let k=0;k<6;k++){px(x,y-k,k%2?center:petal);if(k%2===0)px(x+1,y-k,petal)}}};
+  const flower=(ox,petal,center,kind)=>{blades(ox,5,5,12);for(const fx of[3,11]){const h=14+(r()*6|0),x=ox+fx+(r()*2|0);for(let y=0;y<h;y++)px(x,B-y,sh(.8));if(r()<.6){px(x-1,B-h*.5|0,sh(.9));px(x-2,B-h*.5+1|0,sh(.9))}const cy=B-h;
+      if(autumn){px(x,cy,[120,96,60]);px(x,cy-1,[140,110,70]);px(x+1,cy,[100,80,50]);continue}head(x,cy,petal,center,kind)}};
+  flower(32,[236,234,224],[230,196,60],'daisy');flower(48,[200,34,30],0,'poppy');flower(64,[236,200,50],0,'dand');flower(80,[90,110,210],[60,70,160],'bell');flower(96,[150,110,200],[120,80,170],'lav');
+  // clover: low trefoil leaves with a couple of white heads
+  for(let i=0;i<9;i++){const x=113+(r()*12|0),y=17+(r()*6|0);px(x,y,sh(.95));px(x+1,y,sh(.85));px(x,y+1,sh(.8));for(let k=y+2;k<=B;k++)px(x,k,sh(.7))}
+  if(!autumn){for(const[x,y]of[[116,15],[122,16]]){px(x,y,[240,236,232]);px(x+1,y,[230,226,222]);px(x,y-1,[240,236,232]);px(x+1,y-1,[250,246,242])}}
   grassTex.needsUpdate=true}
 // grass colour patches: lush, yellow-green, blue-green and dry olive meadows blending over ~12 blocks
 const GPAL=[[.94,.94,.94],[1,.95,.64],[.75,.92,.94],[.98,.84,.64],[.82,1,.78]];
@@ -2194,7 +2219,7 @@ furnMat.envMap=ENV;furnMat.combine=THREE.MixOperation;furnMat.reflectivity=.3;
 // furniture: per-texel grain, and the metal flag (red channel + 2) decoded so only metal pieces take the blurry sky reflection
 {const prev=furnMat.onBeforeCompile;furnMat.onBeforeCompile=(sh,r)=>{prev.call(furnMat,sh,r);
   sh.fragmentShader=sh.fragmentShader.replace('#include <color_fragment>',
-    'float fMetal=step(1.5,vColor.r);diffuseColor.rgb*=vec3(vColor.r-2.*fMetal,vColor.g,vColor.b);\n{vec3 q=floor((vPxW-normalize(vPxN)*.002)*16.);float h=fract(sin(dot(q,vec3(12.9898,78.233,37.719)))*43758.5453);float h2=fract(sin(dot(floor(q/4.),vec3(7.13,3.71,5.17)))*24634.6345);diffuseColor.rgb*=.88+.14*h+.06*h2;}')
+    'float fMetal=step(1.5,vColor.r);diffuseColor.rgb*=vec3(vColor.r-2.*fMetal,vColor.g,vColor.b);\n{vec3 q=floor((vPxW-normalize(vPxN)*.002)*32.);float h=fract(sin(dot(q,vec3(12.9898,78.233,37.719)))*43758.5453);float h2=fract(sin(dot(floor(q/8.),vec3(7.13,3.71,5.17)))*24634.6345);diffuseColor.rgb*=.88+.14*h+.06*h2;}')
     .replace('#include <envmap_fragment>',THREE.ShaderChunk.envmap_fragment.replace(/reflectivity/g,'(reflectivity*fMetal)'))}}
 const WOODS=[0x6b4a2e,0x8a6a44,0x4a3424,0x5a4030],FABRIC=[0x5a3a3a,0x3a4a5a,0x4a5a3a,0x6a5a48,0x3a3a42,0x6a4a30];
 const tmpCol=new THREE.Color();
@@ -2403,19 +2428,20 @@ function buildFurn(sp){
   }
 }
 // shop signs: painted text boards over the entrance, faded and missing the odd letter
-function makeSign(sg){const c=document.createElement('canvas'),h=64,w=Math.round(h*sg.w/.9);c.width=w;c.height=h;const x=c.getContext('2d');
-  x.fillStyle=sg.bg;x.fillRect(0,0,w,h);x.strokeStyle='rgba(0,0,0,.35)';x.lineWidth=4;x.strokeRect(2,2,w-4,h-4);
-  let tx=0;if(sg.cross){x.fillStyle='#c0201c';x.fillRect(12,h/2-7,36,14);x.fillRect(23,h/2-18,14,36);tx=24}
-  pixelText(x,sg.text,w/2+tx,h/2,5,sg.fg,w-24-tx*2);
+// signs are drawn at the block pixel size (32 px a metre): a 28 px tall face, bitmap lettering at a whole-pixel scale, and the sign sits on the pixel grid
+function makeSign(sg){const c=document.createElement('canvas'),h=28,w=Math.max(8,Math.round(sg.w*16)*2);c.width=w;c.height=h;const x=c.getContext('2d');
+  x.fillStyle=sg.bg;x.fillRect(0,0,w,h);x.fillStyle='rgba(0,0,0,.35)';x.fillRect(1,1,w-2,1);x.fillRect(1,h-2,w-2,1);x.fillRect(1,1,1,h-2);x.fillRect(w-2,1,1,h-2);
+  let tx=0;if(sg.cross){x.fillStyle='#c0201c';x.fillRect(4,h/2-2,12,4);x.fillRect(8,h/2-6,4,12);tx=8}
+  pixelText(x,sg.text,w/2+tx,h/2,2,sg.fg,w-6-tx*2);
   // weathering: a few letters faded or flaked off
-  for(let i=0;i<sg.text.length*2;i++){const fx=R(tx*2+12,w-12),fy=R(h*.3,h*.7);x.fillStyle=sg.bg;x.globalAlpha=R(.3,.8);x.fillRect(fx|0,fy|0,RI(2,5),RI(2,5))}x.globalAlpha=1;
-  for(let i=0;i<w*h/60;i++){x.fillStyle=`rgba(${rng()<.5?'40,30,20':'230,220,200'},${rng()*.25})`;x.fillRect(rng()*w,rng()*h,1+rng()*3,1+rng()*2)}
-  for(let i=0;i<4;i++){x.fillStyle='rgba(60,40,20,.25)';x.fillRect(rng()*w,0,2+rng()*4,h*rng())}
-  const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;
-  const g=new THREE.Group(),hh=.9;g.position.set(sg.x,sg.y,sg.z);
-  const back=new THREE.Mesh(box(sg.w+.12,hh+.12,.1),lam(0x2a2a2a));back.position.z=-.02;g.add(back);
-  const face=new THREE.Mesh(new THREE.PlaneGeometry(sg.w,hh),new THREE.MeshLambertMaterial({map:t,envMap:ENV_LATE(),combine:THREE.MixOperation,reflectivity:.12}));face.position.z=-.075;face.rotation.y=Math.PI;g.add(face);
-  if(sg.ry)g.rotation.y=sg.ry;if(rng()<.3)g.rotation.z=R(-.08,.08);scene.add(g);freeze(g);return g}
+  for(let i=0;i<sg.text.length;i++){const fx=R(tx*2+4,w-4),fy=R(h*.3,h*.7);x.fillStyle=sg.bg;x.globalAlpha=R(.3,.8);x.fillRect(fx|0,fy|0,RI(1,2),RI(1,2))}x.globalAlpha=1;
+  for(let i=0;i<w*h/30;i++){x.fillStyle=`rgba(${rng()<.5?'40,30,20':'230,220,200'},${rng()*.25})`;x.fillRect(rng()*w|0,rng()*h|0,1,1)}
+  for(let i=0;i<3;i++){x.fillStyle='rgba(60,40,20,.25)';x.fillRect(rng()*w|0,0,1,(h*rng())|0)}
+  const t=new THREE.CanvasTexture(c);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;
+  const sw=w/32,hh=h/32,g=new THREE.Group();g.position.set(Math.round(sg.x*32)/32,Math.round(sg.y*32)/32,Math.round(sg.z*32)/32);
+  const back=new THREE.Mesh(box(sw+.125,hh+.125,.09375),lam(0x2a2a2a));back.position.z=-.03125;g.add(back);
+  const face=new THREE.Mesh(new THREE.PlaneGeometry(sw,hh),new THREE.MeshLambertMaterial({map:t,envMap:ENV_LATE(),combine:THREE.MixOperation,reflectivity:.12}));face.position.z=-.08;face.rotation.y=Math.PI;g.add(face);
+  if(sg.ry)g.rotation.y=sg.ry;scene.add(g);freeze(g);return g}
 const furnSeed=sp=>(Math.imul(Math.round(sp[1]*64),73856093)^Math.imul(Math.round(sp[3]*64),19349663)^Math.imul(Math.round(sp[2]*64),83492791)^sp[0].length)|0;
 function buildOne(sp){const sv=rng;rng=mulberry(furnSeed(sp));FBMET=REFL_F.has(sp[0])||(typeof FMETAL!=='undefined'&&FMETAL.has(sp[0]));FBB[0]=FBB[1]=FBB[2]=1e9;FBB[3]=FBB[4]=FBB[5]=-1e9;buildFurn(sp);rng=sv;sp.bb=FBB.slice();sp.k=FBK}
 function buildFurnMeshes(list,only){
@@ -2430,7 +2456,7 @@ function buildFurnMeshes(list,only){
 const geoC={},matC={},vGeoC={},vMatC={};
 const box=(w,h,d)=>{const k=w+','+h+','+d;return geoC[k]||(geoC[k]=new THREE.BoxGeometry(w,h,d))};
 const lam=c=>matC[c]||(matC[c]=pxShadows(new THREE.MeshLambertMaterial({color:c})));
-function partKind(c){const r=(c>>16)&255,g=(c>>8)&255,b=c&255,l=(r+g+b)/765,sat=Math.max(r,g,b)-Math.min(r,g,b);if(l>.85&&r>200&&g>190&&b<190)return null;if(r>200&&g<60&&b<60)return null;
+function partKind(c){const r=(c>>16)&255,g=(c>>8)&255,b=c&255,l=(r+g+b)/765,sat=Math.max(r,g,b)-Math.min(r,g,b);if(l>.85&&r>200&&g>190&&b<190)return null;if(r>200&&g<60&&b<60)return'paint';if(r>120&&g>70&&b<90&&r-b>60&&l<.6&&l>.18)return'wood';if(sat>60&&l>.25)return'fabric';
   if(l<.09)return'rubber';if(l<.16)return'plastic';if(sat<18&&l<.8)return'metal';return'plain'}
 function part(par,w,h,d,c,x,y,z){const k=typeof vMat==='function'?partKind(c):null,m=new THREE.Mesh(k?vbox(w,h,d):box(w,h,d),k?vMat(c,k):lam(c));m.position.set(x,y,z);m.userData.dims=[w,h,d];par.add(m);return m}
 function limb(par,w,h,d,c,x,y,z){const g=new THREE.Group();g.position.set(x,y,z);part(g,w,h,d,c,0,-h/2,0);par.add(g);return g}
@@ -2526,14 +2552,14 @@ const decalMat=SPLAT[0];
 const decalGeo=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2),wallGeo=new THREE.PlaneGeometry(1,1);const decals=[];
 function addDecal(m){m.receiveShadow=true;freeze(m);scene.add(m);decals.push(m);if(decals.length>180)scene.remove(decals.shift())}
 function splat(p,s,puddle){const x=vc(p.x),z=vc(p.z);let y=vc(p.y+.25);let n=0;while(y>0&&!solid(x,y-1,z)&&n++<12)y--;if(solid(x,y,z))return;
-  const m=new THREE.Mesh(decalGeo,puddle?pick(PUDDLE):pick(SPLAT));m.position.set(p.x,y*VS+.02+(decals.length%10)*.001,p.z);m.rotation.y=Math.floor(rng()*4)*Math.PI/2;m.scale.set(s,1,s);addDecal(m);
+  const nd=s>1.6?3:s>1.2?2:1;for(let i=0;i<nd;i++){const ox=i?R(-.4,.4)*s:0,oz=i?R(-.4,.4)*s:0;const m=new THREE.Mesh(decalGeo,puddle?pick(PUDDLE):pick(SPLAT));m.position.set(Math.round((p.x+ox)*32)/32,y*VS+.02+(decals.length%10)*.001,Math.round((p.z+oz)*32)/32);m.rotation.y=Math.floor(rng()*4)*Math.PI/2;addDecal(m)}
   if(!puddle&&rng()<.5)wallSplat(p)}
 // spatter the nearest wall within reach
 function wallSplat(p){for(let t=0;t<4;t++){const k=RI(0,3),dx=[1,-1,0,0][k],dz=[0,0,1,-1][k],h=p.y+R(.3,1.5);
   for(let d=.3;d<1.8;d+=.25){const cx=vc(p.x+dx*d),cz=vc(p.z+dz*d),cy=vc(h);if(!isOpq(get(cx,cy,cz)))continue;
     const m=new THREE.Mesh(wallGeo,pick(WSPLAT)),off=.012+(decals.length%7)*.001;
-    if(dx){m.position.set((dx>0?cx:cx+1)*VS-dx*off,h,p.z);m.rotation.y=dx>0?-Math.PI/2:Math.PI/2}else{m.position.set(p.x,h,(dz>0?cz:cz+1)*VS-dz*off);m.rotation.y=dz>0?Math.PI:0}
-    const sc=R(.6,1.2);m.scale.set(sc,sc,1);addDecal(m);return}}}
+    const hy=Math.round(h*32)/32;if(dx){m.position.set((dx>0?cx:cx+1)*VS-dx*off,hy,Math.round(p.z*32)/32);m.rotation.y=dx>0?-Math.PI/2:Math.PI/2}else{m.position.set(Math.round(p.x*32)/32,hy,(dz>0?cz:cz+1)*VS-dz*off);m.rotation.y=dz>0?Math.PI:0}
+    addDecal(m);return}}}
 // ---------------- audio
 // ---------------- sound: everything synthesized, but modelled on the real thing (transients, bodies, tails), through a compressor and an outdoor reverb
 let AC=null,master,nbuf,bbuf,verb,eng,engG,engLP,engAM,amb={};
@@ -2753,11 +2779,11 @@ const ENV_LATE=()=>typeof ENV!=='undefined'?ENV:null;
 function vMat(c,kind){const key=c+kind;if(vMatC[key])return vMatC[key];const N=16,cv=document.createElement('canvas');cv.width=cv.height=N;const x=cv.getContext('2d'),r=mulberry(c^kind.length*7919),base=[(c>>16)&255,(c>>8)&255,c&255];
   const px=(i,j,k,t)=>{const q=t||base;x.fillStyle=`rgb(${Math.min(255,q[0]*k)|0},${Math.min(255,q[1]*k)|0},${Math.min(255,q[2]*k)|0})`;x.fillRect(i,j,1,1)};
   for(let j=0;j<N;j++)for(let i=0;i<N;i++){let k=1;
-    if(kind==='paint'||kind==='plain')k=.93+r()*.1;else if(kind==='rubber')k=(j%4<2?.8:1.15)*(.9+r()*.2);else if(kind==='metal')k=.82+(j%2)*.1+r()*.12;else if(kind==='fabric')k=((i+j)%2?.86:1.08)*(.95+r()*.1);else k=.9+r()*.15;
+    if(kind==='paint'||kind==='plain')k=.93+r()*.1;else if(kind==='rubber')k=(j%4<2?.8:1.15)*(.9+r()*.2);else if(kind==='metal')k=.82+(j%2)*.1+r()*.12;else if(kind==='fabric')k=((i+j)%2?.86:1.08)*(.95+r()*.1);else if(kind==='wood')k=(.86+((i*7+Math.floor(j/5))%5)*.045)*(.95+r()*.08)-(i%5===0?.09:0)-((j*3+i)%11===0?.06:0);else k=.9+r()*.15;
     px(i,j,k)}
   if(kind==='paint'){for(let n=0;n<3;n++){const cx=r()*N|0,cy=r()*N|0;for(let q=0;q<2+r()*4;q++)px((cx+(r()*3|0))%N,(cy+(r()*2|0))%N,1,[110+r()*40,62+r()*20,34])} // rust
     for(let n=0;n<2;n++){let cx=r()*N|0,cy=r()*N|0;for(let q=0;q<5;q++){px(cx%N,cy%N,1.25);cx++;if(r()<.4)cy++}}} // scratches
-  const t=new THREE.CanvasTexture(cv);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.RepeatWrapping;
+  const t=new THREE.CanvasTexture(cv);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,2);
   const m=pxShadows(new THREE.MeshLambertMaterial({map:t}));m.userData.c=c;m.userData.kind=kind;if(kind==='metal'||kind==='paint'){m.envMap=ENV_LATE();m.combine=THREE.MixOperation;m.reflectivity=kind==='metal'?.26:.13}return vMatC[key]=m}
 function texVehicle(g,body){g.traverse(o=>{if(!o.isMesh||!o.material||o.material.isMeshBasicMaterial||o.material===glassMat||o.material.transparent)return;if(o.material.map&&!(o.material.userData&&o.material.userData.kind))return;
   const c=o.material.userData&&o.material.userData.c!=null?o.material.userData.c:o.material.color&&o.material.color.getHex?o.material.color.getHex():null;if(c==null)return;const k=vKind(c,body);if(!k)return;
@@ -2846,7 +2872,7 @@ function makeVehicle0(s){
   let gy=H-1;while(gy>0&&get(vc(s.x),gy,vc(s.z))===0)gy--;g.position.set(s.x,(gy+1)*VS,s.z);g.rotation.y=s.yaw;scene.add(g);castBig(g,.45);
   const broken=!s.good&&rng()<(D.pedal?.15:.4);
   // windshield blood layer: a transparent pixel canvas on the front face of the glass, seen from outside and from the driver's seat
-  let wsh=null;g.children.forEach(c=>{const dm=c.userData.dims||(c.geometry&&c.geometry.parameters&&[c.geometry.parameters.width,c.geometry.parameters.height,c.geometry.parameters.depth]);if(!wsh&&c.material===glassMat&&dm){const P={width:dm[0],height:dm[1],depth:dm[2]},cv=document.createElement('canvas');cv.width=Math.max(8,Math.round(P.width*16));cv.height=Math.max(4,Math.round(P.height*16));
+  let wsh=null;g.children.forEach(c=>{const dm=c.userData.dims||(c.geometry&&c.geometry.parameters&&[c.geometry.parameters.width,c.geometry.parameters.height,c.geometry.parameters.depth]);if(!wsh&&c.material===glassMat&&dm){const P={width:dm[0],height:dm[1],depth:dm[2]},cv=document.createElement('canvas');cv.width=Math.max(8,Math.round(P.width*32));cv.height=Math.max(4,Math.round(P.height*32));
     const tx=new THREE.CanvasTexture(cv);tx.magFilter=tx.minFilter=THREE.NearestFilter;tx.generateMipmaps=false;
     const m=new THREE.Mesh(new THREE.PlaneGeometry(P.width-.03,P.height-.03),new THREE.MeshLambertMaterial({map:tx,transparent:true,depthWrite:false,side:THREE.DoubleSide}));
     m.position.set(c.position.x,c.position.y,c.position.z+P.depth/2+.012);m.renderOrder=3;m.visible=false;g.add(m);wsh={m,cv,tx,amt:0,t:0,c,pw:P.width-.03,ph:P.height-.03}}});
@@ -2980,7 +3006,7 @@ function zTex(kind,col,v){const key=kind+col+'_'+v;if(zTexC[key])return zTexC[ke
     for(let n=0;n<2+ri(3);n++){const cx=ri(N),cy=ri(N);for(let t=0;t<3+ri(4);t++)px((cx+ri(3))%N,(cy+ri(2))%N,[112,124,88])}
     for(let n=0;n<2+ri(2);n++){const cx=ri(N),cy=ri(N/2),w=1+ri(3);for(let i=0;i<w;i++){const L=2+ri(7);for(let j=0;j<L;j++)px((cx+i)%N,(cy+j)%N,j<L-1?[92+ri(30),8,8]:[60,6,6])}}
     for(let i=0;i<N;i++)if(r()<.55)px(i,N-1-ri(2),sh(base,.55))}
-  const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.RepeatWrapping;
+  const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,2);
   return zTexC[key]=pxShadows(new THREE.MeshLambertMaterial({map:t}))}
 // living people: pixel skin with freckles and shading, woven shirts with collar, button placket and pocket, denim-twill trousers with stitched seams
 const pTexC={};
@@ -2994,7 +3020,7 @@ function pTex(kind,col){const key=kind+col;if(pTexC[key])return pTexC[key];const
   if(kind==='skin'){for(let n=0;n<5;n++)px(Math.floor(r()*N),Math.floor(r()*N),.84);for(let n=0;n<2;n++)px(Math.floor(r()*N),Math.floor(r()*N),1.08)}
   else if(kind==='shirt'){for(let j=2;j<N;j++)px(7,j,.8);for(let j=4;j<N;j+=4)px(8,j,1.45);for(let i=2;i<6;i++){px(i,4,.8);px(i,8,.8)}for(let j=4;j<=8;j++){px(2,j,.8);px(5,j,.8)}for(let i=0;i<N;i++)px(i,N-1,.78)}
   else{for(let j=0;j<N;j++){x.fillStyle='rgba(200,160,70,.55)';if(j%2)x.fillRect(0,j,1,1);x.fillRect(N-1,j,1,1)}for(let i=0;i<N;i++)px(i,0,.7);for(let i=3;i<7;i++)px(i,3,.8);for(let j=1;j<=3;j++)px(3,j,.8)}
-  const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.RepeatWrapping;
+  const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,2);
   return pTexC[key]=pxShadows(new THREE.MeshLambertMaterial({map:t}))}
 function humanLook(m,skin,shirt,pants,arm){m.torso.material=pTex('shirt',shirt);m.head.material=pTex('skin',skin);
   for(const k of['armL','armR'])if(m[k]&&m[k].children[0])m[k].children[0].material=pTex(arm===shirt?'shirt':'skin',arm||skin);
@@ -4730,7 +4756,7 @@ function carBlood(v,n,s){if(v.two){bloody(v.g,n,60);return}const fw=v.speed>=0?1
     splat3(m,top?1:2,top?1:fw,[0x5a0606,0x6e0808,0x420404,0x7a0a0a],R(.03,.06+s*.005),cnt,true)}}
 // cracked glass: every pane face of a car gets its own crack layer; cracks start where the hit landed and spread as pixel lines
 function glassCrack(v,c,ax,sg,hu,hv,n){const d=dimsOf(c);if(!d)return;v.gcr=v.gcr||new Map();const key=c.id+':'+ax+sg;let C=v.gcr.get(key);
-  if(!C){const fw=(ax===0?d[2]:d[0])-.03,fh=d[1]-.03,cv=document.createElement('canvas');cv.width=Math.max(8,Math.round(fw*16));cv.height=Math.max(4,Math.round(fh*16));
+  if(!C){const fw=(ax===0?d[2]:d[0])-.03,fh=d[1]-.03,cv=document.createElement('canvas');cv.width=Math.max(8,Math.round(fw*32));cv.height=Math.max(4,Math.round(fh*32));
     const tx=new THREE.CanvasTexture(cv);tx.magFilter=tx.minFilter=THREE.NearestFilter;tx.generateMipmaps=false;
     const m=new THREE.Mesh(new THREE.PlaneGeometry(fw,fh),new THREE.MeshLambertMaterial({map:tx,transparent:true,depthWrite:false,side:THREE.DoubleSide}));
     m.position.set(c.position.x,c.position.y,c.position.z);if(ax===0){m.rotation.y=sg*Math.PI/2;m.position.x+=sg*(d[0]/2+.008)}else{if(sg<0)m.rotation.y=Math.PI;m.position.z+=sg*(d[2]/2+.008)}
@@ -4847,7 +4873,7 @@ function carHitZombie(z,v,d){const s=Math.abs(v.speed),fx=Math.sin(v.yaw)*Math.s
   z.g.rotation.order='YXZ';z.chasing=true;sNoise(.25,500,.6)}
 // blood thrown onto the windshield: spatters, drops and streaks that run down; it dries off slowly, faster in rain
 function wsBlood(v,n,s){const W=v.wsh;if(!W)return;const cv=W.cv,x=cv.getContext('2d'),w=cv.width,h=cv.height;W.m.visible=true;
-  for(let k=0;k<n;k++){const cx=R(.1,.9)*w,cy=R(.05,.75)*h,r=R(1,2.6+s*.12),dk=R(0,1);x.fillStyle=`rgba(${110+dk*60|0},${6+dk*10|0},${6+dk*8|0},${R(.75,.95)})`;
+  for(let k=0;k<n;k++){const cx=R(.1,.9)*w,cy=R(.05,.75)*h,r=R(2,5.2+s*.24),dk=R(0,1);x.fillStyle=`rgba(${110+dk*60|0},${6+dk*10|0},${6+dk*8|0},${R(.75,.95)})`;
     for(let i=-Math.ceil(r);i<=r;i++)for(let j=-Math.ceil(r);j<=r;j++)if(i*i+j*j<=r*r*R(.6,1.2))x.fillRect(cx+i|0,cy+j|0,1,1);
     for(let d=0;d<RI(2,6);d++){const a=R(0,6.3),L=r+R(1,4+s*.25);x.fillRect(cx+Math.cos(a)*L|0,cy+Math.sin(a)*L*.6|0,1,1)}
     if(rng()<.6){const L=RI(2,Math.round(h*.4));for(let j=0;j<L;j++)x.fillRect(cx+(j>L*.6&&rng()<.3?1:0)|0,cy+r+j|0,1,1)}}
@@ -5731,7 +5757,7 @@ function frame(){
   if(worldReady){updateWindow(false);const cs=running?players.map(p=>p.vehicle?p.vehicle.pos:p.pos):[spawn];streamChunks(cs,isTouch?2:4);cullT-=dt;if(cullT<=0){cullT=.5;cullEntities(cs)}
     if(running){saveT-=dt;if(saveT<=0){saveT=90;autoSave()}}}
   if(running&&!paused)update(dt);else{pressed.clear();T.pressed.clear()}
-  try{devTick()}catch(e){}try{lodTick(dt);grassPushTick(dt);drawCompass();if(running){flashUpdate();if((flSweepT-=dt)<=0){flSweepT=3;flSweep()}}updEnv(dt)}catch(e){}
+  try{devTick()}catch(e){}try{lodTick(dt);grassPushTick(dt);drawCompass();if(running){flashUpdate();if((flSweepT-=dt)<=0){flSweep();flSweepT=pxBacklog?.5:3}}updEnv(dt)}catch(e){}
   if(!running){tDay+=dt/DAYLEN*.3;updSky()}
   grassTime.value=now/1000;adaptRes(dt);render();requestAnimationFrame(frame);
 }

@@ -5,6 +5,14 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+
+## v17.2 — one pixel size
+
+- Global pixel standard: 32 texels per metre on a world grid aligned with the blocks.
+- A background sweep gives every opaque untextured mesh a kind texture (paint, metal, plastic, rubber, wood, fabric) and metre-based UVs: local frame for moving entities (vehicles, zombies, animals, NPCs, players, doors, bags), world-space for static objects so texels line up with blocks. 16 px tiles repeat twice a metre.
+- Fitted textures resized to 32 px/m: signs (28 px faces, bitmap text, grid-snapped), car glass cracks and windshield blood, blood decals (1 m, grid-snapped), grass sprites (16x24).
+- Shader grids moved from 1/16 m to 1/32 m: furniture grain, flashlight, pixel shadows, rain ripples.
+
 ## v17.1 — blocks to the horizon
 
 - **Far view** rebuilt as blocks: per-cell top block (id, height), colours averaged from the real texture tiles, greedy-merged tops and side runs; 2-block cells to ~100 m, 4-block cells beyond; built and meshed in 2.5 ms slices. Far terrain samples are cached.
