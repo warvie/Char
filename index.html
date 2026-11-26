@@ -307,6 +307,17 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
   body.touch .slot{width:41px!important}
   body.touch .hot.many .slot{width:29px!important;padding:2px 0!important}body.touch .hot.many .slot span{font-size:7px!important}body.touch .hot.many .slot b{font-size:15px!important}
   body.touch .feed{right:336px!important;bottom:auto!important}}
+/* ---- touch layout v4: Run, Jump, Crouch, Crawl in one column on the right edge, top to bottom, all the same size */
+body #touch .tb[data-b=run],body #touch .tb[data-b=jump],body #touch .tb[data-b=crouch],body #touch .tb[data-b=duck]{--s:72px;--g:8px;width:var(--s)!important;height:var(--s)!important;right:calc(12px + env(safe-area-inset-right))!important;left:auto!important;top:auto!important}
+body #touch .tb[data-b=duck]{bottom:calc(16px + env(safe-area-inset-bottom))!important}
+body #touch .tb[data-b=crouch]{bottom:calc(16px + var(--s) + var(--g) + env(safe-area-inset-bottom))!important;background:rgba(52,74,96,.62);border-color:rgba(150,180,210,.6)}
+body #touch .tb[data-b=jump]{bottom:calc(16px + 2*(var(--s) + var(--g)) + env(safe-area-inset-bottom))!important}
+body #touch .tb[data-b=run]{bottom:calc(16px + 3*(var(--s) + var(--g)) + env(safe-area-inset-bottom))!important}
+body #touch .tb[data-b=run] span,body #touch .tb[data-b=jump] span,body #touch .tb[data-b=crouch] span,body #touch .tb[data-b=duck] span{font-size:12px!important}
+body #touch .tb[data-b=run] .ti,body #touch .tb[data-b=jump] .ti,body #touch .tb[data-b=crouch] .ti,body #touch .tb[data-b=duck] .ti{width:24px!important;height:24px!important}
+@media(orientation:portrait) and (max-height:620px){body #touch .tb[data-b=run],body #touch .tb[data-b=jump],body #touch .tb[data-b=crouch],body #touch .tb[data-b=duck]{--s:62px;--g:6px}}
+@media(orientation:landscape){body #touch .tb[data-b=run],body #touch .tb[data-b=jump],body #touch .tb[data-b=crouch],body #touch .tb[data-b=duck]{--s:58px;--g:6px}}
+@media(orientation:landscape) and (max-height:380px){body #touch .tb[data-b=run],body #touch .tb[data-b=jump],body #touch .tb[data-b=crouch],body #touch .tb[data-b=duck]{--s:50px;--g:4px}}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="huds"></div>
@@ -317,7 +328,7 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
 <div id="split" class="hidden"></div><div id="fade"></div><div id="flash"></div>
 <div id="touch" class="hidden"><div id="stick"><i></i></div>
   <button class="tb big" data-b="act"><img class="ti" alt=""><span>Swing</span></button><button class="tb jmp" data-b="jump"><img class="ti" alt=""><span>Jump</span></button><button class="tb" data-b="use"><img class="ti" alt=""><span>Use</span></button><button class="tb" data-b="alt"><img class="ti" alt=""><span>Aim</span></button>
-  <button class="tb sm" data-b="view">View</button><button class="tb sm" data-b="run">Run</button><button class="tb" data-b="duck">Crawl</button><button class="tb sm" data-b="bomb">Bomb</button><button class="tb sm" data-b="torch">Light</button><button class="tb sm" data-b="talk">Talk</button><button class="tb sm" data-b="emote">Emote</button><button class="tb sm" data-b="home">Menu</button><button class="tb sm" data-b="rsp">Unstuck</button></div>
+  <button class="tb sm" data-b="view">View</button><button class="tb sm" data-b="run">Run</button><button class="tb" data-b="crouch">Crouch</button><button class="tb" data-b="duck">Crawl</button><button class="tb sm" data-b="bomb">Bomb</button><button class="tb sm" data-b="torch">Light</button><button class="tb sm" data-b="talk">Talk</button><button class="tb sm" data-b="emote">Emote</button><button class="tb sm" data-b="home">Menu</button><button class="tb sm" data-b="rsp">Unstuck</button></div>
 
 <div id="start" class="screen"><div class="kit">
   <h1>Dead Ground</h1>
@@ -339,7 +350,7 @@ body.touch .feed{bottom:190px!important;width:min(330px,calc(100% - 236px))!impo
     <label>Developer mode <select id="devSel"><option value="0">Off</option><option value="1">On</option></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
-    <h4>v17.9 · Nov 25, 2026 — light reaches what it sees</h4><ul><li>Every light now works like the flashlight: whatever a light can see is lit, and solid walls stop it. Lamps, campfires, street lamps, headlights and tail lights, floodlights, flares, muzzle flashes and explosions each cast 2,300 rays (refined to over 20,000) through the blocks to find what they can reach</li><li>Lamps light the whole of what they can see instead of just the inside of their building, so lamplight spills out of open doors and through windows onto the ground outside; street lamps and headlights now reach under porches, carports and trees instead of skipping anything with a roof over it; glass, leaves, steps, slabs and branches don’t block light</li><li>Lit homes still glow inside, and now also light the street through their windows</li><li>Your own car’s headlights use the same lighting, so the whole beam lands on the road instead of fading out across big flat surfaces</li><li>Sunlight: a pixel the sun reaches is now fully lit; soft shadow edges no longer creep onto sunlit pixels</li></ul><h4>v17.8 · Nov 25, 2026 — nothing dark in the beam</h4><ul><li>The flashlight now lights every pixel you can see inside its circle, out to its full range: the beam comes from your eye, so anything you can see is something it reaches, and edges, corners and floors seen at a slant no longer drop out into dark patches</li><li>The beam re-aims fully whenever you turn or move, so it never lags behind and leaves stale shadows</li><li>Glass, leaves, ladders, water, steps, slabs, branches and chipped blocks no longer block the beam, so whatever shows through or around them is lit</li><li>Surfaces at a steep angle and far-off surfaces near the end of the range always get at least the faintest step of light instead of none</li><li>Window glass, car glass, cracks, blood on glass and blood stains on the ground are now lit by the beam too</li><li>On phones held upright the Light button sits a little higher so it no longer covers the message feed</li></ul><h4>v17.7 · Nov 25, 2026 — real trunks far away</h4><ul><li>Trees in the far view now stand on trunks as thick as the real ones (a 25 cm stem for young trees, one log for normal trees, a 2x2 trunk for old ones) instead of a trunk as wide as the leaves; the crown floats over them with its own underside, so you can see the ground and the gaps between trunks under a forest. Dead trees show as bare trunks</li></ul><h4>v17.6 · Nov 25, 2026 — trim on the grid</h4><ul><li>Window and door trim rebuilt on whole block pixels: the side and head casings reach out half a pixel further to land on the pixel lines, the door plinths stick out a pixel beyond the casing, the window sill is 2 px deep with a 1 px apron, and every piece is a whole number of pixels thick</li><li>Trim pieces now meet edge to edge instead of overlapping at the corners, so they no longer flicker</li><li>No more z-fighting in furniture and decor: wherever two faces would sit in exactly the same plane (pixel-art signs, vines, paintings, curtains, stacked parts) the later one is moved 2 mm out of the way — invisible, but it never fights for the same depth; parts of cars, people and decor do the same. About 81,000 flickering face overlaps are gone</li></ul><h4>v17.5 · Nov 25, 2026 — mops and rain</h4><ul><li>Blood is part of what it hits now, not a picture on a see-through sheet: splats and puddles are block pixels laid on the floor’s own pixel grid that follow the ground, run over edges and drip down the sides; wall spatter is pixels on the wall face with drips running down</li><li>People, cars and tools get blood painted into their own pixel textures, so it wraps around them; you get bloody when you’re hurt, and so does anyone you hit</li><li>Mops (hardware stores, gas stations, schools, hospitals, malls, offices — or make one from 2 planks and 3 cloth): hold it and Use to scrub the blood off floors, walls, cars and their windshields, other people, or yourself</li><li>Rain washes blood away: stains out in the open fade and go, and bloodied clothes, cars and windshields left out in the rain slowly come clean</li><li>F is now the flashlight (T still works; E is Use), and there is a Light button on touch screens</li></ul><h4>v17.4 · Nov 25, 2026 — no real circles</h4><ul><li>Every round thing is now a pixel circle built from whole block pixels: car wheels and hubs, steering wheels, dashboard gauges, manhole covers and rims, campfire flames, trap spikes and pipe bombs</li><li>The sun and moon are pixel discs with their glow in stepped rings; lens flares, light halos and the night-vision eyepiece are pixelated with hard edges</li><li>No more staggered pixels: furniture now sits square to the block grid and every furniture box is snapped to whole block pixels, so its edges fall on the same pixel lines as the blocks; parts of people, animals, cars and decor are sized and placed in whole pixels too</li></ul><h4>v17.3 · Nov 25, 2026 — lights in the dark</h4><ul><li>New lighting system: up to 12 lights at a time, worked out per block pixel on everything (blocks, furniture, people, cars, glass), with realistic inverse-square falloff. Lights indoors stay in their building and outdoor lights don’t shine through walls into rooms</li><li>Everything that should glow now lights its surroundings: wired lamps, campfires (flickering), working street lamps after dark (a few flicker), headlights and tail lights on every car with someone in it or its lights left on (brake lights brighten), lit rooms in occupied homes at night with glowing windows, floodlights on garrisoned military bases, muzzle flashes, explosions and lightning strikes</li><li>Realistic touches: light halos around bright sources at night, glints of lamplight on wet ground in the rain, and eye adaptation — stepping from a dark room into daylight dazzles for a moment and your eyes slowly open up in the dark</li><li>New loot: road flares (gas stations, hardware stores, military bases). Strike one and drop it: it burns red for two minutes and lights the area, but the dead come to the light</li><li>New clothing: night-vision goggles (head slot, military bases). In the dark they switch on by themselves and turn the night bright green, running off your flashlight batteries</li><li>Pixel size corrected: the blocks’ real pixel is 1/16 m, not 1/32 m. Doors are redrawn at 16 x 32 block pixels and their slab is two pixels thick so the faces sit on the grid; signs, blood, glass, grass, road paint, body and vehicle textures and the shader grids now all match</li></ul><h4>v17.2 · Nov 25, 2026 — one pixel size</h4><ul><li>Everything now uses the blocks’ pixel size, 32 texture pixels a metre: people, zombies, animals, cars, tools, crates, beds, bags, decor, signs, blood, glass cracks, the windshield and the grass</li><li>Nothing is untextured any more: every flat-coloured part gets a pixel texture by what it is (painted metal, bare metal, plastic, rubber, wood, cloth); only glowing lamps stay plain</li><li>Things that stay put are textured from their world position, so their pixels sit on the same grid as the blocks around them. Things that move carry their pixels with them</li><li>Signs are redrawn at block resolution with crisp bitmap lettering and sit on the pixel grid (no more tilted signs)</li><li>Blood splats come in whole-metre decals snapped to the grid; grass and flowers are redrawn at twice the detail to match</li><li>Furniture grain, the flashlight’s pixels, pixel shadows and rain ripples were at half resolution (1/16 m) and now match the blocks (1/32 m)</li></ul><h4>v17.1 · Nov 25, 2026 — blocks to the horizon</h4><ul><li>The far view is now made of blocks: distant land is built from real block columns (1 m near, 2 m further out) in each block’s true texture colour, with flat tops and crisp sides; neighbouring columns of the same height and colour merge into one big block, so it stays light to draw. Trees show a leafy crown over a darker trunk, towns show their roads and rooftops</li><li>New doors: pixel-art doors at exactly the block pixel size, so they line up with the wall around them. The classic panel door in four paints plus five new styles: red barn door, steel security door, French glass door, craftsman door and rustic strap door</li><li>Up to 12 hotbar slots (keys 1–9, 0, − and =). New Tactical pants (10 pockets, military bases) and Utility overalls (12 pockets, rare in malls, or sew them); creative mode gets all 12</li></ul><h4>v17 · Nov 25, 2026 — far view</h4><ul><li>Far view: the world now reaches 4x your render distance. Past the loaded chunks a light, low-detail terrain mesh carries the hills, rivers, towns and treelines out to the horizon; it builds a few rows a frame so it never stutters (toggle it next to Render distance)</li><li>The flashlight lights up blocks too, not just furniture and people: every block, zombie, animal and car in the beam is lit in chunky pixels, and walls cast crisp shadows</li><li>Road paint is now part of the road blocks’ texture: lane lines, dashes, crosswalks and runway markings are drawn pixel-for-pixel into the asphalt, with no raised strips</li><li>Grass bends away from you as you walk through it and springs back along your trail; zombies, animals, people and cars push it too</li><li>Window trim no longer clips through chipped and broken blocks beside the window</li><li>Inventory: Close is in the top right, and tapping outside the panel closes it (also works for the trade and campfire panels)</li><li>Smoother: moving no longer re-scans the whole ray-traced lighting volume (only the new strip), the HUD only touches the page when something changes, and the flashlight casts a third fewer rays</li><li>Lighter: chunk meshes free their memory copy once they are on the graphics card, and each region drops its generation scratch data afterwards — memory growth while exploring fell by about two thirds</li><li>Quality of life: walk over loot bags to pick them up (setting in the menu), “+3 Ammo” pop-ups when you loot, hit and kill markers on the crosshair, a compass strip with your waypoint, the nearest military base and where you last died, and the map now marks military bases and your death spot</li><li>Fixed: soldiers are saved properly (a save with soldiers in it could break loading)</li></ul><h4>v16 · Nov 25, 2026 — the compounds</h4><ul><li>Corporate military bases out in the wilds: a walled compound with watchtowers, an HQ, barracks, an armory, a helipad and olive trucks, and the best loot in the game. About half are still held by a private security garrison that warns you off and opens fire inside the wall; shoot one and the whole unit comes for you. The rest were overrun and are full of the dead</li><li>Survivors now drive: some find a working car, run a few errands along the roads and park back home. Press Use on their car to drag them out (they won’t like it)</li><li>Survivors raid empty houses through the front door and come out with a full sack; bandit gangs build a log palisade round their camp, post by post</li><li>People find their way properly now: they path around walls, cars and furniture and open doors on the way instead of walking into them</li><li>Windshield wipers: Q (or the Bomb button) in a car sweeps the blood off the glass</li><li>Every car window cracks where it is hit: bullets, bat swings and side or rear impacts all leave spreading cracks on that pane</li><li>Porches line up with the block pixels: slab, posts, canopy and trim all sit on the 1/32 m texel grid</li><li>Creative: choose the weather from the menu (clear, rain, storm, fog, snow, or natural)</li><li>Developer mode tools: F2 heal, F3 +3 hours, F4 weather, F6 spawn zombie, F7 clear zombies, F8 teleport to crosshair, F9 god mode, F10 freeze time, plus menu buttons to go to a military base, spawn a car or survivor, a performance overlay and copy debug info; the readout now shows time, weather, what everyone is doing and nearby bases</li></ul><h4>v15.7 · Nov 25, 2026 — light &amp; chrome</h4><ul><li>Blood particles are red again (no more black specks)</li><li>Flashlight casts a perfect circle of light, ray-traced against the blocks and painted bright in chunky pixels — it stops at walls and leaves crisp shadows</li><li>Signs, posts, pumps, lamps, car bodies and other metal now carry a soft, blurry sky reflection that follows the time of day</li><li>Creative: sleep any time, anywhere, and a new “Sleep until morning” button in the menu skips straight to dawn</li></ul><h4>v15.6 · Nov 25, 2026 — ripples</h4><ul>
+    <h4>v18 · Nov 26, 2026 — new trees, new wood</h4><ul><li>Three new kinds of tree, each with its own wood: <b>birch</b> (white bark with black marks, pale planks, slim tall crowns, yellow in autumn), <b>pine</b> (red-brown bark, honey planks, tall cones of needles that stay green all year) and <b>maple</b> (grey bark, red-brown planks, broad crowns of red leaves, orange in autumn, pink in spring). Pines take the high ground and grow in stands; birch groves and maples are scattered through the oak woods. Far-off trees show their own colours too</li><li>Chop them for birch, pine and maple wood, saw that into planks of the same kind, and build with any of them. Anything that needs planks or wood takes any kind (oak first). All of them are in the creative palette too</li><li>Window and door trim is textured: painted wood with grain, seams and the odd knot. Its edges and undersides use the block pixel grid too, so their texture lines up with the wall beside them instead of being one smeared colour</li><li>Touch: Run, Jump, Crouch and Crawl sit in one column on the right edge, top to bottom, all the same size. Crouch is new; Crouch and Crawl are toggles that switch each other off</li><li>Glass reflects a little of the flashlight (and other lights); the rest goes through and lights what’s behind it</li><li>Developer mode: FPS and your exact X/Y/Z coordinates, block position and facing on the first line</li><li>Creative mode: unlimited stamina</li></ul><h4>v17.9 · Nov 25, 2026 — light reaches what it sees</h4><ul><li>Every light now works like the flashlight: whatever a light can see is lit, and solid walls stop it. Lamps, campfires, street lamps, headlights and tail lights, floodlights, flares, muzzle flashes and explosions each cast 2,300 rays (refined to over 20,000) through the blocks to find what they can reach</li><li>Lamps light the whole of what they can see instead of just the inside of their building, so lamplight spills out of open doors and through windows onto the ground outside; street lamps and headlights now reach under porches, carports and trees instead of skipping anything with a roof over it; glass, leaves, steps, slabs and branches don’t block light</li><li>Lit homes still glow inside, and now also light the street through their windows</li><li>Your own car’s headlights use the same lighting, so the whole beam lands on the road instead of fading out across big flat surfaces</li><li>Sunlight: a pixel the sun reaches is now fully lit; soft shadow edges no longer creep onto sunlit pixels</li></ul><h4>v17.8 · Nov 25, 2026 — nothing dark in the beam</h4><ul><li>The flashlight now lights every pixel you can see inside its circle, out to its full range: the beam comes from your eye, so anything you can see is something it reaches, and edges, corners and floors seen at a slant no longer drop out into dark patches</li><li>The beam re-aims fully whenever you turn or move, so it never lags behind and leaves stale shadows</li><li>Glass, leaves, ladders, water, steps, slabs, branches and chipped blocks no longer block the beam, so whatever shows through or around them is lit</li><li>Surfaces at a steep angle and far-off surfaces near the end of the range always get at least the faintest step of light instead of none</li><li>Window glass, car glass, cracks, blood on glass and blood stains on the ground are now lit by the beam too</li><li>On phones held upright the Light button sits a little higher so it no longer covers the message feed</li></ul><h4>v17.7 · Nov 25, 2026 — real trunks far away</h4><ul><li>Trees in the far view now stand on trunks as thick as the real ones (a 25 cm stem for young trees, one log for normal trees, a 2x2 trunk for old ones) instead of a trunk as wide as the leaves; the crown floats over them with its own underside, so you can see the ground and the gaps between trunks under a forest. Dead trees show as bare trunks</li></ul><h4>v17.6 · Nov 25, 2026 — trim on the grid</h4><ul><li>Window and door trim rebuilt on whole block pixels: the side and head casings reach out half a pixel further to land on the pixel lines, the door plinths stick out a pixel beyond the casing, the window sill is 2 px deep with a 1 px apron, and every piece is a whole number of pixels thick</li><li>Trim pieces now meet edge to edge instead of overlapping at the corners, so they no longer flicker</li><li>No more z-fighting in furniture and decor: wherever two faces would sit in exactly the same plane (pixel-art signs, vines, paintings, curtains, stacked parts) the later one is moved 2 mm out of the way — invisible, but it never fights for the same depth; parts of cars, people and decor do the same. About 81,000 flickering face overlaps are gone</li></ul><h4>v17.5 · Nov 25, 2026 — mops and rain</h4><ul><li>Blood is part of what it hits now, not a picture on a see-through sheet: splats and puddles are block pixels laid on the floor’s own pixel grid that follow the ground, run over edges and drip down the sides; wall spatter is pixels on the wall face with drips running down</li><li>People, cars and tools get blood painted into their own pixel textures, so it wraps around them; you get bloody when you’re hurt, and so does anyone you hit</li><li>Mops (hardware stores, gas stations, schools, hospitals, malls, offices — or make one from 2 planks and 3 cloth): hold it and Use to scrub the blood off floors, walls, cars and their windshields, other people, or yourself</li><li>Rain washes blood away: stains out in the open fade and go, and bloodied clothes, cars and windshields left out in the rain slowly come clean</li><li>F is now the flashlight (T still works; E is Use), and there is a Light button on touch screens</li></ul><h4>v17.4 · Nov 25, 2026 — no real circles</h4><ul><li>Every round thing is now a pixel circle built from whole block pixels: car wheels and hubs, steering wheels, dashboard gauges, manhole covers and rims, campfire flames, trap spikes and pipe bombs</li><li>The sun and moon are pixel discs with their glow in stepped rings; lens flares, light halos and the night-vision eyepiece are pixelated with hard edges</li><li>No more staggered pixels: furniture now sits square to the block grid and every furniture box is snapped to whole block pixels, so its edges fall on the same pixel lines as the blocks; parts of people, animals, cars and decor are sized and placed in whole pixels too</li></ul><h4>v17.3 · Nov 25, 2026 — lights in the dark</h4><ul><li>New lighting system: up to 12 lights at a time, worked out per block pixel on everything (blocks, furniture, people, cars, glass), with realistic inverse-square falloff. Lights indoors stay in their building and outdoor lights don’t shine through walls into rooms</li><li>Everything that should glow now lights its surroundings: wired lamps, campfires (flickering), working street lamps after dark (a few flicker), headlights and tail lights on every car with someone in it or its lights left on (brake lights brighten), lit rooms in occupied homes at night with glowing windows, floodlights on garrisoned military bases, muzzle flashes, explosions and lightning strikes</li><li>Realistic touches: light halos around bright sources at night, glints of lamplight on wet ground in the rain, and eye adaptation — stepping from a dark room into daylight dazzles for a moment and your eyes slowly open up in the dark</li><li>New loot: road flares (gas stations, hardware stores, military bases). Strike one and drop it: it burns red for two minutes and lights the area, but the dead come to the light</li><li>New clothing: night-vision goggles (head slot, military bases). In the dark they switch on by themselves and turn the night bright green, running off your flashlight batteries</li><li>Pixel size corrected: the blocks’ real pixel is 1/16 m, not 1/32 m. Doors are redrawn at 16 x 32 block pixels and their slab is two pixels thick so the faces sit on the grid; signs, blood, glass, grass, road paint, body and vehicle textures and the shader grids now all match</li></ul><h4>v17.2 · Nov 25, 2026 — one pixel size</h4><ul><li>Everything now uses the blocks’ pixel size, 32 texture pixels a metre: people, zombies, animals, cars, tools, crates, beds, bags, decor, signs, blood, glass cracks, the windshield and the grass</li><li>Nothing is untextured any more: every flat-coloured part gets a pixel texture by what it is (painted metal, bare metal, plastic, rubber, wood, cloth); only glowing lamps stay plain</li><li>Things that stay put are textured from their world position, so their pixels sit on the same grid as the blocks around them. Things that move carry their pixels with them</li><li>Signs are redrawn at block resolution with crisp bitmap lettering and sit on the pixel grid (no more tilted signs)</li><li>Blood splats come in whole-metre decals snapped to the grid; grass and flowers are redrawn at twice the detail to match</li><li>Furniture grain, the flashlight’s pixels, pixel shadows and rain ripples were at half resolution (1/16 m) and now match the blocks (1/32 m)</li></ul><h4>v17.1 · Nov 25, 2026 — blocks to the horizon</h4><ul><li>The far view is now made of blocks: distant land is built from real block columns (1 m near, 2 m further out) in each block’s true texture colour, with flat tops and crisp sides; neighbouring columns of the same height and colour merge into one big block, so it stays light to draw. Trees show a leafy crown over a darker trunk, towns show their roads and rooftops</li><li>New doors: pixel-art doors at exactly the block pixel size, so they line up with the wall around them. The classic panel door in four paints plus five new styles: red barn door, steel security door, French glass door, craftsman door and rustic strap door</li><li>Up to 12 hotbar slots (keys 1–9, 0, − and =). New Tactical pants (10 pockets, military bases) and Utility overalls (12 pockets, rare in malls, or sew them); creative mode gets all 12</li></ul><h4>v17 · Nov 25, 2026 — far view</h4><ul><li>Far view: the world now reaches 4x your render distance. Past the loaded chunks a light, low-detail terrain mesh carries the hills, rivers, towns and treelines out to the horizon; it builds a few rows a frame so it never stutters (toggle it next to Render distance)</li><li>The flashlight lights up blocks too, not just furniture and people: every block, zombie, animal and car in the beam is lit in chunky pixels, and walls cast crisp shadows</li><li>Road paint is now part of the road blocks’ texture: lane lines, dashes, crosswalks and runway markings are drawn pixel-for-pixel into the asphalt, with no raised strips</li><li>Grass bends away from you as you walk through it and springs back along your trail; zombies, animals, people and cars push it too</li><li>Window trim no longer clips through chipped and broken blocks beside the window</li><li>Inventory: Close is in the top right, and tapping outside the panel closes it (also works for the trade and campfire panels)</li><li>Smoother: moving no longer re-scans the whole ray-traced lighting volume (only the new strip), the HUD only touches the page when something changes, and the flashlight casts a third fewer rays</li><li>Lighter: chunk meshes free their memory copy once they are on the graphics card, and each region drops its generation scratch data afterwards — memory growth while exploring fell by about two thirds</li><li>Quality of life: walk over loot bags to pick them up (setting in the menu), “+3 Ammo” pop-ups when you loot, hit and kill markers on the crosshair, a compass strip with your waypoint, the nearest military base and where you last died, and the map now marks military bases and your death spot</li><li>Fixed: soldiers are saved properly (a save with soldiers in it could break loading)</li></ul><h4>v16 · Nov 25, 2026 — the compounds</h4><ul><li>Corporate military bases out in the wilds: a walled compound with watchtowers, an HQ, barracks, an armory, a helipad and olive trucks, and the best loot in the game. About half are still held by a private security garrison that warns you off and opens fire inside the wall; shoot one and the whole unit comes for you. The rest were overrun and are full of the dead</li><li>Survivors now drive: some find a working car, run a few errands along the roads and park back home. Press Use on their car to drag them out (they won’t like it)</li><li>Survivors raid empty houses through the front door and come out with a full sack; bandit gangs build a log palisade round their camp, post by post</li><li>People find their way properly now: they path around walls, cars and furniture and open doors on the way instead of walking into them</li><li>Windshield wipers: Q (or the Bomb button) in a car sweeps the blood off the glass</li><li>Every car window cracks where it is hit: bullets, bat swings and side or rear impacts all leave spreading cracks on that pane</li><li>Porches line up with the block pixels: slab, posts, canopy and trim all sit on the 1/32 m texel grid</li><li>Creative: choose the weather from the menu (clear, rain, storm, fog, snow, or natural)</li><li>Developer mode tools: F2 heal, F3 +3 hours, F4 weather, F6 spawn zombie, F7 clear zombies, F8 teleport to crosshair, F9 god mode, F10 freeze time, plus menu buttons to go to a military base, spawn a car or survivor, a performance overlay and copy debug info; the readout now shows time, weather, what everyone is doing and nearby bases</li></ul><h4>v15.7 · Nov 25, 2026 — light &amp; chrome</h4><ul><li>Blood particles are red again (no more black specks)</li><li>Flashlight casts a perfect circle of light, ray-traced against the blocks and painted bright in chunky pixels — it stops at walls and leaves crisp shadows</li><li>Signs, posts, pumps, lamps, car bodies and other metal now carry a soft, blurry sky reflection that follows the time of day</li><li>Creative: sleep any time, anywhere, and a new “Sleep until morning” button in the menu skips straight to dawn</li></ul><h4>v15.6 · Nov 25, 2026 — ripples</h4><ul>
       <li>Rain ripples: wet ground and puddles now ripple with rings spreading from falling drops and a slow wind swell, and the ray-traced reflections bend and wobble through them.</li>
       <li>Stop signs have STOP printed flat on the face in pixel letters, with a grey metal back.</li>
       <li>Run and jump together however you like: push the touch stick to its edge to run, double-tap W to sprint, and a running jump keeps its speed in the air.</li></ul>
@@ -588,21 +599,32 @@ const BRANCH=[230,231,232,233,234,235],ELB=[],MEDB=[];{const a=.36,b=.64,c=.42,d
   // medium limbs (25 cm, between a log and a branch) for young trunks and the base of big trees' limbs: straight pieces along x, z, y
   {const m=.25,M=.75;for(const sh of[[[0,m,m,1,M,M]],[[m,m,0,M,M,1]],[[m,0,m,M,1,M]]]){const id=FREE.shift();SH[id]=sh;MEDB.push(id);BRANCH.push(id)}}
   for(const id of BRANCH){BCOL[id]=BCOL[B.LOG];HARD[id]=.12;DROP[id]='wood'}}
+// ---------------- kinds of wood: birch (white bark, pale planks), pine (red-brown bark, honey planks, needles) and maple (grey bark,
+// red-brown planks, red leaves), alongside the oak that was always there. Each has its own log, planks and leaves. Their ids are the
+// chipped-coal and chipped-iron shapes, which ore never used (ore breaks clean). They act like oak in every other way (BASE_OF)
+const WOODS=[{k:'birch',name:'Birch',log:100,plank:101,leaf:102,cl:0xd8d4c6,cp:0xd2b888,cf:0x6c9a40},{k:'pine',name:'Pine',log:103,plank:104,leaf:105,cl:0x6a3e28,cp:0xc49a5c,cf:0x2c4a34},
+  {k:'maple',name:'Maple',log:106,plank:107,leaf:108,cl:0x6e6660,cp:0xa86a48,cf:0xa83a24}],WOODID=new Set();
+for(const w of WOODS){for(const[id,base,col]of[[w.log,B.LOG,w.cl],[w.plank,B.PLANK,w.cp],[w.leaf,B.LEAF,w.cf]]){SH[id]=undefined;BASE_OF[id]=base;LVL[id]=0;BTOP[id]=1;BCOL[id]=col;HARD[id]=HARD[base];WOODID.add(id)}
+  DROP[w.log]=w.k+'wood';DROP[w.plank]=w.k+'plank';DROP[w.leaf]=null}
+for(let id=109;id<120;id++){SH[id]=undefined;BASE_OF[id]=B.COAL;LVL[id]=1}
+const PLANKS=['plank',...WOODS.map(w=>w.k+'plank')],LOGS=['wood',...WOODS.map(w=>w.k+'wood')];
+const woodBase=b=>WOODID.has(b)?BASE_OF[b]:b;
 // pick the branch piece joining direction p (toward where it came from) and n (where it goes; -1 = tip)
 function branchPiece(p,n,thin,med){if(n<0||(p>>1)===(n>>1)){const ax=p>>1,o=ax===0?0:ax===2?1:2;return med&&!thin?MEDB[o]:(thin?233:230)+o}
   if(thin&&(p>>1)!==1&&(n>>1)!==1)thin=0;return ELB[thin*36+p*6+n]}
 // pick a damaged variant of stage lvl (1-3) that faces outward: walls running along x show their ±z faces, walls along z their ±x faces
-function chipOf(b,x,y,z,lvl=1){const base=BASE_OF[b]||b,m=CHIPM.indexOf(base);if(m<0||isRub(b))return 0;const h=h3(x,y*7+3,z),alongX=solid(x+1,y,z)||solid(x-1,y,z),alongZ=solid(x,y,z+1)||solid(x,y,z-1);
+function chipOf(b,x,y,z,lvl=1){const base=BASE_OF[b]||b,m=CHIPM.indexOf(base);if(m<0||isRub(b)||WOODID.has(b)||base===B.COAL||base===B.IRON)return 0;const h=h3(x,y*7+3,z),alongX=solid(x+1,y,z)||solid(x-1,y,z),alongZ=solid(x,y,z+1)||solid(x,y,z-1);
   const set=lvl>=3?[9]:lvl===2?(base===B.ROOF?[8]:alongX&&!alongZ?[6,6,8]:alongZ&&!alongX?[7,7,8]:[6,7,8]):base===B.ROOF?[0,5,1,4]:alongX&&!alongZ?[0,1,2,5]:alongZ&&!alongX?[0,4,3,5]:[0,5];
   return CHIP0+m*CHN+set[(h*set.length)|0]}
 // damage a block one or more stages further; returns the new id (0 = it gives way)
 function worsen(b,x,y,z,lvl){if(lvl>3)return 0;if(lvl<=LVL[b])return b;return chipOf(b,x,y,z,lvl)||b}
 const rubOf=(b,x,z)=>{let m=RUBM.indexOf(BASE_OF[b]||b);if(m<0)m=0;return RUB0+m*3+((h3(x,5,z)*3)|0)};
-const MATS=[['plank',B.PLANK],['stone',B.STONE],['dirt',B.DIRT],['metal',B.METAL],['stairs',B.STPX]];
+const MATS=[['plank',B.PLANK],['stone',B.STONE],['dirt',B.DIRT],['metal',B.METAL],['stairs',B.STPX],...WOODS.map(w=>[w.k+'plank',w.plank])];
 // creative mode: every block, unlimited
-const CMATS=[['grass',B.GRASS],['dirt',B.DIRT],['stone',B.STONE],['coal',B.COAL],['iron',B.IRON],['conc',B.CONC],['asph',B.ASPH],['plank',B.PLANK],['log',B.LOG],['leaf',B.LEAF],['brick',B.BRICK],['metal',B.METAL],['glass',B.GLASS],['wall',B.WALL],['tile',B.TILEF],['roof',B.ROOF],['stairs',B.STPX],['frame',B.FRAME],['ladder',B.LADDER],['sludge',B.SLUDGE],['bedrock',B.BED],['gcap1',B.G25],['gcap2',B.G50],['gcap3',B.G75]];
+const CMATS=[['grass',B.GRASS],['dirt',B.DIRT],['stone',B.STONE],['coal',B.COAL],['iron',B.IRON],['conc',B.CONC],['asph',B.ASPH],['plank',B.PLANK],['log',B.LOG],['leaf',B.LEAF],...WOODS.flatMap(w=>[[w.k+'plank',w.plank],[w.k+'log',w.log],[w.k+'leaf',w.leaf]]),['brick',B.BRICK],['metal',B.METAL],['glass',B.GLASS],['wall',B.WALL],['tile',B.TILEF],['roof',B.ROOF],['stairs',B.STPX],['frame',B.FRAME],['ladder',B.LADDER],['sludge',B.SLUDGE],['bedrock',B.BED],['gcap1',B.G25],['gcap2',B.G50],['gcap3',B.G75]];
 const matList=p=>p.creative?CMATS:MATS,curMat=p=>{const L=matList(p);return L[p.mat%L.length]};
 const LABEL={mop:'Mop',flare:'Road flare',nvg:'Night-vision goggles',tactical:'Tactical pants',utility:'Utility overalls',rod:'Fishing rod',fish:'Raw fish',cookedfish:'Grilled fish',batfix:'Bat repair',water:'Bottled water',dirtywater:'Dirty water',bottle:'Empty bottle',soda:'Soda',splint:'Splint',pills:'Antibiotics',batteries:'Batteries',shorts:'Shorts',slacks:'Slacks',jeans:'Jeans',schoolbag:'School backpack',hikepack:'Hiking pack',milpack:'Military rucksack',cigs:'Cigarettes',weed:'Marijuana',lswitch:'Light switch',lamp:'Lamp',wire:'Wire',wheel:'Wheel',engine:'Engine',battery:'Car battery',carradio:'Car radio',wrench:'Wrench',frame:'Wood frame',ladder:'Ladder',sludge:'Sewer sludge',bedrock:'Bedrock',gcap1:'Grass (¼ step)',gcap2:'Grass (½ step)',gcap3:'Grass (¾ step)',scrip:'Scrip',saw:'Chainsaw',grass:'Grass',conc:'Concrete',asph:'Asphalt',log:'Log',leaf:'Leaves',brick:'Brick',glass:'Glass',wall:'Drywall',tile:'Tile',roof:'Roof',veg:'Vegetables',stew:'Meat stew',broth:'Bone broth',jerky:'Jerky',roast:'Roast veg',hotbeans:'Hot beans',tnt:'Dynamite',pipebomb:'Pipe bomb',bunk:'Bunk bed',tent:'Tent',stairs:'Stairs',bed:'Bed',fire:'Campfire',meat:'Raw meat',cooked:'Cooked meat',hide:'Hide',bone:'Bone',hardhat:'Hard hat',helmet:'Metal helmet',jacket:'Leather jacket',vest:'Police vest',hidecoat:'Hide coat',scrapvest:'Scrap armor',cargo:'Padded pants',riot:'Riot pants',spikes:'Spike trap',beartrap:'Bear trap',mine:'Tripwire bomb',ammo:'Ammo',scrap:'Scrap',cloth:'Cloth',fuel:'Fuel can',food:'Canned food',bandage:'Bandage',wood:'Wood',plank:'Planks',dirt:'Dirt',stone:'Stone',coal:'Coal',iron:'Iron ore',metal:'Metal plate',kit:'Repair kit'};
+for(const w of WOODS){LABEL[w.k+'wood']=w.name+' wood';LABEL[w.k+'plank']=w.name+' planks';LABEL[w.k+'log']=w.name+' log';LABEL[w.k+'leaf']=w.name+(w.k==='pine'?' needles':' leaves')}
 // towns: a large one in the middle, smaller ones scattered through the wilds
 const towns=[];
 function townAt(x,z,m){for(const t of towns)if(x>=t.x0-m&&x<=t.x1+m&&z>=t.z0-m&&z<=t.z1+m)return t;return null}
@@ -762,7 +784,7 @@ function restOfRegion(Rg){const X0=Rg.rx*RS,Z0=Rg.rz*RS,X1=X0+RS,Z1=Z0+RS;
     carSpots.push({x,z,yaw:(alongZ?0:Math.PI/2)+(rng()<.5?Math.PI:0)+R(-.15,.15),type:vt});i++;
   }
   // campsites: abandoned ones (a crate and a cold fire pit) and, later, bandit camps
-  for(let i=0,t=0;i<2&&t<60;t++){const x=RI(X0+20,X1-21),z=RI(Z0+20,Z1-21);if(inTown(x,z)||townDist(x,z)<30)continue;const ty=topY(x,z);if(ty!==hm(x,z)||get(x,ty,z)===B.LEAF)continue;
+  for(let i=0,t=0;i<2&&t<60;t++){const x=RI(X0+20,X1-21),z=RI(Z0+20,Z1-21);if(inTown(x,z)||townDist(x,z)<30)continue;const ty=topY(x,z);if(ty!==hm(x,z)||woodBase(get(x,ty,z))===B.LEAF)continue;
     campSpecs.push([x,z,0,rng()<.4?1:0]);i++}
   for(const T of mine)roadDecor(T); // last, so older saves' broken-decor indices still line up
   milBase(Rg); // after everything, on its own random stream, so it never shifts what older saves remember
@@ -785,7 +807,7 @@ function buildMil(x0,z0,x1,z1,gy){const M=6,manned=rng()<.5,xm=(x0+x1)>>1,name=p
     for(let y=Math.max(1,Math.min(h,t)-3);y<t;y++)setv(x,y,z,y<t-3?B.STONE:B.DIRT);setv(x,t,z,d?B.GRASS:B.CONC);for(let y=t+1;y<=Math.max(h,gy)+28;y++)if(get(x,y,z))setv(x,y,z,0)}
   // leaves left hanging from trees whose trunks were cut away
   for(let x=x0-M-6;x<=x1+M+6;x++)for(let z=z0-M-6;z<=z1+M+6;z++){if(x>=x0-M&&x<=x1+M&&z>=z0-M&&z<=z1+M)continue;
-    for(let y=gy-6;y<=gy+24;y++){if(get(x,y,z)!==B.LEAF)continue;let tr=false;for(let dx=-3;dx<=3&&!tr;dx++)for(let dz=-3;dz<=3&&!tr;dz++)for(let dy=-8;dy<=0;dy++)if(get(x+dx,y+dy,z+dz)===B.LOG){tr=true;break}if(!tr)setv(x,y,z,0)}}
+    for(let y=gy-6;y<=gy+24;y++){if(woodBase(get(x,y,z))!==B.LEAF)continue;let tr=false;for(let dx=-3;dx<=3&&!tr;dx++)for(let dz=-3;dz<=3&&!tr;dz++)for(let dy=-8;dy<=0;dy++)if(woodBase(get(x+dx,y+dy,z+dz))===B.LOG){tr=true;break}if(!tr)setv(x,y,z,0)}}
   for(const sp of furnSpecs)if(sp[1]>(x0-M)*VS&&sp[1]<(x1+M+1)*VS&&sp[3]>(z0-M)*VS&&sp[3]<(z1+M+1)*VS)sp[2]=-60;
   // perimeter wall: 2.5 m of concrete capped with steel, a gate in the south wall, tall gate posts
   const wallAt=(x,z)=>{for(let y=gy+1;y<=gy+5;y++)setv(x,y,z,B.CONC);setv(x,gy+6,z,B.METAL)};
@@ -1383,15 +1405,23 @@ function airport(T){const g=G,X=T.x0,Z=T.z0,rn=mulberry(rhash(X,Z,77)),livery=[0
   // cars left in the car park
   for(let i=0;i<10;i++){const x=(X+52+RI(0,24)*4)*VS,z=(rng()<.5?Z+84:Z+91)*VS;if(!carSpots.some(c=>Math.hypot(c.x-x,c.z-z)<3))carSpots.push({x,z,yaw:R(-.1,.1)+(rng()<.5?Math.PI:0),type:pickVType()})}
   for(let i=0;i<14;i++){const x=R(X,T.x1)*VS,z=R(Z,T.z1)*VS;splat({x,y:topW(x,z),z},R(.6,1.6))}}
+// which tree grows here: pines on high ground and in their own stands, birch groves, maples scattered through, oak elsewhere
+function treeSpecies(x,y,z){const st=h3(x>>5,7711,z>>5),r=h3(x,7712,z);if(y>G+14)return r<.7?2:r<.85?1:0;if(st<.22)return r<.75?2:0;if(st<.4)return r<.7?1:0;if(st<.5)return r<.6?3:0;return r<.12?3:r<.2?1:0}
 function tree(x,z){
   {const t=topY(x,z),tb=get(x,t,z);if(tb>=23&&tb<=25)setv(x,t,z,B.GRASS)}
   // three sizes: young (25 cm stem, thin limbs, small crown), normal (log trunk) and old (1 m trunk of 2x2 logs, flared roots, heavy limbs)
-  const h=topY(x,z),dead=rng()<.35,sz=rng(),kind=sz<.22?0:sz<.8?1:2,th=kind===0?RI(5,7):kind===1?RI(8,12):RI(12,16);
+  const h=topY(x,z),sp=treeSpecies(x,h,z),TW=sp?WOODS[sp-1]:null,LOGB=TW?TW.log:B.LOG,LEAFB=TW?TW.leaf:B.LEAF;
   const put=(a,b,c,v)=>{if(get(a,b,c)===0)setv(a,b,c,v)};
+  // pine: a tall straight log trunk under a cone of needles, ring after ring narrowing to a spike
+  if(sp===2){const th=RI(11,16),dead=rng()<.15;for(let i=1;i<=th;i++)setv(x,h+i,z,LOGB);if(dead){put(x,h+th+1,z,235);return}
+    const y0=h+Math.max(3,Math.round(th*.3)),top=h+th+2;
+    for(let y=y0;y<=top;y++){const f=(top-y)/(top-y0),R=.6+f*3.4+((y-y0)%3===0?.5:0);for(let dx=-4;dx<=4;dx++)for(let dz=-4;dz<=4;dz++){const d=Math.hypot(dx,dz);if(d<R&&(d<R-1||rng()<.75))put(x+dx,y,z+dz,LEAFB)}}
+    put(x,top+1,z,LEAFB);return}
+  const dead=rng()<(sp===1?.2:.35),sz=rng(),kind=sp===1?(sz<.3?0:1):sz<.22?0:sz<.8?1:2,th=sp===1?(kind===0?RI(6,8):RI(9,13)):kind===0?RI(5,7):kind===1?RI(8,12):RI(12,16);
   if(kind===0)for(let i=1;i<=th;i++)setv(x,h+i,z,MEDB[2]);
-  else if(kind===1)for(let i=1;i<=th;i++)setv(x,h+i,z,B.LOG);
-  else{for(let i=1;i<=th;i++)for(let a=0;a<2;a++)for(let b=0;b<2;b++)if(i<=th-3||(a===0&&b===0))setv(x+a,h+i,z+b,B.LOG);
-    for(const[a,b]of[[-1,0],[2,0],[-1,1],[2,1],[0,-1],[0,2],[1,-1],[1,2]])if(rng()<.55&&get(x+a,h,z+b))put(x+a,h+1,z+b,B.LOG)}
+  else if(kind===1)for(let i=1;i<=th;i++)setv(x,h+i,z,LOGB);
+  else{for(let i=1;i<=th;i++)for(let a=0;a<2;a++)for(let b=0;b<2;b++)if(i<=th-3||(a===0&&b===0))setv(x+a,h+i,z+b,LOGB);
+    for(const[a,b]of[[-1,0],[2,0],[-1,1],[2,1],[0,-1],[0,2],[1,-1],[1,2]])if(rng()<.55&&get(x+a,h,z+b))put(x+a,h+1,z+b,LOGB)}
   // each limb is a path of cells; every cell gets the straight or curved piece that joins its neighbours so limbs never break apart.
   // Limbs taper: big trees start them medium, then thick, then thin at the tip
   const DI=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
@@ -1407,11 +1437,12 @@ function tree(x,z){
         thin=kind===0||(i>=path.length-(dead?2:1)&&i>0),med=kind===2&&i<Math.min(2,path.length-1);
       setv(px,py,pz,branchPiece(kin^1,out,thin,med))}
     [cx,cy,cz]=path[path.length-1];
-    if(!dead)for(let a=-1;a<=1;a++)for(let b=0;b<=1;b++)for(let c=-1;c<=1;c++)if(rng()<.7)put(cx+a,cy+b,cz+c,B.LEAF)}
-  if(dead){const top=kind===2?B.LOG:kind===0?MEDB[2]:232;put(x,h+th+1,z,top);put(x,h+th+2,z,235);return}
-  const R2=kind===0?8:kind===1?20:34,RX=kind===2?6:4,ox=kind===2?.5:0;
+    if(!dead)for(let a=-1;a<=1;a++)for(let b=0;b<=1;b++)for(let c=-1;c<=1;c++)if(rng()<.7)put(cx+a,cy+b,cz+c,LEAFB)}
+  if(dead){const top=kind===2?LOGB:kind===0?MEDB[2]:232;put(x,h+th+1,z,top);put(x,h+th+2,z,235);return}
+  // crowns: oak round, birch narrow and tall, maple broad and low
+  const R2=(kind===0?8:kind===1?20:34)*(sp===1?.6:sp===3?1.35:1),RX=kind===2||sp===3?6:4,ox=kind===2?.5:0,VY=sp===1?.75:sp===3?2.2:1.6;
   for(let dx=-RX;dx<=RX+(kind===2?1:0);dx++)for(let dy=-2;dy<=(kind===2?5:4);dy++)for(let dz=-RX;dz<=RX+(kind===2?1:0);dz++){
-    const ex=dx-ox,ez=dz-ox;if(ex*ex+dy*dy*1.6+ez*ez<R2&&rng()<.85&&get(x+dx,h+th+dy,z+dz)===0)setv(x+dx,h+th+dy,z+dz,B.LEAF)}
+    const ex=dx-ox,ez=dz-ox;if(ex*ex+dy*dy*VY+ez*ez<R2&&rng()<.85&&get(x+dx,h+th+dy,z+dz)===0)setv(x+dx,h+th+dy,z+dz,LEAFB)}
 }
 
 // ---------------- renderer + scene
@@ -1593,11 +1624,11 @@ const flBlock=i=>`if(flOn${i}>0.){vec3 Lv=Pq-flPos${i};float Ld=length(Lv);vec3 
   if(fz>.3&&Ld<flRange){float u=dot(L,flRt${i})/fz/flTan,w=dot(L,flUp${i})/fz/flTan;
     if(u*u+w*w<=1.){float hd=texture2D(flMap${i},vec2(u,w)*.5+.5).r*flRange;
       if(Ld<=hd+.3+Ld*.04){float nl=max(abs(dot(normalize(vPxN),-L)),.3);float lv=max(floor(clamp(nl*(1.15/(1.+Ld*Ld*.01)),0.,1.)*6.+.35),1.)/6.;flAdd+=vec3(1.,.95,.8)*flOn${i}*lv*1.7;}}}}`;
-const FL_ADD=`{vec3 Pq=(floor(vPxW*16.-normalize(vPxN)*.01)+.5)/16.;vec3 flAdd=vec3(0.);${flBlock(0)}${flBlock(1)}gl_FragColor.rgb+=diffuseColor.rgb*flAdd;if(dlN>.5){vec3 dd=vec3(0.),ds=vec3(0.);dlLight(Pq,normalize(vPxN),dd,ds);gl_FragColor.rgb+=diffuseColor.rgb*dd+ds;}}`;
+const FL_ADD=`{vec3 Pq=(floor(vPxW*16.-normalize(vPxN)*.01)+.5)/16.;vec3 flAdd=vec3(0.);${flBlock(0)}${flBlock(1)}float flK=1.;\n#ifdef FL_GLASS\nflK=.16;\n#endif\ngl_FragColor.rgb+=diffuseColor.rgb*flAdd*flK;if(dlN>.5){vec3 dd=vec3(0.),ds=vec3(0.);dlLight(Pq,normalize(vPxN),dd,ds);gl_FragColor.rgb+=(diffuseColor.rgb*dd+ds)*flK;}}`;
 const _fd=new V3(),_fr=new V3(),_fu=new V3(),_rd=new V3(),_fs=new V3();
 // the beam's ray: only whole, solid, opaque cubes stop it. Glass, leaves, ladders, water and shaped blocks (steps, slabs, limbs, chipped
 // corners) let it through, so whatever shows through or around them is lit too
-function flRay(O,d,max){const h=rayVoxIf(O,d,max,b=>b&&b!==B.GLASS&&b!==B.LEAF&&b!==B.LADDER&&b!==B.FURN&&b!==255&&!SH[b]&&!BRANCH.includes(b));return h?h.t:-1}
+function flRay(O,d,max){const h=rayVoxIf(O,d,max,b=>b&&b!==B.GLASS&&woodBase(b)!==B.LEAF&&b!==B.LADDER&&b!==B.FURN&&b!==255&&!SH[b]&&!BRANCH.includes(b));return h?h.t:-1}
 let flSweepT=0;
 // ---------------- one pixel size for everything: 32 texture pixels a metre, like the blocks.
 // Every opaque mesh gets a pixel texture (untextured colours get one by kind: paint, metal, plastic, rubber, wood, cloth) and UVs measured in metres.
@@ -1854,9 +1885,9 @@ for(const f of FACES){const c=f[3],a=[0,1,2].map(i=>c[1][i]-c[0][i]),b=[0,1,2].m
 const BRGB=BCOL.map(c=>{const k=new THREE.Color(c);return[k.r,k.g,k.b]});
 // ---------------- procedural texture atlas (16px tiles, drawn at load)
 // 32px tiles: each tile spans a 2x2 group of voxels (1 m), every voxel face shows one quarter, so patterns run across blocks
-const TS=32,ACOLS=8,AROWS=4,AW=TS*ACOLS,AH=TS*AROWS;
+const TS=32,ACOLS=8,AROWS=8,AW=TS*ACOLS,AH=TS*AROWS;
 const atlasC=document.createElement('canvas');atlasC.width=AW;atlasC.height=AH;
-const TILE={curbTop:26,curbSide:27,water:25,grassTop:0,grassSide:1,dirt:2,stone:3,coal:4,iron:5,conc:6,asph:7,plank:8,bark:9,logTop:10,leaf:11,brick:12,metal:13,bed:14,glass:15,frame:16,sludge:17,wall:18,tilef:19,dirtTop:20,asphTop:21,roofTop:22,roofSide:23,trim:24};
+const TILE={curbTop:26,curbSide:27,water:25,grassTop:0,grassSide:1,dirt:2,stone:3,coal:4,iron:5,conc:6,asph:7,plank:8,bark:9,logTop:10,leaf:11,brick:12,metal:13,bed:14,glass:15,frame:16,sludge:17,wall:18,tilef:19,dirtTop:20,asphTop:21,roofTop:22,roofSide:23,trim:24,bBark:32,bTop:33,bPlank:34,bLeaf:35,pBark:36,pTop:37,pPlank:38,pLeaf:39,mBark:40,mTop:41,mPlank:42,mLeaf:43};
 let drawSeason=()=>{},realism=()=>{},down8=()=>{};
 {
   const ctx=atlasC.getContext('2d'),tr=mulberry(seed^0x5eed),rr=()=>tr(),A=TS*TS/256;
@@ -1946,7 +1977,9 @@ let drawSeason=()=>{},realism=()=>{},down8=()=>{};
       mod(TILE.grassSide,(x,y)=>.84+fb(x,y,88)*.3);
     }};
   // painted trim: clean enamel with faint grain
-  for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const k=.93+fb(x*.3,y,91)*.08+(x%5===0?-.02:0);px(TILE.trim,x,y,216*k,212*k,204*k)}
+  // painted wood trim, drawn in whole block pixels (2x2 here, one pixel after the atlas is halved): long grain streaks, a few darker
+  // seams where boards meet and the odd knot showing through the paint, strong enough to read as texture at a glance
+  for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const X=x>>1,Y=y>>1,st=h3(X,9101,Y>>2),k=.84+st*.12+(h3(X,9102,Y)<.12?-.06:0)+(Y%8===7?-.09:0)+(X%8===0?.05:0)+(h3(X>>1,9103,Y>>1)<.03?-.14:0);px(TILE.trim,x,y,216*k,212*k,204*k)}
   realism('static');
   // 8x8 pixels per block: point-sample every other texel (odd ones, so 1-px mortar lines and board joints survive) into 2x2 blocks
   down8=()=>{const im=ctx.getImageData(0,0,AW,AH),d=im.data;if(!d||!d.length)return;for(let y=0;y<AH;y+=2)for(let x=0;x<AW;x+=2){const s=((y+1)*AW+x+1)*4;for(const[dx,dy]of[[0,0],[1,0],[0,1]]){const o=((y+dy)*AW+x+dx)*4;d[o]=d[s];d[o+1]=d[s+1];d[o+2]=d[s+2];d[o+3]=d[s+3]}}ctx.putImageData(im,0,0)};
@@ -1968,6 +2001,27 @@ let drawSeason=()=>{},realism=()=>{},down8=()=>{};
     if(s===2)specks(TILE.asphTop,8,150,80,30);
     noise(TILE.roofTop,64,62,60,.3);specks(TILE.roofTop,30,96,92,86,.2);specks(TILE.roofTop,14,40,38,36,.1);if(s===3)snow(TILE.roofTop,.96);if(s===2)specks(TILE.roofTop,8,160,80,30);
     realism('season');
+    // the other woods, made from the oak tiles: same grain and pattern, their own colours, plus birch's black marks, pine's bark
+    // plates and evergreen needles, and maple's red leaves (orange in autumn)
+    {const get=t=>ctx.getImageData((t%ACOLS)*TS,((t/ACOLS)|0)*TS,TS,TS),lum=d=>{let s=0;for(let i=0;i<d.length;i+=4)s+=d[i]*.3+d[i+1]*.59+d[i+2]*.11;return s/(d.length/4)||1};
+      const recol=(src,dst,col,ex)=>{const im=get(src),d=im.data,L=lum(d);for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const o=(y*TS+x)*4,l=(d[o]*.3+d[o+1]*.59+d[o+2]*.11)/L;let c=col(l,x,y,d[o],d[o+1],d[o+2]);if(ex)c=ex(c,x,y)||c;d[o]=Math.min(255,c[0]);d[o+1]=Math.min(255,c[1]);d[o+2]=Math.min(255,c[2])}
+        ctx.putImageData(im,(dst%ACOLS)*TS,((dst/ACOLS)|0)*TS)};
+      const k=(c,l,a=1)=>[c[0]*(1+(l-1)*a),c[1]*(1+(l-1)*a),c[2]*(1+(l-1)*a)];
+      // birch: chalk-white bark with short black dashes running round the trunk
+      recol(TILE.bark,TILE.bBark,l=>k([214,210,198],l,.35),(c,x,y)=>{const X=x>>1,Y=y>>1;return h3(X>>1,7301,Y)<.13||h3(X>>2,7302,Y>>1)<.05?[38,36,34]:null});
+      recol(TILE.logTop,TILE.bTop,(l,x,y,r,g,b)=>[r*1.3+20,g*1.3+18,b*1.25+12]);
+      recol(TILE.plank,TILE.bPlank,l=>k([222,200,152],l,.9));
+      recol(TILE.leaf,TILE.bLeaf,(l,x,y,r,g,b)=>s===2?[r*1.25+30,g*1.15+20,b*.6]:[r*1.1+12,g*1.22+16,b*.8]);
+      // pine: red-brown bark in plates, honey planks, needles that stay dark green all year (snow on top in winter)
+      recol(TILE.bark,TILE.pBark,l=>k([110,62,40],l,.8),(c,x,y)=>{const X=x>>1,Y=y>>1;return(Y+((X>>1)&1)*2)%5===0||h3(X>>1,7311,Y>>2)<.1?[58,32,22]:null});
+      recol(TILE.logTop,TILE.pTop,(l,x,y,r,g,b)=>[r*1.25+10,g*1.05,b*.85]);
+      recol(TILE.plank,TILE.pPlank,l=>k([206,160,96],l,.9));
+      recol(TILE.leaf,TILE.pLeaf,(l,x,y)=>{if(s===3&&h3(x>>1,7321,y>>1)<.45)return[226,232,238];const v=.7+h3(x>>1,7322,y>>1)*.5;return[34*v,70*v,52*v]});
+      // maple: grey-brown smooth bark, red-brown planks, red leaves (fiery orange in autumn, pale pink in spring)
+      recol(TILE.bark,TILE.mBark,l=>k([112,102,94],l,.6));
+      recol(TILE.logTop,TILE.mTop,(l,x,y,r,g,b)=>[r*1.2+14,g*.95,b*.9]);
+      recol(TILE.plank,TILE.mPlank,l=>k([176,104,72],l,.9));
+      recol(TILE.leaf,TILE.mLeaf,(l,x,y,r,g,b)=>{if(s===3)return[r,g,b];const v=.75+h3(x>>1,7331,y>>1)*.45,C=s===2?[214,96,30]:s===0?[214,120,130]:[168,42,32];return[C[0]*v,C[1]*v,C[2]*v]})}
     down8();
   };
   drawSeason(1);
@@ -1980,7 +2034,8 @@ const TILE_OF=[];{const T=TILE,all=t=>[t,t,t,t,t,t],top=(s,t)=>[s,s,t,s,s,s];
   TILE_OF[B.LOG]=[T.bark,T.bark,T.logTop,T.logTop,T.bark,T.bark];TILE_OF[B.LEAF]=all(T.leaf);TILE_OF[B.BRICK]=all(T.brick);TILE_OF[B.METAL]=all(T.metal);
   TILE_OF[B.BED]=all(T.bed);TILE_OF[B.GLASS]=all(T.glass);TILE_OF[255]=all(T.water);TILE_OF[B.FRAME]=all(T.frame);TILE_OF[B.SLUDGE]=all(T.sludge);TILE_OF[B.DOOR]=all(T.plank);TILE_OF[B.LADDER]=all(T.plank);
   TILE_OF[B.WALL]=all(T.wall);TILE_OF[B.TILEF]=[T.tilef,T.tilef,T.tilef,T.plank,T.tilef,T.tilef];TILE_OF[B.ROOF]=[T.roofSide,T.roofSide,T.roofTop,T.conc,T.roofSide,T.roofSide];
-  for(let b=23;b<=25;b++)TILE_OF[b]=TILE_OF[B.GRASS];for(let b=26;b<=29;b++)TILE_OF[b]=all(T.plank);for(let b=CHIP0;b<RUB0+RUBN;b++)TILE_OF[b]=TILE_OF[BASE_OF[b]];for(const b of BRANCH)TILE_OF[b]=all(T.bark)}
+  for(let b=23;b<=25;b++)TILE_OF[b]=TILE_OF[B.GRASS];for(let b=26;b<=29;b++)TILE_OF[b]=all(T.plank);for(let b=CHIP0;b<RUB0+RUBN;b++)TILE_OF[b]=TILE_OF[BASE_OF[b]];for(const b of BRANCH)TILE_OF[b]=all(T.bark);
+  for(const[w,bk,tp,pl,lf]of[[WOODS[0],T.bBark,T.bTop,T.bPlank,T.bLeaf],[WOODS[1],T.pBark,T.pTop,T.pPlank,T.pLeaf],[WOODS[2],T.mBark,T.mTop,T.mPlank,T.mLeaf]]){TILE_OF[w.log]=[bk,bk,tp,tp,bk,bk];TILE_OF[w.plank]=all(pl);TILE_OF[w.leaf]=all(lf)}}
 const FACE_UV=[[2,1],[2,1],[0,2],[0,2],[0,1],[0,1]]; // which axes give (u,v) on each face
 // uv for corner c of a face on voxel (x,y,z): pick the quarter of the 1 m tile from the voxel's parity
 function quv(tile,fi,c,x,y,z){const a=FACE_UV[fi],P=[x,y,z],u=((P[a[0]]&1)+c[a[0]])/2,v=((P[a[1]]&1)+c[a[1]])/2,tx=tile%ACOLS,ty=(tile/ACOLS)|0;
@@ -2034,7 +2089,7 @@ pxShadows(grassMat);
 // grass casts shadows too: a depth material with the same cut-out and sway, so blades throw pixel shadows that move with the wind
 const grassDepth=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking,map:grassTex,alphaTest:.5,side:THREE.DoubleSide});
 grassDepth.onBeforeCompile=sh=>{sh.uniforms.time=grassTime;sh.vertexShader='uniform float time;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nfloat sw=uv.y>.5?1.:0.;transformed.x+=sin(time*1.7+position.x*.6+position.z*.4)*.2*sw;transformed.z+=cos(time*1.3+position.x*.45)*.14*sw;')};
-const gmat=new THREE.MeshLambertMaterial({map:atlas,color:0xcfe6ee,transparent:true,opacity:.8,depthWrite:false});
+const gmat=new THREE.MeshLambertMaterial({map:atlas,color:0xcfe6ee,transparent:true,opacity:.8,depthWrite:false});gmat.defines={FL_GLASS:1};
 gmat.onBeforeCompile=sh=>{if(typeof FLU==='undefined')return;Object.assign(sh.uniforms,FLU);
   sh.vertexShader='varying vec3 vGW,vPxW,vPxN;\n'+sh.vertexShader.replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvGW=(modelMatrix*vec4(transformed,1.)).xyz;vPxW=vGW;vPxN=normalize(mat3(modelMatrix)*objectNormal);');
   sh.fragmentShader='varying vec3 vGW,vPxW,vPxN;\n'+FL_GLSL+sh.fragmentShader.replace('gl_FragColor = vec4( outgoingLight, diffuseColor.a );',
@@ -2068,12 +2123,15 @@ function groundBlend(b,x,y,z){const me=b===2?2:1;let other=0;
     const v=n?Math.round(o/n*255):0;qB[cz*2+cx]=v;if(v)any=1}
   if(any)qBT=(me===2?TILE.grassTop:TILE.dirtTop)+1}
 function quad(x,y,z,ox,oz,fi,bx,tile,cr,cg,cb,s,vs=0){
-  if(mv+4>mCap)mGrow();const f=FACES[fi],a0=FACE_UV[fi][0],a1=FACE_UV[fi][1],P=[x,y,z],pu=P[a0]&1,pv=P[a1]&1,tx=tile%ACOLS,ty=(tile/ACOLS)|0;
+  if(mv+4>mCap)mGrow();const f=FACES[fi],a0=FACE_UV[fi][0],a1=FACE_UV[fi][1],P=[x,y,z],tx=tile%ACOLS,ty=(tile/ACOLS)|0;
+  // a face that sticks out past its block (trim) takes its texture from the next block over, so its pixels keep the world grid
+  const su=bx[a0]>=1?-1:bx[a0+3]<=0?1:0,sv=bx[a1]>=1?-1:bx[a1+3]<=0?1:0;
+  const pu=(P[a0]-su)&1,pv=(P[a1]-sv)&1;
   for(let c=0;c<4;c++){const q=f[3][c],fr=[q[0]?bx[3]:bx[0],q[1]?bx[4]:bx[1],q[2]?bx[5]:bx[2]],o3=(mv+c)*3,o2=(mv+c)*2;
     mP[o3]=Math.round((x-ox+1+fr[0])*16);mP[o3+1]=Math.round((y+fr[1])*16);mP[o3+2]=Math.round((z-oz+1+fr[2])*16);
     mN[o3]=f[0]*127;mN[o3+1]=f[1]*127;mN[o3+2]=f[2]*127;mC[o3]=Math.min(255,cr*s*255);mC[o3+1]=Math.min(255,cg*s*255);mC[o3+2]=Math.min(255,cb*s*255);
     // texture coords stay inside the block's own tile, even for trim that sticks out past the block face (else it samples the neighbouring atlas tile)
-    const fu=fr[a0]<0?0:fr[a0]>1?1:fr[a0],fv=fr[a1]<0?0:fr[a1]>1?1:fr[a1],u=(pu+fu)/2,vv=(pv+fv+(a1===1?vs:0))/2;mU[o2]=((tx*TS+.03+u*(TS-.06))/AW)*65535;mU[o2+1]=(1-(ty*TS+.03+(1-vv)*(TS-.06))/AH)*65535}
+    const gu=fr[a0]+su,gv=fr[a1]+sv,fu=gu<0?0:gu>1?1:gu,fv=gv<0?0:gv>1?1:gv,u=(pu+fu)/2,vv=(pv+fv+(a1===1?vs:0))/2;mU[o2]=((tx*TS+.03+u*(TS-.06))/AW)*65535;mU[o2+1]=(1-(ty*TS+.03+(1-vv)*(TS-.06))/AH)*65535}
   {const bt=fi===2?qBT:0;for(let c=0;c<4;c++){mT[mv+c]=bt;for(let j=0;j<4;j++)mB[(mv+c)*4+j]=bt?qB[j]:0}}
   mI[mi]=mv;mI[mi+1]=mv+1;mI[mi+2]=mv+2;mI[mi+3]=mv;mI[mi+4]=mv+2;mI[mi+5]=mv+3;mi+=6;mv+=4;
 }
@@ -2204,18 +2262,18 @@ function lodPalette(){const T=atlasC.getContext('2d').getImageData(0,0,AW,AH).da
 // top, out[4] crown bottom, 0 = none), from the real world when it is loaded, otherwise from the terrain generator (plus the town
 // plans, rough buildings and treelines so the horizon isn't bare). Trunks found in the cell go into T as [x0,z0,x1,z1,bottom,top]
 // at their real width (a 25 cm stem, a 1-block log or a 2x2 old trunk), not the width of the cell
-const lodFar=new Map(),TREEB=new Set([B.LOG,B.LEAF,...BRANCH]),TRUNKB=new Set([B.LOG,MEDB[2]]);
+const lodFar=new Map(),TREEB=new Set([B.LOG,B.LEAF,...BRANCH,...WOODS.flatMap(w=>[w.log,w.leaf])]),TRUNKB=new Set([B.LOG,MEDB[2],...WOODS.map(w=>w.log)]),LEAFB=new Set([B.LEAF,...WOODS.map(w=>w.leaf)]);
 function lodGround(x,y,z){while(y>0&&(!solid(x,y,z)||TREEB.has(BASE_OF[get(x,y,z)]||get(x,y,z)))&&get(x,y,z)!==255)y--;return y}
-function lodSample(x,z,out,cs,T){out[3]=out[4]=0;
+function lodSample(x,z,out,cs,T){out[3]=out[4]=out[5]=0;
   if(inWin(x,z)){let y=Math.min(H-1,(hm(x,z)|0)+(townAt(x,z,2)?60:22));while(y>0&&!solid(x,y,z)&&get(x,y,z)!==255)y--;let b=get(x,y,z);b=BASE_OF[b]||b;
-    if(TREEB.has(b)&&!townAt(x,z,0)){let lo=0;for(let t=y;t>0;t--){const c=get(x,t,z);if(c===B.LEAF)lo=t;else if(c&&!BRANCH.includes(c)&&c!==B.LOG)break}
+    if(TREEB.has(b)&&!townAt(x,z,0)){let lo=0;for(let t=y;t>0;t--){const c=get(x,t,z);if(LEAFB.has(c)){lo=t;if(!out[5])out[5]=c}else if(c&&!BRANCH.includes(c)&&!TRUNKB.has(c))break}
       const gy=lodGround(x,y,z);if(lo>gy){out[3]=y+1;out[4]=lo}y=gy;b=get(x,y,z);b=BASE_OF[b]||b}
     if(b>=23&&b<=25)b=1;if(SH[b]&&b!==255)b=B.PLANK;
     out[0]=y+1;out[1]=b;out[2]=b===1?Math.min(3,Math.max(0,Math.round((gpatch(x,z)[1]-.86)/.06))):0;
     if(T){const h0=cs>>1,hit=[];for(let dz=-h0;dz<cs-h0;dz++)for(let dx=-h0;dx<cs-h0;dx++){const X=x+dx,Z=z+dz,yy=(hm(X,Z)|0)+4,c=get(X,yy,Z);
-        if(TRUNKB.has(c)&&!townAt(X,Z,0)){let t=yy,u=yy;while(TRUNKB.has(get(X,t-1,Z)))t--;while(TRUNKB.has(get(X,u+1,Z)))u++;hit.push([X,Z,t,u+1,c===B.LOG?0:.25])}}
+        if(TRUNKB.has(c)&&!townAt(X,Z,0)){let t=yy,u=yy;while(TRUNKB.has(get(X,t-1,Z)))t--;while(TRUNKB.has(get(X,u+1,Z)))u++;hit.push([X,Z,t,u+1,c===MEDB[2]?.25:0,c===MEDB[2]?B.LOG:c])}}
       if(hit.length){let ax=1e9,az=1e9,bx=-1e9,bz=-1e9,yb=1e9,yt=0;for(const q of hit){ax=Math.min(ax,q[0]);az=Math.min(az,q[1]);bx=Math.max(bx,q[0]+1);bz=Math.max(bz,q[1]+1);yb=Math.min(yb,q[2]);yt=Math.max(yt,q[3])}
-        if(hit.length>1&&hit.length===(bx-ax)*(bz-az)&&hit.every(q=>!q[4]))T.push([ax,az,bx,bz,yb,yt]);else for(const q of hit)T.push([q[0]+q[4],q[1]+q[4],q[0]+1-q[4],q[1]+1-q[4],q[2],q[3]])}}
+        if(hit.length>1&&hit.length===(bx-ax)*(bz-az)&&hit.every(q=>!q[4]))T.push([ax,az,bx,bz,yb,yt,hit[0][5]]);else for(const q of hit)T.push([q[0]+q[4],q[1]+q[4],q[0]+1-q[4],q[1]+1-q[4],q[2],q[3],q[5]])}}
     return}
   const t=townAt(x,z,0);out[2]=0;
   if(t&&!t.air){if(isRoad(x,z)){out[0]=G+1;out[1]=B.ASPH;return}const lx=Math.floor((x-t.x0)/14),lz=Math.floor((z-t.z0)/14),h=h3(lx,913,lz),e=((x-t.x0)%14+14)%14,f=((z-t.z0)%14+14)%14;
@@ -2225,8 +2283,8 @@ function lodSample(x,z,out,cs,T){out[3]=out[4]=0;
   if(cv!==undefined){const lo=cv%524288,hi=Math.floor(cv/524288);out[0]=lo>>12;out[1]=(lo>>2)&1023;out[2]=lo&3;out[3]=hi&127;out[4]=hi>>7}
   else{lodNat(x,z,out);if(lodFar.size>300000)lodFar.clear();lodFar.set(ck,(out[0]<<12|out[1]<<2|out[2])+(out[3]|out[4]<<7)*524288)}
   // the generator's treeline: one trunk per 4x4 patch with a crown, a block wide, standing in whichever cell holds it
-  if(T&&out[3]){const px=x>>2,pz=z>>2,r=h3(px,4093,pz),tx=px*4+1+(r<.5?0:1),tz=pz*4+1+((r*4|0)&1),h0=cs>>1;
-    if(tx>=x-h0&&tx<x-h0+cs&&tz>=z-h0&&tz<z-h0+cs)T.push([tx,tz,tx+1,tz+1,out[0],out[4]])}}
+  if(out[3]){const px=x>>2,pz=z>>2,sp=treeSpecies(px*4+1,out[0]-1,pz*4+1),tw=sp?WOODS[sp-1]:null;out[5]=tw?tw.leaf:B.LEAF;
+    if(T){const r=h3(px,4093,pz),tx=px*4+1+(r<.5?0:1),tz=pz*4+1+((r*4|0)&1),h0=cs>>1;if(tx>=x-h0&&tx<x-h0+cs&&tz>=z-h0&&tz<z-h0+cs)T.push([tx,tz,tx+1,tz+1,out[0],out[4],tw?tw.log:B.LOG])}}}
 function lodNat(x,z,out){out[2]=out[3]=out[4]=0;
   const n=natH(x,z),h=Math.floor(n.hf);if(n.wl&&h<n.wl){out[0]=n.wl;out[1]=255;return}
   if(n.mm>.2&&h>G+18){out[0]=h+1;out[1]=B.STONE;return}
@@ -2261,26 +2319,26 @@ function* lodLevel(J,L){const{cs,n,x0,z0}=L,Hh=L.h,K=L.k,CT=L.ct,CB=L.cb,P=J.P,N
         if(ok&&run&&run.top===top&&run.bot===bot&&run.k===k&&run.e===t-1)run.e=t;else{flush();if(ok)run={s:t,e:t,top,bot,k}}}
       flush();yield}}
   // crowns: tops, undersides where they float, and the parts of their sides that no neighbouring crown or ground covers
-  const LK=B.LEAF*4,crown=a=>Hh[a]>=0&&CT[a]>0;
-  yield* rects(CT,()=>LK,crown,1,LOD_TOP);
-  yield* rects(CB,()=>LK,a=>crown(a)&&CB[a]>Hh[a],-1,LOD_SIDE);
+  const CK=L.ck,LKa=a=>CK[a]*4,crown=a=>Hh[a]>=0&&CT[a]>0;
+  yield* rects(CT,LKa,crown,1,LOD_TOP);
+  yield* rects(CB,LKa,a=>crown(a)&&CB[a]>Hh[a],-1,LOD_SIDE);
   for(let j=0;j<n;j++){for(let i=0;i<n;i++){const a=i+j*n;if(!crown(a))continue;
     for(const[di,dj]of[[1,0],[-1,0],[0,1],[0,-1]]){const b=at(i+di,j+dj);let segs=[[Math.max(CB[a],0),CT[a]]];
       const cut=(l,h)=>{const o=[];for(const[s,e]of segs){if(h<=s||l>=e){o.push([s,e]);continue}if(l>s)o.push([s,l]);if(h<e)o.push([h,e])}segs=o};
       if(b>=0&&Hh[b]>=0){cut(-1e9,Hh[b]);if(CT[b]>0)cut(CB[b],CT[b])}
-      for(const[s,e]of segs){if(e<=s)continue;if(di)wall(di,0,x0+(i+(di>0?1:0))*cs,z0+j*cs,z0+(j+1)*cs,e,s,LK);else wall(0,dj,z0+(j+(dj>0?1:0))*cs,x0+i*cs,x0+(i+1)*cs,e,s,LK)}}}
+      const LK=CK[a]*4;for(const[s,e]of segs){if(e<=s)continue;if(di)wall(di,0,x0+(i+(di>0?1:0))*cs,z0+j*cs,z0+(j+1)*cs,e,s,LK);else wall(0,dj,z0+(j+(dj>0?1:0))*cs,x0+i*cs,x0+(i+1)*cs,e,s,LK)}}}
     yield}
   // trunks at their own width, from the ground up into the crown (dead trees get a cut top)
-  const TK=B.LOG*4;let c=0;
-  for(const[ax,az,bx,bz,yb,yt]of L.T){if(yt<=yb)continue;wall(1,0,bx,az,bz,yt,yb,TK);wall(-1,0,ax,az,bz,yt,yb,TK);wall(0,1,bz,ax,bx,yt,yb,TK);wall(0,-1,az,ax,bx,yt,yb,TK);
+  let c=0;
+  for(const[ax,az,bx,bz,yb,yt,tid]of L.T){if(yt<=yb)continue;const TK=(tid||B.LOG)*4;wall(1,0,bx,az,bz,yt,yb,TK);wall(-1,0,ax,az,bz,yt,yb,TK);wall(0,1,bz,ax,bx,yt,yb,TK);wall(0,-1,az,ax,bx,yt,yb,TK);
     quad(ax,yt,az,ax,yt,bz,bx,yt,bz,bx,yt,az,0,1,0,LOD_TOP,TK*3);if((++c&255)===0)yield}}
 function lodStart(cx,cz){const RF=Math.round(farView()/VS),hole=Math.max(0,RD*CS-6),RA=Math.min(RF,Math.max(hole+48,200));lodPalette();
-  const mk=(cs,R)=>{const n=Math.ceil(2*R/cs);return{cs,n,x0:cx-Math.floor(n/2)*cs,z0:cz-Math.floor(n/2)*cs,h:new Int16Array(n*n),k:new Uint16Array(n*n),ct:new Int16Array(n*n),cb:new Int16Array(n*n),T:[],row:0}};
+  const mk=(cs,R)=>{const n=Math.ceil(2*R/cs);return{cs,n,x0:cx-Math.floor(n/2)*cs,z0:cz-Math.floor(n/2)*cs,h:new Int16Array(n*n),k:new Uint16Array(n*n),ct:new Int16Array(n*n),cb:new Int16Array(n*n),ck:new Uint8Array(n*n),T:[],row:0}};
   const A=mk(2,RA),Bv=mk(4,RF);A.skip=(x,z)=>(x-cx)*(x-cx)+(z-cz)*(z-cz)<hole*hole;Bv.skip=(x,z)=>Math.abs(x-cx)<RA-2&&Math.abs(z-cz)<RA-2;
   lodJob={cx,cz,L:[A,Bv],li:0,P:[],N:[],C:[],I:[]}}
-function lodStep(budget){const J=lodJob,t0=performance.now(),o=[0,0,0,0,0];
+function lodStep(budget){const J=lodJob,t0=performance.now(),o=[0,0,0,0,0,0];
   while(J.li<J.L.length&&performance.now()-t0<budget){const L=J.L[J.li];
-    if(L.row<L.n){const j=L.row++;for(let i=0;i<L.n;i++){const x=L.x0+i*L.cs+(L.cs>>1),z=L.z0+j*L.cs+(L.cs>>1),a=i+j*L.n;if(L.skip(x,z)){L.h[a]=-1;continue}lodSample(x,z,o,L.cs,L.T);L.h[a]=o[0];L.k[a]=o[1]*4+o[2];L.ct[a]=o[3];L.cb[a]=o[4]}}
+    if(L.row<L.n){const j=L.row++;for(let i=0;i<L.n;i++){const x=L.x0+i*L.cs+(L.cs>>1),z=L.z0+j*L.cs+(L.cs>>1),a=i+j*L.n;if(L.skip(x,z)){L.h[a]=-1;continue}lodSample(x,z,o,L.cs,L.T);L.h[a]=o[0];L.k[a]=o[1]*4+o[2];L.ct[a]=o[3];L.cb[a]=o[4];L.ck[a]=o[5]||B.LEAF}}
     else{if(!L.gen)L.gen=lodLevel(J,L);if(L.gen.next().done)J.li++}}
   if(J.li<J.L.length)return;
   const g=new THREE.BufferGeometry(),nv=J.P.length/3;g.setAttribute('position',new THREE.Float32BufferAttribute(J.P,3));g.setAttribute('normal',new THREE.Int8BufferAttribute(J.N.map(v=>v*127),3,true));
@@ -2310,7 +2368,7 @@ furnMat.envMap=ENV;furnMat.combine=THREE.MixOperation;furnMat.reflectivity=.3;
   sh.fragmentShader=sh.fragmentShader.replace('#include <color_fragment>',
     'float fMetal=step(1.5,vColor.r);diffuseColor.rgb*=vec3(vColor.r-2.*fMetal,vColor.g,vColor.b);\n{vec3 q=floor((vPxW-normalize(vPxN)*.002)*16.);float h=fract(sin(dot(q,vec3(12.9898,78.233,37.719)))*43758.5453);float h2=fract(sin(dot(floor(q/4.),vec3(7.13,3.71,5.17)))*24634.6345);diffuseColor.rgb*=.88+.14*h+.06*h2;}')
     .replace('#include <envmap_fragment>',THREE.ShaderChunk.envmap_fragment.replace(/reflectivity/g,'(reflectivity*fMetal)'))}}
-const WOODS=[0x6b4a2e,0x8a6a44,0x4a3424,0x5a4030],FABRIC=[0x5a3a3a,0x3a4a5a,0x4a5a3a,0x6a5a48,0x3a3a42,0x6a4a30];
+const FWOODS=[0x6b4a2e,0x8a6a44,0x4a3424,0x5a4030],FABRIC=[0x5a3a3a,0x3a4a5a,0x4a5a3a,0x6a5a48,0x3a3a42,0x6a4a30];
 const tmpCol=new THREE.Color();
 function fbuf(k){let b=FBUF.get(k);if(!b){b={P:[],N:[],C:[],I:[],BX:new Map()};FBUF.set(k,b)}return b}
 const FBB=[0,0,0,0,0,0];let FBK=0,FBMET=false;const REFL_F=new Set(['stop','rsign','gsign','spost','tlight','lamppost','pump','plane','swing','slide','lswitch','streetlight','hydrant','mailbox','pole']);
@@ -2344,7 +2402,7 @@ function furnBuilder(wx,wy,wz,yaw){
 const pick=a=>a[RI(0,a.length-1)];
 function buildFurn(sp){
   const[type,wx,wy,wz,yaw]=sp,F=PAINT_T.has(type)?((FBK=slotOf(Math.floor(vc(wx)/CS),Math.floor(vc(wz)/CS))),(w,h,d,col,x,y,z)=>paintRect(sp,w,d,col,x,z)):furnBuilder(wx,wy,wz,yaw),[fw,fd]=FD[type]||[1,1],W_=fw*VS,D_=fd*VS;
-  const wood=pick(WOODS),fab=pick(FABRIC),dk=0x1a1814,white=0xd8d4c8;
+  const wood=pick(FWOODS),fab=pick(FABRIC),dk=0x1a1814,white=0xd8d4c8;
   // little things that sit on tops: a candle (wax, wick, flame), a lava lamp (cone base, glass with blobs, cap)
   const candle=(x,y,z)=>{const h=R(.08,.16),c=pick([0xece4d2,0xd8c8a8,0xb83030,0xe8e0f0]);F(.05,h,.05,c,x,y+h/2,z);F(.008,.02,.008,0x1a1a1a,x,y+h+.01,z);F(.02,.035,.02,0xffd070,x,y+h+.035,z);F(.012,.02,.012,0xfff4c0,x,y+h+.03,z)};
   const lava=(x,y,z)=>{const gc=pick([0xd84a20,0x9a30c0,0x30a0d0,0x40c050]),bc=pick([0xf0d040,0xf06090,0xf0f0f0]);F(.11,.1,.11,0x8a8c90,x,y+.05,z);F(.08,.03,.08,0x6a6c70,x,y+.115,z);
@@ -2758,7 +2816,7 @@ const SND={
   // a door: the hinge creak (a stick-slip squeal) and a woody knock
   creak:()=>{sVoice(R(160,220),R(120,150),.4,.15,R(500,700),1400,.2,.05);sNoise(.06,260,.3,'lowpass',.8,.1,true,.32)},
   // footsteps by surface
-  step:(b)=>{const hard=b===B.CONC||b===B.ASPH||b===B.STONE||b===B.BRICK||b===B.TILEF,wood=b===B.PLANK||b===B.STPX||b===B.STNX||b===B.STPZ||b===B.STNZ,metal=b===B.METAL;
+  step:(b)=>{b=woodBase(b);const hard=b===B.CONC||b===B.ASPH||b===B.STONE||b===B.BRICK||b===B.TILEF,wood=b===B.PLANK||b===B.STPX||b===B.STNX||b===B.STPZ||b===B.STNZ,metal=b===B.METAL;
     if(metal){sNoise(.05,1900,.22,'bandpass',3,.1);sTone(600,520,.05,.04,'triangle',.1)}else if(wood){sNoise(.06,420,.32,'lowpass',1,.05,true);sTone(180,150,.05,.08,'sine',0)}
     else if(hard){sNoise(.035,1500,.18,'bandpass',1.2,.08);sNoise(.05,300,.18,'lowpass',.8,0,true)}else{sNoise(.08,900,.16,'lowpass',.7,.02);sNoise(.06,2400,.05,'bandpass',1,0)}}};
 // ---------------- game state
@@ -2793,6 +2851,7 @@ const RECIPES=[
   {out:'tnt',n:1,need:{coal:3,cloth:1,scrap:1},label:'Bundle of dynamite (place it)'},
   {out:'bunk',n:1,need:{plank:12,cloth:4},label:'Build a bunk bed'},
   {out:'plank',n:4,need:{wood:1},label:'Saw planks'},
+  ...WOODS.map(w=>({out:w.k+'plank',n:4,need:{[w.k+'wood']:1},label:'Saw '+w.name.toLowerCase()+' planks'})),
   {out:'metal',n:1,need:{iron:2,coal:1},label:'Smelt a metal plate'},
   {out:'ammo',n:8,need:{scrap:1,coal:1},label:'Hand-load ammo'},
   {out:'bandage',n:1,need:{cloth:2},label:'Tie a bandage'},
@@ -2848,7 +2907,7 @@ function pxRound(R,L,axis='z',rin=0){const key=[R,L,axis,rin].join(',');if(pxRou
 function pxCone(R,Hp){const B=[];for(let k=0;k<Hp;k++){const r=Math.max(.5,R*(1-k/Hp)),Ri=Math.ceil(r);for(let i=-Ri;i<Ri;i++)for(let j=-Ri;j<Ri;j++){if(Math.hypot(i+.5,j+.5)>r+.02)continue;B.push([i*PXS,k*PXS,j*PXS,(i+1)*PXS,(k+1)*PXS,(j+1)*PXS])}}return pxBoxes(B)}
 const wheelGeo=pxRound(6,5,'x'),hubGeo=pxRound(3,6,'x');
 const torusGeo=pxRound(3,1,'z',2),circGeo=null,ringGeo=null;
-const glassMat=new THREE.MeshLambertMaterial({color:0x22313a,transparent:true,opacity:.42});
+const glassMat=new THREE.MeshLambertMaterial({color:0x22313a,transparent:true,opacity:.42});glassMat.defines={FL_GLASS:1};
 const basic=c=>matC['b'+c]||(matC['b'+c]=new THREE.MeshBasicMaterial({color:c}));
 const dsm=c=>matC['d'+c]||(matC['d'+c]=new THREE.MeshBasicMaterial({color:c,side:THREE.DoubleSide}));
 function dial(par,x,y,z,r,tick){
@@ -3384,7 +3443,7 @@ function lightning(){
   // the strike itself
   const hp=new V3(x,gy,z);burst(new V3(x,gy+.3,z),40,6,[1,1,.85],3);
   const b=get(ix,ty,iz);if(b&&!isRub(b)&&b!==B.BED){const nb=worsen(b,ix,ty,iz,Math.min(3,LVL[b]+2));if(nb!==b)setBlock(ix,ty,iz,nb)}
-  if(b===B.LEAF||b===B.LOG||b===B.GRASS||b===B.PLANK||rng()<.35){const f=makeFire(x,gy,z);f.burn=R(20,45)}
+  {const wb=woodBase(b);if(wb===B.LEAF||wb===B.LOG||b===B.GRASS||wb===B.PLANK||rng()<.35){const f=makeFire(x,gy,z);f.burn=R(20,45)}}
   for(const z of zombies)if(!z.dead&&z.pos.distanceTo(hp)<3.5)hurtZombie(z,200,{x:0,z:0},null);
   for(const n of npcs)if(!n.dead&&n.pos.distanceTo(hp)<3)hurtNPC(n,60,{x:0,z:0},null);
   for(const a of animals)if(!a.dead&&a.pos.distanceTo(hp)<3)hurtAnimal(a,200,{x:0,z:0},null);
@@ -3467,7 +3526,7 @@ function readInput(p){
     if(wheel){const N=pockets(p);inp.tool=((p.hsel|0)+(wheel>0?1:N-1))%N;wheel=0}
     if(players.length===1)gpRead(0,inp);
     if(T.on){inp.f+=-T.my;inp.s+=T.mx;if(T.held.act)inp.primary=true;if(T.held.jump)inp.jump=true;if(T.run)inp.sprint=true;if(T.aim)inp.aim=true;inp.pad=true;
-      const q=T.pressed;if(q.has('home')){toMainMenu();return inp}if(q.has('emote'))openEmo(!emoOpen);if(q.has('alt'))touchAlt(p,inp);if(q.has('use'))inp.interact=true;if(q.has('tool'))inp.toolNext=true;if(q.has('mat'))inp.matNext=true;if(q.has('place'))inp.place=true;if(q.has('bag'))inp.menu=true;if(q.has('view'))inp.view=true;if(q.has('bomb'))inp.throw=true;if(q.has('torch'))inp.torch=true;if(q.has('talk'))inp.interact=true;if(q.has('rsp'))unstick(p);if(T.duck)inp.crawl=true;if(p.tapBag){p.tapBag=false;inp.menu=true}}
+      const q=T.pressed;if(q.has('home')){toMainMenu();return inp}if(q.has('emote'))openEmo(!emoOpen);if(q.has('alt'))touchAlt(p,inp);if(q.has('use'))inp.interact=true;if(q.has('tool'))inp.toolNext=true;if(q.has('mat'))inp.matNext=true;if(q.has('place'))inp.place=true;if(q.has('bag'))inp.menu=true;if(q.has('view'))inp.view=true;if(q.has('bomb'))inp.throw=true;if(q.has('torch'))inp.torch=true;if(q.has('talk'))inp.interact=true;if(q.has('rsp'))unstick(p);if(T.duck)inp.crawl=true;if(T.crouch)inp.crouch=true;if(p.tapBag){p.tapBag=false;inp.menu=true}}
   }else{
     inp.f=k('KeyI')-k('KeyK');inp.turn=k('KeyL')-k('KeyJ');inp.look=k('KeyU')-k('KeyO');
     inp.jump=!!keys.KeyN;inp.sprint=!!keys.KeyP;inp.primary=!!keys.KeyH;inp.aim=!!keys.Quote;
@@ -3686,7 +3745,7 @@ function primary(p,eye,dir,vh,dt){
     if(p.dig.t>=1){
       if(b===B.GLASS)breakGlass(vh.x,vh.y,vh.z);
       else if(b===B.DOOR){const dr=doorMap.get(dkey(vh.x,vh.y,vh.z));if(dr)destroyDoor(dr);dropItem((vh.x+.5)*VS,(vh.y+.5)*VS,(vh.z+.5)*VS,'plank',3,BCOL[B.PLANK])}
-      else{setBlock(vh.x,vh.y,vh.z,0);burst(new V3((vh.x+.5)*VS,(vh.y+.5)*VS,(vh.z+.5)*VS),12,3,BRGB[b],1);const d=DROP[b];if(d){if(p.creative){}else dropBlock(vh.x,vh.y,vh.z,b)}if(BASE_OF[b]&&!isRub(b)&&rng()<.4)dropRubble(vh.x,vh.y,vh.z,b)}
+      else{setBlock(vh.x,vh.y,vh.z,0);burst(new V3((vh.x+.5)*VS,(vh.y+.5)*VS,(vh.z+.5)*VS),12,3,BRGB[b],1);const d=DROP[b];if(d){if(p.creative){}else dropBlock(vh.x,vh.y,vh.z,b)}if(BASE_OF[b]&&LVL[b]&&!isRub(b)&&rng()<.4)dropRubble(vh.x,vh.y,vh.z,b)}
       p.dig=null}
   }
   else if(p.tool===5){if(p.cool<=0){p.cool=.5;const k=p.hitem;if(k&&FOODS[k]){if(p.inv[k]>0)eat(p,k);else msg(p,`No ${LABEL[k].toLowerCase()} left`)}else if(k==='bandage')heal(p);else if(k==='flare')lightFlare(p);else if(k==='mop')mopUse(p);else if(k==='rod'){if(p.inv.rod>0)fishUse(p);else msg(p,'No fishing rod')}else if(k==='splint'||k==='pills'){if(p.inv[k]>0)useMed(p,k);else msg(p,`No ${LABEL[k].toLowerCase()} left`)}else if(k==='cigs'||k==='weed'){if(p.inv[k]>0)smoke(p,k);else msg(p,`No ${LABEL[k].toLowerCase()} left`)}else if(k==='pipebomb')throwBomb(p);else{p.swing=1;melee(p,eye,dir,2.2,9)}}}
@@ -3882,7 +3941,7 @@ function updatePlayer(p,dt){
   if(inp.pad&&T.on&&Math.hypot(T.mx||0,T.my||0)>.93&&inp.f>.5)inp.sprint=true;
   if(!inp.pad&&p.i===0){const w=!!keys.KeyW,now=performance.now();if(w&&!p.wPrev){if(now-(p.wTap||0)<280)p.wRun=true;p.wTap=now}if(!w)p.wRun=false;p.wPrev=w;if(p.wRun)inp.sprint=true}
   const lg=p.inj?p.inj.leg:0,sprint=(inp.sprint&&!p.aim&&p.stamina>3&&l>.1&&inp.f>0&&lg<.5)||(!p.grounded&&p.airSprint&&l>.1);
-  p.stamina=clamp(p.stamina+(sprint?-20:13)*dt,0,100);
+  p.stamina=p.creative?100:clamp(p.stamina+(sprint?-20:13)*dt,0,100);
   // crouch (C / Ctrl): 1.05 m tall, slow and quiet - fits through a 1.5 m window opening once the glass is out
   // crawling: flat on your belly (45 cm tall) fits through half-metre gaps; you only get up when there's room
   if(inp.crawl&&!p.fly){if(!p.crawl){p.crawl=true;p.crouch=false}}
@@ -4094,7 +4153,7 @@ function updHud(p){
   {const N=pockets(p);if(h.pkN!==N){h.pkN=N;h.slots.forEach((s,k)=>s.style.display=k<N?'':'none');const hb=h.slots[0]&&h.slots[0].parentElement;if(hb&&hb.classList){hb.classList.toggle('many',N>6);hb.classList.toggle('lots',N>9)}}}
   h.slots.forEach((s,k)=>{const b=p.hot[k],v=hotView(p,b);s.classList.toggle('on',k===p.hsel);s.classList.toggle('empty',!b);s.lastChild.classList.toggle('low',b==='Pistol'&&((p.mag|0)<3||p.jam)||b==='Bat'&&(p.batHP??100)<20);
     if(s.dataset.b!==String(b)){s.dataset.b=String(b);s.querySelector('b').textContent=v.name;const im=s.querySelector('img');if(v.icon)im.src=v.icon;else if(im.removeAttribute)im.removeAttribute("src")}s.lastChild.textContent=v.sub});
-  const show=['scrip','spikes','beartrap','mine','ammo','food','bandage','scrap','cloth','fuel','kit','wood','plank','stone','dirt','coal','iron','metal'].filter(x=>p.inv[x]>0||x==='ammo'||x==='food');
+  const show=['scrip','spikes','beartrap','mine','ammo','food','bandage','scrap','cloth','fuel','kit','wood','plank',...LOGS.slice(1),...PLANKS.slice(1),'stone','dirt','coal','iron','metal'].filter(x=>p.inv[x]>0||x==='ammo'||x==='food');
   sH(h.inv,show.map(x=>`<span>${LABEL[x]}</span><b>${p.inv[x]}</b>`).join(''));
   if(isTouch&&p.i===0)touchLabels(p);
   sT(h.prompt,isTouch&&p.vehicle?'':promptFor(p)); // on phones the car panel sits where the prompt would; the Use button gets you out
@@ -4380,6 +4439,10 @@ const DESC={mop:'Scrub blood off floors, walls, cars and people. Hold it and Use
   bandage:'Restores health.',wood:'Chopped logs.',plank:'Building planks.',dirt:'For building.',stone:'For building.',coal:'Fuel for fires and makeshift petrol.',iron:'Smelt into metal plates.',
   metal:'Armor, repairs and walls.',kit:'Fixes a wrecked vehicle.',meat:'Raw. Cook it at a campfire first.',cooked:'Cooked meat. Restores hunger and a little health.',hide:'Animal hide. Coats and dressings.',
   bone:'Crafting material.',spikes:'Placeable trap.',beartrap:'Placeable trap.',mine:'Tripwire bomb.',tent:'Pitch it anywhere and sleep.',stairs:'Stair blocks.',bed:'Place to set your respawn point.',fire:'Place to cook and keep warm.'};
+for(const w of WOODS){const hx=c=>'#'+c.toString(16).padStart(6,'0'),sh=(c,k)=>{const r=Math.min(255,((c>>16)&255)*k),g=Math.min(255,((c>>8)&255)*k),b=Math.min(255,(c&255)*k);return'#'+[r,g,b].map(v=>(v|0).toString(16).padStart(2,'0')).join('')};
+  ITEM[w.k+'wood']=[2,1,10];ITEM[w.k+'plank']=[2,1,20];DESC[w.k+'wood']=w.name+' logs. Saw them into '+w.name.toLowerCase()+' planks.';DESC[w.k+'plank']=w.name+' planks: build with them, or use them anywhere planks are needed.';
+  PXD[w.k+'wood']=r=>{r(1,4,14,4,sh(w.cl,1));r(1,9,14,4,sh(w.cl,.85));r(13,4,2,4,sh(w.cp,1.1));r(13,9,2,4,sh(w.cp,1.1));r(1,4,14,1,sh(w.cl,1.2));if(w.k==='birch'){r(4,5,2,1,'#2a2a2a');r(9,10,3,1,'#2a2a2a');r(6,11,1,1,'#2a2a2a')}};
+  PXD[w.k+'plank']=r=>{r(1,4,14,3,sh(w.cp,1.05));r(1,8,14,3,sh(w.cp,.9));r(1,12,14,2,sh(w.cp,.78));r(4,5,1,1,sh(w.cp,.6));r(10,9,1,1,sh(w.cp,.55))}}
 const TOOLITEMS=['Pistol','Bat','Pickaxe'];
 const isz=(k,r)=>{const d=ITEM[k]||[1,1,10];return r?[d[1],d[0]]:[d[0],d[1]]};
 function caseFits(p,s,x,y,r){const[w,h]=isz(s.k,r);if(x<0||y<0||x+w>caseW(p)||y+h>caseH(p))return false;
@@ -4466,10 +4529,11 @@ function renderMenu(){
   $('#mEat').disabled=!Object.keys(FOODS).some(k=>p.inv[k]>0);$('#mBand').disabled=!p.inv.bandage;
 }
 $('#mRec').addEventListener('click',e=>{const b=e.target.closest('button[data-r]');if(!b||!menuP)return;const r=RECIPES[+b.dataset.r],p=menuP;
-  if(!Object.entries(r.need).every(([a,q])=>haveN(p,a)>=q))return;let wornUp=false;for(const[a,q]of Object.entries(r.need)){const fromInv=Math.min(p.inv[a]|0,q);p.inv[a]-=fromInv;if(fromInv<q&&p.wear.back===a){p.wear.back=null;wornUp=true}}
+  if(!Object.entries(r.need).every(([a,q])=>haveN(p,a)>=q))return;let wornUp=false;for(const[a,q]of Object.entries(r.need)){const pl=woodPool(a);if(pl){let n=q;for(const k of pl){const t=Math.min(p.inv[k]|0,n);p.inv[k]-=t;n-=t}continue}const fromInv=Math.min(p.inv[a]|0,q);p.inv[a]-=fromInv;if(fromInv<q&&p.wear.back===a){p.wear.back=null;wornUp=true}}
   if(r.out==='batfix'){p.batHP=100;msg(p,'Bat taped up and good as new');SND.pick();renderMenu();return}
   p.inv[r.out]+=r.n;if(wornUp&&CLOTHES[r.out]&&CLOTHES[r.out].slot==='back'){p.inv[r.out]--;p.wear.back=r.out;updateClothes(p);caseOrganize(p);msg(p,`Upgraded: ${LABEL[r.out]} (${caseW(p)} × ${caseH(p)})`)}SND.pick();renderMenu()});
-const haveN=(p,a)=>(p.inv[a]|0)+(p.wear.back===a?1:0);
+const woodPool=a=>a==='plank'?PLANKS:a==='wood'?LOGS:null;
+const haveN=(p,a)=>{const pl=woodPool(a);if(pl)return pl.reduce((t,k)=>t+(p.inv[k]|0),0);return(p.inv[a]|0)+(p.wear.back===a?1:0)};
 $('#mWear').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!menuP)return;const p=menuP;
   if(b.dataset.w){const k=b.dataset.w,sl=CLOTHES[k].slot;if(!(p.inv[k]>0))return;if(p.wear[sl])p.inv[p.wear[sl]]++;p.inv[k]--;p.wear[sl]=k;SND.pick()}
   if(b.dataset.u){const sl=b.dataset.u;if(p.wear[sl]){p.inv[p.wear[sl]]++;p.wear[sl]=null}}
@@ -4810,6 +4874,7 @@ const TBI={jump:['....#....','...###...','..#####..','.#######.','....#....','..
  tool:['#.....##.','##...##..','.##.##...','..###....','..###....','.##.##...','##...##..'],
  view:['..#####..','.#.....#.','#..###..#','#..#.#..#','#..###..#','.#.....#.','..#####..'],
  run:['#..#..#..','.#..#..#.','..#..#..#','.#..#..#.','#..#..#..'],
+ crouch:['.........','..###....','..###....','.#####...','#.###.#..','..####...','.##..##..'],
  duck:['....#....','....#....','....#....','.#######.','..#####..','...###...','....#....'],
  bomb:['......#.#','.....#...','..####...','.######..','.######..','.######..','..####...'],
  talk:['#######..','#.....#..','#.#.#.#..','#.....#..','#######..','.#.......','#........'],
@@ -4834,7 +4899,7 @@ function touchLabels(p){const tb=k=>document.querySelector(`#touch .tb[data-b=${
   const set=(k,label,icon,src)=>{const b=tb(k);if(!b)return;b.classList.toggle('gone',label==null);if(label==null)return;const sp=b.querySelector('span'),im=b.querySelector('.ti');if(sp)sp.textContent=label;if(im){const u=src||tbIcon(icon);if(im.getAttribute('src')!==u)im.setAttribute('src',u)}};
   set('act',p.tool===5&&!p.hitem?'Punch':p.tool===5&&FOODS[p.hitem]?'Eat':p.tool===5&&p.hitem==='rod'?(p.fishing?(p.fishing.bite>0?'REEL IN!':'Reel in'):'Cast'):p.tool===5&&(p.hitem==='cigs'||p.hitem==='weed')?'Smoke':p.tool===5&&p.hitem==='pipebomb'?'Throw':p.tool===5&&p.hitem==='flare'?'Light':p.tool===5&&p.hitem==='mop'?'Mop':act,null,act?(hotView(p,p.hot[p.hsel]).icon||tbIcon('use')):'');set('jump',veh?'Brake':'Jump','jump');set('use',use,veh?'car':'use');tb('use').classList.toggle('idle',!veh&&!p.sleeping&&!m);
   set('alt',alt&&alt[0],alt&&alt[1])}
-function initTouchIcons(){for(const k of['view','run','duck','bomb','talk','emote','home','rsp']){const b=document.querySelector(`#touch .tb[data-b=${k}]`);if(!b||b.querySelector('.ti'))continue;const t=b.textContent;b.innerHTML=`<img class="ti" alt="" src="${tbIcon(k)}"><span></span>`;b.querySelector('span').textContent=t}}
+function initTouchIcons(){for(const k of['view','run','crouch','duck','bomb','talk','emote','home','rsp']){const b=document.querySelector(`#touch .tb[data-b=${k}]`);if(!b||b.querySelector('.ti'))continue;const t=b.textContent;b.innerHTML=`<img class="ti" alt="" src="${tbIcon(k)}"><span></span>`;b.querySelector('span').textContent=t}}
 // ---------------- touch controls
 function setTouchMode(on){isTouch=on;document.body.classList.toggle('touch',on);const tc=$('#touch');if(tc)tc.classList.toggle('hidden',!on||!running);tbLast='';if(!on)T.on=false;fitView(true)}
 const T={aim:false,on:false,mx:0,my:0,held:{},pressed:new Set(),stick:null,look:null,run:false,sx:0,sy:0,lx:0,ly:0};
@@ -4846,8 +4911,8 @@ const T={aim:false,on:false,mx:0,my:0,held:{},pressed:new Set(),stick:null,look:
   addEventListener('keydown',e=>{if(isTouch&&!/^(Audio|Media|Volume)/.test(e.key))setTouchMode(false)},true);
   document.querySelectorAll('.tb').forEach(b=>{const k=b.dataset.b;
     b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();T.on=true;T.held[k]=true;T.pressed.add(k);
-      if(k==='run'){T.run=!T.run;b.classList.toggle('on',T.run)}else if(k==='duck'){T.duck=!T.duck;b.classList.toggle('on',T.duck)}else if(k==='aim'){T.aim=!T.aim;b.classList.toggle('on',T.aim)}else b.classList.add('on')});
-    const up=()=>{T.held[k]=false;if(k!=='run'&&k!=='aim')b.classList.remove('on')};
+      if(k==='run'){T.run=!T.run;b.classList.toggle('on',T.run)}else if(k==='duck'||k==='crouch'){const o=k==='duck'?'crouch':'duck';T[k]=!T[k];b.classList.toggle('on',T[k]);if(T[k]){T[o]=false;const ob=b.parentNode.querySelector('.tb[data-b='+o+']');if(ob)ob.classList.remove('on')}}else if(k==='aim'){T.aim=!T.aim;b.classList.toggle('on',T.aim)}else b.classList.add('on')});
+    const up=()=>{T.held[k]=false;if(k!=='run'&&k!=='aim'&&k!=='duck'&&k!=='crouch')b.classList.remove('on')};
     for(const ev of['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,up);
     b.addEventListener('contextmenu',e=>e.preventDefault());});
   canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'||!running)return;T.on=true;e.preventDefault();
@@ -5372,7 +5437,7 @@ function rosterForRegion(Rg){
   for(const m of milSpecs)if(m[5]){const cx=(m[0]+m[2])>>1,cz=(m[1]+m[3])>>1;for(let i=0,n=RI(5,7);i<n;i++){const nights=RI(20,90);
     roster.push({name:pick(['Pvt. ','Cpl. ','Sgt. ','Spc. ','Lt. '])+pick(FIRST)+' '+pick(LAST),kind:'soldier',reg:Rg.key,camp:[cx,cz,m[4]],base:m.slice(0,5),unit:m[6],alive:true,out:null,hp:130,kills:RI(nights>>2,nights),pk:RI(0,4),nights})}}
   const X0=Rg.rx*RS,Z0=Rg.rz*RS;
-  for(let g=0,t=0,ng=rng()<.45?0:rng()<.85?1:2;g<ng&&t<80;t++){const x=RI(X0+30,X0+RS-31),z=RI(Z0+30,Z0+RS-31);if(inTown(x,z)||townDist(x,z)<40||milSpecs.some(m=>x>m[0]-20&&x<m[2]+20&&z>m[1]-20&&z<m[3]+20))continue;const ty=topY(x,z);if(ty!==hm(x,z)||get(x,ty,z)===B.LEAF)continue;
+  for(let g=0,t=0,ng=rng()<.45?0:rng()<.85?1:2;g<ng&&t<80;t++){const x=RI(X0+30,X0+RS-31),z=RI(Z0+30,Z0+RS-31);if(inTown(x,z)||townDist(x,z)<40||milSpecs.some(m=>x>m[0]-20&&x<m[2]+20&&z>m[1]-20&&z<m[3]+20))continue;const ty=topY(x,z);if(ty!==hm(x,z)||woodBase(get(x,ty,z))===B.LEAF)continue;
     g++;campSpecs.push([x,z,1,0]);const fr=rng()<.4; // some armed groups are drifters who mean no harm
     for(let i=0,n=RI(2,4);i<n;i++){const nights=RI(6,60);roster.push({name:makeName(used),kind:'bandit',friendly:fr,reg:Rg.key,camp:[x,z,ty],alive:true,out:null,hp:70,kills:RI(nights>>2,nights),pk:fr?RI(0,1):RI(0,6),nights})}}
 }
@@ -5488,7 +5553,7 @@ function campPlan(n){const c=n.rec&&n.rec.camp;if(!c)return null;const key=c[0]+
   for(let i=-r;i<=r;i++)for(const[dx,dz,sd]of[[i,-r,0],[i,r,1],[-r,i,2],[r,i,3]]){if(sd===gate&&Math.abs(i)<=1)continue;if((sd>1)&&Math.abs(i)===r)continue;cells.push([x+dx,z+dz])}
   cells.sort((a,b)=>((a[0]*7+a[1]*13)%5)-((b[0]*7+b[1]*13)%5));P={cells,done:false};campPlans.set(key,P);return P}
 function campNext(n){const P=campPlan(n);if(!P||P.done)return null;
-  for(let h=1;h<=3;h++)for(const[x,z]of P.cells){if(!inB(x,0,z))continue;const ty=topY(x,z);if(ty<0)continue;let gy=ty;while(gy>0&&(get(x,gy,z)===B.LOG||get(x,gy,z)===B.LEAF))gy--;
+  for(let h=1;h<=3;h++)for(const[x,z]of P.cells){if(!inB(x,0,z))continue;const ty=topY(x,z);if(ty<0)continue;let gy=ty;while(gy>0&&(woodBase(get(x,gy,z))===B.LOG||woodBase(get(x,gy,z))===B.LEAF))gy--;
     if(get(x,gy+h,z)===0&&(h===1||get(x,gy+h-1,z)===B.LOG))return[x,gy+h,z]}
   P.done=true;return null}
 function campBuild(n,dt){if(n.bT>0){n.bT-=dt;n.hammer=.3;if(n.bT<=0&&n.bC){const[x,y,z]=n.bC;if(get(x,y,z)===0&&!players.some(p=>Math.hypot(p.pos.x-(x+.5)*VS,p.pos.z-(z+.5)*VS)<.8)){setBlock(x,y,z,B.LOG);burst(new V3((x+.5)*VS,(y+.5)*VS,(z+.5)*VS),5,2,BRGB[B.LOG],1);playAt(n.pos,()=>sNoise(.08,600,.3),.8)}n.bC=null}return[0,0,0]}
@@ -5990,10 +6055,10 @@ function cullEntities(cs){const F=(viewUnits()+6)**2,vis=(o,px,pz)=>{let m=1e9;c
 let DEV=false;try{DEV=localStorage.getItem('deadground-dev')==='1'}catch(e){}
 for(const id of['#devSel','#devSel2']){const el=$(id);if(!el)continue;el.value=DEV?'1':'0';el.addEventListener('change',()=>{DEV=el.value==='1';for(const j of['#devSel','#devSel2'])if($(j))$(j).value=el.value;try{localStorage.setItem('deadground-dev',DEV?'1':'0')}catch(e){}$('#devHud').classList.toggle('hidden',!DEV||!running)})}
 const BKEY={};for(const k in B)BKEY[B[k]]=k.toLowerCase();
-function blockName(b){if(b===255)return'water';if(b>=180&&b<=224)return'rubble';if(b>=225)return'branch';const base=BASE_OF[b]||b,n=BKEY[base]||('block '+b);return base!==b?n+' (chipped)':n}
+function blockName(b){if(b===255)return'water';{const w=WOODS.find(w=>w.log===b||w.plank===b||w.leaf===b);if(w)return LABEL[w.k+(b===w.log?'log':b===w.plank?'plank':'leaf')].toLowerCase()}if(b>=180&&b<=224)return'rubble';if(b>=225)return'branch';const base=BASE_OF[b]||b,n=BKEY[base]||('block '+b);return base!==b?n+' (chipped)':n}
 function rayBox(O,d,bb,max){let t0=0,t1=max;for(let a=0;a<3;a++){const o=[O.x,O.y,O.z][a],dv=[d.x,d.y,d.z][a],lo=bb[a],hi=bb[a+3];if(Math.abs(dv)<1e-9){if(o<lo||o>hi)return-1;continue}let ta=(lo-o)/dv,tb=(hi-o)/dv;if(ta>tb)[ta,tb]=[tb,ta];t0=Math.max(t0,ta);t1=Math.min(t1,tb);if(t0>t1)return-1}return t0}
 let devT=0,devFps=60,devLast=performance.now();
-function devTick(){const now=performance.now(),fd=now-devLast;devLast=now;devFps+=(1000/Math.max(1,fd)-devFps)*.05;const el=$('#devHud');if(!DEV||!running||!players[0]||menuP){if(!el.classList.contains('hidden'))el.classList.add('hidden');return}
+let devFc=0,devFt=0,devFpsN=0;function devTick(){const now=performance.now(),fd=now-devLast;devLast=now;devFps+=(1000/Math.max(1,fd)-devFps)*.05;devFc++;devFt+=fd;if(devFt>=500){devFpsN=Math.round(devFc*1000/devFt);devFc=0;devFt=0}const el=$('#devHud');if(!DEV||!running||!players[0]||menuP){if(!el.classList.contains('hidden'))el.classList.add('hidden');return}
   el.classList.remove('hidden');if((devT-=fd)>0)return;devT=150;const p=players[0],c=p.cam,eye=c.position.clone(),dir=new V3();c.getWorldDirection(dir);const max=40;let best=null;
   const vh=rayVox(eye,dir,max);if(vh)best={t:vh.t,txt:`Block: ${blockName(get(vh.x,vh.y,vh.z))}  id ${get(vh.x,vh.y,vh.z)}  at ${vh.x},${vh.y},${vh.z}`};
   const take=(t,txt)=>{if(t>=0&&(!best||t<best.t))best={t,txt}};
@@ -6003,7 +6068,8 @@ function devTick(){const now=performance.now(),fd=now-devLast;devLast=now;devFps
   try{const vr=vehRay(eye,dir,max);if(vr){const v=vr.v||vr,P=v.ph;take(vr.t??eye.distanceTo(v.pos),`Vehicle: ${v.name}  hp ${Math.round(v.hp)}  fuel ${Math.round(v.fuel)}${P?`  engine ${Math.round(P.engine)} battery ${Math.round(P.battery)} tank ${Math.round(P.fuel)} lights ${Math.round(P.lights)}`:''}${v.flat?'  flats '+v.flat:''}`)}}catch(e){}
   for(const sp of furnSpecs){if(!sp.bb||sp.gone||FLAT.has(sp[0]))continue;const dx=sp[1]-eye.x,dz=sp[3]-eye.z;if(dx*dx+dz*dz>max*max)continue;const t=rayBox(eye,dir,sp.bb,max);if(t>=0)take(t,`Furniture: ${sp[0]}${sp.user?' (placed)':''}${sp.on?' (on)':''}`)}
   const R=regAt(vc(p.pos.x),vc(p.pos.z)),T=townAt(vc(p.pos.x),vc(p.pos.z),0);
-  el.textContent=`${best?best.txt+`  (${best.t.toFixed(1)} m)`:'Looking at: sky'}\npos ${p.pos.x.toFixed(1)}, ${p.pos.y.toFixed(1)}, ${p.pos.z.toFixed(1)}  cell ${vc(p.pos.x)},${vc(p.pos.y)},${vc(p.pos.z)}  region ${R?R.key:'?'}${T?'  in '+townName(T):''}  ${Math.round(devFps)} fps  zombies ${zombies.length}`+devExtra(p)}
+  const fp=devFpsN||Math.round(devFps),hd=((p.yaw*180/Math.PI)%360+540)%360-180;
+  el.textContent=`FPS ${fp}   X ${p.pos.x.toFixed(2)}  Y ${p.pos.y.toFixed(2)}  Z ${p.pos.z.toFixed(2)}   block ${vc(p.pos.x)} ${vc(p.pos.y)} ${vc(p.pos.z)}   facing ${['S','SW','W','NW','N','NE','E','SE'][((Math.round(hd/45)%8)+8)%8]}\n${best?best.txt+`  (${best.t.toFixed(1)} m)`:'Looking at: sky'}\nregion ${R?R.key:'?'}${T?'  in '+townName(T):''}  zombies ${zombies.length}${players[1]?`  P2 ${players[1].pos.x.toFixed(1)} ${players[1].pos.y.toFixed(1)} ${players[1].pos.z.toFixed(1)}`:''}`+devExtra(p)}
 // developer tools: hotkeys F2–F10 (and buttons in the menu) for testing — heal, skip time, weather, spawn and clear zombies, teleport, god mode, freeze time
 const DEVX={freeze:false,perf:false};
 function devCmd(c,p){p=p||players[0];if(!p||!running)return;const say=t=>msg(p,'[dev] '+t);

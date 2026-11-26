@@ -10,6 +10,13 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v18 — new trees, new wood
+- Wood species (`WOODS`): birch, pine, maple with log/plank/leaf block ids 100–108 (taken from the unused chipped-ore shapes; ore no longer chips). `BASE_OF` maps them to oak so every material rule applies; `woodBase()` for direct checks. Atlas grows to 8×8 tiles; species tiles are recoloured from the oak tiles each season (`recol`). `treeSpecies()` picks by height and stands; pines get a cone crown, birch narrow, maple broad. Items `<k>wood`/`<k>plank`, recipes, and plank/wood pooling in `haveN` and crafting. LOD crowns/trunks carry their species colour.
+- Trim tile redrawn with visible grain; `quad()` shifts texture coordinates for faces that stick out past their block so trim edges keep the world pixel grid.
+- Touch: Run/Jump/Crouch/Crawl column (v4 layout), new Crouch toggle.
+- Glass (`FL_GLASS` define on gmat and car glass) reflects 16% of flashlight and dynamic light.
+- Dev HUD first line: FPS (counted per half second), X/Y/Z, block, facing. Creative: stamina pinned at 100.
+
 ## v17.9 — light reaches what it sees
 - Per-light occlusion maps for the 12 dynamic lights: 48x48 octahedral rays (`dlOccTick`, `flRay`) cached by position, refined with 8 sub-rays per texel, stored at 96x96 with half-texel widening in one 384x288 atlas (`dlOcc`, origins in `dlO`); invalidated by `dlEdit` on block changes. Replaces the height-map roof test and the lamp box clip; home lights keep their box and also light what they see outside.
 - Player-driven headlights go through the dynamic lights instead of a per-vertex three.js SpotLight.
