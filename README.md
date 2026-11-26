@@ -10,6 +10,9 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v18.4 — one round, steady render edge
+- Near-world materials discard fragments beyond `vrR` (= render distance) from the camera in xz; the far-view mesh discards inside it (`vrInject`, `vrNear`), with a 6 m screen-space dithered crossfade using the same pattern for both. `ldTex` (NC×NC loaded-chunk mask) keeps the far view visible where a chunk is not loaded. `streamChunks` loads to RD+2 chunks and unloads past RD+4; the far-view hole shrinks so it always covers the circle.
+
 ## v18.3 — developer render controls
 - `QLOCK` (dev menu "Render quality"): -1 adaptive governor, 0–6 pins the `QL` rung regardless of frame time. `shK` uniform scales the shading-LOD distance (dev "Distance shading": 1, 2, 0.5, 0 = off); `shDbg` tints by shading level. Perf overlay shows rung/lock/scale/frame ms. Stored in `deadground-qlock`, `deadground-shk`.
 
