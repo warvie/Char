@@ -10,6 +10,12 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v18.1 — banded light, faster lighting
+- `lbBand(d,r)`: 8 distance bands per light, edges at (k/8)^2·r (widening), brightness 1−t²(0.4+0.6t), t=k/8 (steps grow with distance); `lbNl` quarters the angle term; spot cones quartered. Used by `dlLight` and the flashlight.
+- `PXQ_GLSL`/`pxQuv`: for materials with a texture map, the light/shadow sample point is the world position of the fragment's texel centre, reconstructed from screen derivatives of position and texel coordinates (exact for any position/rotation/scale; checked to 1e-12 m on a turned plane). Blocks keep world quantisation.
+- Lights culled against the player camera frusta before the 12 slots are filled; sun shadow map redrawn only when `shadowSig` changes (sun angle, frustum centre, block edits, nearby movers) or every 30 frames; light-map refinement only within ~32 m of a camera.
+- Benchmark (headless Chrome, SwiftShader, 1024×768, 12 lights): lighting in the shader on the texture pixel 43–53 ms/frame; baking light into a texture on the CPU 345–373 ms per light change plus 6–8 ms/frame to draw. Lights change every frame (flashlight, flicker, cars), so the in-shader method stays. Culling to 6 lights: 17–25 ms/frame.
+
 ## v18 — new trees, new wood
 - Wood species (`WOODS`): birch, pine, maple with log/plank/leaf block ids 100–108 (taken from the unused chipped-ore shapes; ore no longer chips). `BASE_OF` maps them to oak so every material rule applies; `woodBase()` for direct checks. Atlas grows to 8×8 tiles; species tiles are recoloured from the oak tiles each season (`recol`). `treeSpecies()` picks by height and stands; pines get a cone crown, birch narrow, maple broad. Items `<k>wood`/`<k>plank`, recipes, and plank/wood pooling in `haveN` and crafting. LOD crowns/trunks carry their species colour.
 - Trim tile redrawn with visible grain; `quad()` shifts texture coordinates for faces that stick out past their block so trim edges keep the world pixel grid.
