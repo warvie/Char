@@ -10,6 +10,9 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v19.3 — lighter hordes and details
+- `hordeTick`: zombies >30 m get matrixAutoUpdate off and a manual matrix refresh every 3rd frame (phase per zombie); >24 m castShadow off (original flags kept in `userData.cs0`). `grassTick` (4×/s): grass chunk meshes visible within 40 m, shadow casting within 24 m. Decals culled past 34 m.
+
 ## v19.2 — FPS counter
 - `#devFps` badge (top right) when developer mode is on, from `devTick`, every 0.5 s, coloured by rate.
 
