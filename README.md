@@ -10,6 +10,9 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v18.3 — developer render controls
+- `QLOCK` (dev menu "Render quality"): -1 adaptive governor, 0–6 pins the `QL` rung regardless of frame time. `shK` uniform scales the shading-LOD distance (dev "Distance shading": 1, 2, 0.5, 0 = off); `shDbg` tints by shading level. Perf overlay shows rung/lock/scale/frame ms. Stored in `deadground-qlock`, `deadground-shk`.
+
 ## v18.2 — shading LOD
 - `shLd(P)` = ((d−6)/22)^1.5 (d = camera distance), capped near 7; level k samples on a nested world grid of 2^k block pixels (`shQd`, snapped along the surface only). Every level blends into the next over its last 30% (both evaluated only there): sun shadows (`sunShLOD`/`shLevel`), dynamic lights and flashlight (`FL_ADD`).
 - Second shadow cascade `sun2` (no light, ~290 m, 1024/2048 map), redrawn only when sun/area/blocks change and never in the same frame as the near map (`shadowPass`), so blocks cast into it even when ray-traced shadows cover them up close. Level 0: near map 5-tap max; 1–2: near map single tap (+ ray-traced blocks with fewer steps, or the far map for non-blocks on Ultra); 3–4: far map 4-tap average over the level pixel; 5+: one far tap.
