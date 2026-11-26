@@ -10,6 +10,9 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v18.6 — nothing missing in view
+- `cullEntities`: range render distance + 8 m (the shader circle cuts exactly), every 0.1 s and on any chunk load; position from the geometry bounding-sphere centre in world space (`cullCentre`, cached for frozen objects). Grass bounding spheres padded 2 m for sway/push.
+
 ## v18.5 — light the colour of the sky
 - `updSky`: sun colour by elevation (SUNC0→SUNC1→SUNC2, greyed by overcast), hemisphere sky colour by day/dusk/night/overcast, ground colour = ground tint × sun colour (bounce). Ultra near shadow map 4096 when maxTextureSize ≥ 8192.
 
