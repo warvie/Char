@@ -10,6 +10,9 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v19.1 — fewer chunks drawn
+- `drawn[]`: loaded slots within RD chunks are visible, the RD..RD+4 ring is built but hidden (far view covers it via `ldTex`). Default RD 6 desktop / 4 touch, one-time migration of higher saved values (`deadground-rd2`). Far view recentres every 32 blocks.
+
 ## v19 — faster, same picture
 - `renderer.compile` after preload; `streamChunks` time budget (4.5 ms desktop / 3 ms touch, up to 2× the count); occlusion: visible chunks re-queried every 3rd frame, covered ones every frame; props bucketed by chunk slot (rebuilt each second or on load change); shadow pre-pass hides sky/far view/particles/stains; `loadedCnt`/`ldDirty` replace per-frame slot scans; prop culling on chunk change or 1 s.
 
