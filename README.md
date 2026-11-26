@@ -10,6 +10,9 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v18.5 — light the colour of the sky
+- `updSky`: sun colour by elevation (SUNC0→SUNC1→SUNC2, greyed by overcast), hemisphere sky colour by day/dusk/night/overcast, ground colour = ground tint × sun colour (bounce). Ultra near shadow map 4096 when maxTextureSize ≥ 8192.
+
 ## v18.4 — one round, steady render edge
 - Near-world materials discard fragments beyond `vrR` (= render distance) from the camera in xz; the far-view mesh discards inside it (`vrInject`, `vrNear`), with a 6 m screen-space dithered crossfade using the same pattern for both. `ldTex` (NC×NC loaded-chunk mask) keeps the far view visible where a chunk is not loaded. `streamChunks` loads to RD+2 chunks and unloads past RD+4; the far-view hole shrinks so it always covers the circle.
 
