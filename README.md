@@ -10,6 +10,9 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v18.9 — a better-looking picture
+- Post: 4-tap sharpen (off without AA/at PIX>1), vibrance weighted to low saturation, luminance split tone. Touch default GFX 1.
+
 ## v18.8 — no more see-through gaps
 - Removed the circular near-world discard and dithered crossfade (pixels where the near and far surfaces had different distances were discarded by both). Near world draws all loaded chunks; far view discards exactly on loaded chunk columns (`ldTex` RGBA: slot chunk coords mod 256 + loaded flag). Checked: 0 uncovered ground samples of 30k at 0/10/23 m from the far-view centre.
 - Occlusion queries now run mid-render from a marker mesh (renderOrder 7) after the static world and before movers (renderOrder 8), so only static geometry occludes; all touched GL state is saved/restored (no `resetState`). Sky restored to drawn first.
