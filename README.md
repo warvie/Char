@@ -10,6 +10,9 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v19.2 — FPS counter
+- `#devFps` badge (top right) when developer mode is on, from `devTick`, every 0.5 s, coloured by rate.
+
 ## v19.1 — fewer chunks drawn
 - `drawn[]`: loaded slots within RD chunks are visible, the RD..RD+4 ring is built but hidden (far view covers it via `ldTex`). Default RD 6 desktop / 4 touch, one-time migration of higher saved values (`deadground-rd2`). Far view recentres every 32 blocks.
 
