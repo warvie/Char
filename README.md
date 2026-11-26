@@ -10,6 +10,11 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v19.5 — fewer draw calls, self-tuning
+- Merged stand-ins (`buildProxy`/`proxyTick`): parked vehicles, crates, beds, manholes and multi-part region props beyond 16 m (back under 13 m) get one mesh per material/attribute/shadow/layer bucket with transforms baked relative to the group; originals hidden, restored on approach, movement or every 8 s. Up to 3 builds per frame.
+- `tuneTick`: every 45 s measures {pre-pass, occlusion} combinations for 75 frames each (fastest 90% mean) and keeps the best; governor paused meanwhile.
+- FPS badge shows a 60 s rolling average.
+
 ## v19.4 — every pixel lit once
 - Depth pre-pass (`depthPrepass`): chunk and furniture meshes on layer 7, drawn with `scene.overrideMaterial` (colour off, polygon offset +1) before the main render, which then skips the depth clear. Occlusion hiding keeps/restores full layer masks. Benchmark (`tools/bench_depth_prepass.py`, 6 overdrawn layers of a 12-light shader, SwiftShader): 136–139 → 29–39 ms.
 - `shadowSig`: movers within 32 m, 10 cm / ~0.8 rad walk-phase quantisation.
