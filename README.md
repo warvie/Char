@@ -10,6 +10,10 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v19.4 — every pixel lit once
+- Depth pre-pass (`depthPrepass`): chunk and furniture meshes on layer 7, drawn with `scene.overrideMaterial` (colour off, polygon offset +1) before the main render, which then skips the depth clear. Occlusion hiding keeps/restores full layer masks. Benchmark (`tools/bench_depth_prepass.py`, 6 overdrawn layers of a 12-light shader, SwiftShader): 136–139 → 29–39 ms.
+- `shadowSig`: movers within 32 m, 10 cm / ~0.8 rad walk-phase quantisation.
+
 ## v19.3 — lighter hordes and details
 - `hordeTick`: zombies >30 m get matrixAutoUpdate off and a manual matrix refresh every 3rd frame (phase per zombie); >24 m castShadow off (original flags kept in `userData.cs0`). `grassTick` (4×/s): grass chunk meshes visible within 40 m, shadow casting within 24 m. Decals culled past 34 m.
 
