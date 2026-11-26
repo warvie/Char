@@ -10,6 +10,9 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v19 — faster, same picture
+- `renderer.compile` after preload; `streamChunks` time budget (4.5 ms desktop / 3 ms touch, up to 2× the count); occlusion: visible chunks re-queried every 3rd frame, covered ones every frame; props bucketed by chunk slot (rebuilt each second or on load change); shadow pre-pass hides sky/far view/particles/stains; `loadedCnt`/`ldDirty` replace per-frame slot scans; prop culling on chunk change or 1 s.
+
 ## v18.9 — a better-looking picture
 - Post: 4-tap sharpen (off without AA/at PIX>1), vibrance weighted to low saturation, luminance split tone. Touch default GFX 1.
 
