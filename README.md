@@ -10,6 +10,13 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v18.2 — shading LOD
+- `shLd(P)` = ((d−6)/22)^1.5 (d = camera distance), capped near 7; level k samples on a nested world grid of 2^k block pixels (`shQd`, snapped along the surface only). Every level blends into the next over its last 30% (both evaluated only there): sun shadows (`sunShLOD`/`shLevel`), dynamic lights and flashlight (`FL_ADD`).
+- Second shadow cascade `sun2` (no light, ~290 m, 1024/2048 map), redrawn only when sun/area/blocks change and never in the same frame as the near map (`shadowPass`), so blocks cast into it even when ray-traced shadows cover them up close. Level 0: near map 5-tap max; 1–2: near map single tap (+ ray-traced blocks with fewer steps, or the far map for non-blocks on Ultra); 3–4: far map 4-tap average over the level pixel; 5+: one far tap.
+- Skyline shading (`lodHorizon`): per far-view vertex (`aHor`) and a 168² texture over the loaded world (obstacle height + distance, so any surface height gets its own angle), toward the morning and evening sun; `horFac` blends ±2°.
+- RT AO fades out over levels 1–2; SSAO 4 samples + 4 faded 30–70 m, off 150–220 m; SSR steps reduced with distance; dynamic-light specular off past level 1.
+- Cost model on a head-height view of open ground (`tools/bench_shading_lod.py`): 74 → 52 texture reads and ray steps per pixel (−30%). SwiftShader timing 101–104 → 89–93 ms; software GPUs run loops without early exit, so real GPUs gain more.
+
 ## v18.1 — banded light, faster lighting
 - `lbBand(d,r)`: 8 distance bands per light, edges at (k/8)^2·r (widening), brightness 1−t²(0.4+0.6t), t=k/8 (steps grow with distance); `lbNl` quarters the angle term; spot cones quartered. Used by `dlLight` and the flashlight.
 - `PXQ_GLSL`/`pxQuv`: for materials with a texture map, the light/shadow sample point is the world position of the fragment's texel centre, reconstructed from screen derivatives of position and texel coordinates (exact for any position/rotation/scale; checked to 1e-12 m on a turned plane). Blocks keep world quantisation.
