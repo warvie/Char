@@ -10,6 +10,10 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v18.8 — no more see-through gaps
+- Removed the circular near-world discard and dithered crossfade (pixels where the near and far surfaces had different distances were discarded by both). Near world draws all loaded chunks; far view discards exactly on loaded chunk columns (`ldTex` RGBA: slot chunk coords mod 256 + loaded flag). Checked: 0 uncovered ground samples of 30k at 0/10/23 m from the far-view centre.
+- Occlusion queries now run mid-render from a marker mesh (renderOrder 7) after the static world and before movers (renderOrder 8), so only static geometry occludes; all touched GL state is saved/restored (no `resetState`). Sky restored to drawn first.
+
 ## v18.7 — nothing hidden is drawn
 - GPU occlusion queries (WebGL2, `ANY_SAMPLES_PASSED_CONSERVATIVE`): `occAfter` tests every loaded chunk box (blocks+glass+grass+furniture) and every creature/parked car box (inflated 35 cm) against the frame's depth; `occBefore` moves covered objects (and props fully inside a covered chunk box) to layer 6 for the next frame, restoring after the render. Results are valid only for the same world generation (block edits, door motion), eye within 30 cm, and either no rotation or boxes that were wholly on screen; camera inside a box always draws. Shadow maps due that frame are drawn first by a pre-pass with an empty-view camera that sees layer 6 (three.js filters shadow casters by the view camera's layers). `gpuOnly` keeps bounding boxes.
 - Sky drawn last at the far plane (`gl_Position.z=w`), far view and stains after the near world; stain instanced mesh frustum-culled with a maintained bounding sphere; clouds frustum-culled; the flyer draws after the sky.
