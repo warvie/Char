@@ -10,6 +10,9 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v19.9 — fold away the developer info
+- `#devMin` arrow inside `#devHud` (text now in `#devTxt`); `.min` hides the text and clears the box but keeps its fixed width so the arrow doesn't move; stored in `deadground-devmin`; HUD raycasts skipped while folded. Test: `tools/test_dev_minimise.py`.
+
 ## v19.8 — FPS profiler
 - `profStart`/`profTick`/`profReport`: 17 tests × (20 settle + 90 timed frames), median frame time, cost = baseline − test. Flags hook `renderView` (post off, lights/flashlight zeroed), `shadowPass`, `update`, dynScale ×0.5, RT steps 0, pre-pass/occlusion off, and hide sets (`profSet`). Governor and auto-tune paused. Results saved to `deadground-prof`.
 
