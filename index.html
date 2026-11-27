@@ -2193,11 +2193,11 @@ const __PF={};window.__perfOn=()=>{if(__PF.on)return 'already on';__PF.on=1;__PF
   {const R=renderer.render,gl=renderer.getContext(),X=gl.getExtension('EXT_disjoint_timer_query_webgl2');__PF.gq=[];
     renderer.render=function(sc,c){const k=sc===scene?(c&&c.isPerspectiveCamera&&c===occShCam?'render: shadow pre-pass':(scene.overrideMaterial?'render: depth pre-pass':(c&&c.fov===1?'render: other':'render: scene view/mirror'))):'render: post/other';__PF.t[k]=__PF.t[k]||0;__PF.n[k]=__PF.n[k]||0;
       let q=null;if(X&&!__PF.qBusy){q=gl.createQuery();gl.beginQuery(X.TIME_ELAPSED_EXT,q);__PF.qBusy=1}
-      const t=performance.now();try{return R.apply(this,arguments)}finally{__PF.t[k]+=performance.now()-t;__PF.n[k]++;if(q){gl.endQuery(X.TIME_ELAPSED_EXT);__PF.qBusy=0;__PF.gq.push([q,'GPU '+k])}
+      const t=performance.now();try{return R.apply(this,arguments)}finally{__PF.t[k]+=performance.now()-t;__PF.n[k]++;if(k==='render: scene view/mirror'&&c&&c.fov!==1){const I=renderer.info.render;__PF.calls=(__PF.calls||0)*.9+I.calls*.1;__PF.tris=I.triangles}if(q){gl.endQuery(X.TIME_ELAPSED_EXT);__PF.qBusy=0;__PF.gq.push([q,'GPU '+k])}
         for(let i=__PF.gq.length-1;i>=0;i--){const[qq,kk]=__PF.gq[i];if(gl.getQueryParameter(qq,gl.QUERY_RESULT_AVAILABLE)){if(!gl.getParameter(X.GPU_DISJOINT_EXT)){__PF.t[kk]=(__PF.t[kk]||0)+gl.getQueryParameter(qq,gl.QUERY_RESULT)/1e6;__PF.n[kk]=(__PF.n[kk]||0)+1}gl.deleteQuery(qq);__PF.gq.splice(i,1)}}}}}
   return 'on'};
 window.__perfReset=()=>{for(const k in __PF.t){__PF.t[k]=0;__PF.n[k]=0}__PF.f0=performance.now();__PF.fr=__PF.frames||0};
-window.__perfInfo=()=>{const I=renderer.info;return{calls:I.render.calls,tris:I.render.triangles,geos:I.memory.geometries,tex:I.memory.textures,progs:I.programs&&I.programs.length,q:qLvl,scale:dynScale,gfx:GFX,rd:RD,occ:OCC.on,pre:PREPASS}};
+window.__perfInfo=()=>{const I=renderer.info;return{viewCalls:Math.round(__PF.calls||0),viewTris:__PF.tris,calls:I.render.calls,tris:I.render.triangles,geos:I.memory.geometries,tex:I.memory.textures,progs:I.programs&&I.programs.length,q:qLvl,scale:dynScale,gfx:GFX,rd:RD,occ:OCC.on,pre:PREPASS}};
 window.__perfSet=(k,v)=>{if(k==='occ')OCC.on=v;if(k==='pre')PREPASS=v;return[OCC.on,PREPASS]};
 window.__perf=()=>{const fr=Math.max(1,(__PF.n.render||1));return Object.entries(__PF.t).map(([k,v])=>[k,+(v/fr).toFixed(2),__PF.n[k]]).filter(e=>e[1]>=.05).sort((a,b)=>b[1]-a[1])};
 window.__prof=()=>({on:PROF.on,i:PROF.i,n:PROF_TESTS.length,res:PROF.res.slice(),names:PROF_TESTS.map(t=>t[0]),gfx:GFX,rd:RD,q:qLvl,scale:dynScale});
