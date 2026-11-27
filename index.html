@@ -1639,11 +1639,11 @@ const mirRT=[0,1].map(()=>{const t=new THREE.WebGLRenderTarget(320,100);t.textur
 const bakRT=[0,1].map(()=>new THREE.WebGLRenderTarget(240,144));
 let carCamFrame=0;
 // ---------------- flashlight: a hard-edged circle of light, computed per texel (pixelated) and only where rays from the lamp actually reach
-const FLN=24,FLU={flTan:{value:Math.tan(.36)},flRange:{value:30}},FLT=[];
+const FLN=24,FLU={flTan:{value:Math.tan(.36)},flRange:{value:30},uCamP:{value:new THREE.Vector3()}},FLT=[];
 {const V4=()=>THREE.Vector4?new THREE.Vector4():{x:0,y:0,z:0,w:0};Object.assign(FLU,{dlP:{value:Array.from({length:12},V4)},dlC:{value:Array.from({length:12},V4)},dlD:{value:Array.from({length:12},V4)},dlB:{value:Array.from({length:12},V4)},dlN:{value:0},dlWet:{value:0},dlH:{value:null},dlHO:{value:new V3()},dlHS:{value:new V3(1,1,1)},dlO:{value:Array.from({length:12},V4)},dlOcc:{value:null},shNoVox:{value:0},vrR:{value:0},ldTex:{value:null},shK:{value:1},shDbg:{value:0},shSun:{value:new V3(0,1,0)},horTex:{value:null},horO:{value:THREE.Vector4?new THREE.Vector4(0,0,1,0):{x:0,y:0,z:1,w:0}}})}
 for(const i of[0,1]){const d=new Uint8Array(FLN*FLN*4),t=new THREE.DataTexture(d,FLN,FLN,THREE.RGBAFormat);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.needsUpdate=true;FLT.push({d,t,f:0});
   FLU['flOn'+i]={value:0};FLU['flPos'+i]={value:new V3()};FLU['flDir'+i]={value:new V3(0,0,-1)};FLU['flRt'+i]={value:new V3(1,0,0)};FLU['flUp'+i]={value:new V3(0,1,0)};FLU['flMap'+i]={value:t}}
-const FL_GLSL0='uniform float flTan,flRange,flOn0,flOn1;uniform vec3 flPos0,flPos1,flDir0,flDir1,flRt0,flRt1,flUp0,flUp1;uniform sampler2D flMap0,flMap1;\n'+
+const FL_GLSL0='uniform vec3 uCamP;uniform float flTan,flRange,flOn0,flOn1;uniform vec3 flPos0,flPos1,flDir0,flDir1,flRt0,flRt1,flUp0,flUp1;uniform sampler2D flMap0,flMap1;\n'+
 // dynamic lights: up to 12 at once, worked out per block pixel. Kinds: omni, spot (cone), and interior lights that only reach inside a box (a house).
 // Outdoor lights skip anything under a roof (read from the height map), so street lamps and headlights don't shine through walls into rooms.
 // Inverse-square falloff with a smooth cut-off; on wet ground each light also leaves a glint
@@ -1658,7 +1658,7 @@ float dlSees(vec4 o,float ti,vec3 P){if(o.w<.01)return 1.;vec3 v=P-o.xyz;float d
 // light and grow larger with distance. The angle to the light is stepped too (quarters)
 float lbBand(float d,float r){float t=floor(sqrt(d/r)*8.)*.125;return t>=1.?0.:1.-t*t*(.4+.6*t);}
 float lbNl(float nl){return .4+.6*floor(clamp(nl,0.,1.)*4.+.5)/4.;}
-void dlLight(vec3 P,vec3 N,inout vec3 dif,inout vec3 spc,float lv){vec3 V=normalize(cameraPosition-P);
+void dlLight(vec3 P,vec3 N,inout vec3 dif,inout vec3 spc,float lv){vec3 V=normalize(uCamP-P);
   for(int i=0;i<12;i++){if(float(i)>=dlN)break;vec4 p=dlP[i],c=dlC[i];vec3 L=p.xyz-P;float r=abs(p.w),d=length(L);if(d>r)continue;
     vec3 l=L/max(d,.001);float nl=dot(N,l);if(nl<=0.)continue;
     // homes' room lights fill their own house; everything else (and the home light past its walls) is lit wherever the light can see
@@ -1686,11 +1686,11 @@ float vrLd(vec3 P){vec2 c=floor(P.xz/${(CS*VS).toFixed(1)});vec4 t=texture2D(ldT
 // pixel-size levels: within 10 blocks of the camera everything is drawn at full detail (pixel size 1); every further 10 blocks the
 // pixel grows by half (1.5, 2, 2.5 ... up to 8). Textures, lighting, shadows and the flashlight all use the same cells, anchored to
 // the world's 2-block texture tiles so a coarse pixel always lines up with the fine ones inside it
-float pxS(vec3 P){float d=length(P.xz-cameraPosition.xz)*2.;return min(1.+.5*floor(d/10.),8.);}
+float pxS(vec3 P){float d=length(P.xz-uCamP.xz)*2.;return min(1.+.5*floor(d/10.),8.);}
 float cq1(float x,float s){float c=s/16.,l=x-floor(x),a=floor(l/c)*c,b=min(a+c,1.);return floor(x)+(a+b)*.5;}
 vec3 coarseQ(vec3 P,vec3 N,float s){if(s<1.01)return P;vec3 a=abs(N),q=vec3(cq1(P.x,s),cq1(P.y,s),cq1(P.z,s));
   if(a.x>=a.y&&a.x>=a.z)q.x=P.x;else if(a.y>=a.z)q.y=P.y;else q.z=P.z;return q;}
-float shLd(vec3 P){float d=max(length(P-cameraPosition)-6.,0.)/22.*shK;return min(d*sqrt(d),6.95);}
+float shLd(vec3 P){float d=max(length(P-uCamP)-6.,0.)/22.*shK;return min(d*sqrt(d),6.95);}
 // the centre of the level-lv pixel around P, kept on the surface (only the directions along the surface are snapped)
 vec3 shQd(vec3 P,vec3 N,float lv){float g=16./exp2(lv);vec3 c=(floor((P-N*.004)*g)+.5)/g;return c+N*dot(N,P-c);}
 // skyline shading: how high the land rises toward the low sun (two directions, the morning and evening sides), from the far-view
@@ -1902,7 +1902,7 @@ function gpuT(end){try{if(GT.x===undefined){GT.gl=renderer.getContext();GT.x=ren
   if(!end){if(GT.q){if(!gl.getQueryParameter(GT.q,gl.QUERY_RESULT_AVAILABLE))return;const v=gl.getQueryParameter(GT.q,gl.QUERY_RESULT)/1e6;if(!gl.getParameter(X.GPU_DISJOINT_EXT))GT.ms+=(v-GT.ms)*.15}else GT.q=gl.createQuery();
     gl.beginQuery(X.TIME_ELAPSED_EXT,GT.q);GT.busy=true}else if(GT.busy){gl.endQuery(X.TIME_ELAPSED_EXT);GT.busy=false}}catch(e){GT.x=null}}
 function renderView(cam,i,x,y,w,h,under){
-  cam.updateMatrixWorld();sky.position.copy(cam.position);sky.scale.setScalar(cam.far*.85);sky.updateMatrixWorld();
+  cam.updateMatrixWorld();FLU.uCamP.value.setFromMatrixPosition(cam.matrixWorld);sky.position.copy(cam.position);sky.scale.setScalar(cam.far*.85);sky.updateMatrixWorld();
   const dl=dayLight(),night=1-dl;
   skyMat.uniforms.hor.value.copy(scene.fog.color);skyMat.uniforms.top.value.copy(scene.fog.color).multiplyScalar(.62+.1*dl).lerp(_c1.setHex(dl>.2?0x4a6a9a:0x05070d),.35*(1-WX.amt));
   skyMat.uniforms.sunDir.value.copy(SUN_DIR);skyMat.uniforms.night.value=night*(1-WX.amt);skyMat.uniforms.sunUp.value=clamp(SUN_DIR.y*6,0,1)*(1-WX.amt*.85);
@@ -2033,7 +2033,7 @@ float getShadowMask(){float s=1.;
   return s;}`);if(typeof FLU!=='undefined')sh.fragmentShader=FL_GLSL+vrInject(sh.fragmentShader,'vPxW').replace('gl_FragColor = vec4( outgoingLight, diffuseColor.a );','gl_FragColor = vec4( outgoingLight, diffuseColor.a );\n'+FL_ADD)};return m}
 function installVmatShader(){vmat.onBeforeCompile=sh=>{
   Object.assign(sh.uniforms,RTU,PAINTU);
-  sh.vertexShader='varying vec3 vRtW,vRtN;attribute vec4 aBl;attribute float aBlT;varying vec4 vBl;varying float vBlT;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n{vec3 w_=(modelMatrix*vec4(transformed,1.)).xyz;vec2 cc_=(floor(w_.xz/8.)+.5)*8.;float d_=length(cc_-cameraPosition.xz)*2.;if(d_>150.){float G_=4.*(1.+floor((d_-150.)/10.))*.5;w_=floor(w_/G_+.5)*G_;transformed=(w_-modelMatrix[3].xyz)/modelMatrix[0][0];}}\nvRtW=(modelMatrix*vec4(transformed,1.)).xyz;vRtN=normalize(mat3(modelMatrix)*objectNormal);vBl=aBl;vBlT=aBlT;');
+  sh.vertexShader='uniform vec3 uCamP;varying vec3 vRtW,vRtN;attribute vec4 aBl;attribute float aBlT;varying vec4 vBl;varying float vBlT;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n{vec3 w_=(modelMatrix*vec4(transformed,1.)).xyz;vec2 cc_=(floor(w_.xz/8.)+.5)*8.;float d_=length(cc_-uCamP.xz)*2.;if(d_>150.){float G_=4.*(1.+floor((d_-150.)/10.))*.5;w_=floor(w_/G_+.5)*G_;transformed=(w_-modelMatrix[3].xyz)/modelMatrix[0][0];}}\nvRtW=(modelMatrix*vec4(transformed,1.)).xyz;vRtN=normalize(mat3(modelMatrix)*objectNormal);vBl=aBl;vBlT=aBlT;');
   sh.fragmentShader=`varying vec3 vRtW,vRtN;varying vec4 vBl;varying float vBlT;uniform sampler2D paintIdx,paintAtlas;uniform float pW;uniform vec3 rtOrigin,rtSize,sunDirU;uniform float sunK,wet,rtime,rtSunN,rtAOk;uniform sampler2D hTex;
 #ifdef RTX
 uniform highp sampler3D rtVox;
