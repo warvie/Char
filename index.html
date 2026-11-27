@@ -2121,7 +2121,7 @@ const PROF_TESTS=[
 function profStart(){if(PROF.on)return;PROF.on=true;PROF.i=0;PROF.f=0;PROF.ms=[];PROF.res=[];PROF.saveQ=qLvl;PROF.pre=PREPASS;PROF.occ=OCC.on;PROF.flags={};$('#profBox').classList.add('hidden')}
 function profApply(fl){PROF.flags=fl;dynScale=fl.half?QL[qLvl].s*.5:QL[qLvl].s;PREPASS=fl.pre?false:PROF.pre;OCC.on=fl.occ?false:PROF.occ;RTU.rtSunN.value=fl.rt?0:QL[qLvl].rt;RTU.rtAOk.value=fl.rt?0:QL[qLvl].rao;for(const rt of rts)if(rt)rt.dispose();rts.length=0}
 function profSet(k){const L=[];if(k==='mob'){for(const z of zombies)if(z.g)L.push(z.g);for(const n of npcs)if(n.g)L.push(n.g);for(const a of animals)if(a.g)L.push(a.g)}
-  else if(k==='car'){for(const v of vehicles)if(v.g)L.push(v.g)}else if(k==='prop')L.push(...occProps());else if(k==='furn')L.push(...furnMeshes.filter(Boolean));else if(k==='grass')L.push(...grassMeshes.filter(Boolean));
+  else if(k==='car'){for(const v of vehicles)if(v.g)L.push(v.g)}else if(k==='prop'){L.push(...occProps());for(const e of CHP.map.values())if(e.P)L.push(e.P)}else if(k==='furn')L.push(...furnMeshes.filter(Boolean));else if(k==='grass')L.push(...grassMeshes.filter(Boolean));
   else if(k==='far'){if(lodMesh)L.push(lodMesh)}else if(k==='block'){L.push(...chunkMeshes.filter(Boolean),...glassMeshes.filter(Boolean))}return L}
 function profHide(on){if(on){PROF.hidden.length=0;const k=PROF.flags.hide;if(!k)return;for(const o of profSet(k))if(o.visible){o.visible=false;PROF.hidden.push(o)}}else{for(const o of PROF.hidden)o.visible=true;PROF.hidden.length=0}}
 function profTick(dt){if(!PROF.on)return false;if(!running){PROF.on=false;return false}
@@ -2205,7 +2205,7 @@ const __PF={};window.__perfOn=()=>{if(__PF.on)return 'already on';__PF.on=1;__PF
         for(let i=__PF.gq.length-1;i>=0;i--){const[qq,kk]=__PF.gq[i];if(gl.getQueryParameter(qq,gl.QUERY_RESULT_AVAILABLE)){if(!gl.getParameter(X.GPU_DISJOINT_EXT)){__PF.t[kk]=(__PF.t[kk]||0)+gl.getQueryParameter(qq,gl.QUERY_RESULT)/1e6;__PF.n[kk]=(__PF.n[kk]||0)+1}gl.deleteQuery(qq);__PF.gq.splice(i,1)}}}}}
   return 'on'};
 window.__perfReset=()=>{for(const k in __PF.t){__PF.t[k]=0;__PF.n[k]=0}__PF.f0=performance.now();__PF.fr=__PF.frames||0};
-window.__perfInfo=()=>{const I=renderer.info;return{viewCalls:Math.round(__PF.calls||0),viewTris:__PF.tris,calls:I.render.calls,tris:I.render.triangles,geos:I.memory.geometries,tex:I.memory.textures,progs:I.programs&&I.programs.length,q:qLvl,scale:dynScale,gfx:GFX,rd:RD,occ:OCC.on,pre:PREPASS}};
+window.__perfInfo=()=>{const I=renderer.info;let cs=0,cm=0,cp=0,vm=0;for(const e of CHP.map.values())if(e.P){cs++;cm+=e.members.length;cp+=e.P.children.length}try{(function w(c){if(!c.visible)return;if(c.isMesh)vm++;for(const k of c.children)w(k)})(scene)}catch(e){}return{chpSlots:cs,chpProps:cm,chpMeshes:cp,visMeshes:vm,viewCalls:Math.round(__PF.calls||0),viewTris:__PF.tris,calls:I.render.calls,tris:I.render.triangles,geos:I.memory.geometries,tex:I.memory.textures,progs:I.programs&&I.programs.length,q:qLvl,scale:dynScale,gfx:GFX,rd:RD,occ:OCC.on,pre:PREPASS}};
 window.__perfSet=(k,v)=>{if(k==='occ')OCC.on=v;if(k==='pre')PREPASS=v;return[OCC.on,PREPASS]};
 window.__perf=()=>{const fr=Math.max(1,(__PF.n.render||1));return Object.entries(__PF.t).map(([k,v])=>[k,+(v/fr).toFixed(2),__PF.n[k]]).filter(e=>e[1]>=.05).sort((a,b)=>b[1]-a[1])};
 window.__prof=()=>({on:PROF.on,i:PROF.i,n:PROF_TESTS.length,res:PROF.res.slice(),names:PROF_TESTS.map(t=>t[0]),gfx:GFX,rd:RD,q:qLvl,scale:dynScale});
@@ -4478,10 +4478,54 @@ function buildProxy(g){if(!_pn||!g.updateMatrixWorld)return null;g.updateMatrixW
     const m=new THREE.Mesh(geo,b.m);m.castShadow=b.cs;m.receiveShadow=b.rs;m.layers.mask=b.lm;m.renderOrder=b.ro;m.userData.noPx=1;m.userData.pxs=1;P.add(m)}return P}
 function proxyOn(g){let P=null;try{P=buildProxy(g)}catch(e){P=null}if(!P)return false;const saved=[];for(const c of g.children){saved.push([c,c.visible]);c.visible=false}g.add(P);P.updateMatrixWorld(true);g.userData.px={P,saved,t:performance.now()};return true}
 function proxyOff(g){const u=g.userData.px;if(!u)return;g.remove(u.P);for(const m of u.P.children)m.geometry.dispose();for(const[c,v]of u.saved)c.visible=v;g.userData.px=null}
+// ---------------- one piece per far chunk: beyond ~20 m, all of a chunk's still props (signs, crates, beds, manholes, traps, bags,
+// blood marks) are merged into one mesh per material, so a far street block costs a handful of draw calls instead of hundreds. The
+// very same triangles, materials and textures, baked in world space, so it looks identical and casts the same shadows. The real
+// objects come back the moment you come within 17 m, and a change to any prop (a looted crate's lid, a scrubbed blood mark) rebuilds
+// its chunk's piece within a second. Doors and fires stay live (they move and flicker)
+function chpCands(){const L=[];for(const R of regions.values())if(R.live)for(const o of R.objs||[])L.push(o);crates.forEach(c=>L.push(c.g));beds.forEach(b=>L.push(b.g));traps.forEach(t=>L.push(t.g));bags.forEach(b=>L.push(b.g));decals.forEach(o=>L.push(o));manObjs.forEach(o=>L.push(o));return L}
+function chpHash(list){let h=1;for(const o of list){h=(h*31+o.id+(o.userData&&o.userData.wv?7:0))|0;
+    (function w(c){for(const k of c.children){h=(h*31+(k.visible?2:1)+(k.rotation?Math.round(k.rotation.x*64)*3+Math.round(k.rotation.y*64)*7+Math.round(k.rotation.z*64)*11:0))|0;w(k)}})(o)}return h}
+function chpClean(o){let ok=true;(function w(c){if(!ok||(!c.visible&&c!==o))return;if(c.isPoints||c.isSprite||c.isLight||c.isInstancedMesh||c.isSkinnedMesh){ok=false;return}
+    if(c.isMesh&&(Array.isArray(c.material)||!c.geometry||!c.geometry.attributes||!c.geometry.attributes.position||!c.geometry.attributes.position.array)){ok=false;return}
+    for(const k of c.children)w(k)})(o);return ok}
+function mergeStatics(list){if(!_pn)return null;const B=new Map(),members=[];
+  for(const o of list){if(!o.userData||!o.userData.wv||!chpClean(o))continue;members.push(o);if(o.updateMatrixWorld)o.updateMatrixWorld(true);
+    (function walk(c){if(!c.visible&&c!==o)return;
+      if(c.isMesh){const G=c.geometry,A=G.attributes,keys=['position','normal','uv','color'].filter(k=>A[k]&&A[k].array),key=c.material.uuid+'|'+keys.join(',')+'|'+(c.castShadow?1:0)+(c.receiveShadow?1:0)+'|'+c.layers.mask+'|'+c.renderOrder;
+        let b=B.get(key);if(!b)B.set(key,b={m:c.material,keys,cs:c.castShadow,rs:c.receiveShadow,lm:c.layers.mask,ro:c.renderOrder,P:[],N:[],U:[],C:[]});
+        _pm.copy(c.matrixWorld);_pn.getNormalMatrix(_pm);const idx=G.index&&G.index.array,n=idx?idx.length:A.position.count,Pp=A.position,Nm=A.normal,U=A.uv,C=A.color;
+        for(let t=0;t<n;t++){const i=idx?idx[t]:t;_pv.set(Pp.getX(i),Pp.getY(i),Pp.getZ(i)).applyMatrix4(_pm);b.P.push(_pv.x,_pv.y,_pv.z);
+          if(b.keys.includes('normal')){_pv.set(Nm.getX(i),Nm.getY(i),Nm.getZ(i)).applyMatrix3(_pn).normalize();b.N.push(_pv.x,_pv.y,_pv.z)}
+          if(b.keys.includes('uv'))b.U.push(U.getX(i),U.getY(i));if(b.keys.includes('color'))b.C.push(C.getX(i),C.getY(i),C.getZ(i))}}
+      for(const k of c.children)walk(k)})(o)}
+  if(!members.length||!B.size)return null;const P=new THREE.Group();P.userData.proxy=1;
+  for(const b of B.values()){const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(b.P,3));if(b.N.length)geo.setAttribute('normal',new THREE.Float32BufferAttribute(b.N,3));
+    if(b.U.length)geo.setAttribute('uv',new THREE.Float32BufferAttribute(b.U,2));if(b.C.length)geo.setAttribute('color',new THREE.Float32BufferAttribute(b.C,3));geo.computeBoundingSphere();geo.computeBoundingBox();
+    const m=new THREE.Mesh(geo,b.m);m.castShadow=b.cs;m.receiveShadow=b.rs;m.layers.mask=b.lm;m.renderOrder=b.ro;m.userData.noPx=1;m.userData.pxs=1;m.matrixAutoUpdate=false;P.add(m)}
+  P.matrixAutoUpdate=false;return{P,members}}
+const CHP={map:new Map(),bk:null,bkT:0};
+function chpDrop(k,e){if(e.P){scene.remove(e.P);for(const m of e.P.children)if(m.geometry&&m.geometry.dispose)m.geometry.dispose()}
+  for(const o of e.members||[])if(o.userData){o.userData.chp=0;o.visible=!!o.userData.wv}CHP.map.delete(k)}
+function chProxyTick(){if(!PX_ON||!players.length)return;const now=performance.now(),S=CS*VS;
+  if(!CHP.bk||now-CHP.bkT>1000){CHP.bkT=now;CHP.bk=new Map();
+    for(const o of chpCands()){const c=cullCentre(o),k=slotOf(Math.floor(c.x/VS/CS),Math.floor(c.z/VS/CS));let a=CHP.bk.get(k);if(!a)CHP.bk.set(k,a=[]);a.push(o)}
+    for(const a of CHP.bk.values())a.h=chpHash(a);
+    for(const[k,e]of CHP.map)if(!CHP.bk.has(k))chpDrop(k,e)}
+  let built=0;
+  for(const[k,list]of CHP.bk){const e=CHP.map.get(k);
+    if(!loaded[k]||!drawn[k]){if(e)chpDrop(k,e);continue}
+    const cx=(slotC[k*2]+.5)*S,cz=(slotC[k*2+1]+.5)*S;let d=1e9;for(const p of players){const q=Math.hypot(p.pos.x-cx,p.pos.z-cz);if(q<d)d=q}
+    if(e?d<17:d<20){if(e)chpDrop(k,e);continue}
+    if(e&&e.h===list.h)continue;if(built>=2)continue;
+    if(e)chpDrop(k,e);
+    let r=null;try{r=mergeStatics(list)}catch(err){r=null}
+    if(!r){CHP.map.set(k,{h:list.h,P:null,members:[]});continue}
+    scene.add(r.P);r.P.updateMatrixWorld(true);for(const o of r.members){o.userData.chp=1;o.visible=false}
+    CHP.map.set(k,{h:list.h,P:r.P,members:r.members});built++}}
 let pxCand=[],pxCandT=0;
 function proxyTick(){if(!PX_ON||!players.length)return;const now=performance.now();
-  if(now-pxCandT>1000){pxCandT=now;pxCand=[];for(const v of vehicles)pxCand.push([v.g,v]);crates.forEach(c=>pxCand.push([c.g,null]));beds.forEach(b=>pxCand.push([b.g,null]));for(const o of manObjs)if(o.children&&o.children.length>1)pxCand.push([o,null]);
-    for(const R of regions.values())if(R.live)for(const o of R.objs||[])if(o.children&&o.children.length>2)pxCand.push([o,null])}
+  if(now-pxCandT>1000){pxCandT=now;pxCand=[];for(const v of vehicles)pxCand.push([v.g,v])}
   let work=0;
   for(const[g,v]of pxCand){if(!g||!g.parent)continue;const u=g.userData&&g.userData.px;let d=1e9;const uc=g.userData&&g.userData.c,X=uc?uc[0]:g.position.x,Z=uc?uc[1]:g.position.z;for(const p of players){const q=Math.hypot(p.pos.x-X,p.pos.z-Z);if(q<d)d=q}
     const busy=v&&(v.driver||v.npcD||v.pass||Math.abs(v.speed||0)>.05||v.ph&&v.ph.lights>0&&v.lightsOn);
@@ -6451,7 +6495,7 @@ function update(dt){
   for(const n of npcs)updateNPC(n,dt,night);npcs=npcs.filter(n=>!n.gone);npcT-=dt;if(npcT<=0){npcT=3;spawnNPCsNear()}
   animT-=dt;if(animT<=0){animT=6;if(animals.filter(a=>!a.dead).length<14)spawnAnimal(true)}
   updateSleep(dt);applySeason();updateWeather(dt);for(const p of players)updFx(p,dt);
-  for(const z of zombies)updateZombie(z,dt,night);hordeTick();try{proxyTick()}catch(e){}
+  for(const z of zombies)updateZombie(z,dt,night);hordeTick();try{proxyTick()}catch(e){}try{chProxyTick()}catch(e){}
   zombies=zombies.filter(z=>!z.gone);
   spawnT-=dt;const maxZ=Math.min(48,(night?26:10)+day*3);
   if(spawnT<=0){spawnT=night?1.1:3.2;if(zombies.filter(z=>!z.dead).length<maxZ)spawnOpen()}
@@ -6501,9 +6545,9 @@ const _cc=new V3();
 function cullCentre(o){const u=o.userData||(o.userData={});if(u.cc&&!o.matrixAutoUpdate)return u.cc;const g=o.geometry;if(g&&!g.boundingSphere&&g.attributes&&g.attributes.position&&g.attributes.position.array)g.computeBoundingSphere();
   if(g&&g.boundingSphere){o.updateMatrixWorld();_cc.copy(g.boundingSphere.center).applyMatrix4(o.matrixWorld)}else o.getWorldPosition?o.getWorldPosition(_cc):_cc.copy(o.position);
   if(!o.matrixAutoUpdate)u.cc=_cc.clone();return _cc}
-function cullEntities(cs){const F=1e12,vis=(o,px,pz)=>{let m=1e9;let X=px,Z=pz;if(X==null){const c=cullCentre(o);X=c.x;Z=c.z}for(const c of cs){const dx=X-c.x,dz=Z-c.z,d=dx*dx+dz*dz;if(d<m)m=d}o.visible=m<F&&chunkReadyAt(X,Z)&&!!drawn[slotOf(Math.floor(X/VS/CS),Math.floor(Z/VS/CS))]};
+function cullEntities(cs){const F=1e12,vis=(o,px,pz)=>{let m=1e9;let X=px,Z=pz;if(X==null){const c=cullCentre(o);X=c.x;Z=c.z}for(const c of cs){const dx=X-c.x,dz=Z-c.z,d=dx*dx+dz*dz;if(d<m)m=d}const u=o.userData||(o.userData={});u.wv=m<F&&chunkReadyAt(X,Z)&&!!drawn[slotOf(Math.floor(X/VS/CS),Math.floor(Z/VS/CS))];o.visible=u.wv&&!u.chp};
   for(const R of regions.values())if(R.live)for(const o of R.objs||[])vis(o);
-  crates.forEach(c=>vis(c.g));doors.forEach(d=>{if(!d.gone)vis(d.pivot)});beds.forEach(b=>vis(b.g));fires.forEach(f=>vis(f.g));traps.forEach(t=>vis(t.g));bags.forEach(b=>vis(b.g));decals.forEach(o=>{vis(o);if(o.visible){const c=cullCentre(o);let m=1e9;for(const q of cs){const d=Math.hypot(c.x-q.x,c.z-q.z);if(d<m)m=d}if(m>34)o.visible=false}});
+  crates.forEach(c=>vis(c.g));doors.forEach(d=>{if(!d.gone)vis(d.pivot)});beds.forEach(b=>vis(b.g));fires.forEach(f=>vis(f.g));traps.forEach(t=>vis(t.g));bags.forEach(b=>vis(b.g));decals.forEach(o=>{vis(o);if(o.visible){const c=cullCentre(o);let m=1e9;for(const q of cs){const d=Math.hypot(c.x-q.x,c.z-q.z);if(d<m)m=d}if(m>34){o.visible=false;o.userData.wv=false}}});
   vehicles.forEach(v=>{if(!v.driver&&!v.pass)vis(v.g)});manObjs.forEach(o=>o.userData.c?vis(o,o.userData.c[0],o.userData.c[1]):vis(o))}
 
 // ---------------- developer mode: what's under the crosshair, and where you are
