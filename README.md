@@ -10,6 +10,11 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v19.6 — steadier from the start
+- `scene.autoUpdate=false`; one `scene.updateMatrixWorld()` per frame in `render()` after the shadow camera moves (sky and bathroom mirror quad updated explicitly when moved mid-render). Scene had ~26.5k objects and 4–6 render calls per frame.
+- Governor `TARGET_MS` 33.4 (30 fps).
+- CPU profile of game logic in Node (`prof2.js`): 2.2 ms/frame in the first 10 s (chunk building, texture sweep) falling to ~1 ms/frame by a minute (JIT warm-up, stand-ins built) — game logic is not the bottleneck.
+
 ## v19.5 — fewer draw calls, self-tuning
 - Merged stand-ins (`buildProxy`/`proxyTick`): parked vehicles, crates, beds, manholes and multi-part region props beyond 16 m (back under 13 m) get one mesh per material/attribute/shadow/layer bucket with transforms baked relative to the group; originals hidden, restored on approach, movement or every 8 s. Up to 3 builds per frame.
 - `tuneTick`: every 45 s measures {pre-pass, occlusion} combinations for 75 frames each (fastest 90% mean) and keeps the best; governor paused meanwhile.
