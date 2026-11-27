@@ -10,6 +10,9 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v19.7 — round flashlight
+- Flashlight (`flAt`) always evaluated at the block-pixel point `Pq`, outside the shading LOD; dynamic lights keep the LOD.
+
 ## v19.6 — steadier from the start
 - `scene.autoUpdate=false`; one `scene.updateMatrixWorld()` per frame in `render()` after the shadow camera moves (sky and bathroom mirror quad updated explicitly when moved mid-render). Scene had ~26.5k objects and 4–6 render calls per frame.
 - Governor `TARGET_MS` 33.4 (30 fps).
