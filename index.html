@@ -2091,7 +2091,7 @@ function applyQ(){const q=QL[qLvl],U=postMat.uniforms;dynScale=q.s;U.uRays.value
 // ---------------- FPS profiler (developer menu): measures, on this machine, what each part of the picture costs. It takes a baseline,
 // then switches one thing off at a time for about 1.5 s (frames are timed after a short settle), and reports how many ms per frame
 // each one costs. Quality stays fixed while it runs, and everything is put back afterwards
-const PROF={on:false,i:-1,f:0,ms:[],res:[],flags:{},hidden:[],saveQ:null,saveS:null};
+const PROF={on:false,i:-1,f:0,ms:[],res:[],flags:{},hidden:[],saveQ:null,saveS:null,px:new Uint8Array(4),work:0};
 const PROF_TESTS=[
   ['Nothing switched off (baseline)',{}],
   ['Half resolution (tells pixel cost from draw-call cost)',{half:1}],
@@ -2117,15 +2117,16 @@ function profSet(k){const L=[];if(k==='mob'){for(const z of zombies)if(z.g)L.pus
   else if(k==='far'){if(lodMesh)L.push(lodMesh)}else if(k==='block'){L.push(...chunkMeshes.filter(Boolean),...glassMeshes.filter(Boolean))}return L}
 function profHide(on){if(on){PROF.hidden.length=0;const k=PROF.flags.hide;if(!k)return;for(const o of profSet(k))if(o.visible){o.visible=false;PROF.hidden.push(o)}}else{for(const o of PROF.hidden)o.visible=true;PROF.hidden.length=0}}
 function profTick(dt){if(!PROF.on)return false;if(!running){PROF.on=false;return false}
-  if(PROF.f===0)profApply(PROF_TESTS[PROF.i][1]);PROF.f++;if(PROF.f>20)PROF.ms.push(dt*1000);
+  if(PROF.f===0)profApply(PROF_TESTS[PROF.i][1]);PROF.f++;if(PROF.f>20)PROF.ms.push(PROF.work||dt*1000);
   if(PROF.f>=20+90){const m=PROF.ms.slice().sort((a,b)=>a-b);PROF.res.push(m[m.length>>1]);PROF.i++;PROF.f=0;PROF.ms=[];
     if(PROF.i>=PROF_TESTS.length){PROF.on=false;profApply({});PREPASS=PROF.pre;OCC.on=PROF.occ;qLvl=PROF.saveQ;applyQ();profReport()}}
   return true}
+window.__prof=()=>({on:PROF.on,i:PROF.i,n:PROF_TESTS.length,res:PROF.res.slice(),names:PROF_TESTS.map(t=>t[0]),gfx:GFX,rd:RD,q:qLvl,scale:dynScale});
 function profReport(){const b=PROF.res[0],rows=PROF_TESTS.map((t,i)=>[t[0],b-PROF.res[i]]).slice(1).sort((x,y)=>y[1]-x[1]),mx=Math.max(1,...rows.map(r=>r[1]));
-  const txt=`Baseline ${b.toFixed(1)} ms/frame (${(1000/b).toFixed(0)} FPS), quality step ${qLvl+1}, ${GFXN[GFX]}, render distance ${RD}\n`+rows.map(r=>`${r[1]>=0?'-':'+'}${Math.abs(r[1]).toFixed(1)} ms  ${r[0]}`).join('\n');
+  const txt=`Baseline ${b.toFixed(1)} ms of work per frame (${(1000/b).toFixed(0)} FPS if nothing else limited it), quality step ${qLvl+1}, ${GFXN[GFX]}, render distance ${RD}\n`+rows.map(r=>`${r[1]>=0?'-':'+'}${Math.abs(r[1]).toFixed(1)} ms  ${r[0]}`).join('\n');
   try{localStorage.setItem('deadground-prof',txt)}catch(e){}
-  const el=$('#profBox');el.innerHTML=`<b>What each part costs (ms per frame saved by switching it off)</b><br>Baseline: ${b.toFixed(1)} ms per frame = ${(1000/b).toFixed(0)} FPS<br><br>`+rows.map(r=>`${(r[1]>=0?'':'+')+r[1].toFixed(1).padStart(5)} ms ${r[0]}<span class="bar" style="width:${Math.max(0,Math.round(r[1]/mx*120))}px"></span>`).join('<br>')+
-    `<br><br><small>Negative = switching it off made frames slower (it was saving time). Your screen may cap frames at 16.7 ms.</small><br><button id="profCopy">Copy results</button> <button id="profClose">Close</button>`;
+  const el=$('#profBox');el.innerHTML=`<b>What each part costs (ms per frame saved by switching it off)</b><br>Baseline: ${b.toFixed(1)} ms of work per frame (CPU + graphics card) = ${(1000/b).toFixed(0)} FPS if nothing else limited it<br><br>`+rows.map(r=>`${(r[1]>=0?'':'+')+r[1].toFixed(1).padStart(5)} ms ${r[0]}<span class="bar" style="width:${Math.max(0,Math.round(r[1]/mx*120))}px"></span>`).join('<br>')+
+    `<br><br><small>Negative = switching it off made frames slower (it was saving time). Times are measured with the graphics card made to finish each frame, so they show real cost even when the screen caps the frame rate.</small><br><button id="profCopy">Copy results</button> <button id="profClose">Close</button>`;
   el.classList.remove('hidden');$('#profCopy').onclick=()=>{try{navigator.clipboard.writeText(txt)}catch(e){}};$('#profClose').onclick=()=>el.classList.add('hidden')}
 // ---------------- self-tuning: speed-ups that never change the picture (the depth pre-pass and hiding things behind walls) help on
 // some machines and cost on others, depending on whether the graphics card or the draw calls are the limit. So the game measures:
@@ -6472,7 +6473,10 @@ function frame(){
   if(running&&!paused&&!PROF.flags.logic)update(dt);else{pressed.clear();T.pressed.clear()}
   try{devTick()}catch(e){}try{lodTick(dt);grassPushTick(dt);drawCompass();dlTick(dt);updFlares(dt);rainWash(dt);if(running){flashUpdate();if((flSweepT-=dt)<=0){flSweep();flSweepT=pxBacklog?.5:3}}updEnv(dt)}catch(e){}
   if(!running){tDay+=dt/DAYLEN*.3;updSky()}
-  grassTime.value=now/1000;if(!profTick(dt)&&!tuneTick(dt))adaptRes(dt);profHide(true);render();profHide(false);requestAnimationFrame(frame);
+  grassTime.value=now/1000;if(!profTick(dt)&&!tuneTick(dt))adaptRes(dt);profHide(true);render();profHide(false);
+  // while profiling, wait for the graphics card to finish the frame and time the whole thing: that's the real cost of a frame, which
+  // a 60 Hz (or throttled 30 Hz) display would otherwise hide behind its fixed frame interval
+  if(PROF.on){try{const gl=renderer.getContext();gl.readPixels(0,0,1,1,gl.RGBA,gl.UNSIGNED_BYTE,PROF.px)}catch(e){}PROF.work=performance.now()-now}requestAnimationFrame(frame);
 }
 
 // ---------------- start
