@@ -1990,15 +1990,19 @@ const PXQ_GLSL=`#include <uv_pars_fragment>
 #if defined(USE_MAP)
 #define PX_UVQ 1
 uniform vec2 pxTS;
-vec2 pxUvC(){float s=pxS(vPxW);if(s<1.01)return vUv;vec2 tc=vUv*pxTS;return(floor(tc/s)+.5)*s/pxTS;}
-vec3 pxQuv(vec3 n){float s=pxS(vPxW);vec2 tc=vUv*pxTS;vec3 dp1=dFdx(vPxW),dp2=dFdy(vPxW);vec2 t1=dFdx(tc),t2=dFdy(tc);float det=t1.x*t2.y-t1.y*t2.x;
-  if(abs(det)<1e-9)return coarseQ((floor(vPxW*16.-n*.01)+.5)/16.,n,s);vec2 dq=(floor(tc/s)+.5)*s-tc;
+// texture cells: how many texels make one block pixel (1/16 m) on this surface, found from how far a texel spans in the world, so every
+// object's texture starts at exactly one block pixel up close (finer textures are grouped) and grows by half a pixel per level
+vec2 pxK(float s){vec2 tc=vUv*pxTS;vec3 dp1=dFdx(vPxW),dp2=dFdy(vPxW);vec2 t1=dFdx(tc),t2=dFdy(tc);float det=t1.x*t2.y-t1.y*t2.x;if(abs(det)<1e-9)return vec2(s);
+  vec2 tw=vec2(length((dp1*t2.y-dp2*t1.y)/det),length((dp2*t1.x-dp1*t2.x)/det));vec2 r=max(floor(.0625/max(tw,vec2(1e-5))*4.+.5)/4.,vec2(.25));return max(s*r,vec2(1.));}
+vec2 pxUvC(){vec2 k=pxK(pxS(vPxW));if(k.x<1.01&&k.y<1.01)return vUv;vec2 tc=vUv*pxTS;return(floor(tc/k)+.5)*k/pxTS;}
+vec3 pxQuv(vec3 n){float s=pxS(vPxW);vec2 k=pxK(s);vec2 tc=vUv*pxTS;vec3 dp1=dFdx(vPxW),dp2=dFdy(vPxW);vec2 t1=dFdx(tc),t2=dFdy(tc);float det=t1.x*t2.y-t1.y*t2.x;
+  if(abs(det)<1e-9)return coarseQ((floor(vPxW*16.-n*.01)+.5)/16.,n,s);vec2 dq=(floor(tc/k)+.5)*k-tc;
   return vPxW+(dp1*t2.y-dp2*t1.y)/det*dq.x+(dp2*t1.x-dp1*t2.x)/det*dq.y-n*.002;}
 #endif
 `;
-function pxShadows(m){if(!m||m.isMeshBasicMaterial||(m.userData&&m.userData.pxs))return m;(m.userData=m.userData||{}).pxs=1;m.extensions=Object.assign({},m.extensions,{derivatives:true});const prev=m.onBeforeCompile;m.onBeforeCompile=(sh,r)=>{if(prev)prev.call(m,sh,r);if(typeof FLU!=='undefined'){Object.assign(sh.uniforms,FLU)}
+function pxShadows(m){if(!m||m.isMeshBasicMaterial||(m.userData&&m.userData.pxs))return m;(m.userData=m.userData||{}).pxs=1;m.extensions=Object.assign({},m.extensions,{derivatives:true});const prev=m.onBeforeCompile;m.onBeforeCompile=(sh,r)=>{if(prev)prev.call(m,sh,r);if(typeof FLU!=='undefined'){Object.assign(sh.uniforms,FLU)}sh.uniforms.pxSnap={value:m.userData.pxNoSnap?0:1};
   {const im=m.map&&m.map.image;sh.uniforms.pxTS={value:THREE.Vector2?new THREE.Vector2(im&&im.width||16,im&&im.height||16):{x:16,y:16}}}
-  sh.vertexShader='varying vec3 vPxW,vPxN;\n#ifdef LOD_HOR\nattribute vec2 aHor;varying vec2 vHor;\n#endif\n'+sh.vertexShader.replace('#include <project_vertex>','\n#ifdef LOD_HOR\nvHor=aHor*1.6-.1;\n#endif\n{vec4 w_=vec4(transformed,1.);vec3 n_=objectNormal;\n#ifdef USE_INSTANCING\nw_=instanceMatrix*w_;n_=mat3(instanceMatrix)*n_;\n#endif\nvPxW=(modelMatrix*w_).xyz;vPxN=normalize(mat3(modelMatrix)*n_);}\n#include <project_vertex>');
+  sh.vertexShader='uniform vec3 uCamP;uniform float pxSnap;varying vec3 vPxW,vPxN;\n#ifdef LOD_HOR\nattribute vec2 aHor;varying vec2 vHor;\n#endif\n'+sh.vertexShader.replace('#include <project_vertex>','\n#ifdef LOD_HOR\nvHor=aHor*1.6-.1;\n#else\nif(pxSnap>.5){float sc_=length(modelMatrix[0].xyz);vec4 o4_=vec4(transformed,1.);\n#ifdef USE_INSTANCING\no4_=instanceMatrix*o4_;sc_*=length(instanceMatrix[0].xyz);\n#endif\nvec3 o_=(modelMatrix*o4_).xyz;\nfloat s_=min(1.+.5*floor(length(o_.xz-uCamP.xz)*.2),8.);if(s_>1.01&&sc_>1e-4){float g_=s_/16./sc_,b_=.0625/sc_;vec3 r_=transformed-floor(transformed/b_+.5)*b_;r_*=step(abs(r_),vec3(.01/sc_));transformed=floor(transformed/g_+.5)*g_+r_;}}\n#endif\n{vec4 w_=vec4(transformed,1.);vec3 n_=objectNormal;\n#ifdef USE_INSTANCING\nw_=instanceMatrix*w_;n_=mat3(instanceMatrix)*n_;\n#endif\nvPxW=(modelMatrix*w_).xyz;vPxN=normalize(mat3(modelMatrix)*n_);}\n#include <project_vertex>');
   sh.fragmentShader=`varying vec3 vPxW,vPxN;
 #ifdef LOD_HOR
 varying vec2 vHor;
@@ -2451,7 +2455,7 @@ function grassPushTick(dt){if(!running)return;const L=[];
     near.sort((a,b)=>Math.hypot(a.pos.x-c.x,a.pos.z-c.z)-Math.hypot(b.pos.x-c.x,b.pos.z-c.z));for(const a of near.slice(0,4))L.push([a.pos.x,a.pos.y,a.pos.z,.7]);
     for(const v of vehicles)if(!v.driver&&v.npcD&&Math.abs(v.speed)>.3&&Math.abs(v.pos.x-c.x)<30&&Math.abs(v.pos.z-c.z)<30)L.push([v.pos.x,v.pos.y,v.pos.z,v.Wd*.9])}
   for(let i=0;i<10;i++){const q=L[i],g=GPUSH[i];if(q){g.x=q[0];g.y=q[1];g.z=q[2];g.w=Math.max(0,q[3])}else g.w=0}}
-pxShadows(grassMat);
+grassMat.userData.pxNoSnap=1;pxShadows(grassMat);
 // grass casts shadows too: a depth material with the same cut-out and sway, so blades throw pixel shadows that move with the wind
 const grassDepth=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking,map:grassTex,alphaTest:.5,side:THREE.DoubleSide});
 grassDepth.onBeforeCompile=sh=>{sh.uniforms.time=grassTime;sh.vertexShader='uniform float time;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nfloat sw=uv.y>.5?1.:0.;transformed.x+=sin(time*1.7+position.x*.6+position.z*.4)*.2*sw;transformed.z+=cos(time*1.3+position.x*.45)*.14*sw;')};
