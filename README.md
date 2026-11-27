@@ -10,6 +10,9 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v20.1 — desktop version
+- `desktop/`: Windows .bat and Mac .command launchers that start Chrome/Edge in app mode with `--disable-gpu-vsync --disable-frame-rate-limit --disable-background-timer-throttling` and a dedicated profile (flags are ignored when attaching to a running instance, hence `--user-data-dir`). Browser pages cannot uncap vsync themselves.
+
 ## v20 — measured on real hardware
 - Profiled in a real browser on an AMD Radeon 840M (Ultra, RD 6): before, CPU per frame ≈ render 13 ms (incl. `scene.updateMatrixWorld` 5.3 ms over ~26.5k objects) + occlusion 5–7 ms + update 3 ms; GPU world view ≈ 5 ms. `fastMW` updates only visible subtrees (skipped subtrees force-updated when shown). Occlusion and pre-pass default off; auto-tune disabled.
 - `GT`: per-frame CPU time and a GPU `TIME_ELAPSED` query around the world view; the governor uses min(interval, work×1.15) so browser/display frame caps no longer lower quality; profiler uses the same work time. After: ~12 ms CPU, ~5 ms GPU ⇒ ~85 FPS capacity at full quality.
