@@ -533,8 +533,8 @@ const fbm=(x,z)=>vnoise(x/16,z/16)*.6+vnoise(x/7,z/7)*.3+vnoise(x/3,z/3)*.1;
 // ---------------- world data
 // VS = size of one voxel in world units (0.5 = half-size blocks). The world is 96x96 units.
 // infinite world: an endless grid of RS x RS regions; a 3x3-region window (W x W) around the players lives in a ring buffer
-// the world window: 3x3 regions on phones and tablets, 5x5 on computers (more memory, but render distance can reach much further)
-const WR=(typeof matchMedia==='function'&&matchMedia('(pointer: coarse)').matches&&!matchMedia('(any-pointer: fine)').matches)||(navigator.deviceMemory&&navigator.deviceMemory<=4)?3:5,WH=(WR-1)/2;
+// the world window: 5x5 regions on devices with 8 GB of memory or more, 3x3 on smaller ones (or touch-only devices that don't say) (more memory, but render distance can reach much further)
+const WR=(typeof navigator!=='undefined'&&navigator.deviceMemory)?(navigator.deviceMemory>=8?5:3):(typeof matchMedia==='function'&&matchMedia('(pointer: coarse)').matches&&!matchMedia('(any-pointer: fine)').matches)?3:5,WH=(WR-1)/2;
 const VS=.5,RS=224,W=RS*WR,H=96,CS=16,NC=W/CS,G=24,FH=6,P=48;
 let OX=-RS*WH,OZ=-RS*WH; // world voxel coords of the window's corner (multiples of RS)
 const vox=new Uint8Array(W*H*W), hmap=new Int16Array(W*W);
