@@ -1886,6 +1886,14 @@ const prepassMat=new THREE.MeshBasicMaterial({colorWrite:false,polygonOffset:tru
 function depthPrepass(cam){if(!PREPASS)return false;const m=cam.layers.mask,sn=renderer.shadowMap.needsUpdate;cam.layers.mask=1<<7;renderer.shadowMap.needsUpdate=false;scene.overrideMaterial=prepassMat;
   try{renderer.render(scene,cam)}finally{scene.overrideMaterial=null;cam.layers.mask=m;renderer.shadowMap.needsUpdate=sn}renderer.autoClearDepth=false;return true}
 function endPrepass(){renderer.autoClearDepth=true}
+// ---------------- how much work a frame really is. The time between frames isn't it: a browser running in the background, on battery
+// saving or on a 30 Hz screen spaces frames out however light they are, and the quality governor used to read that as the game being
+// slow and lower the picture for nothing. So the CPU time of each frame is measured directly, and the graphics card's time for the
+// world view with a GPU timer (where the browser offers one); the governor and the FPS counter go by the larger of the two
+const GT={x:undefined,gl:null,q:null,busy:false,ms:0,cpu:0,work:0};
+function gpuT(end){try{if(GT.x===undefined){GT.gl=renderer.getContext();GT.x=renderer.capabilities.isWebGL2&&GT.gl.getExtension('EXT_disjoint_timer_query_webgl2')||null}const gl=GT.gl,X=GT.x;if(!X)return;
+  if(!end){if(GT.q){if(!gl.getQueryParameter(GT.q,gl.QUERY_RESULT_AVAILABLE))return;const v=gl.getQueryParameter(GT.q,gl.QUERY_RESULT)/1e6;if(!gl.getParameter(X.GPU_DISJOINT_EXT))GT.ms+=(v-GT.ms)*.15}else GT.q=gl.createQuery();
+    gl.beginQuery(X.TIME_ELAPSED_EXT,GT.q);GT.busy=true}else if(GT.busy){gl.endQuery(X.TIME_ELAPSED_EXT);GT.busy=false}}catch(e){GT.x=null}}
 function renderView(cam,i,x,y,w,h,under){
   cam.updateMatrixWorld();sky.position.copy(cam.position);sky.scale.setScalar(cam.far*.85);sky.updateMatrixWorld();
   const dl=dayLight(),night=1-dl;
@@ -1893,8 +1901,8 @@ function renderView(cam,i,x,y,w,h,under){
   skyMat.uniforms.sunDir.value.copy(SUN_DIR);skyMat.uniforms.night.value=night*(1-WX.amt);skyMat.uniforms.sunUp.value=clamp(SUN_DIR.y*6,0,1)*(1-WX.amt*.85);
   skyMat.uniforms.sunCol.value.setHex(SUN_DIR.y<.25?0xffb070:0xfff0d0);
   if(PROF.flags.light)FLU.dlN.value=0;if(PROF.flags.flash){FLU.flOn0.value=0;FLU.flOn1.value=0}
-  if(GFX===0||!canPost||PROF.flags.post){const rs0=()=>{renderer.setRenderTarget(null);renderer.setViewport(x,y,w,h);renderer.setScissor(x,y,w,h)};rs0();occBefore(cam,i,rs0);depthPrepass(cam);try{renderer.render(scene,cam)}finally{endPrepass()}occAfter(cam,i);return}
-  const rt=getRT(i,w,h);renderer.setRenderTarget(rt);occBefore(cam,i,()=>renderer.setRenderTarget(rt));depthPrepass(cam);try{renderer.render(scene,cam)}finally{endPrepass()}occAfter(cam,i);renderer.setRenderTarget(null);
+  if(GFX===0||!canPost||PROF.flags.post){const rs0=()=>{renderer.setRenderTarget(null);renderer.setViewport(x,y,w,h);renderer.setScissor(x,y,w,h)};rs0();occBefore(cam,i,rs0);depthPrepass(cam);gpuT(0);try{renderer.render(scene,cam)}finally{endPrepass();gpuT(1)}occAfter(cam,i);return}
+  const rt=getRT(i,w,h);renderer.setRenderTarget(rt);occBefore(cam,i,()=>renderer.setRenderTarget(rt));depthPrepass(cam);gpuT(0);try{renderer.render(scene,cam)}finally{endPrepass();gpuT(1)}occAfter(cam,i);renderer.setRenderTarget(null);
   renderer.setViewport(x,y,w,h);renderer.setScissor(x,y,w,h);
   const U=postMat.uniforms;U.tColor.value=rt.texture;U.tDepth.value=rt.depthTexture;U.aspect.value=w/h;U.time.value=(performance.now()/1000)%100;U.px.value.set(1/rt.width,1/rt.height);U.aa.value=PIX>1?0:1;
   _m4.multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse);U.invVP.value.copy(_m4).invert();U.VPm.value.copy(_m4);
@@ -2192,7 +2200,7 @@ const __PF={};window.__perfOn=()=>{if(__PF.on)return 'already on';__PF.on=1;__PF
   wm(scene,'updateMatrixWorld','scene.updateMatrixWorld');wm(renderer,'render','renderer.render (all calls)');
   {const R=renderer.render,gl=renderer.getContext(),X=gl.getExtension('EXT_disjoint_timer_query_webgl2');__PF.gq=[];
     renderer.render=function(sc,c){const k=sc===scene?(c&&c.isPerspectiveCamera&&c===occShCam?'render: shadow pre-pass':(scene.overrideMaterial?'render: depth pre-pass':(c&&c.fov===1?'render: other':'render: scene view/mirror'))):'render: post/other';__PF.t[k]=__PF.t[k]||0;__PF.n[k]=__PF.n[k]||0;
-      let q=null;if(X&&!__PF.qBusy){q=gl.createQuery();gl.beginQuery(X.TIME_ELAPSED_EXT,q);__PF.qBusy=1}
+      let q=null;if(X&&!__PF.qBusy&&!GT.busy){q=gl.createQuery();gl.beginQuery(X.TIME_ELAPSED_EXT,q);__PF.qBusy=1}
       const t=performance.now();try{return R.apply(this,arguments)}finally{__PF.t[k]+=performance.now()-t;__PF.n[k]++;if(k==='render: scene view/mirror'&&c&&c.fov!==1){const I=renderer.info.render;__PF.calls=(__PF.calls||0)*.9+I.calls*.1;__PF.tris=I.triangles}if(q){gl.endQuery(X.TIME_ELAPSED_EXT);__PF.qBusy=0;__PF.gq.push([q,'GPU '+k])}
         for(let i=__PF.gq.length-1;i>=0;i--){const[qq,kk]=__PF.gq[i];if(gl.getQueryParameter(qq,gl.QUERY_RESULT_AVAILABLE)){if(!gl.getParameter(X.GPU_DISJOINT_EXT)){__PF.t[kk]=(__PF.t[kk]||0)+gl.getQueryParameter(qq,gl.QUERY_RESULT)/1e6;__PF.n[kk]=(__PF.n[kk]||0)+1}gl.deleteQuery(qq);__PF.gq.splice(i,1)}}}}}
   return 'on'};
@@ -6507,7 +6515,7 @@ function rayBox(O,d,bb,max){let t0=0,t1=max;for(let a=0;a<3;a++){const o=[O.x,O.
 let devT=0,devFps=60,devLast=performance.now();
 let devFc=0,devFt=0,devFpsN=0;const devHist=[];function devTick(){const now=performance.now(),fd=now-devLast;devLast=now;devFps+=(1000/Math.max(1,fd)-devFps)*.05;devFc++;devFt+=fd;if(devFt>=500){devFpsN=Math.round(devFc*1000/devFt);devFc=0;devFt=0;
     devHist.push(devFpsN);if(devHist.length>120)devHist.shift();const avg=Math.round(devHist.reduce((a,b)=>a+b,0)/devHist.length);
-    const fb=$('#devFps');if(fb){fb.classList.toggle('hidden',!DEV);if(DEV){fb.innerHTML=devFpsN+' FPS<br><small>avg '+avg+'</small>';fb.classList.toggle('slow',devFpsN<50&&devFpsN>=30);fb.classList.toggle('bad',devFpsN<30)}}}const el=$('#devHud');if(!DEV||!running||!players[0]||menuP){if(!el.classList.contains('hidden'))el.classList.add('hidden');return}
+    const fb=$('#devFps');if(fb){fb.classList.toggle('hidden',!DEV);if(DEV){fb.innerHTML=devFpsN+' FPS<br><small>avg '+avg+'</small>'+(GT.work>0?'<br><small title="CPU '+GT.cpu.toFixed(1)+' ms, GPU '+GT.ms.toFixed(1)+' ms">load '+GT.work.toFixed(1)+' ms ≈ '+Math.min(999,Math.round(1000/GT.work))+' FPS max</small>':'');fb.classList.toggle('slow',devFpsN<50&&devFpsN>=30);fb.classList.toggle('bad',devFpsN<30)}}}const el=$('#devHud');if(!DEV||!running||!players[0]||menuP){if(!el.classList.contains('hidden'))el.classList.add('hidden');return}
   el.classList.remove('hidden');if(el.classList.contains('min'))return;if((devT-=fd)>0)return;devT=150;const p=players[0],c=p.cam,eye=c.position.clone(),dir=new V3();c.getWorldDirection(dir);const max=40;let best=null;
   const vh=rayVox(eye,dir,max);if(vh)best={t:vh.t,txt:`Block: ${blockName(get(vh.x,vh.y,vh.z))}  id ${get(vh.x,vh.y,vh.z)}  at ${vh.x},${vh.y},${vh.z}`};
   const take=(t,txt)=>{if(t>=0&&(!best||t<best.t))best={t,txt}};
@@ -6560,7 +6568,7 @@ function frame(){
   if(running&&!paused&&!PROF.flags.logic)update(dt);else{pressed.clear();T.pressed.clear()}
   try{devTick()}catch(e){}try{lodTick(dt);grassPushTick(dt);drawCompass();dlTick(dt);updFlares(dt);rainWash(dt);if(running){flashUpdate();if((flSweepT-=dt)<=0){flSweep();flSweepT=pxBacklog?.5:3}}updEnv(dt)}catch(e){}
   if(!running){tDay+=dt/DAYLEN*.3;updSky()}
-  grassTime.value=now/1000;if(!profTick(dt)&&!tuneTick(dt))adaptRes(dt);profHide(true);render();profHide(false);
+  grassTime.value=now/1000;if(!profTick(dt)&&!tuneTick(dt))adaptRes(GT.work>0?Math.min(dt,GT.work*1.15/1000):dt);profHide(true);render();profHide(false);GT.cpu+=((performance.now()-now)-GT.cpu)*.15;GT.work=Math.max(GT.cpu,GT.ms+2);
   // while profiling, wait for the graphics card to finish the frame and time the whole thing: that's the real cost of a frame, which
   // a 60 Hz (or throttled 30 Hz) display would otherwise hide behind its fixed frame interval
   if(PROF.on){try{const gl=renderer.getContext();gl.readPixels(0,0,1,1,gl.RGBA,gl.UNSIGNED_BYTE,PROF.px)}catch(e){}PROF.work=performance.now()-now}requestAnimationFrame(frame);
