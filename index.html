@@ -2037,7 +2037,7 @@ float getShadowMask(){float s=1.;
   return s;}`);if(typeof FLU!=='undefined')sh.fragmentShader=FL_GLSL+vrInject(sh.fragmentShader,'vPxW').replace('gl_FragColor = vec4( outgoingLight, diffuseColor.a );','gl_FragColor = vec4( outgoingLight, diffuseColor.a );\n'+FL_ADD)};return m}
 function installVmatShader(){vmat.onBeforeCompile=sh=>{
   Object.assign(sh.uniforms,RTU,PAINTU);
-  sh.vertexShader='uniform vec3 uCamP;varying vec3 vRtW,vRtN;attribute vec4 aBl;attribute float aBlT;varying vec4 vBl;varying float vBlT;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n{vec3 w_=(modelMatrix*vec4(transformed,1.)).xyz;vec2 cc_=(floor(w_.xz/8.)+.5)*8.;float d_=length(cc_-uCamP.xz)*2.;if(d_>150.){float G_=4.*(1.+floor((d_-150.)/10.))*.5;w_=floor(w_/G_+.5)*G_;transformed=(w_-modelMatrix[3].xyz)/modelMatrix[0][0];}}\nvRtW=(modelMatrix*vec4(transformed,1.)).xyz;vRtN=normalize(mat3(modelMatrix)*objectNormal);vBl=aBl;vBlT=aBlT;');
+  sh.vertexShader='uniform vec3 uCamP;varying vec3 vRtW,vRtN;attribute vec4 aBl;attribute float aBlT;varying vec4 vBl;varying float vBlT;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvRtW=(modelMatrix*vec4(transformed,1.)).xyz;vRtN=normalize(mat3(modelMatrix)*objectNormal);vBl=aBl;vBlT=aBlT;');
   sh.fragmentShader=`varying vec3 vRtW,vRtN;varying vec4 vBl;varying float vBlT;uniform sampler2D paintIdx,paintAtlas;uniform float pW;uniform vec3 rtOrigin,rtSize,sunDirU;uniform float sunK,wet,rtime,rtSunN,rtAOk;uniform sampler2D hTex;
 #ifdef RTX
 uniform highp sampler3D rtVox;
@@ -2510,7 +2510,37 @@ const slotOf=(cx,cz)=>{let a=cx%NC,b=cz%NC;if(a<0)a+=NC;if(b<0)b+=NC;return b*NC
 const chunkIn=(cx,cz)=>cx*CS>=OX&&cz*CS>=OZ&&cx*CS<OX+W&&cz*CS<OZ+W;
 const slotC=new Int32Array(NC*NC*2);
 let LAZYM=true;const GAPC=new Int16Array(18*18),LIMC=new Int16Array(16*16);
+// ---------------- far chunks as big blocks: once a whole chunk is past the 8x pixel level (150 blocks), it is rebuilt on a 4x4x4 voxel
+// grid: every 4x4x4 group of blocks becomes one block 4 times the size (solid when at least a quarter of it is filled, so walls and
+// roofs keep their shape), with the top texture of whatever is on top and the side texture of what it is mostly made of. Nothing
+// else is drawn there: no grass, glass panes, furniture, props or creatures. It switches back to full blocks as you come back in
+const coarseF=new Uint8Array(NC*NC),CO_D=150,CO_BACK=144,CO_BX=[0,0,0,4,4,4];let COARSE=true;
+function chunkNearB(cx,cz){let m=1e9;for(const p of players){if(!p||!p.pos)continue;const px=p.pos.x/VS,pz=p.pos.z/VS,dx=Math.max(cx*CS-px,0,px-(cx*CS+CS)),dz=Math.max(cz*CS-pz,0,pz-(cz*CS+CS));m=Math.min(m,Math.hypot(dx,dz))}return m}
+function wantCoarse(cx,cz,cur){return COARSE&&chunkNearB(cx,cz)>=(cur?CO_BACK:CO_D)}
+const coSolid=b=>b!==0&&b!==14&&b!==15&&b!==17&&b!==20,coCnt=new Uint16Array(256),coTop=new Uint16Array(256);
+function buildCoarse(cx,cz,k){const x0=cx*CS,z0=cz*CS,NY=H/4,N=CS/4,SW=N+2,S=new Uint8Array(SW*SW*NY);mv=0;mi=0;qBT=0;
+  for(let j=-1;j<=N;j++)for(let i=-1;i<=N;i++)for(let c=0;c<NY;c++){let n=0;const bx=x0+i*4,bz=z0+j*4,by=c*4;
+    for(let y=by;y<by+4;y++)for(let z=bz;z<bz+4;z++)for(let x=bx;x<bx+4;x++)if(coSolid(get(x,y,z)))n++;S[(c*SW+j+1)*SW+i+1]=n>=16?1:0}
+  const sol=(i,c,j)=>c<0?1:c>=NY?0:S[(c*SW+j+1)*SW+i+1];
+  for(let c=0;c<NY;c++)for(let j=0;j<N;j++)for(let i=0;i<N;i++){if(!sol(i,c,j))continue;let open=false;for(let fi=0;fi<6;fi++){const F=FACES[fi];if(!sol(i+F[0],c+F[1],j+F[2])){open=true;break}}if(!open)continue;
+    const bx=x0+i*4,bz=z0+j*4,by=c*4;coCnt.fill(0);coTop.fill(0);
+    for(let z=bz;z<bz+4;z++)for(let x=bx;x<bx+4;x++){let t=0;for(let y=by;y<by+4;y++){const b=get(x,y,z);if(coSolid(b)){coCnt[b]++;t=b}}if(t)coTop[t]++}
+    let sd=0,tp=0;for(let b=1;b<256;b++){if(coCnt[b]>coCnt[sd])sd=b;if(coTop[b]>coTop[tp])tp=b}if(!sd)continue;if(!tp)tp=sd;
+    const tl=b=>b===255?[TILE.water,TILE.water,TILE.water,TILE.water,TILE.water,TILE.water]:TILE_OF[BASE_OF&&BASE_OF[b]&&!TILE_OF[b]?BASE_OF[b]:b];
+    const ts=tl(sd),tt=tl(tp);if(!ts&&!tt)continue;const v=.88+.12*h3(bx,by,bz);
+    for(let fi=0;fi<6;fi++){const F=FACES[fi];if(sol(i+F[0],c+F[1],j+F[2]))continue;const top=fi===2,src=top?(tt||ts):(ts||tt),id=top?tp:sd;let r=1,g=1,b2=1;
+      if(id===1||(id>=23&&id<=25)){const gc=gpatch(bx+2,bz+2);r=gc[0];g=gc[1];b2=gc[2]}
+      quad(bx,by,bz,x0,z0,fi,CO_BX,src[fi],r,g,b2,v*F[4])}}
+  for(const arr of[chunkMeshes,glassMeshes,grassMeshes])if(arr[k]){scene.remove(arr[k]);arr[k].geometry.dispose();arr[k]=null}
+  if(mv){const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.BufferAttribute(mP.slice(0,mv*3),3));g.setAttribute('normal',new THREE.BufferAttribute(mN.slice(0,mv*3),3,true));
+    g.setAttribute('color',new THREE.BufferAttribute(mC.slice(0,mv*3),3,true));g.setAttribute('uv',new THREE.BufferAttribute(mU.slice(0,mv*2),2,true));g.setAttribute('aBl',new THREE.BufferAttribute(mB.slice(0,mv*4),4,true));g.setAttribute('aBlT',new THREE.BufferAttribute(mT.slice(0,mv),1));
+    g.setIndex(new THREE.BufferAttribute(mv>65535?mI.slice(0,mi):Uint16Array.from(mI.subarray(0,mi)),1));g.computeBoundingSphere();
+    gpuOnly(g);const m=new THREE.Mesh(g,vmat);m.position.set((x0-1)*VS,0,(z0-1)*VS);m.scale.setScalar(VS/16);m.castShadow=GFX<3;m.layers.enable(7);m.receiveShadow=true;freeze(m);scene.add(m);chunkMeshes[k]=m}}
 function buildChunk(cx,cz){
+  {const k0=slotOf(cx,cz),co=wantCoarse(cx,cz,coarseF[k0]&&slotC[k0*2]===cx&&slotC[k0*2+1]===cz);coarseF[k0]=co?1:0;
+   if(co){slotC[k0*2]=cx;slotC[k0*2+1]=cz;buildCoarse(cx,cz,k0);const k=k0;
+     if(!loaded[k]){loadedCnt++;drawn[k]=1}loaded[k]=1;dirtyGen++;ldDirty=true;{const v=!!drawn[k];grassT=14;if(chunkMeshes[k])chunkMeshes[k].visible=v;if(furnMeshes[k])furnMeshes[k].visible=false}return}}
   const WW=W*W,x0=cx*CS,z0=cz*CS,x1=x0+CS-1,z1=z0+CS-1,nb=[0,0,0,0,0,0];mv=0;mi=0;const GP=[],GN=[],GI=[],GUV=[],TP=[],TU=[],TC=[],TI=[],gd=GFX===0?.18:.42;
   // skip buried blocks without looking at them: per column, the lowest see-through cell (air, glass, ladder…) in it or its 4 neighbours;
   // everything two or more below that is boxed in by opaque blocks on all six sides, so it can't show a face until something above is dug out
@@ -2567,7 +2597,7 @@ function buildChunk(cx,cz){
     g.setIndex(new THREE.BufferAttribute(mv>65535?mI.slice(0,mi):Uint16Array.from(mI.subarray(0,mi)),1));g.computeBoundingSphere();
     gpuOnly(g);const m=new THREE.Mesh(g,vmat);m.position.set((x0-1)*VS,0,(z0-1)*VS);m.scale.setScalar(VS/16);m.castShadow=GFX<3;m.layers.enable(7);m.receiveShadow=true;freeze(m);scene.add(m);chunkMeshes[k]=m}
   if(GP.length){const gm=new THREE.Mesh(gpuOnly(mkGeo(GP,GN,null,GI,GUV)),gmat);gm.scale.setScalar(VS);gm.renderOrder=2;gm.receiveShadow=true;freeze(gm);scene.add(gm);glassMeshes[k]=gm}
-  if(!loaded[k]){loadedCnt++;drawn[k]=1}loaded[k]=1;dirtyGen++;ldDirty=true;{const v=!!drawn[k];grassT=14;for(const arr of[chunkMeshes,glassMeshes])if(arr[k])arr[k].visible=v;if(grassMeshes[k])grassMeshes[k].visible=false;if(furnMeshes[k])furnMeshes[k].visible=v}
+  if(!loaded[k]){loadedCnt++;drawn[k]=1}loaded[k]=1;dirtyGen++;ldDirty=true;{const v=!!drawn[k];grassT=14;for(const arr of[chunkMeshes,glassMeshes])if(arr[k])arr[k].visible=v;if(grassMeshes[k])grassMeshes[k].visible=false;if(furnMeshes[k])furnMeshes[k].visible=v&&!coarseF[k]}
 }
 // painted drywall: rooms record their interior box and colour; wall faces looking into a room get plaster in that colour
 const paintRooms=[],roomIdx=new Map();
@@ -2596,8 +2626,8 @@ function rebuildAt(x,z){
   const cx=Math.floor(x/CS),cz=Math.floor(z/CS),lx=x-cx*CS,lz=z-cz*CS;rb(cx,cz);
   if(lx===0)rb(cx-1,cz);if(lx===CS-1)rb(cx+1,cz);if(lz===0)rb(cx,cz-1);if(lz===CS-1)rb(cx,cz+1);
 }
-let RD=isTouch?4:6;try{const r=+localStorage.getItem('deadground-rd');if(r>=3&&r<=10)RD=r;if(!localStorage.getItem('deadground-rd2')){localStorage.setItem('deadground-rd2','1');if(r>(isTouch?4:6)){RD=isTouch?4:6;localStorage.setItem('deadground-rd',String(RD))}}}catch(e){}
-const want=[],dirtyC=new Set(); // dirtyC: loaded chunks to remesh in the background (window shifted under them)
+let RD=isTouch?4:6;try{const r=+localStorage.getItem('deadground-rd');if(r>=3&&r<=14)RD=r;if(!localStorage.getItem('deadground-rd2')){localStorage.setItem('deadground-rd2','1');if(r>(isTouch?4:6)){RD=isTouch?4:6;localStorage.setItem('deadground-rd',String(RD))}}}catch(e){}
+let coTick=0;const want=[],dirtyC=new Set(); // dirtyC: loaded chunks to remesh in the background (window shifted under them)
 const chunkLd=(x,z)=>{const k=slotOf(x,z);return!!loaded[k]&&slotC[k*2]===x&&slotC[k*2+1]===z};
 const chunkReadyAt=(px,pz)=>chunkLd(Math.floor(px/VS/CS),Math.floor(pz/VS/CS));
 function streamChunks(centers,budget){
@@ -2607,11 +2637,12 @@ function streamChunks(centers,budget){
   let n=0;const t0=performance.now(),tb=budget>100?1e9:isTouch?3:4.5,more=budget>100?budget:budget*2;
   if(want.length){want.sort((a,b)=>a-b);for(const w of want){if(n>=more||(n>=1&&performance.now()-t0>tb)||(n>=budget&&performance.now()-t0>tb*.5))break;const l=w%4096,x=bx+l%NC,z=bz+((l/NC)|0);if(!chunkLd(x,z)){const k=slotOf(x,z);if(loaded[k])unloadChunk(k);buildChunk(x,z);n++}}}
   for(const k of dirtyC){if(n>=more||(n>=1&&performance.now()-t0>tb))break;dirtyC.delete(k);if(loaded[k]){buildChunk(slotC[k*2],slotC[k*2+1]);n++}}
+  if((coTick=(coTick+1)%12)===0)for(let k=0;k<NC*NC;k++){if(!loaded[k]||dirtyC.has(k))continue;const x=slotC[k*2],z=slotC[k*2+1];if((wantCoarse(x,z,coarseF[k])?1:0)!==coarseF[k])dirtyC.add(k)}
   const r2u=(RD+4)*(RD+4);
   for(let k=0;k<NC*NC;k++){if(!loaded[k])continue;const x=slotC[k*2],z=slotC[k*2+1];let keep=chunkIn(x,z);
     if(keep){keep=false;for(const[ccx,ccz]of cs){const dx=x-ccx,dz=z-ccz;if(dx*dx+dz*dz<=r2u){keep=true;break}}}if(!keep)unloadChunk(k)}
   {const key=cs.map(c=>c[0]+','+c[1]).join(';')+'|'+RD+'|'+loadedCnt+'|'+dirtyGen;if(key!==drawnKey){drawnKey=key;const r2s=RD*RD;let ch2=false;for(let k=0;k<NC*NC;k++){if(!loaded[k])continue;const x=slotC[k*2],z=slotC[k*2+1];let v=false;for(const[ccx,ccz]of cs){const dx=x-ccx,dz=z-ccz;if(dx*dx+dz*dz<=r2s){v=true;break}}
-    if(drawn[k]!==(v?1:0)){drawn[k]=v?1:0;ch2=true;grassT=14;for(const arr of[chunkMeshes,glassMeshes])if(arr[k])arr[k].visible=v;if(!v&&grassMeshes[k])grassMeshes[k].visible=false;if(furnMeshes[k])furnMeshes[k].visible=v}}if(ch2){ldDirty=true;drawnGen++}}}
+    if(drawn[k]!==(v?1:0)){drawn[k]=v?1:0;ch2=true;grassT=14;for(const arr of[chunkMeshes,glassMeshes])if(arr[k])arr[k].visible=v;if(!v&&grassMeshes[k])grassMeshes[k].visible=false;if(furnMeshes[k])furnMeshes[k].visible=v&&!coarseF[k]}}if(ch2){ldDirty=true;drawnGen++}}}
   // the shader's picture of which chunks are in, and the radius of the circle
   let ch=false;if(ldDirty){ldDirty=false;for(let k=0;k<NC*NC;k++){const a=loaded[k]&&drawn[k]?255:0,r=a?((slotC[k*2]%256)+256)%256:0,g=a?((slotC[k*2+1]%256)+256)%256:0,o=k*4;if(ldD[o]!==r||ldD[o+1]!==g||ldD[o+3]!==a){ldD[o]=r;ldD[o+1]=g;ldD[o+3]=a;ch=true}}}if(ch)ldT.needsUpdate=true;FLU.vrR.value=1;
   return want.length;
@@ -6876,8 +6907,8 @@ async function loadCode(code){
   withSeed(st.seed,()=>{loadingSave=true;startGame(Math.max(1,st.p.length));applyState(st);msg(null,`Save loaded — day ${day}`)})}
 // render distance pickers
 for(const id of['#farSel','#farSel2']){const el=$(id);el.value=FARV?'1':'0';el.addEventListener('change',()=>{FARV=el.value==='1';$('#farSel').value=$('#farSel2').value=el.value;try{localStorage.setItem('deadground-far',FARV?'1':'0')}catch(e){}})}
-for(const id of['#rdSel','#rdSel2']){const el=$(id);el.innerHTML=[4,6,8,10].map(v=>`<option value="${v}">${v} chunks (${v*CS*VS} m)</option>`).join('');el.value=String(RD);
-  el.addEventListener('change',()=>{RD=Math.min(10,+el.value);$('#rdSel').value=$('#rdSel2').value=String(RD);try{localStorage.setItem('deadground-rd',String(RD))}catch(e){}})}
+for(const id of['#rdSel','#rdSel2']){const el=$(id);el.innerHTML=[4,6,8,10,12,14].map(v=>`<option value="${v}">${v} chunks (${v*CS} blocks)</option>`).join('');el.value=String(RD);
+  el.addEventListener('change',()=>{RD=Math.min(14,+el.value);$('#rdSel').value=$('#rdSel2').value=String(RD);try{localStorage.setItem('deadground-rd',String(RD))}catch(e){}})}
 for(const id of['#pixSel','#pixSel2']){const el=$(id);el.innerHTML=[[1,'Smooth'],[2,'Pixel ×2'],[3,'Pixel ×3'],[4,'Pixel ×4']].map(([v,n])=>`<option value="${v}">${n}</option>`).join('');el.value=String(PIX);
   el.addEventListener('change',()=>{PIX=+el.value;$('#pixSel').value=$('#pixSel2').value=String(PIX);try{localStorage.setItem('deadground-pix2',String(PIX))}catch(e){}for(const rt of rts)if(rt)rt.dispose();rts.length=0;applyPix()})}
 for(const id of['#gfxSel','#gfxSel2']){const el=$(id);el.innerHTML=GFXN.map((n,i)=>`<option value="${i}"${i===3&&!RTX_OK?' disabled':''}>${n}${['  (fastest)',' (pixel shadows, rays)',' (+ motion blur, reflections)',' (+ pixel ray tracing)'][i]}</option>`).join('');el.value=String(GFX);
