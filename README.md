@@ -10,6 +10,9 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v19.8 — FPS profiler
+- `profStart`/`profTick`/`profReport`: 17 tests × (20 settle + 90 timed frames), median frame time, cost = baseline − test. Flags hook `renderView` (post off, lights/flashlight zeroed), `shadowPass`, `update`, dynScale ×0.5, RT steps 0, pre-pass/occlusion off, and hide sets (`profSet`). Governor and auto-tune paused. Results saved to `deadground-prof`.
+
 ## v19.7 — round flashlight
 - Flashlight (`flAt`) always evaluated at the block-pixel point `Pq`, outside the shading LOD; dynamic lights keep the LOD.
 
