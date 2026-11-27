@@ -2188,6 +2188,9 @@ const __PF={};window.__perfOn=()=>{if(__PF.on)return 'already on';__PF.on=1;__PF
   try{if(typeof pxSweep==='function'){const f_=pxSweep;__PF.t['pxSweep']=0;__PF.n['pxSweep']=0;pxSweep=function(){const t=performance.now();try{return f_.apply(this,arguments)}finally{__PF.t['pxSweep']+=performance.now()-t;__PF.n['pxSweep']++}}}}catch(e){}
   try{if(typeof stainFlush==='function'){const f_=stainFlush;__PF.t['stainFlush']=0;__PF.n['stainFlush']=0;stainFlush=function(){const t=performance.now();try{return f_.apply(this,arguments)}finally{__PF.t['stainFlush']+=performance.now()-t;__PF.n['stainFlush']++}}}}catch(e){}
   try{if(typeof updSky==='function'){const f_=updSky;__PF.t['updSky']=0;__PF.n['updSky']=0;updSky=function(){const t=performance.now();try{return f_.apply(this,arguments)}finally{__PF.t['updSky']+=performance.now()-t;__PF.n['updSky']++}}}}catch(e){}
+  const wm=(o,m,k)=>{const f=o[m].bind(o);__PF.t[k]=0;__PF.n[k]=0;o[m]=function(){const t=performance.now();try{return f.apply(o,arguments)}finally{__PF.t[k]+=performance.now()-t;__PF.n[k]++}}};
+  wm(scene,'updateMatrixWorld','scene.updateMatrixWorld');wm(renderer,'render','renderer.render (all calls)');
+  {const R=renderer.render;renderer.render=function(sc,c){const k=sc===scene?(c&&c.isPerspectiveCamera&&c===occShCam?'render: shadow pre-pass':(scene.overrideMaterial?'render: depth pre-pass':(c&&c.fov===1?'render: other':'render: scene view/mirror'))):'render: post/other';__PF.t[k]=__PF.t[k]||0;__PF.n[k]=__PF.n[k]||0;const t=performance.now();try{return R.apply(this,arguments)}finally{__PF.t[k]+=performance.now()-t;__PF.n[k]++}}}
   return 'on'};
 window.__perfReset=()=>{for(const k in __PF.t){__PF.t[k]=0;__PF.n[k]=0}__PF.f0=performance.now();__PF.fr=__PF.frames||0};
 window.__perf=()=>{const fr=Math.max(1,(__PF.n.render||1));return Object.entries(__PF.t).map(([k,v])=>[k,+(v/fr).toFixed(2),__PF.n[k]]).filter(e=>e[1]>=.05).sort((a,b)=>b[1]-a[1])};
