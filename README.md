@@ -10,6 +10,11 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v20.3 — blockier with distance
+- `pxS(P)` = min(1+0.5·floor(d/10 blocks), 8) block pixels; `coarseQ` snaps tangent axes to that cell size anchored to the 2-block texture tiles. Used for vmat atlas UVs (clamped to the tile), paint, `pxWorld` (RT sun/AO, shadows), entity/prop UVs (`pxUvC`) and their light points (`pxQuv`), dynamic lights and flashlight (`FL_ADD`), sun shadow sampling (`shLevel`). Technique LOD (`shLd`) unchanged.
+- Vertex clustering in vmat beyond 150 blocks (per 16-block cell distance): grid 4·(1+floor((d−150)/10)) blocks. Creatures and props hidden past 75 m.
+- Far view on layer 8, rendered into a 256² cube target one face per frame (`farSkyTick`), sampled by the sky shader with alpha; refreshed after 2 m movement or 2 s.
+
 ## v20.2 — far props merged by chunk
 - `chProxyTick`/`mergeStatics`: static props bucketed by chunk slot (1 Hz, hash of ids + child visibility + quantised rotations); slots farther than 20 m (back under 17 m) get one world-space mesh per material/shadow/layer bucket; originals hidden via `userData.chp` (respected by `cullEntities`, which now records intended visibility in `userData.wv`). Objects containing sprites/lights/points stay live; doors and fires excluded. Per-object stand-ins now cover vehicles only. Measured (Radeon 840M, Ultra, RD 6): visible meshes ~5.2k → ~2.4k, ~30 → ~50 FPS at full quality.
 - Blocks were already merged: all touching blocks in a chunk are one mesh (this is the same idea applied to props).
