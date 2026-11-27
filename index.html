@@ -533,8 +533,10 @@ const fbm=(x,z)=>vnoise(x/16,z/16)*.6+vnoise(x/7,z/7)*.3+vnoise(x/3,z/3)*.1;
 // ---------------- world data
 // VS = size of one voxel in world units (0.5 = half-size blocks). The world is 96x96 units.
 // infinite world: an endless grid of RS x RS regions; a 3x3-region window (W x W) around the players lives in a ring buffer
-const VS=.5,RS=224,W=RS*3,H=96,CS=16,NC=W/CS,G=24,FH=6,P=48;
-let OX=-RS,OZ=-RS; // world voxel coords of the window's corner (multiples of RS)
+// the world window: 3x3 regions on phones and tablets, 5x5 on computers (more memory, but render distance can reach much further)
+const WR=(typeof matchMedia==='function'&&matchMedia('(pointer: coarse)').matches&&!matchMedia('(any-pointer: fine)').matches)||(navigator.deviceMemory&&navigator.deviceMemory<=4)?3:5,WH=(WR-1)/2;
+const VS=.5,RS=224,W=RS*WR,H=96,CS=16,NC=W/CS,G=24,FH=6,P=48;
+let OX=-RS*WH,OZ=-RS*WH; // world voxel coords of the window's corner (multiples of RS)
 const vox=new Uint8Array(W*H*W), hmap=new Int16Array(W*W);
 const md=v=>{v%=W;return v<0?v+W:v};
 const inWin=(x,z)=>x>=OX&&z>=OZ&&x<OX+W&&z<OZ+W;
@@ -1643,7 +1645,13 @@ const FLN=24,FLU={flTan:{value:Math.tan(.36)},flRange:{value:30},uCamP:{value:ne
 {const V4=()=>THREE.Vector4?new THREE.Vector4():{x:0,y:0,z:0,w:0};Object.assign(FLU,{dlP:{value:Array.from({length:12},V4)},dlC:{value:Array.from({length:12},V4)},dlD:{value:Array.from({length:12},V4)},dlB:{value:Array.from({length:12},V4)},dlN:{value:0},dlWet:{value:0},dlH:{value:null},dlHO:{value:new V3()},dlHS:{value:new V3(1,1,1)},dlO:{value:Array.from({length:12},V4)},dlOcc:{value:null},shNoVox:{value:0},vrR:{value:0},ldTex:{value:null},shK:{value:1},shDbg:{value:0},shSun:{value:new V3(0,1,0)},horTex:{value:null},horO:{value:THREE.Vector4?new THREE.Vector4(0,0,1,0):{x:0,y:0,z:1,w:0}}})}
 for(const i of[0,1]){const d=new Uint8Array(FLN*FLN*4),t=new THREE.DataTexture(d,FLN,FLN,THREE.RGBAFormat);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.needsUpdate=true;FLT.push({d,t,f:0});
   FLU['flOn'+i]={value:0};FLU['flPos'+i]={value:new V3()};FLU['flDir'+i]={value:new V3(0,0,-1)};FLU['flRt'+i]={value:new V3(1,0,0)};FLU['flUp'+i]={value:new V3(0,1,0)};FLU['flMap'+i]={value:t}}
-const FL_GLSL0='uniform vec3 uCamP;uniform float flTan,flRange,flOn0,flOn1;uniform vec3 flPos0,flPos1,flDir0,flDir1,flRt0,flRt1,flUp0,flUp1;uniform sampler2D flMap0,flMap1;\n'+
+// pixel-size levels by distance (in blocks): level 0 is full detail out to 5 blocks; level 1 runs 6 blocks (to 11), level 2 runs 8 (to 19),
+// then 12, 20, 36, 68 ... each level is as long as the last plus a doubling step, so level n starts at 2^n + 4n - 1 blocks. The pixel
+// grows by half at every level (1, 1.5, 2, 2.5 ...) up to 8
+const PXLV_GLSL=`float pxLv(float d){float n=0.;for(int i=1;i<15;i++){float f=float(i);if(d>=exp2(f)+4.*f-1.)n=f;else break;}return n;}
+float pxSd(float d){return min(1.+.5*pxLv(d),8.);}
+`;
+const FL_GLSL0='uniform vec3 uCamP;'+PXLV_GLSL+'uniform float flTan,flRange,flOn0,flOn1;uniform vec3 flPos0,flPos1,flDir0,flDir1,flRt0,flRt1,flUp0,flUp1;uniform sampler2D flMap0,flMap1;\n'+
 // dynamic lights: up to 12 at once, worked out per block pixel. Kinds: omni, spot (cone), and interior lights that only reach inside a box (a house).
 // Outdoor lights skip anything under a roof (read from the height map), so street lamps and headlights don't shine through walls into rooms.
 // Inverse-square falloff with a smooth cut-off; on wet ground each light also leaves a glint
@@ -1686,7 +1694,7 @@ float vrLd(vec3 P){vec2 c=floor(P.xz/${(CS*VS).toFixed(1)});vec4 t=texture2D(ldT
 // pixel-size levels: within 10 blocks of the camera everything is drawn at full detail (pixel size 1); every further 10 blocks the
 // pixel grows by half (1.5, 2, 2.5 ... up to 8). Textures, lighting, shadows and the flashlight all use the same cells, anchored to
 // the world's 2-block texture tiles so a coarse pixel always lines up with the fine ones inside it
-float pxS(vec3 P){float d=length(P.xz-uCamP.xz)*2.;return min(1.+.5*floor(d/10.),8.);}
+float pxS(vec3 P){return pxSd(length(P.xz-uCamP.xz)*2.);}
 float cq1(float x,float s){float c=s/16.,l=x-floor(x),a=floor(l/c)*c,b=min(a+c,1.);return floor(x)+(a+b)*.5;}
 vec3 coarseQ(vec3 P,vec3 N,float s){if(s<1.01)return P;vec3 a=abs(N),q=vec3(cq1(P.x,s),cq1(P.y,s),cq1(P.z,s));
   if(a.x>=a.y&&a.x>=a.z)q.x=P.x;else if(a.y>=a.z)q.y=P.y;else q.z=P.z;return q;}
@@ -2002,7 +2010,7 @@ vec3 pxQuv(vec3 n){float s=pxS(vPxW);vec2 k=pxK(s);vec2 tc=vUv*pxTS;vec3 dp1=dFd
 `;
 function pxShadows(m){if(!m||m.isMeshBasicMaterial||(m.userData&&m.userData.pxs))return m;(m.userData=m.userData||{}).pxs=1;m.extensions=Object.assign({},m.extensions,{derivatives:true});const prev=m.onBeforeCompile;m.onBeforeCompile=(sh,r)=>{if(prev)prev.call(m,sh,r);if(typeof FLU!=='undefined'){Object.assign(sh.uniforms,FLU)}sh.uniforms.pxSnap={value:m.userData.pxNoSnap?0:1};
   {const im=m.map&&m.map.image;sh.uniforms.pxTS={value:THREE.Vector2?new THREE.Vector2(im&&im.width||16,im&&im.height||16):{x:16,y:16}}}
-  sh.vertexShader='uniform vec3 uCamP;uniform float pxSnap;varying vec3 vPxW,vPxN;\n#ifdef LOD_HOR\nattribute vec2 aHor;varying vec2 vHor;\n#endif\n'+sh.vertexShader.replace('#include <project_vertex>','\n#ifdef LOD_HOR\nvHor=aHor*1.6-.1;\n#else\nif(pxSnap>.5){float sc_=length(modelMatrix[0].xyz);vec4 o4_=vec4(transformed,1.);\n#ifdef USE_INSTANCING\no4_=instanceMatrix*o4_;sc_*=length(instanceMatrix[0].xyz);\n#endif\nvec3 o_=(modelMatrix*o4_).xyz;\nfloat s_=min(1.+.5*floor(length(o_.xz-uCamP.xz)*.2),8.);if(s_>1.01&&sc_>1e-4){float g_=s_/16./sc_,b_=.0625/sc_;vec3 r_=transformed-floor(transformed/b_+.5)*b_;r_*=step(abs(r_),vec3(.01/sc_));transformed=floor(transformed/g_+.5)*g_+r_;}}\n#endif\n{vec4 w_=vec4(transformed,1.);vec3 n_=objectNormal;\n#ifdef USE_INSTANCING\nw_=instanceMatrix*w_;n_=mat3(instanceMatrix)*n_;\n#endif\nvPxW=(modelMatrix*w_).xyz;vPxN=normalize(mat3(modelMatrix)*n_);}\n#include <project_vertex>');
+  sh.vertexShader='uniform vec3 uCamP;uniform float pxSnap;'+PXLV_GLSL+'varying vec3 vPxW,vPxN;\n#ifdef LOD_HOR\nattribute vec2 aHor;varying vec2 vHor;\n#endif\n'+sh.vertexShader.replace('#include <project_vertex>','\n#ifdef LOD_HOR\nvHor=aHor*1.6-.1;\n#else\nif(pxSnap>.5){float sc_=length(modelMatrix[0].xyz);vec4 o4_=vec4(transformed,1.);\n#ifdef USE_INSTANCING\no4_=instanceMatrix*o4_;sc_*=length(instanceMatrix[0].xyz);\n#endif\nvec3 o_=(modelMatrix*o4_).xyz;\nfloat s_=pxSd(length(o_.xz-uCamP.xz)*2.);if(s_>1.01&&sc_>1e-4){float g_=s_/16./sc_,b_=.0625/sc_;vec3 r_=transformed-floor(transformed/b_+.5)*b_;r_*=step(abs(r_),vec3(.01/sc_));transformed=floor(transformed/g_+.5)*g_+r_;}}\n#endif\n{vec4 w_=vec4(transformed,1.);vec3 n_=objectNormal;\n#ifdef USE_INSTANCING\nw_=instanceMatrix*w_;n_=mat3(instanceMatrix)*n_;\n#endif\nvPxW=(modelMatrix*w_).xyz;vPxN=normalize(mat3(modelMatrix)*n_);}\n#include <project_vertex>');
   sh.fragmentShader=`varying vec3 vPxW,vPxN;
 #ifdef LOD_HOR
 varying vec2 vHor;
@@ -2628,7 +2636,7 @@ function rebuildAt(x,z){
   const cx=Math.floor(x/CS),cz=Math.floor(z/CS),lx=x-cx*CS,lz=z-cz*CS;rb(cx,cz);
   if(lx===0)rb(cx-1,cz);if(lx===CS-1)rb(cx+1,cz);if(lz===0)rb(cx,cz-1);if(lz===CS-1)rb(cx,cz+1);
 }
-let RD=isTouch?4:6;try{const r=+localStorage.getItem('deadground-rd');if(r>=3&&r<=14)RD=r;if(!localStorage.getItem('deadground-rd2')){localStorage.setItem('deadground-rd2','1');if(r>(isTouch?4:6)){RD=isTouch?4:6;localStorage.setItem('deadground-rd',String(RD))}}}catch(e){}
+const RDMAX=WR>3?24:14;let RD=isTouch?4:6;try{const r=+localStorage.getItem('deadground-rd');if(r>=3&&r<=RDMAX)RD=r;if(!localStorage.getItem('deadground-rd2')){localStorage.setItem('deadground-rd2','1');if(r>(isTouch?4:6)){RD=isTouch?4:6;localStorage.setItem('deadground-rd',String(RD))}}}catch(e){}
 let coTick=0;const want=[],dirtyC=new Set(); // dirtyC: loaded chunks to remesh in the background (window shifted under them)
 const chunkLd=(x,z)=>{const k=slotOf(x,z);return!!loaded[k]&&slotC[k*2]===x&&slotC[k*2+1]===z};
 const chunkReadyAt=(px,pz)=>chunkLd(Math.floor(px/VS/CS),Math.floor(pz/VS/CS));
@@ -6816,12 +6824,12 @@ function winStep(){const op=winQ.shift();if(op[0]==='u')unloadRegion(op[1]);
   else{const so=[OX,OZ];[OX,OZ]=winTarget;planTowns();try{loadRegion(op[1])}finally{[OX,OZ]=so;planTowns()}}if(winQ.length)rebuildGlobals();
   if(!winQ.length){const[nox,noz]=winTarget;winTarget=null;OX=nox;OZ=noz;planTowns();blockDmg.clear();rebuildGlobals();evictCache();const n=RS/CS;for(const N of winNew){const cx0=N.rx*n,cz0=N.rz*n;for(let dz=-1;dz<=n;dz++)for(let dx=-1;dx<=n;dx++){if(dx>=0&&dx<n&&dz>=0&&dz<n)continue;const k=slotOf(cx0+dx,cz0+dz);if(loaded[k])dirtyC.add(k)}}winNew=[];rtDirty=true;RTW.ox=-1e9}}
 function setWindow(nox,noz,force,stagger){
-  if(stagger&&!force){const want=new Set(),wx=nox/RS,wz=noz/RS;for(let dz=0;dz<3;dz++)for(let dx=0;dx<3;dx++)want.add(rkey(wx+dx,wz+dz));
+  if(stagger&&!force){const want=new Set(),wx=nox/RS,wz=noz/RS;for(let dz=0;dz<WR;dz++)for(let dx=0;dx<WR;dx++)want.add(rkey(wx+dx,wz+dz));
     const out=[...regions.values()].filter(R=>R.live&&!want.has(R.key)),inn=[...want].map(k=>{const[a,b]=k.split(',').map(Number);return reg(a,b)}).filter(R=>!R.live);
-    const slot=(A,B_)=>((A.rx-B_.rx)%3+3)%3===0&&((A.rz-B_.rz)%3+3)%3===0;
+    const slot=(A,B_)=>((A.rx-B_.rx)%WR+WR)%WR===0&&((A.rz-B_.rz)%WR+WR)%WR===0;
     if(out.length===inn.length&&inn.every(N=>out.some(O=>slot(O,N)))){winQ=[];for(const N of inn){const O=out.find(O=>slot(O,N));winQ.push(['u',O],['l',N])}winTarget=[nox,noz];winNew=inn;return}}
   winQ=[];winTarget=null;
-  const want=new Set(),wx=nox/RS,wz=noz/RS;for(let dz=0;dz<3;dz++)for(let dx=0;dx<3;dx++)want.add(rkey(wx+dx,wz+dz));
+  const want=new Set(),wx=nox/RS,wz=noz/RS;for(let dz=0;dz<WR;dz++)for(let dx=0;dx<WR;dx++)want.add(rkey(wx+dx,wz+dz));
   for(const R of regions.values())if(R.live&&(force||!want.has(R.key)))unloadRegion(R);
   OX=nox;OZ=noz;planTowns();blockDmg.clear();
   for(const k of want){const[a,b]=k.split(',').map(Number),R=reg(a,b);if(!R.live)loadRegion(R)}
@@ -6835,16 +6843,16 @@ const SLACK=56;
 function updateWindow(force){if(winQ.length&&!force){winStep();return}if(force&&winQ.length){while(winQ.length)winStep()}
   const cs=running?players.filter(p=>p.dead<=0||true).map(p=>p.vehicle?p.vehicle.pos:p.pos):[spawn];if(!cs.length)return;
   let cx=0,cz=0;for(const c of cs){cx+=c.x;cz+=c.z}cx=cx/cs.length/VS;cz=cz/cs.length/VS;
-  const mx=OX+RS,mz=OZ+RS;let nox=OX,noz=OZ;
-  if(force||cx<mx-SLACK||cx>=mx+RS+SLACK)nox=(Math.floor(cx/RS)-1)*RS;
-  if(force||cz<mz-SLACK||cz>=mz+RS+SLACK)noz=(Math.floor(cz/RS)-1)*RS;
+  const mx=OX+RS*WH,mz=OZ+RS*WH;let nox=OX,noz=OZ;
+  if(force||cx<mx-SLACK||cx>=mx+RS+SLACK)nox=(Math.floor(cx/RS)-WH)*RS;
+  if(force||cz<mz-SLACK||cz>=mz+RS+SLACK)noz=(Math.floor(cz/RS)-WH)*RS;
   if(nox!==OX||noz!==OZ||force){setWindow(nox,noz,false,!force);if(winQ.length)return;if(running)for(const p of players)if(!inWin(vc(p.pos.x)-24,vc(p.pos.z)-24)||!inWin(vc(p.pos.x)+24,vc(p.pos.z)+24)){const o=players.find(q=>q!==p);if(o){p.pos.copy(o.pos);p.pos.x+=1;msg(p,'Too far from your partner — pulled back')}}}
 }
-function ensureWindowAt(pos){const cx=pos.x/VS,cz=pos.z/VS;if(cx<OX+RS-SLACK||cx>=OX+2*RS+SLACK||cz<OZ+RS-SLACK||cz>=OZ+2*RS+SLACK)setWindow((Math.floor(cx/RS)-1)*RS,(Math.floor(cz/RS)-1)*RS,false)}
+function ensureWindowAt(pos){const cx=pos.x/VS,cz=pos.z/VS,a=WH*RS,b=(WH+1)*RS;if(cx<OX+a-SLACK||cx>=OX+b+SLACK||cz<OZ+a-SLACK||cz>=OZ+b+SLACK)setWindow((Math.floor(cx/RS)-WH)*RS,(Math.floor(cz/RS)-WH)*RS,false)}
 function worldInit(){
   curSeason=-1;applySeason(true);WX.amt=WX.target=0;
   spawn.set((MAIN+2*P+6)*VS,(G+1)*VS,(MAIN+2*P+6)*VS);
-  OX=-RS;OZ=-RS;setWindow(-RS,-RS,true);
+  OX=-RS*WH;OZ=-RS*WH;setWindow(-RS*WH,-RS*WH,true);
   for(let i=0;i<14;i++)spawnAnimal(false);
   npcT=0;worldReady=true;
 }
@@ -6894,7 +6902,7 @@ function applyState(st){
   st.p.forEach((s,i)=>{const p=players[i];if(!p)return;p.pos.set(s.x,s.y+.05,s.z);p.yaw=s.a;p.hp=s.hp;p.hunger=s.hu;p.kills=s.k||0;p.pk=s.pk|0;p.nights=s.n|0;p.eye=p.pos.y+1.6;
     for(const k in p.inv)p.inv[k]=0;Object.assign(p.inv,s.i);p.wear=Object.assign({head:null,body:null,legs:null,back:null},s.w);p.mag=s.mg|0;if(s.bt!=null)p.batt=s.bt;if(s.bh!=null)p.batHP=s.bh;if(!s.pk){if(!p.wear.legs)p.wear.legs='jeans';if(!p.wear.back)p.wear.back='hikepack'}updateClothes(p);p.creative=!!s.cr;p.sawFuel=s.sf|0;if(Array.isArray(s.hb)&&s.hb.length<=HOTN)p.hot=Array.from({length:HOTN},(_,k)=>typeof s.hb[k]==='string'&&s.hb[k].length<24?s.hb[k]:null);selectHot(p,Math.min(HOTN-1,s.hs|0));
     p.spawnPt=s.s?new V3(s.s[0],s.s[1],s.s[2]):null});
-  if(!old){const p=players[0];OX=(Math.floor(p.pos.x/VS/RS)-1)*RS;OZ=(Math.floor(p.pos.z/VS/RS)-1)*RS;setWindow(OX,OZ,true)}
+  if(!old){const p=players[0];OX=(Math.floor(p.pos.x/VS/RS)-WH)*RS;OZ=(Math.floor(p.pos.z/VS/RS)-WH)*RS;setWindow(OX,OZ,true)}
 }
 function setMsg(t){$('#genMsg').textContent=t}
 function worldSummary(){return`Seed ${seed} · endless world · ${towns.length} towns nearby · ${crates.length} crates · ${vehicles.length} vehicles`}
@@ -6909,8 +6917,8 @@ async function loadCode(code){
   withSeed(st.seed,()=>{loadingSave=true;startGame(Math.max(1,st.p.length));applyState(st);msg(null,`Save loaded — day ${day}`)})}
 // render distance pickers
 for(const id of['#farSel','#farSel2']){const el=$(id);el.value=FARV?'1':'0';el.addEventListener('change',()=>{FARV=el.value==='1';$('#farSel').value=$('#farSel2').value=el.value;try{localStorage.setItem('deadground-far',FARV?'1':'0')}catch(e){}})}
-for(const id of['#rdSel','#rdSel2']){const el=$(id);el.innerHTML=[4,6,8,10,12,14].map(v=>`<option value="${v}">${v} chunks (${v*CS} blocks)</option>`).join('');el.value=String(RD);
-  el.addEventListener('change',()=>{RD=Math.min(14,+el.value);$('#rdSel').value=$('#rdSel2').value=String(RD);try{localStorage.setItem('deadground-rd',String(RD))}catch(e){}})}
+for(const id of['#rdSel','#rdSel2']){const el=$(id);el.innerHTML=[4,6,8,10,12,14,16,20,24].filter(v=>v<=RDMAX).map(v=>`<option value="${v}">${v} chunks (${v*CS} blocks)</option>`).join('');el.value=String(RD);
+  el.addEventListener('change',()=>{RD=Math.min(RDMAX,+el.value);$('#rdSel').value=$('#rdSel2').value=String(RD);try{localStorage.setItem('deadground-rd',String(RD))}catch(e){}})}
 for(const id of['#pixSel','#pixSel2']){const el=$(id);el.innerHTML=[[1,'Smooth'],[2,'Pixel ×2'],[3,'Pixel ×3'],[4,'Pixel ×4']].map(([v,n])=>`<option value="${v}">${n}</option>`).join('');el.value=String(PIX);
   el.addEventListener('change',()=>{PIX=+el.value;$('#pixSel').value=$('#pixSel2').value=String(PIX);try{localStorage.setItem('deadground-pix2',String(PIX))}catch(e){}for(const rt of rts)if(rt)rt.dispose();rts.length=0;applyPix()})}
 for(const id of['#gfxSel','#gfxSel2']){const el=$(id);el.innerHTML=GFXN.map((n,i)=>`<option value="${i}"${i===3&&!RTX_OK?' disabled':''}>${n}${['  (fastest)',' (pixel shadows, rays)',' (+ motion blur, reflections)',' (+ pixel ray tracing)'][i]}</option>`).join('');el.value=String(GFX);
