@@ -1798,7 +1798,7 @@ function renderBathMirror(p){if(--mirScan<=0){mirScan=20;mirSp=null;let bd=4.5;f
   const cp=p.cam.position,dn=(cp.x-mx)*s+(cp.z-mz)*c;if(dn<.05)return;
   mirFrame++;if(GFX<2&&mirFrame%2)return;
   bathCam.position.set(cp.x-2*dn*s,cp.y,cp.z-2*dn*c);const dist=bathCam.position.distanceTo(mirrorQuad.position);bathCam.fov=Math.min(110,2*Math.atan(.36/dist)*180/Math.PI*1.08);bathCam.updateProjectionMatrix();bathCam.lookAt(mx,my,mz);bathCam.updateMatrixWorld();
-  const bv=p.body.g.visible;p.body.g.visible=true;mirrorQuad.visible=false;renderer.setRenderTarget(bathRT);renderer.render(scene,bathCam);renderer.setRenderTarget(null);mirrorQuad.visible=true;p.body.g.visible=bv;
+  const bv=p.body.g.visible;p.body.g.visible=true;if(!bv){p.body.g.updateMatrixWorld(true);p.body.g.__sk=1}mirrorQuad.visible=false;renderer.setRenderTarget(bathRT);renderer.render(scene,bathCam);renderer.setRenderTarget(null);mirrorQuad.visible=true;p.body.g.visible=bv;
   if(mirrorQuad.material.map!==bathRT.texture){mirrorQuad.material.map=bathRT.texture;mirrorQuad.material.color.setHex(0xe8eef2);mirrorQuad.material.needsUpdate=true}}
 function renderCarCams(p){
   const v=p.vehicle;if(!v||!p.carView||!v.IN||!v.IN.mirror)return;carCamFrame++;if(GFX<2&&carCamFrame%2)return;
@@ -2190,7 +2190,11 @@ const __PF={};window.__perfOn=()=>{if(__PF.on)return 'already on';__PF.on=1;__PF
   try{if(typeof updSky==='function'){const f_=updSky;__PF.t['updSky']=0;__PF.n['updSky']=0;updSky=function(){const t=performance.now();try{return f_.apply(this,arguments)}finally{__PF.t['updSky']+=performance.now()-t;__PF.n['updSky']++}}}}catch(e){}
   const wm=(o,m,k)=>{const f=o[m].bind(o);__PF.t[k]=0;__PF.n[k]=0;o[m]=function(){const t=performance.now();try{return f.apply(o,arguments)}finally{__PF.t[k]+=performance.now()-t;__PF.n[k]++}}};
   wm(scene,'updateMatrixWorld','scene.updateMatrixWorld');wm(renderer,'render','renderer.render (all calls)');
-  {const R=renderer.render;renderer.render=function(sc,c){const k=sc===scene?(c&&c.isPerspectiveCamera&&c===occShCam?'render: shadow pre-pass':(scene.overrideMaterial?'render: depth pre-pass':(c&&c.fov===1?'render: other':'render: scene view/mirror'))):'render: post/other';__PF.t[k]=__PF.t[k]||0;__PF.n[k]=__PF.n[k]||0;const t=performance.now();try{return R.apply(this,arguments)}finally{__PF.t[k]+=performance.now()-t;__PF.n[k]++}}}
+  {const R=renderer.render,gl=renderer.getContext(),X=gl.getExtension('EXT_disjoint_timer_query_webgl2');__PF.gq=[];
+    renderer.render=function(sc,c){const k=sc===scene?(c&&c.isPerspectiveCamera&&c===occShCam?'render: shadow pre-pass':(scene.overrideMaterial?'render: depth pre-pass':(c&&c.fov===1?'render: other':'render: scene view/mirror'))):'render: post/other';__PF.t[k]=__PF.t[k]||0;__PF.n[k]=__PF.n[k]||0;
+      let q=null;if(X&&!__PF.qBusy){q=gl.createQuery();gl.beginQuery(X.TIME_ELAPSED_EXT,q);__PF.qBusy=1}
+      const t=performance.now();try{return R.apply(this,arguments)}finally{__PF.t[k]+=performance.now()-t;__PF.n[k]++;if(q){gl.endQuery(X.TIME_ELAPSED_EXT);__PF.qBusy=0;__PF.gq.push([q,'GPU '+k])}
+        for(let i=__PF.gq.length-1;i>=0;i--){const[qq,kk]=__PF.gq[i];if(gl.getQueryParameter(qq,gl.QUERY_RESULT_AVAILABLE)){if(!gl.getParameter(X.GPU_DISJOINT_EXT)){__PF.t[kk]=(__PF.t[kk]||0)+gl.getQueryParameter(qq,gl.QUERY_RESULT)/1e6;__PF.n[kk]=(__PF.n[kk]||0)+1}gl.deleteQuery(qq);__PF.gq.splice(i,1)}}}}}
   return 'on'};
 window.__perfReset=()=>{for(const k in __PF.t){__PF.t[k]=0;__PF.n[k]=0}__PF.f0=performance.now();__PF.fr=__PF.frames||0};
 window.__perf=()=>{const fr=Math.max(1,(__PF.n.render||1));return Object.entries(__PF.t).map(([k,v])=>[k,+(v/fr).toFixed(2),__PF.n[k]]).filter(e=>e[1]>=.05).sort((a,b)=>b[1]-a[1])};
@@ -6452,13 +6456,21 @@ function update(dt){
   hudT-=dt;if(hudT<=0){hudT=.1;players.forEach(updHud);updTop();if(boardOpen&&(boardT=(boardT||0)+1)%5===0)renderBoard()}else players.forEach(p=>{p.hud.hurt.style.opacity=Math.min(.9,p.flash*1.5+(p.hp<25?.35:0))});
   pressed.clear();T.pressed.clear();
 }
+function fastMW(root){if(root.matrixAutoUpdate)root.updateMatrix();if(root.matrixWorldNeedsUpdate){root.matrixWorld.copy(root.matrix);root.matrixWorldNeedsUpdate=false}
+  (function walk(o,force){const ch=o.children;for(let i=0,n=ch.length;i<n;i++){const c=ch[i];if(!c.visible){c.__sk=1;continue}
+    if(c.isCamera){c.updateMatrixWorld(force||c.__sk===1);c.__sk=0;continue}
+    let f=force||c.__sk===1;c.__sk=0;if(c.matrixAutoUpdate)c.updateMatrix();
+    if(c.matrixWorldNeedsUpdate||f){c.matrixWorld.multiplyMatrices(o.matrixWorld,c.matrix);c.matrixWorldNeedsUpdate=false;f=true}
+    if(c.children.length)walk(c,f)}})(root,false)}
 function render(){
   {const lh=$('#lookHint');if(lh&&lh.classList.contains){const show=running&&!isTouch&&!document.pointerLockElement&&!menuP&&!emoOpen&&!cpalOpen&&!paused&&players.length===1&&$('#talk').classList.contains('hidden')&&$('#cook').classList.contains('hidden');if(lh.classList.contains('hidden')===show)lh.classList.toggle('hidden',!show)}}
   fitView();const w=VW,h=VH;renderer.setScissorTest(true);
   const cen=running?players.map(p=>p.vehicle?p.vehicle.pos:p.pos):[spawn];updateShadowCam(cen);updateRT(cen[0]);
   // the scene's ~26,000 objects get their world positions worked out once per frame here, instead of again inside every one of the
-  // 4-6 render calls a frame makes (views, depth pre-pass, shadow pass, mirrors)
-  scene.updateMatrixWorld();
+  // 4-6 render calls a frame makes (views, depth pre-pass, shadow pass, mirrors). Hidden things are skipped (most of the 26,000 are
+  // parts of parked cars, crates and beds that are switched off or stood in for); anything that was skipped is brought fully up to
+  // date the first frame it's shown again
+  fastMW(scene);
   RTU.sunDirU.value.copy(SUN_DIR);RTU.sunK.value=clamp(sun.intensity*1.5,0,1);RTU.wet.value=WX.wet;RTU.rtime.value=performance.now()/1000;
   if(!running){const t=performance.now()/1000*.05;introCam.position.set(spawn.x+Math.cos(t)*48,32,spawn.z+Math.sin(t)*48);introCam.lookAt(spawn.x,12,spawn.z);introCam.far=farView()+60;
     introCam.aspect=w/h;introCam.updateProjectionMatrix();renderView(introCam,0,0,0,w,h,false);return}
