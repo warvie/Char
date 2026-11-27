@@ -1822,7 +1822,7 @@ function renderCarCams(p){
 // camera within 30 cm of where it was tested, boxes 35 cm larger than the object, and after turning only for boxes that were wholly
 // on screen. Anything without a fresh answer is drawn. Covered things keep casting shadows (drawn in a pass that sees everything).
 // All GL state the test touches is saved and put back, so three.js never draws with the wrong state
-const OCC={on:true,gl:null,prog:null,vao:null,uVP:null,uLo:null,uHi:null,st:[new Map(),new Map()],pool:[],hidden:[],frame:0,gen:0,edits:-1,doorSig:0,cam:null,ci:0,stat:{chunks:0,things:0,tested:0}};
+const OCC={on:false,gl:null,prog:null,vao:null,uVP:null,uLo:null,uHi:null,st:[new Map(),new Map()],pool:[],hidden:[],frame:0,gen:0,edits:-1,doorSig:0,cam:null,ci:0,stat:{chunks:0,things:0,tested:0}};
 const OCCL=6,_ob=new THREE.Box3(),_ob2=new THREE.Box3(),_ob3=new THREE.Box3(),_ofr=new THREE.Frustum(),_om=new THREE.Matrix4(),_ov=new V3();
 function glSave(gl){return[gl.getParameter(gl.CURRENT_PROGRAM),gl.getParameter(gl.VERTEX_ARRAY_BINDING),gl.getParameter(gl.ARRAY_BUFFER_BINDING),gl.getParameter(gl.COLOR_WRITEMASK),gl.getParameter(gl.DEPTH_WRITEMASK),gl.getParameter(gl.DEPTH_FUNC),gl.isEnabled(gl.DEPTH_TEST),gl.isEnabled(gl.CULL_FACE),gl.isEnabled(gl.BLEND)]}
 function glRestore(gl,S){gl.useProgram(S[0]);gl.bindVertexArray(S[1]);gl.bindBuffer(gl.ARRAY_BUFFER,S[2]);gl.colorMask(S[3][0],S[3][1],S[3][2],S[3][3]);gl.depthMask(S[4]);gl.depthFunc(S[5]);
@@ -1882,7 +1882,7 @@ function occTest(cam,i){const gl=OCC.gl;if(!gl)return;OCC.frame++;const M=OCC.st
 // wall, floor and box behind it that happens to be drawn first. Lighting, shadows and the 12 lights are by far the costliest work in
 // a frame, so not running them on hidden surfaces is a large saving with no change to the picture. The pre-pass sits a hair behind
 // (polygon offset), so the real surface always passes its own depth test
-const prepassMat=new THREE.MeshBasicMaterial({colorWrite:false,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1});let PREPASS=true;
+const prepassMat=new THREE.MeshBasicMaterial({colorWrite:false,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1});let PREPASS=false;
 function depthPrepass(cam){if(!PREPASS)return false;const m=cam.layers.mask,sn=renderer.shadowMap.needsUpdate;cam.layers.mask=1<<7;renderer.shadowMap.needsUpdate=false;scene.overrideMaterial=prepassMat;
   try{renderer.render(scene,cam)}finally{scene.overrideMaterial=null;cam.layers.mask=m;renderer.shadowMap.needsUpdate=sn}renderer.autoClearDepth=false;return true}
 function endPrepass(){renderer.autoClearDepth=true}
@@ -2197,6 +2197,8 @@ const __PF={};window.__perfOn=()=>{if(__PF.on)return 'already on';__PF.on=1;__PF
         for(let i=__PF.gq.length-1;i>=0;i--){const[qq,kk]=__PF.gq[i];if(gl.getQueryParameter(qq,gl.QUERY_RESULT_AVAILABLE)){if(!gl.getParameter(X.GPU_DISJOINT_EXT)){__PF.t[kk]=(__PF.t[kk]||0)+gl.getQueryParameter(qq,gl.QUERY_RESULT)/1e6;__PF.n[kk]=(__PF.n[kk]||0)+1}gl.deleteQuery(qq);__PF.gq.splice(i,1)}}}}}
   return 'on'};
 window.__perfReset=()=>{for(const k in __PF.t){__PF.t[k]=0;__PF.n[k]=0}__PF.f0=performance.now();__PF.fr=__PF.frames||0};
+window.__perfInfo=()=>{const I=renderer.info;return{calls:I.render.calls,tris:I.render.triangles,geos:I.memory.geometries,tex:I.memory.textures,progs:I.programs&&I.programs.length,q:qLvl,scale:dynScale,gfx:GFX,rd:RD,occ:OCC.on,pre:PREPASS}};
+window.__perfSet=(k,v)=>{if(k==='occ')OCC.on=v;if(k==='pre')PREPASS=v;return[OCC.on,PREPASS]};
 window.__perf=()=>{const fr=Math.max(1,(__PF.n.render||1));return Object.entries(__PF.t).map(([k,v])=>[k,+(v/fr).toFixed(2),__PF.n[k]]).filter(e=>e[1]>=.05).sort((a,b)=>b[1]-a[1])};
 window.__prof=()=>({on:PROF.on,i:PROF.i,n:PROF_TESTS.length,res:PROF.res.slice(),names:PROF_TESTS.map(t=>t[0]),gfx:GFX,rd:RD,q:qLvl,scale:dynScale});
 function profReport(){const b=PROF.res[0],rows=PROF_TESTS.map((t,i)=>[t[0],b-PROF.res[i]]).slice(1).sort((x,y)=>y[1]-x[1]),mx=Math.max(1,...rows.map(r=>r[1]));
@@ -2209,7 +2211,7 @@ function profReport(){const b=PROF.res[0],rows=PROF_TESTS.map((t,i)=>[t[0],b-PRO
 // some machines and cost on others, depending on whether the graphics card or the draw calls are the limit. So the game measures:
 // every 45 s of play it runs each combination for about a second and a half and keeps whichever gave the shortest frames. The
 // resolution governor waits while it measures, so the two don't confuse each other
-const TUNE={cfg:[[1,1],[0,1],[1,0],[0,0]],i:-1,f:0,ms:[],best:0,t:8,res:[]};
+const TUNE={cfg:[[0,0]],i:-1,f:0,ms:[],best:0,t:1e9,res:[]};
 function tuneApply(c){PREPASS=!!c[0];OCC.on=!!c[1]}
 function tuneTick(dt){if(!running||paused||menuP||players.length===0)return false;
   if(TUNE.i<0){TUNE.t-=dt;if(TUNE.t>0)return false;TUNE.i=0;TUNE.f=0;TUNE.ms=[];TUNE.res=[];tuneApply(TUNE.cfg[0])}
