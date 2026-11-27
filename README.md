@@ -10,6 +10,10 @@ A 3D zombie-apocalypse survival game that runs in the browser. Raid ruined towns
 
 
 
+## v20.2 — far props merged by chunk
+- `chProxyTick`/`mergeStatics`: static props bucketed by chunk slot (1 Hz, hash of ids + child visibility + quantised rotations); slots farther than 20 m (back under 17 m) get one world-space mesh per material/shadow/layer bucket; originals hidden via `userData.chp` (respected by `cullEntities`, which now records intended visibility in `userData.wv`). Objects containing sprites/lights/points stay live; doors and fires excluded. Per-object stand-ins now cover vehicles only. Measured (Radeon 840M, Ultra, RD 6): visible meshes ~5.2k → ~2.4k, ~30 → ~50 FPS at full quality.
+- Blocks were already merged: all touching blocks in a chunk are one mesh (this is the same idea applied to props).
+
 ## v20.1 — desktop version
 - `desktop/`: Windows .bat and Mac .command launchers that start Chrome/Edge in app mode with `--disable-gpu-vsync --disable-frame-rate-limit --disable-background-timer-throttling` and a dedicated profile (flags are ignored when attaching to a running instance, hence `--user-data-dir`). Browser pages cannot uncap vsync themselves.
 
