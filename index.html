@@ -346,7 +346,7 @@ body #touch .tb[data-b=run] .ti,body #touch .tb[data-b=jump] .ti,body #touch .tb
     <button class="go" id="bSolo">Play solo</button>
     <button class="go" id="bCoop">2-player split-screen</button>
     <button class="go" id="bCreative">Creative</button>
-    <button class="go hidden" id="bCont">Continue saved game</button>
+    <button class="go hidden" id="bCont">Continue saved game</button></div><div id="slots" style="margin:10px 0 0"></div><div class="row" style="display:none">
   </div>
   <p id="genMsg" class="note" style="margin:10px 0 0">Generating world…</p><div id="genBar" style="height:10px;margin:6px 0 0;background:#24221e;border:2px solid var(--line)"><div id="genFill" style="height:100%;width:0;background:var(--olive)"></div></div>
   <div class="row opts">
@@ -359,7 +359,7 @@ body #touch .tb[data-b=run] .ti,body #touch .tb[data-b=jump] .ti,body #touch .tb
     <label>Developer mode <select id="devSel"><option value="0">Off</option><option value="1">On</option></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
-    <h4>v20.46 · Nov 28, 2026 — wider rain, brighter sill water, dev Face nearest</h4><ul><li>Rain and drops are two block pixels wide</li><li>More trails run down windows in heavy rain (and on across the sills with them)</li><li>Water from a window now crosses all four faces under it: the sill's top, its front, back under its lip, and down the apron, then drips off the apron's bottom edge</li><li>The water running across window sills shows now: two pixels wide, a darker, cool wet streak with a bright bead at its head and a longer wet tail (pale one-pixel water on white trim was invisible)</li><li>Developer menu, Functions tab: Force all rain lanes, Show drip sources, Game speed (1/2, 1/4), Weather now (skips the build-up), Hide HUD, rain animation speed (normal, 1/4, paused), camera zoom (1x, 2x, 4x) and Highlight rain effects (shows exactly where the shaders draw water)</li><li>Developer menu: a Functions tab with Face nearest (window sill, window, stop sign, yield sign, traffic light, car, zombie, tree, brick wall), which moves you to a good spot and looks straight at it. You hover there until you press jump</li></ul><h4>v20.45 · Nov 28, 2026 — sill water as texture, exact pixel rain</h4><ul><li>The water running off a window is now part of the sill's own texture, not a separate drop: each trail on the glass carries straight on, in the sill's pixels, across its top and down its front face. Only where it leaves the sill's bottom edge does it become a falling drop</li><li>Rain and all falling drops are exactly one block pixel wide, sit in the block-pixel grid's columns, and are whole pixels long; wind swirls are exactly a block pixel wide too</li></ul><h4>v20.44 · Nov 28, 2026 — rain on windshields, sill trails, no leaks</h4><ul><li>Windshields collect rain you can see from inside the car too: single-pixel drops that roll down (or get pushed up and back when you drive fast), leaving faint wet trails. The wipers scrape it clean, and it dries off slowly once the rain stops</li><li>Window sills: each trail running down the glass carries on, right where and when it reaches the bottom, as a matching wet trail across the top of the sill, over its front edge and down its front face, and then drops off to the ground. Nothing slides off the sides</li><li>Roofs don't leak any more: a block only drips where water can run off an open edge (a side with open air beside it), not into the room underneath or into the gap between two blocks</li><li>Rain and drip streaks are all one block pixel wide, with lengths in whole block pixels</li><li>Loading in is much faster, about 3 seconds from opening the game to playing (it was 8). Only the land you can see is made before you play; the rest, the far view and the land further out fill in over the first seconds of play. Shaders now compile in the background while the world is made, and pressing play while the page is still starting no longer makes the world twice</li><li>In heavy rain, or once they're soaked, absorbent surfaces (brick, wood, dirt) start to run too, with fainter, slower trails than smooth ones</li></ul><h4>v20.43 · Nov 28, 2026 — pixel rain, ledge drips, sills, pixel wind</h4><ul><li>Rain and all drips fall as streaks one block pixel wide (as thick as a pixel on the blocks beside them), each its own length</li><li>Drips from anything with a ledge: signs, traffic lights (under the arm and the light housings), hanging blocks, overhangs and roof eaves, and tree canopies</li><li>On windows you can follow the water: a drop runs down the glass, lands on top of the sill, slides along it to the nearer end, and falls off to the ground</li><li>Wind swirls are drawn the same way: ribbons one block pixel wide with a dappled pixel texture, fading out at their tips</li></ul><h4>v20.42 · Nov 28, 2026 — painted stairs, dry undersides, wind gusts, drips</h4><ul><li>Rain runs down signs, posts and everything else out in the open in wet streaks with a bright bead at the head (sheltered things stay dry)</li><li>Rain on every block out in the open, by material: on smooth faces (metal, tile, smooth stone, concrete) drops run down in trails, faster the smoother the face; absorbent ones (brick, wood, dirt, bark) take a dark wet spot where each drop lands, which slowly fades as it soaks in. Tops get the spots too</li><li>V changes your view: first and third person in a vehicle; first, second (out in front, facing you) and third person on foot. The camera stops short of walls</li><li>Rain falls as streaks exactly one screen pixel wide, each its own length</li><li>Drips: water running down a sign drips off its bottom edge, and water on a window gathers on the sill and rolls off its front and ends. Each drop falls (as a little one-pixel streak) to whatever is beneath it, and its landing ripples the wet ground's reflection itself</li><li>Wind gusts: swirls of pale wind lines tumble across the land in the wind's direction and at its speed (slow and gentle in a breeze, fast and many in a storm). Grass under a passing gust switches to its heavy-wind frames, so a wave of bent grass moves along with each swirl</li><li>Staircases inside painted rooms are painted to match the room: their sides, backs and sloped undersides. The treads and step fronts stay bare</li><li>Wet-ground reflections only appear on up-facing surfaces the rain actually falls on. Ceilings and the undersides of things no longer shine as if wet</li></ul><h4>v20.41 · Nov 28, 2026 — smoother travel, grass frames, yield signs, rain levels, flash floods</h4><ul>
+    <h4>v20.48 · Nov 28, 2026 — three world slots, real seasons</h4><ul><li>Up to three saved worlds. The start screen lists them: pick a slot for a new game, Continue or Delete a saved one. Your old save moves into slot 1</li><li>A few seconds after a world loads, any shader that failed to compile is reported in the browser console</li><li>The water running over window sills is a lighter, see-through blue, part of the sill's texture, with the sill's own pixels showing through it</li><li>Saves are smaller and quicker: stored as compressed bytes in the browser's database instead of a text-encoded string (about a third of the size)</li><li>New worlds start in the real season (by today's date), then the seasons turn every 3 in-game days as usual. The starting season is saved with the world, so reloading carries on where it was. With developer mode on, a new world's slot has a Real season switch (off: it starts in summer)</li></ul><h4>v20.47 · Nov 28, 2026 — rain on every car window</h4><ul><li>Bigger beads of rain on glass and bigger wet spots on blocks; the running drizzle trails stay one pixel wide; falling rain and drops are two block pixels wide</li><li>The wind swirls are gone; gusts still sweep across the grass</li><li>Rain shows on all of a vehicle's windows, from outside and from the seats: the side and rear windows get the drops and running trails, and the windshield keeps its own rain layer that the wipers clear</li></ul><h4>v20.46 · Nov 28, 2026 — wider rain, brighter sill water, dev Face nearest</h4><ul><li>Rain and drops are two block pixels wide</li><li>More trails run down windows in heavy rain (and on across the sills with them)</li><li>Water from a window now crosses all four faces under it: the sill's top, its front, back under its lip, and down the apron, then drips off the apron's bottom edge</li><li>The water running across window sills shows now: two pixels wide, a darker, cool wet streak with a bright bead at its head and a longer wet tail (pale one-pixel water on white trim was invisible)</li><li>Developer menu, Functions tab: Force all rain lanes, Show drip sources, Game speed (1/2, 1/4), Weather now (skips the build-up), Hide HUD, rain animation speed (normal, 1/4, paused), camera zoom (1x, 2x, 4x) and Highlight rain effects (shows exactly where the shaders draw water)</li><li>Developer menu: a Functions tab with Face nearest (window sill, window, stop sign, yield sign, traffic light, car, zombie, tree, brick wall), which moves you to a good spot and looks straight at it. You hover there until you press jump</li></ul><h4>v20.45 · Nov 28, 2026 — sill water as texture, exact pixel rain</h4><ul><li>The water running off a window is now part of the sill's own texture, not a separate drop: each trail on the glass carries straight on, in the sill's pixels, across its top and down its front face. Only where it leaves the sill's bottom edge does it become a falling drop</li><li>Rain and all falling drops are exactly one block pixel wide, sit in the block-pixel grid's columns, and are whole pixels long; wind swirls are exactly a block pixel wide too</li></ul><h4>v20.44 · Nov 28, 2026 — rain on windshields, sill trails, no leaks</h4><ul><li>Windshields collect rain you can see from inside the car too: single-pixel drops that roll down (or get pushed up and back when you drive fast), leaving faint wet trails. The wipers scrape it clean, and it dries off slowly once the rain stops</li><li>Window sills: each trail running down the glass carries on, right where and when it reaches the bottom, as a matching wet trail across the top of the sill, over its front edge and down its front face, and then drops off to the ground. Nothing slides off the sides</li><li>Roofs don't leak any more: a block only drips where water can run off an open edge (a side with open air beside it), not into the room underneath or into the gap between two blocks</li><li>Rain and drip streaks are all one block pixel wide, with lengths in whole block pixels</li><li>Loading in is much faster, about 3 seconds from opening the game to playing (it was 8). Only the land you can see is made before you play; the rest, the far view and the land further out fill in over the first seconds of play. Shaders now compile in the background while the world is made, and pressing play while the page is still starting no longer makes the world twice</li><li>In heavy rain, or once they're soaked, absorbent surfaces (brick, wood, dirt) start to run too, with fainter, slower trails than smooth ones</li></ul><h4>v20.43 · Nov 28, 2026 — pixel rain, ledge drips, sills, pixel wind</h4><ul><li>Rain and all drips fall as streaks one block pixel wide (as thick as a pixel on the blocks beside them), each its own length</li><li>Drips from anything with a ledge: signs, traffic lights (under the arm and the light housings), hanging blocks, overhangs and roof eaves, and tree canopies</li><li>On windows you can follow the water: a drop runs down the glass, lands on top of the sill, slides along it to the nearer end, and falls off to the ground</li><li>Wind swirls are drawn the same way: ribbons one block pixel wide with a dappled pixel texture, fading out at their tips</li></ul><h4>v20.42 · Nov 28, 2026 — painted stairs, dry undersides, wind gusts, drips</h4><ul><li>Rain runs down signs, posts and everything else out in the open in wet streaks with a bright bead at the head (sheltered things stay dry)</li><li>Rain on every block out in the open, by material: on smooth faces (metal, tile, smooth stone, concrete) drops run down in trails, faster the smoother the face; absorbent ones (brick, wood, dirt, bark) take a dark wet spot where each drop lands, which slowly fades as it soaks in. Tops get the spots too</li><li>V changes your view: first and third person in a vehicle; first, second (out in front, facing you) and third person on foot. The camera stops short of walls</li><li>Rain falls as streaks exactly one screen pixel wide, each its own length</li><li>Drips: water running down a sign drips off its bottom edge, and water on a window gathers on the sill and rolls off its front and ends. Each drop falls (as a little one-pixel streak) to whatever is beneath it, and its landing ripples the wet ground's reflection itself</li><li>Wind gusts: swirls of pale wind lines tumble across the land in the wind's direction and at its speed (slow and gentle in a breeze, fast and many in a storm). Grass under a passing gust switches to its heavy-wind frames, so a wave of bent grass moves along with each swirl</li><li>Staircases inside painted rooms are painted to match the room: their sides, backs and sloped undersides. The treads and step fronts stay bare</li><li>Wet-ground reflections only appear on up-facing surfaces the rain actually falls on. Ceilings and the undersides of things no longer shine as if wet</li></ul><h4>v20.41 · Nov 28, 2026 — smoother travel, grass frames, yield signs, rain levels, flash floods</h4><ul>
 <li>Driving and running are much smoother: on the same drive, about 36 fps instead of 20, and the long freezes are gone. The far view no longer rebuilds all at once while you travel, regions you leave are packed away a little each frame, chunks rebuild fewer times as they come closer, merging far cars and zombies no longer stalls, and background work shares one time budget per frame</li>
 <li>Grass no longer bends: each tuft swaps between drawn frames instead. It leans with the wind (whatever direction it blows, breezes to harsh storm gusts) and gets pressed half down or flat when something walks or drives through it</li>
 <li>Stop signs say STOP again, in white on the red. Yield signs are now built the same way: a 17-pixel downward triangle with YIELD across the top, a white triangle inside, metal back and edges, and the same holed post</li>
@@ -2195,15 +2195,15 @@ vec3 pxReflF(){vec3 n=normalize(vPxN);
 const RBABS=new Array(64).fill(.6),RBDBG={value:0},RBALL={value:0};let RAINB_APPLY=null;function rbInit(){if(RAINB_APPLY)return;const T=TILE,set=(k,v)=>{if(T[k]!=null)RBABS[T[k]]=v};
   for(const[k,v]of[['grassTop',.9],['grassSide',.9],['dirt',1],['dirtTop',1],['stone',.45],['coal',.45],['iron',.45],['conc',.55],['asph',.6],['asphTop',.6],['plank',.85],['bark',.9],['logTop',.9],['leaf',.7],['brick',.9],['metal',0],['bed',.4],['frame',.8],['sludge',.95],['wall',.75],['tilef',.1],['roofTop',.7],['roofSide',.7],['trim',.5],['curbTop',.55],['curbSide',.55],
     ['bBark',.9],['bTop',.9],['bPlank',.85],['bLeaf',.7],['pBark',.9],['pTop',.9],['pPlank',.85],['pLeaf',.7],['mBark',.9],['mTop',.9],['mPlank',.85],['mLeaf',.7]])set(k,v);
-  RAINB_APPLY=`{vec2 tt_=vec2(floor(vUv.x*${ACOLS}.),floor((1.-vUv.y)*${AROWS}.));int ti_=int(tt_.y*${ACOLS}.+tt_.x+.5);if(ti_>=0&&ti_<64&&ti_!=${TILE.glass}&&ti_!=${TILE.water}){vec2 rb_=rainBlock(vRtW,normalize(vRtN),pxS(vRtW),rbAbs[ti_]);float st_=ti_==${TILE.trim}?sillTrail(vRtW,normalize(vRtN)):0.;diffuseColor.rgb=diffuseColor.rgb*(1.-rb_.x)+rb_.y*.14;if(st_>0.){vec3 wc_=st_>.95?vec3(.9,.95,1.05):vec3(.42,.52,.64)*(.75+.25*st_);diffuseColor.rgb=mix(diffuseColor.rgb,wc_,clamp(.35+st_*.6,0.,1.));}if(rbDbg>.5){if(st_>0.)diffuseColor.rgb=vec3(1.,0.,1.)*(.4+.6*st_);else if(ti_==${TILE.trim})diffuseColor.rgb=vec3(1.,1.,0.)*(.3+.7*sillZone(vRtW,normalize(vRtN)));else if(rb_.y>.01)diffuseColor.rgb=vec3(0.,1.,1.);}}}`}
+  RAINB_APPLY=`{vec2 tt_=vec2(floor(vUv.x*${ACOLS}.),floor((1.-vUv.y)*${AROWS}.));int ti_=int(tt_.y*${ACOLS}.+tt_.x+.5);if(ti_>=0&&ti_<64&&ti_!=${TILE.glass}&&ti_!=${TILE.water}){vec2 rb_=rainBlock(vRtW,normalize(vRtN),pxS(vRtW),rbAbs[ti_]);float st_=ti_==${TILE.trim}?sillTrail(vRtW,normalize(vRtN)):0.;diffuseColor.rgb=diffuseColor.rgb*(1.-rb_.x)+rb_.y*.14;if(st_>0.){vec3 wc_=st_>.95?vec3(.95,.98,1.04):vec3(.76,.87,.98);diffuseColor.rgb=mix(diffuseColor.rgb,wc_,st_>.95?.6:.2+.25*st_);}if(rbDbg>.5){if(st_>0.)diffuseColor.rgb=vec3(1.,0.,1.)*(.4+.6*st_);else if(ti_==${TILE.trim})diffuseColor.rgb=vec3(1.,1.,0.)*(.3+.7*sillZone(vRtW,normalize(vRtN)));else if(rb_.y>.01)diffuseColor.rgb=vec3(0.,1.,1.);}}}`}
 const RAINB_GLSL=`float rbH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 // the glass's running trails, the same lanes and timing as the window shader (rainGlass), looked up at a height Y on the glass's
 // timeline; the lane's column is fixed where the trail left the bottom of the glass (ybw)
 float glassTrailAt(float uvx,float Y,float ybw){float c=1./16.,o=0.;for(int k=0;k<2;k++){float fk=float(k),lane=floor(uvx/(c*3.))+fk*57.,hc2=fract(lane*.6180339887+.31);if(hc2<.6*rbRain||rbAll>.5){
     float sp=.3+.6*fract(lane*.7548776662+.17),span=1.3+fract(lane*.5698402910+.53),yy=mod(Y+fk*.7,span),head=span-mod(rbTime*sp+hc2*37.,span),yb=mod(ybw+fk*.7,span);
     float lx=(floor(uvx/(c*3.))*3.+1.)*c+floor(sin(yb*7.+lane)*1.3+sin(yb*13.1+lane*2.)*.6)*c;
-    // on the sill the trail is two pixels wide and leaves a longer wet tail (24 pixels) behind its head
-    float dc=floor(uvx/c)-floor(lx/c);if(dc>-.5&&dc<1.5){float dy=floor(yy/c)-floor(head/c);if(dy>=0.&&dy<24.)o=max(o,dy<.5?1.:.85-dy/30.);}}}return o;}
+    // on the sill the trail is one pixel wide (like the glass's) and leaves a longer wet tail (24 pixels) behind its head
+    float dc=floor(uvx/c)-floor(lx/c);if(abs(dc)<.5){float dy=floor(yy/c)-floor(head/c);if(dy>=0.&&dy<24.)o=max(o,dy<.5?1.:.85-dy/30.);}}}return o;}
 // water from a window carried on across its sill, as part of the sill's own texture: on the top face it runs from the glass to the
 // front edge, on the front face down to the bottom edge, continuing each glass trail where and when it reached the bottom of the glass
 float sillTrail(vec3 P,vec3 N){if(rbRain<.01)return 0.;{vec3 Q=P+N*.3;vec2 hc=(Q.xz/.5-rtOrigin.xz)/rtSize.xz;if(!(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)&&P.y/.5+.02<texture2D(hTex,hc).r*255.-1.05)return 0.;}
@@ -2227,7 +2227,7 @@ vec2 rainBlock(vec3 P,vec3 N,float s,float ab){float amt=rbRain;if(amt<.01)retur
   float c=s/16.;vec3 a=abs(N);vec2 uv;if(a.y>.5)uv=P.xz;else{vec3 Nc=(N.x<-.5||N.z<-.5)?-N:N;vec3 T=normalize(vec3(-Nc.z,0.,Nc.x));uv=vec2(dot(P,T),P.y);}
   float dk=0.,br=0.;
   // soak spots: a drop lands, the spot darkens at once and fades as it soaks in (slower on more absorbent stuff)
-  {vec2 cell=floor(uv/(c*2.)+.001);float T_=2.5+4.*ab,ph=rbTime/T_+rbH(cell+5.),age=fract(ph);if(rbH(cell+floor(ph)*vec2(.37,.71))<.07*amt)dk=max(dk,pow(1.-age,1.5)*(.12+.38*ab));}
+  {vec2 cell=floor(uv/(c*4.)+.001);float T_=2.5+4.*ab,ph=rbTime/T_+rbH(cell+5.),age=fract(ph);if(rbH(cell+floor(ph)*vec2(.37,.71))<.07*amt)dk=max(dk,pow(1.-age,1.5)*(.12+.38*ab));}
   // trails on upright faces, faster and more of them the smoother the face
   // once it rains hard enough (or the surface is soaked), absorbent stuff can't take any more and starts to run too: fainter, slower,
   // sparser trails that fade in from about 55% rain or wetness to full in a downpour
@@ -2235,7 +2235,7 @@ vec2 rainBlock(vec3 P,vec3 N,float s,float ab){float amt=rbRain;if(amt<.01)retur
   if(a.y<.5&&sm>.01){for(int k=0;k<2;k++){float fk=float(k),lane=floor(uv.x/(c*3.))+fk*57.,h2=rbH(vec2(lane,3.1));if(h2<.3*amt*sm){
       float sp=(.15+.9*sm)*(.6+.6*rbH(vec2(lane,9.7))),span=1.3+rbH(vec2(lane,4.4)),yy=mod(uv.y+fk*.7,span),head=span-mod(rbTime*sp+h2*37.,span);
       float lx=(floor(uv.x/(c*3.))*3.+1.)*c+floor(sin(yy*7.+lane)*.8)*c;
-      if(abs(floor(uv.x/c)-floor(lx/c))<.5){float dy=floor(yy/c)-floor(head/c);if(dy>=0.&&dy<10.){float v=dy<.5?1.:.8-dy/12.;br=max(br,v*sm*tv);dk=max(dk,.18*v*tv);}}}}}
+      float dc_=floor(uv.x/c)-floor(lx/c);if(abs(dc_)<.5){float dy=floor(yy/c)-floor(head/c);if(dy>=0.&&dy<10.){float v=dy<.5?1.:.8-dy/12.;br=max(br,v*sm*tv);dk=max(dk,.18*v*tv);}}}}}
   return vec2(dk,br);}
 `;
 function installVmatShader(){vmat.onBeforeCompile=sh=>{
@@ -2710,7 +2710,7 @@ grassMat.onBeforeCompile=sh=>{sh.uniforms.time=grassTime;sh.uniforms.gPush=grass
 // over as it goes. Grass inside a gust shows its heavy wind frames, so a wave of bent grass moves along with the swirl
 const GUSTS=[],GUST_SEG=28;let gustLines=null;
 function gustTick(dt){const W4=gWind.value,str=W4.z,dx=W4.x,dz=W4.y,c=players[0]&&players[0].pos;if(!c)return;
-  if(!gustLines){gustLines=makeRibbons(6*GUST_SEG,0xe8eef2);scene.add(gustLines.mesh)}
+  if(!gustLines){gustLines=makeRibbons(6*GUST_SEG,0xe8eef2);scene.add(gustLines.mesh);gustLines.mesh.visible=false} // the swirls aren't drawn; the gusts still bend the grass
   const want=Math.min(6,Math.round(1+str*2)),sp=2+str*4.6,under=underground(c);
   for(const G of GUSTS){G.x+=dx*sp*dt;G.z+=dz*sp*dt;G.d+=sp*dt;G.a+=dt*(3+str*1.5)}
   for(let i=GUSTS.length-1;i>=0;i--)if(GUSTS[i].d>GUSTS[i].L||Math.hypot(GUSTS[i].x-c.x,GUSTS[i].z-c.z)>60)GUSTS.splice(i,1);
@@ -2769,13 +2769,13 @@ vec4 rainGlass(vec3 P,vec3 N,float s){float amt=max(rgWet,rgRain);if(amt<.01)ret
   if(rgOpen(P+N*.3,P.y)+rgOpen(P-N*.8,P.y)<.5)return vec4(0.); // (the far side is looked for past the glass block and the wall it sits in)
   vec3 Nc=(N.x<-.5||N.z<-.5||N.y<-.5)?-N:N;
   float c=s/16.;vec3 a=abs(N);vec2 uv;if(a.y>.5)uv=P.xz;else{vec3 T=normalize(vec3(-Nc.z,0.,Nc.x));uv=vec2(dot(P,T),P.y);}
-  vec2 cell=floor(uv/c+.001);float o=0.;vec2 tl=vec2(0.);
+  vec2 cell=floor(uv/(c*2.)+.001);float o=0.;vec2 tl=vec2(0.);
   if(rgH(cell)<.08*amt){o=.6+.4*rgH(cell+7.);tl=vec2(rgH(cell+3.)-.5,rgH(cell+5.)-.5);}
   if(rgRain>.01){float ph=rgTime*5.+rgH(cell+11.)*9.,tk=floor(ph);if(rgH(cell+vec2(tk*.37,tk*.71))<.04*rgRain){o=max(o,1.-fract(ph)*.55);tl+=vec2(.35,-.35);}}
   if(a.y<.5&&rgRain>.01){for(int k=0;k<2;k++){float fk=float(k),lane=floor(uv.x/(c*3.))+fk*57.,hc2=fract(lane*.6180339887+.31);if(hc2<.6*rgRain||rgAll>.5){
       float sp=.3+.6*fract(lane*.7548776662+.17),span=1.3+fract(lane*.5698402910+.53),yy=mod(uv.y+fk*.7,span),head=span-mod(rgTime*sp+hc2*37.,span);
       float lx=(floor(uv.x/(c*3.))*3.+1.)*c+floor(sin(yy*7.+lane)*1.3+sin(yy*13.1+lane*2.)*.6)*c;
-      if(abs(floor(uv.x/c)-floor(lx/c))<.5){float dy=floor(yy/c)-floor(head/c);if(dy>=0.&&dy<12.){float v=dy<.5?1.:.85-dy/15.;if(v>o){o=v;tl=vec2(.5,-.25);}}}}}}
+      float dc_=floor(uv.x/c)-floor(lx/c);if(abs(dc_)<.5){float dy=floor(yy/c)-floor(head/c);if(dy>=0.&&dy<12.){float v=dy<.5?1.:.85-dy/15.;if(v>o){o=v;tl=vec2(.5,-.25);}}}}}}
   return vec4(o,o,tl);}
 `;
 // every window: a mirror at grazing angles and clearer head-on (Fresnel), reflecting the sky and the far land in the sky picture along the
@@ -3885,9 +3885,13 @@ function pxRound(R,L,axis='z',rin=0){const key=[R,L,axis,rin].join(',');if(pxRou
 function pxCone(R,Hp){const B=[];for(let k=0;k<Hp;k++){const r=Math.max(.5,R*(1-k/Hp)),Ri=Math.ceil(r);for(let i=-Ri;i<Ri;i++)for(let j=-Ri;j<Ri;j++){if(Math.hypot(i+.5,j+.5)>r+.02)continue;B.push([i*PXS,k*PXS,j*PXS,(i+1)*PXS,(k+1)*PXS,(j+1)*PXS])}}return pxBoxes(B)}
 const wheelGeo=pxRound(6,5,'x'),hubGeo=pxRound(3,6,'x');
 const torusGeo=pxRound(3,1,'z',2),circGeo=null,ringGeo=null;
-const glassMat=new THREE.MeshLambertMaterial({color:0x22313a,transparent:true,opacity:.42});glassMat.defines={FL_GLASS:1};
+const glassMat=new THREE.MeshLambertMaterial({color:0x22313a,transparent:true,opacity:.42,side:THREE.DoubleSide});glassMat.defines={FL_GLASS:1};
 // car windows and other loose glass get the pixel levels and rain drops too (pixel levels first, so the rain can use them)
-pxShadows(glassMat);{const prev=glassMat.onBeforeCompile;glassMat.onBeforeCompile=(sh,r)=>{prev.call(glassMat,sh,r);rainGlassInject(sh,'vPxW','vPxN')}}
+// both sides of the glass are drawn, so the rain on a car's windows shows from the seats too. A vehicle's windshield (its glass box's
+// front face, marked by aVeh) leaves its rain to its own layer, the one the wipers clear
+pxShadows(glassMat);{const prev=glassMat.onBeforeCompile;glassMat.onBeforeCompile=(sh,r)=>{prev.call(glassMat,sh,r);
+  sh.vertexShader='attribute float aVeh;varying float vWsF;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvWsF=aVeh>.5&&objectNormal.z>.9?1.:0.;');
+  sh.fragmentShader='varying float vWsF;\n'+sh.fragmentShader;rainGlassInject(sh,'vPxW','vPxN','rgOn=vWsF>.5?0.:1.;')}}
 const basic=c=>matC['b'+c]||(matC['b'+c]=new THREE.MeshBasicMaterial({color:c}));
 const dsm=c=>matC['d'+c]||(matC['d'+c]=new THREE.MeshBasicMaterial({color:c,side:THREE.DoubleSide}));
 // ---- gauges are pixel art at the block pixel size (1/16 m). A dial is Rp whole pixels in radius: a dark face, pale tick
@@ -4095,6 +4099,8 @@ function makeVehicle0(s){
     const m=new THREE.Mesh(new THREE.PlaneGeometry(P.width-.03,P.height-.03),new THREE.MeshLambertMaterial({map:tx,transparent:true,depthWrite:false,side:THREE.DoubleSide}));
     m.position.set(c.position.x,c.position.y,c.position.z+P.depth/2+.012);m.renderOrder=3;m.visible=false;g.add(m);wsh={m,cv,tx,amt:0,t:0,c,pw:P.width-.03,ph:P.height-.03}}});
   texVehicle(g,col);
+  // mark the vehicle's glass (its own copy of the geometry), so the shader can leave the windshield to the wiper-cleared rain layer
+  for(const c of g.children)if(c.material===glassMat&&c.geometry&&c.geometry.attributes.position){const pr=c.geometry.parameters;c.geometry=c.geometry.clone();if(pr)c.geometry.parameters=pr;c.geometry.setAttribute('aVeh',new THREE.BufferAttribute(new Float32Array(c.geometry.attributes.position.count).fill(1),1))}
   return{wsh,col:ci,type:t,two,pedal:!!D.pedal,name:D.name,g,pos:g.position,yaw:s.yaw,speed:0,gy,fuel:D.pedal?100:s.good?30:(rng()<.5?0:RI(10,55)),hp:broken?0:RI(45,100),broken,
     driver:null,pass:null,wheels,L,Wd,VH:D.VH,maxS:D.maxS,acc:D.acc,steerA:0,IN,lights};
 }
@@ -4414,7 +4420,13 @@ function raySphere(o,d,c,r){const ox=c.x-o.x,oy=c.y-o.y,oz=c.z-o.z,tca=ox*d.x+oy
 
 // ---------------- time of day
 const SEASON_DAYS=3,SEASONS=['Spring','Summer','Autumn','Winter'];
-const seasonOf=d=>Math.floor((d-1)/SEASON_DAYS+1)%4; // day 1 is summer
+// a new world starts in the real season (by today's date, northern hemisphere: Mar-May spring, Jun-Aug summer, Sep-Nov autumn, Dec-Feb
+// winter) and from there the seasons turn every 3 in-game days like any world. The starting season (WORLD.sb) is saved with the world,
+// so reloading carries on where it was. With Real season off (developer mode only) a world starts in summer on day 1
+const WORLD={slot:1,realSeason:true,sb:1};
+const realSeason=()=>{const m=new Date().getMonth();return m>=2&&m<=4?0:m>=5&&m<=7?1:m>=8&&m<=10?2:3};
+const seasonOf=d=>(WORLD.sb+Math.floor((d-1)/SEASON_DAYS))%4;
+const worldSeasonStart=()=>{WORLD.sb=WORLD.realSeason?realSeason():1};worldSeasonStart();
 let curSeason=-1;
 function applySeason(force){const s=seasonOf(day);if(s===curSeason&&!force)return;const first=curSeason<0;curSeason=s;drawSeason(s);atlas.needsUpdate=true;buildAtlasLevels();drawGrassTex(s);grassMat.visible=s!==3;
   if(!WX.lock){if(WX.type==='snow'&&s!==3)WX.type='rain';if(s===3&&WX.type!=='snow')WX.type='snow'}
@@ -5722,7 +5734,7 @@ async function toMainMenu(){if(!running)return;try{await autoSave()}catch(e){}ne
   players=[];running=false;REC=false;bombs.forEach(b=>scene.remove(b.g));bombs=[];if(engG)engG.gain.value=0;
   $('#top').classList.add('hidden');$('#split').classList.add('hidden');$('#touch').classList.add('hidden');
   if(document.pointerLockElement)document.exitPointerLock();
-  try{if(localStorage.getItem('deadground-save'))$('#bCont').classList.remove('hidden')}catch(e){}
+  try{renderSlots()}catch(e){}
   $('#start').classList.remove('hidden');setMsg('Game saved. Continue it, or pick a mode for a fresh world.')}
 $('#pMenu').onclick=()=>toMainMenu();$('#mMain').onclick=()=>toMainMenu();
 $('#pMap').onclick=()=>{$('#pause').classList.add('hidden');paused=false;openMap(true)};
@@ -6593,8 +6605,8 @@ function setBodyFP(p,on){if(p.fpBody===on)return;p.fpBody=on;p.body.g.traverse(o
 function updateClothes(p){const c=p.cl,set=(m,k)=>{m.visible=!!k;if(k)m.material.color.setHex(CLOTHES[k].col)};
   set(c.head,p.wear.head);set(c.body,p.wear.body);c.legs.forEach(m=>set(m,p.wear.legs));if(c.back)set(c.back,p.wear.back);if(c.pack0)c.pack0.visible=!p.wear.back}
 
-// ---- streaks: rain, and the drops that drip off sills and signs, drawn as upright streaks exactly two block pixels wide (1/16 m),
-// each on that grid and a whole number of grid steps long
+// ---- streaks: rain, and the drops that drip off sills and signs, drawn as upright streaks two block pixels wide (1/16 m), each on
+// that grid and a whole number of grid steps long
 // ribbons: segments in any direction, one block pixel wide, each segment its own brightness (aA), for the wind swirls
 const RIB_VS=`attribute float aSd,aA;attribute vec3 aO;uniform vec2 uRes;varying float vA;void main(){vec4 v=modelViewMatrix*vec4(position,1.),o=modelViewMatrix*vec4(aO,1.);vec4 c=projectionMatrix*v;
   vec2 d=o.xy-v.xy;d=length(d)>1e-5?normalize(d):vec2(1.,0.);v.xy+=vec2(-d.y,d.x)*aSd/64.;vA=aA;gl_Position=projectionMatrix*v;}`;
@@ -7410,7 +7422,7 @@ function cullEntities(cs){const F=Math.min(CO_START*VS,viewUnits()+8)**2,vis=(o,
 // ---------------- developer mode: what's under the crosshair, and where you are
 let DEV=false;try{DEV=localStorage.getItem('deadground-dev')==='1'}catch(e){}
 if(DEV&&renderer.debug)renderer.debug.checkShaderErrors=true; // developer mode reports broken shaders (off otherwise, so compiles don't stall loading)
-for(const id of['#devSel','#devSel2']){const el=$(id);if(!el)continue;el.value=DEV?'1':'0';el.addEventListener('change',()=>{DEV=el.value==='1';for(const j of['#devSel','#devSel2'])if($(j))$(j).value=el.value;if($('#devFps'))$('#devFps').classList.toggle('hidden',!DEV);try{localStorage.setItem('deadground-dev',DEV?'1':'0')}catch(e){}$('#devHud').classList.toggle('hidden',!DEV||!running)})}
+for(const id of['#devSel','#devSel2']){const el=$(id);if(!el)continue;el.value=DEV?'1':'0';el.addEventListener('change',()=>{DEV=el.value==='1';try{renderSlots()}catch(_){}for(const j of['#devSel','#devSel2'])if($(j))$(j).value=el.value;if($('#devFps'))$('#devFps').classList.toggle('hidden',!DEV);try{localStorage.setItem('deadground-dev',DEV?'1':'0')}catch(e){}$('#devHud').classList.toggle('hidden',!DEV||!running)})}
 const BKEY={};for(const k in B)BKEY[B[k]]=k.toLowerCase();
 function blockName(b){if(b===255)return'water';{const w=WOODS.find(w=>w.log===b||w.plank===b||w.leaf===b);if(w)return LABEL[w.k+(b===w.log?'log':b===w.plank?'plank':'leaf')].toLowerCase()}if(b>=180&&b<=224)return'rubble';if(b>=225)return'branch';const base=BASE_OF[b]||b,n=BKEY[base]||('block '+b);return base!==b?n+' (chipped)':n}
 function rayBox(O,d,bb,max){let t0=0,t1=max;for(let a=0;a<3;a++){const o=[O.x,O.y,O.z][a],dv=[d.x,d.y,d.z][a],lo=bb[a],hi=bb[a+3];if(Math.abs(dv)<1e-9){if(o<lo||o>hi)return-1;continue}let ta=(lo-o)/dv,tb=(hi-o)/dv;if(ta>tb)[ta,tb]=[tb,ta];t0=Math.max(t0,ta);t1=Math.min(t1,tb);if(t0>t1)return-1}return t0}
@@ -7789,7 +7801,7 @@ const r2=v=>Math.round(v*100)/100;
 function collectState(){
   for(const R of regions.values())if(R.live)gatherState(R);
   const emptySt=st=>!st||(!(st.fg&&st.fg.length)&&!(st.bg&&st.bg.length)&&!(st.to&&st.to.length)&&!st.c.length&&!st.d&&!st.vh.length&&!st.b.length&&!st.f.length&&!st.tr.length);
-  return{v:2,gv:GENV,seed,day,t:r2(tDay),k:kills,
+  return{v:2,gv:GENV,seed,day,t:r2(tDay),k:kills,rs:WORLD.realSeason?1:0,sb:WORLD.sb,
     p:players.map(p=>({x:r2(p.pos.x),y:r2(p.pos.y),z:r2(p.pos.z),a:r2(p.yaw),hp:Math.round(p.hp),hu:Math.round(p.hunger),k:p.kills,pk:p.pk|0,n:p.nights|0,w:p.wear,pk:1,mg:p.mag|0,bt:Math.round(p.batt??100),bh:Math.round(p.batHP??100),cr:p.creative?1:0,sf:Math.round(p.sawFuel||0),hb:p.hot,hs:p.hsel|0,
       i:Object.fromEntries(Object.entries(p.inv).filter(e=>e[1]>0)),s:p.spawnPt?[r2(p.spawnPt.x),r2(p.spawnPt.y),r2(p.spawnPt.z)]:0})),
     // only regions you changed or met people in are stored; everything else regrows from the seed
@@ -7801,7 +7813,27 @@ async function encodeSave(){const raw=new TextEncoder().encode(JSON.stringify(co
 async function decodeSave(code){code=(code||'').trim();if(!/^DG1[zr]/.test(code))throw new Error('Not a Dead Ground save code');
   let u=unb64(code.slice(4));if(code[3]==='z'){u=await zip(u,1);if(!u)throw new Error('This browser cannot unpack compressed saves')}
   const st=JSON.parse(new TextDecoder().decode(u));if(st.v!==1&&st.v!==2)throw new Error('Unknown save version');return st}
-async function autoSave(){if(!running)return;try{localStorage.setItem('deadground-save',await encodeSave())}catch(e){}}
+// ---- save slots: three worlds. Each is stored as its compressed bytes in IndexedDB (no text encoding, so about a third of the size a
+// localStorage string took, and far more room), with a small summary per slot in localStorage for the start screen
+const SLOT_N=3,SLOTK='deadground-slots';
+const slotMeta=()=>{try{const a=JSON.parse(localStorage.getItem(SLOTK)||'[]');return Array.from({length:SLOT_N},(_,i)=>a[i]||null)}catch(e){return[null,null,null]}};
+const slotMetaSet=a=>{try{localStorage.setItem(SLOTK,JSON.stringify(a))}catch(e){}};
+let _idb=null;function idb(){if(_idb)return _idb;_idb=new Promise((res,rej)=>{try{const r=indexedDB.open('deadground',1);r.onupgradeneeded=()=>r.result.createObjectStore('saves');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}});return _idb}
+async function slotPut(i,bytes){try{const db=await idb();await new Promise((res,rej)=>{const t=db.transaction('saves','readwrite');t.objectStore('saves').put(bytes,i);t.oncomplete=res;t.onerror=()=>rej(t.error)});try{localStorage.removeItem('deadground-slot-'+i)}catch(e){}return true}
+  catch(e){try{localStorage.setItem('deadground-slot-'+i,b64(bytes));return true}catch(e2){return false}}}
+async function slotGet(i){try{const db=await idb();const v=await new Promise((res,rej)=>{const r=db.transaction('saves').objectStore('saves').get(i);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});if(v)return v}catch(e){}
+  try{const t=localStorage.getItem('deadground-slot-'+i);return t?unb64(t):null}catch(e){return null}}
+async function slotDel(i){try{const db=await idb();await new Promise(res=>{const t=db.transaction('saves','readwrite');t.objectStore('saves').delete(i);t.oncomplete=res;t.onerror=res})}catch(e){}try{localStorage.removeItem('deadground-slot-'+i)}catch(e){}
+  const m=slotMeta();m[i-1]=null;slotMetaSet(m)}
+// the world as bytes: its state as JSON, deflated (a leading 'z' or 'r' says whether it's compressed)
+async function stateBytes(){const raw=new TextEncoder().encode(JSON.stringify(collectState()));const z=await zip(raw,0);const out=new Uint8Array((z||raw).length+1);out[0]=z?122:114;out.set(z||raw,1);return out}
+async function bytesState(u){let d=u.subarray(1);if(u[0]===122){d=await zip(d,1);if(!d)throw new Error('This browser cannot unpack compressed saves')}return JSON.parse(new TextDecoder().decode(d))}
+async function autoSave(){if(!running)return;try{const b=await stateBytes();if(await slotPut(WORLD.slot,b)){const m=slotMeta(),p=players[0];
+    m[WORLD.slot-1]={day,seed,mode:players.length>1?'2-player':p&&p.creative?'creative':'survival',t:Date.now(),kb:Math.max(1,Math.round(b.length/1024)),rs:WORLD.realSeason?1:0};slotMetaSet(m)}}catch(e){}}
+// the single save from before slots moves into slot 1
+async function slotMigrate(){try{const old=localStorage.getItem('deadground-save');if(!old)return;const m=slotMeta();if(m.some(Boolean)){localStorage.removeItem('deadground-save');return}
+  const st=await decodeSave(old);const raw=new TextEncoder().encode(JSON.stringify(st)),z=await zip(raw,0),b=new Uint8Array((z||raw).length+1);b[0]=z?122:114;b.set(z||raw,1);
+  if(await slotPut(1,b)){m[0]={day:st.day,seed:st.seed,mode:st.p&&st.p.length>1?'2-player':st.p&&st.p[0]&&st.p[0].cr?'creative':'survival',t:Date.now(),kb:Math.max(1,Math.round(b.length/1024)),rs:st.rs===0?0:1};slotMetaSet(m);localStorage.removeItem('deadground-save')}}catch(e){}}
 const GENV=5; // bump when the world generator changes so old edits aren't applied to a different town layout
 function applyState(st){
   const old=st.v!==2||(st.gv|0)!==GENV;
@@ -7811,7 +7843,7 @@ function applyState(st){
     for(const[rx,rz,e,rst,rd]of st.r||[]){const R=reg(rx,rz);if(e)R.edits=unpackEdits(e);if(rst){R.st=Object.assign({c:[],d:'',vh:[],b:[],f:[],tr:[]},rst);if(rst.zp!=null)R.zpop=rst.zp}R.rosterDone=!!rd;R.visited=true}
     for(const a of st.ro||[]){const r={reg:a[0],kind:['survivor','bandit','family','soldier'][a[1]]||'survivor',name:a[3],alive:!!a[4],out:null,kills:a[5],pk:a[6],nights:a[7],hp:a[8]};if(a[9])r.role=a[9];if(a[10])r.fam=a[10];if(a[11])r.need=a[11];if(a[12])r.helped=a[12];if(a[13])r.friendly=true;if(a[1]===1)r.camp=a[2];else if(a[1]===3){r.camp=a[2][0];r.base=a[2][1];r.unit=a[2][2]}else r.homeI=a[2];roster.push(r);rosterNames.add(r.name)}
   }
-  day=st.day;tDay=st.t;kills=st.k||0;
+  day=st.day;tDay=st.t;kills=st.k||0;if(st.rs!=null&&!st._slot)WORLD.realSeason=!!st.rs;WORLD.sb=st.sb!=null?st.sb:1;try{curSeason=-1;applySeason(true)}catch(e){}
   st.p.forEach((s,i)=>{const p=players[i];if(!p)return;p.pos.set(s.x,s.y+.05,s.z);p.yaw=s.a;p.hp=s.hp;p.hunger=s.hu;p.kills=s.k||0;p.pk=s.pk|0;p.nights=s.n|0;p.eye=p.pos.y+1.6;
     for(const k in p.inv)p.inv[k]=0;Object.assign(p.inv,s.i);p.wear=Object.assign({head:null,body:null,legs:null,back:null},s.w);p.mag=s.mg|0;if(s.bt!=null)p.batt=s.bt;if(s.bh!=null)p.batHP=s.bh;if(!s.pk){if(!p.wear.legs)p.wear.legs='jeans';if(!p.wear.back)p.wear.back='hikepack'}updateClothes(p);p.creative=!!s.cr;p.sawFuel=s.sf|0;if(Array.isArray(s.hb)&&s.hb.length<=HOTN)p.hot=Array.from({length:HOTN},(_,k)=>typeof s.hb[k]==='string'&&s.hb[k].length<24?s.hb[k]:null);selectHot(p,Math.min(HOTN-1,s.hs|0));
     p.spawnPt=s.s?new V3(s.s[0],s.s[1],s.s[2]):null});
@@ -7845,11 +7877,14 @@ function lsHide(){LS.on=false;$('#loadScr').classList.add('hidden')}
 function lsSet(ph,f,txt){if(!LS.on)return;LS.ph=ph;let t=0;for(let i=0;i<ph;i++)t+=LS_W[i];t=Math.min(1,t+LS_W[ph]*Math.max(0,Math.min(1,f)));
   $('#lsFill').style.width=Math.round(t*100)+'%';$('#lsPct').textContent=Math.floor(t*100)+'%';$('#lsStep').textContent=txt||LS_PH[ph]+'…';
   $('#lsList').innerHTML=LS_PH.map((n,i)=>`<div style="color:${i<ph?'#a3ae5e':i===ph?'#e8e2d0':'#6a665a'}">${i<ph?'&#10003;':i===ph?'&#9656;':'&middot;'} ${n}</div>`).join('')}
+// once the world is up, every shader is checked once and any that failed to compile is reported in the console with its error
+// (compile errors aren't checked as each shader is made, so loading doesn't wait on them; this catches them anyway)
+function shaderCheck(){try{const gl=renderer.getContext();for(const q of renderer.info.programs||[])if(!gl.getProgramParameter(q.program,gl.LINK_STATUS)){const logs=gl.getAttachedShaders(q.program).map(x=>gl.getShaderInfoLog(x)).filter(Boolean).join(' | ');console.error('Dead Ground: a shader failed to compile ('+q.name+'): '+logs.slice(0,600))}}catch(e){}}
 function lsTick(){if(!LS.on||!running)return;
   if(gateHold){const f=gateN0?1-gateLeft/gateN0:0;lsSet(1,f,gateTerr&&winQ.length?'Generating the land you’re standing on…':`Loading the ground around you… ${Math.floor(f*100)}%`);LS.fr=0;return}
   if(LS.ph<3)lsSet(3,0,'Preparing graphics…');lsSet(3,LS.fr/3,'Preparing graphics…');
   if(++LS.fr>3){$('#lsFill').style.width='100%';$('#lsPct').textContent='100%';$('#lsStep').textContent='Fully loaded';$('#lsList').innerHTML=LS_PH.map(n=>`<div style="color:#a3ae5e">&#10003; ${n}</div>`).join('');
-    LS.on=false;LS.bg=pendR.size?pendR.size:null;clockT=performance.now();setTimeout(()=>{if(!LS.on)$('#loadScr').classList.add('hidden')},450)}}
+    LS.on=false;LS.bg=pendR.size?pendR.size:null;clockT=performance.now();setTimeout(shaderCheck,2500);setTimeout(()=>{if(!LS.on)$('#loadScr').classList.add('hidden')},450)}}
 function bgTick(){const el=$('#bgLoad');if(!el)return;if(!running){LS.bg=null;el.classList.add('hidden');return}if(LS.bg==null)return;const n=pendR.size;
   if(n>0){el.classList.remove('hidden');el.textContent=`Loading land further out… ${Math.floor(100*(1-n/LS.bg))}%`}
   else{LS.bg=null;el.textContent='World fully loaded';el.classList.remove('hidden');msg(null,'The world around you is fully loaded');setTimeout(()=>{if(LS.bg==null)el.classList.add('hidden')},3000)}}
@@ -7859,9 +7894,12 @@ function withSeed(ns,then){if(genBusy){LS.wait=()=>withSeed(ns,then);return}cons
 function readSeed(){const v=$('#seedIn').value.trim();if(!v)return seed;if(/^-?\d+$/.test(v))return +v|0;let h=2166136261;for(const c of v)h=Math.imul(h^c.charCodeAt(0),16777619);return h|0}
 function play(n){lsShow(startCreative?'Loading creative world':n>1?'Loading 2-player world':'Loading world');setTimeout(()=>play2(n),30)}
 function play2(n){const ns=readSeed();try{localStorage.setItem('deadground-seed',String(ns))}catch(e){}withSeed(ns,()=>{loadingSave=false;startGame(n)})}
+function loadState(st){withSeed(st.seed,()=>{lsSet(2,0,'Loading your save into the world…');loadingSave=true;startGame(Math.max(1,st.p.length));applyState(st);msg(null,`Save loaded — day ${day}`)})}
 async function loadCode(code){
   lsShow('Loading your save');let st;try{st=await decodeSave(code)}catch(e){lsHide();setMsg(e.message);return}
-  withSeed(st.seed,()=>{lsSet(2,0,'Loading your save into the world…');loadingSave=true;startGame(Math.max(1,st.p.length));applyState(st);msg(null,`Save loaded — day ${day}`)})}
+  const m=slotMeta();WORLD.slot=selSlot;WORLD.realSeason=st.rs===0?false:true;if(m[selSlot-1]&&!confirm(`Load this code into slot ${selSlot}? It replaces the world saved there.`)){lsHide();return}loadState(st)}
+async function loadSlot(i){lsShow('Loading your save');const b=await slotGet(i);if(!b){lsHide();setMsg('That slot is empty');return}let st;try{st=await bytesState(b)}catch(e){lsHide();setMsg(e.message);return}
+  WORLD.slot=i;WORLD.realSeason=st.rs!==0;st._slot=1;loadState(st)}
 // render distance pickers
 for(const id of['#farSel','#farSel2']){const el=$(id);el.value=FARV?'1':'0';el.addEventListener('change',()=>{FARV=el.value==='1';$('#farSel').value=$('#farSel2').value=el.value;try{localStorage.setItem('deadground-far',FARV?'1':'0')}catch(e){}})}
 for(const id of['#rdSel','#rdSel2','#dpRD']){const el=$(id);el.innerHTML=[4,6,8,10,12,14,16,20,24].map(v=>v*16/CS).filter(v=>Number.isInteger(v)&&v<=RDMAX).map(v=>`<option value="${v}">${v} chunks (${v*CS} blocks)</option>`).join('');el.value=String(RD);
@@ -7871,19 +7909,36 @@ for(const id of['#pixSel','#pixSel2']){const el=$(id);el.innerHTML=[[1,'Smooth']
 for(const id of['#gfxSel','#gfxSel2']){const el=$(id);el.innerHTML=GFXN.map((n,i)=>`<option value="${i}"${i===3&&!RTX_OK?' disabled':''}>${n}${['  (fastest)',' (pixel shadows, rays)',' (+ motion blur, reflections)',' (+ pixel ray tracing)'][i]}</option>`).join('');el.value=String(GFX);
   el.addEventListener('change',()=>{GFX=+el.value;$('#gfxSel').value=$('#gfxSel2').value=String(GFX);try{localStorage.setItem('deadground-gfx',String(GFX))}catch(e){}applyGfx()})}
 applyGfx();
-$('#bSolo').onclick=()=>play(1);
-$('#bCreative').onclick=()=>{startCreative=true;play(1)};
-$('#bCoop').onclick=()=>play(2);
+$('#bSolo').onclick=()=>newInSlot(()=>play(1));
+$('#bCreative').onclick=()=>newInSlot(()=>{startCreative=true;play(1)});
+$('#bCoop').onclick=()=>newInSlot(()=>play(2));
 $('#bRand').onclick=()=>{$('#seedIn').value=String((Math.random()*1e9)|0)};
 $('#bLoad').onclick=()=>loadCode($('#codeIn').value);
-$('#bCont').onclick=()=>{try{loadCode(localStorage.getItem('deadground-save'))}catch(e){}};
+$('#bCont').onclick=()=>loadSlot(selSlot);
+// the three world slots on the start screen: pick one for a new game (its Real season switch applies to the new world), continue or
+// delete a saved one, or switch its seasons between the real calendar and the in-game cycle
+let selSlot=1;
+function slotAgo(t){const s_=(Date.now()-t)/1000;return s_<90?'just now':s_<5400?Math.round(s_/60)+' min ago':s_<129600?Math.round(s_/3600)+' h ago':Math.round(s_/86400)+' days ago'}
+function renderSlots(){const box=$('#slots');if(!box)return;const m=slotMeta(),pend=JSON.parse(localStorage.getItem('deadground-slotrs')||'[1,1,1]');
+  box.innerHTML=m.map((e,i)=>{const n=i+1,rs=e?e.rs!==0:pend[i]!==0;return `<div class="row" style="align-items:center;gap:8px;margin:4px 0;padding:6px 8px;border:2px solid ${selSlot===n?'var(--olive)':'var(--line)'}">
+    <label style="flex:1;cursor:pointer"><input type="radio" name="slotSel" value="${n}" ${selSlot===n?'checked':''} style="width:14px;height:14px;min-width:0;padding:0;margin:0 6px 0 0;vertical-align:middle"> <b>World ${n}</b> <span class="note">${e?`day ${e.day} · ${e.mode} · seed ${e.seed} · ${e.kb} KB · saved ${slotAgo(e.t)}`:'empty: new games start here'}</span></label>
+    ${DEV&&!e?`<label class="note" title="Developer: start this new world in the real season (otherwise in summer)"><input type="checkbox" data-rs="${n}" ${rs?'checked':''} style="width:14px;height:14px;min-width:0;padding:0;margin:0 4px 0 0;vertical-align:middle"> Real season</label>`:''}
+    ${e?`<button data-cont="${n}">Continue</button><button data-del="${n}">Delete</button>`:''}</div>`}).join('');
+  box.querySelectorAll('input[name=slotSel]').forEach(r=>r.onchange=()=>{selSlot=+r.value;renderSlots()});
+  box.querySelectorAll('[data-cont]').forEach(b=>b.onclick=()=>{selSlot=+b.dataset.cont;loadSlot(selSlot)});
+  box.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{const n=+b.dataset.del;if(!confirm(`Delete world ${n}? This can't be undone.`))return;await slotDel(n);renderSlots()});
+  box.querySelectorAll('[data-rs]').forEach(c=>c.onchange=()=>{const n=+c.dataset.rs,pp=JSON.parse(localStorage.getItem('deadground-slotrs')||'[1,1,1]');pp[n-1]=c.checked?1:0;localStorage.setItem('deadground-slotrs',JSON.stringify(pp))});}
+// a new game goes into the selected slot (asking first if a world is saved there) and takes that slot's Real season setting
+function newInSlot(go){const m=slotMeta(),e=m[selSlot-1];if(e&&!confirm(`Start a new world in slot ${selSlot}? The world saved there (day ${e.day}) will be replaced when this one saves.`))return;
+  const pend=JSON.parse(localStorage.getItem('deadground-slotrs')||'[1,1,1]');WORLD.slot=selSlot;WORLD.realSeason=!DEV||pend[selSlot-1]!==0;worldSeasonStart();try{curSeason=-1;applySeason(true)}catch(_){}go()}
+slotMigrate().then(renderSlots);renderSlots();
 $('#mSleep').onclick=()=>{const p=menuP;if(!p||!p.creative)return;closeMenu&&closeMenu();for(const q of players)if(q.creative||players.length===1)trySleep(q,null);if(players.some(q=>!q.sleeping))msg(p,'Everyone needs to be asleep (or in creative) to skip the night')};
 $('#mCreative').onclick=()=>{const p=menuP;if(!p)return;p.creative=!p.creative;p.fly=false;msg(p,p.creative?'Creative mode: every block, unlimited, no damage. Double-tap jump to fly':'Survival mode');renderMenu()};
 $('#mRsp').onclick=()=>{const p=menuP;if(!p)return;if(p.vehicle)exitVehicle(p);respawn(p);closeMenu()};
-$('#mSave').onclick=async()=>{await autoSave();$('#mSaveNote').textContent='Saved in this browser.'};
+$('#mSave').onclick=async()=>{await autoSave();$('#mSaveNote').textContent=`Saved in world slot ${WORLD.slot}.`};
 $('#mCode').onclick=async()=>{const c=await encodeSave();const o=$('#mCodeOut');o.value=c;o.classList.remove('hidden');o.select();
   let ok=false;try{await navigator.clipboard.writeText(c);ok=true}catch(e){}$('#mSaveNote').textContent=`${ok?'Copied':'Select and copy the code above'} — ${c.length.toLocaleString()} characters for the whole world.`};
-try{if(localStorage.getItem('deadground-save'))$('#bCont').classList.remove('hidden')}catch(e){}
+
 for(const o of scene.children)baseObjs.add(o);
 try{initPicEd()}catch(e){}setTimeout(()=>{netInit().catch(()=>{})},0);
 setTimeout(()=>{if(genBusy||worldReady)return; /* a play button already started making the world */genRun(genAll(true),()=>{$('#seedIn').placeholder=String(seed);setMsg(worldSummary());document.querySelectorAll('#start button').forEach(b=>b.disabled=false)})},40);
