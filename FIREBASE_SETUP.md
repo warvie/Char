@@ -14,7 +14,8 @@ Until the config in step 4 is pasted into the game, the email and password boxes
 1. In the project, open **Build → Authentication** and click **Get started**.
 2. On the **Sign-in method** tab, choose **Email/Password**.
 3. Turn on **Email/Password** and click **Save**. (The **Email link** switch underneath can stay off.)
-4. On the **Settings** tab, open **Authorized domains** and make sure these are listed (add any that are missing):
+4. Still on **Sign-in method**, click **Add new provider**, choose **Google**, turn it on, pick a support email and click **Save**. This is what the **Continue with Google** button uses.
+5. On the **Settings** tab, open **Authorized domains** and make sure these are listed (add any that are missing):
    - `warvie.github.io`
    - `localhost`
 
