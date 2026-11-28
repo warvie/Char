@@ -1,0 +1,8 @@
+.claude/settings.local.json
+.claude/launch.json
+.DS_Store
+Thumbs.db
+# local copies of the desktop launchers, for playing straight from this folder
+/Play Dead Ground.bat
+/Play Dead Ground (Mac).command
+/README.txt
