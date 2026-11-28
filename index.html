@@ -359,7 +359,7 @@ body #touch .tb[data-b=run] .ti,body #touch .tb[data-b=jump] .ti,body #touch .tb
     <label>Developer mode <select id="devSel"><option value="0">Off</option><option value="1">On</option></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
-    <h4>v20.41 · Nov 28, 2026 — smoother travel, grass frames, yield signs, rain levels, flash floods</h4><ul>
+    <h4>v20.42 · Nov 28, 2026 — painted stairs, dry undersides, wind gusts, drips</h4><ul><li>Rain runs down signs, posts and everything else out in the open in wet streaks with a bright bead at the head (sheltered things stay dry)</li><li>Rain on every block out in the open, by material: on smooth faces (metal, tile, smooth stone, concrete) drops run down in trails, faster the smoother the face; absorbent ones (brick, wood, dirt, bark) take a dark wet spot where each drop lands, which slowly fades as it soaks in. Tops get the spots too</li><li>V changes your view: first and third person in a vehicle; first, second (out in front, facing you) and third person on foot. The camera stops short of walls</li><li>Rain falls as streaks exactly one screen pixel wide, each its own length</li><li>Drips: water running down a sign drips off its bottom edge, and water on a window gathers on the sill and rolls off its front and ends. Each drop falls (as a little one-pixel streak) to whatever is beneath it, and its landing ripples the wet ground's reflection itself</li><li>Wind gusts: swirls of pale wind lines tumble across the land in the wind's direction and at its speed (slow and gentle in a breeze, fast and many in a storm). Grass under a passing gust switches to its heavy-wind frames, so a wave of bent grass moves along with each swirl</li><li>Staircases inside painted rooms are painted to match the room: their sides, backs and sloped undersides. The treads and step fronts stay bare</li><li>Wet-ground reflections only appear on up-facing surfaces the rain actually falls on. Ceilings and the undersides of things no longer shine as if wet</li></ul><h4>v20.41 · Nov 28, 2026 — smoother travel, grass frames, yield signs, rain levels, flash floods</h4><ul>
 <li>Driving and running are much smoother: on the same drive, about 36 fps instead of 20, and the long freezes are gone. The far view no longer rebuilds all at once while you travel, regions you leave are packed away a little each frame, chunks rebuild fewer times as they come closer, merging far cars and zombies no longer stalls, and background work shares one time budget per frame</li>
 <li>Grass no longer bends: each tuft swaps between drawn frames instead. It leans with the wind (whatever direction it blows, breezes to harsh storm gusts) and gets pressed half down or flat when something walks or drives through it</li>
 <li>Stop signs say STOP again, in white on the red. Yield signs are now built the same way: a 17-pixel downward triangle with YIELD across the top, a white triangle inside, metal back and edges, and the same holed post</li>
@@ -448,7 +448,7 @@ body #touch .tb[data-b=run] .ti,body #touch .tb[data-b=jump] .ti,body #touch .tb
       <dt>1–5 / wheel</dt><dd>Bat, pistol, pickaxe, build, place (traps, bed, campfire)</dd>
       <dt>R</dt><dd>Change block material or item to place</dd>
       <dt>E</dt><dd>Search, open doors, refuel, repair, enter/exit car</dd>
-      <dt>V</dt><dd>Driver view / outside view in a car</dd>
+      <dt>V</dt><dd>Change view: first / third person in a car; first / second / third person on foot</dd>
       <dt>Space ×2</dt><dd>Fly (creative mode)</dd>
       <dt>Space / Shift</dt><dd>Jump (brake in car) / sprint (or tap W twice) · jump while running to keep your speed</dd>
       <dt>Tab</dt><dd>Attaché case, crafting, leaderboard</dd>
@@ -1619,11 +1619,12 @@ let MBLUR=false;try{MBLUR=localStorage.getItem('deadground-mblur')==='1'}catch(e
 // clock for screen effects (rain ripples, glints, fog drift): it stops while the world is frozen
 let FX_T=0,FX_L=performance.now();function fxT(){const n=performance.now();if(!(typeof WFZ!=='undefined'&&WFZ))FX_T+=(n-FX_L)/1000;FX_L=n;return FX_T}
 const prevCamP=[];
+const DRIPU=[];for(let i=0;i<12;i++)DRIPU.push(new THREE.Vector4(0,0,0,0));
 const postMat=new THREE.ShaderMaterial({defines:{RAYS:24,MB:1,SSR:22,AO:1},depthTest:false,depthWrite:false,
-  uniforms:{tColor:{value:null},tDepth:{value:null},sunUV:{value:new THREE.Vector2()},sunOn:{value:0},sunCol:{value:new THREE.Color()},rays:{value:0},flare:{value:0},
+  uniforms:{dRip:{value:DRIPU},tColor:{value:null},tDepth:{value:null},sunUV:{value:new THREE.Vector2()},sunOn:{value:0},sunCol:{value:new THREE.Color()},rays:{value:0},flare:{value:0},
     aa:{value:1},blur:{value:0},expo:{value:1},nvg:{value:0},invVP:{value:new THREE.Matrix4()},prevVP:{value:new THREE.Matrix4()},aspect:{value:1},time:{value:0},px:{value:new THREE.Vector2()},haze:{value:new THREE.Color()},hazeK:{value:0},vig:{value:.35},camPos:{value:new V3()},fogCol:{value:new THREE.Color()},fogD:{value:0},fogBase:{value:(G+1)*VS},wet:{value:0},VPm:{value:new THREE.Matrix4()},tHeight:{value:null},hOrigin:{value:new V3()},hSize:{value:new V3()},rtm:{value:0},uRays:{value:24},uSsr:{value:22},uAO:{value:1},uMB:{value:1}},
   vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
-  fragmentShader:`uniform float expo,nvg;uniform float uRays,uSsr,uAO,uMB;uniform sampler2D tColor,tDepth;uniform vec2 sunUV,px;uniform float aa,rtm,sunOn,rays,flare,blur,aspect,time,hazeK,vig;uniform vec3 sunCol,haze,camPos,fogCol;uniform float fogD,fogBase,wet;uniform mat4 invVP,prevVP,VPm;uniform sampler2D tHeight;uniform vec3 hOrigin,hSize;varying vec2 vUv;uniform float pxI,pxInc;uniform vec3 pxC;
+  fragmentShader:`uniform vec4 dRip[12];uniform float expo,nvg;uniform float uRays,uSsr,uAO,uMB;uniform sampler2D tColor,tDepth;uniform vec2 sunUV,px;uniform float aa,rtm,sunOn,rays,flare,blur,aspect,time,hazeK,vig;uniform vec3 sunCol,haze,camPos,fogCol;uniform float fogD,fogBase,wet;uniform mat4 invVP,prevVP,VPm;uniform sampler2D tHeight;uniform vec3 hOrigin,hSize;varying vec2 vUv;uniform float pxI,pxInc;uniform vec3 pxC;
   float ppLv(float d){if(d<pxI)return 0.;return floor((d-pxI)/max(pxInc,.01))+1.;}
   float pcq(float x,float s){float c=s/16.,l=x-floor(x),a=floor(l/c)*c,b=min(a+c,1.);return floor(x)+(a+b)*.5;}
   vec3 recon(vec2 u,float dd){vec4 w=invVP*vec4(u*2.-1.,dd*2.-1.,1.);return w.xyz/w.w;}
@@ -1643,13 +1644,16 @@ const postMat=new THREE.ShaderMaterial({defines:{RAYS:24,MB:1,SSR:22,AO:1},depth
   #ifdef SSR
     // rain: wet, sky-exposed flat surfaces reflect the scene (screen-space), with puddles and ripples
     if(wet>.01&&d<.99999){vec3 P=recon(uv,d),Px=recon(uv+vec2(px.x,0.),texture2D(tDepth,uv+vec2(px.x,0.)).x),Py=recon(uv+vec2(0.,px.y),texture2D(tDepth,uv+vec2(0.,px.y)).x);
-      vec3 N=normalize(cross(Px-P,Py-P));if(N.y<0.)N=-N;
+      // the surface's normal, turned to face the camera (the side you see): ceilings and the undersides of things face down and never
+      // get the wet reflection; only up-facing ground the rain actually falls on does
+      vec3 N=normalize(cross(Px-P,Py-P));if(dot(N,P-pxC)>0.)N=-N;
       if(N.y>.82){float ps_=min(1.+ppLv(length(P.xz-pxC.xz)*2.),8.);vec2 tq;if(ps_>1.01){P.xz=vec2(pcq(P.x,ps_),pcq(P.z,ps_));tq=floor(P.xz*16.);}else{tq=floor(P.xz*16.+.001);P.xz=(tq+.5)/16.;}vec2 hc=(P.xz/.5-hOrigin.xz)/hSize.xz;float top=texture2D(tHeight,hc).r*255.*.5;float ex=(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)?1.:step(top-.55,P.y);
         float pud=smoothstep(.4,.8,vn(P.xz*.32)+.2*wet),k=wet*ex*(.3+.7*pud);
         if(k>.01){vec3 V=normalize(P-pxC),Rr=reflect(V,vec3(0.,1.,0.));
           vec2 rip=vec2(0.);vec2 q=P.xz*1.6;vec2 cb=floor(q);
           for(int j=-1;j<=1;j++)for(int i=-1;i<=1;i++){vec2 c=cb+vec2(float(i),float(j));float h=fract(sin(dot(c,vec2(127.1,311.7)))*43758.5453),h2=fract(sin(dot(c,vec2(269.5,183.3)))*43758.5453);
             vec2 ctr=c+vec2(h,h2);float t=fract(rtm*(.6+.6*h)+h2);vec2 dv=q-ctr;float dd=length(dv),rr=t*1.1,e=(dd-rr)*5.;rip+=dv/(dd+.001)*sin((dd-rr)*24.)*exp(-e*e)*(1.-t)*(1.-t);}
+          for(int i=0;i<12;i++){vec4 R_=dRip[i];if(R_.w<=0.)continue;vec2 dv=P.xz-R_.xy;float dd=length(dv),rr=R_.z*.55,e=(dd-rr)*16.;rip+=dv/(dd+.001)*sin((dd-rr)*70.)*exp(-e*e)*R_.w*R_.w*2.2;}
           rip+=vec2(sin(P.x*3.1+rtm*1.7+P.z*1.3),cos(P.z*2.7-rtm*1.3+P.x*.9))*.18;
           Rr.xz+=rip*.11*wet*(.35+.65*pud);Rr=normalize(Rr);
           vec3 hcol=fogCol*1.05,R0=P+vec3(0.,.02,0.);float stp=.3;
@@ -2169,6 +2173,25 @@ vec3 pxReflF(){vec3 n=normalize(vPxN);
 #define vReflect pxReflF()
 #endif
 `;
+// how much each atlas tile soaks up rain (0 smooth, sheds it in fast trails .. 1 absorbent, only darkens where drops land)
+const RBABS=new Array(64).fill(.6);let RAINB_APPLY=null;function rbInit(){if(RAINB_APPLY)return;const T=TILE,set=(k,v)=>{if(T[k]!=null)RBABS[T[k]]=v};
+  for(const[k,v]of[['grassTop',.9],['grassSide',.9],['dirt',1],['dirtTop',1],['stone',.45],['coal',.45],['iron',.45],['conc',.55],['asph',.6],['asphTop',.6],['plank',.85],['bark',.9],['logTop',.9],['leaf',.7],['brick',.9],['metal',0],['bed',.4],['frame',.8],['sludge',.95],['wall',.75],['tilef',.1],['roofTop',.7],['roofSide',.7],['trim',.5],['curbTop',.55],['curbSide',.55],
+    ['bBark',.9],['bTop',.9],['bPlank',.85],['bLeaf',.7],['pBark',.9],['pTop',.9],['pPlank',.85],['pLeaf',.7],['mBark',.9],['mTop',.9],['mPlank',.85],['mLeaf',.7]])set(k,v);
+  RAINB_APPLY=`{vec2 tt_=vec2(floor(vUv.x*${ACOLS}.),floor((1.-vUv.y)*${AROWS}.));int ti_=int(tt_.y*${ACOLS}.+tt_.x+.5);if(ti_>=0&&ti_<64&&ti_!=${TILE.glass}&&ti_!=${TILE.water}){vec2 rb_=rainBlock(vRtW,normalize(vRtN),pxS(vRtW),rbAbs[ti_]);diffuseColor.rgb=diffuseColor.rgb*(1.-rb_.x)+rb_.y*.14;}}`}
+const RAINB_GLSL=`float rbH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+vec2 rainBlock(vec3 P,vec3 N,float s,float ab){float amt=rbRain;if(amt<.01)return vec2(0.);
+  vec3 Q=P+N*.3;vec2 hc=(Q.xz/.5-rtOrigin.xz)/rtSize.xz;if(!(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)&&P.y/.5+.02<texture2D(hTex,hc).r*255.-1.05)return vec2(0.);
+  float c=s/16.;vec3 a=abs(N);vec2 uv;if(a.y>.5)uv=P.xz;else{vec3 Nc=(N.x<-.5||N.z<-.5)?-N:N;vec3 T=normalize(vec3(-Nc.z,0.,Nc.x));uv=vec2(dot(P,T),P.y);}
+  float dk=0.,br=0.;
+  // soak spots: a drop lands, the spot darkens at once and fades as it soaks in (slower on more absorbent stuff)
+  {vec2 cell=floor(uv/(c*2.)+.001);float T_=2.5+4.*ab,ph=rbTime/T_+rbH(cell+5.),age=fract(ph);if(rbH(cell+floor(ph)*vec2(.37,.71))<.07*amt)dk=max(dk,pow(1.-age,1.5)*(.12+.38*ab));}
+  // trails on upright faces, faster and more of them the smoother the face
+  if(a.y<.5&&ab<.75){float sm=1.-ab/.75;for(int k=0;k<2;k++){float fk=float(k),lane=floor(uv.x/(c*3.))+fk*57.,h2=rbH(vec2(lane,3.1));if(h2<.3*amt*sm){
+      float sp=(.15+.9*sm)*(.6+.6*rbH(vec2(lane,9.7))),span=1.3+rbH(vec2(lane,4.4)),yy=mod(uv.y+fk*.7,span),head=span-mod(rbTime*sp+h2*37.,span);
+      float lx=(floor(uv.x/(c*3.))*3.+1.)*c+floor(sin(yy*7.+lane)*.8)*c;
+      if(abs(floor(uv.x/c)-floor(lx/c))<.5){float dy=floor(yy/c)-floor(head/c);if(dy>=0.&&dy<10.){float v=dy<.5?1.:.8-dy/12.;br=max(br,v*sm);dk=max(dk,.18*v);}}}}}
+  return vec2(dk,br);}
+`;
 function installVmatShader(){vmat.onBeforeCompile=sh=>{
   Object.assign(sh.uniforms,RTU,PAINTU);sh.uniforms.mapL={value:atlasL};
   // shaped blocks (branches, chipped and broken blocks, slabs, stairs, window trim): corners that sit inside a block are snapped to
@@ -2240,6 +2263,11 @@ float getShadowMask(){float s=1.;vec3 n=normalize(vRtN),P=pxWorld();
 #ifdef RTX
   if(rtAOk>.5){float aoK=1.-smoothstep(1.,2.,shLd(pxWorld()));if(aoK>0.)reflectedLight.indirectDiffuse*=mix(1.,rtAO(),aoK);}
 #endif`);
+  // rain on every block face out in the open, by material (RBABS: how much each texture soaks up, 0 smooth .. 1 absorbent): on smooth
+  // upright faces drops run down in trails, faster the smoother; absorbent ones (brick, wood, dirt) just take a dark wet spot where
+  // each drop hits, which slowly fades as it soaks in. Tops only get the spots
+  rbInit();Object.assign(sh.uniforms,{rbRain:RAINU,rbTime:postMat.uniforms.time,rbAbs:{value:RBABS}});
+  sh.fragmentShader=sh.fragmentShader.replace('void main() {','uniform float rbRain,rbTime;uniform float rbAbs[64];\n'+RAINB_GLSL+'void main() {').replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n'+RAINB_APPLY);
   // the flashlight beam lands on blocks too
   if(typeof FLU!=='undefined'){Object.assign(sh.uniforms,FLU);sh.fragmentShader=FL_GLSL+vrInject(sh.fragmentShader,'vRtW').replace('gl_FragColor = vec4( outgoingLight, diffuseColor.a );','gl_FragColor = vec4( outgoingLight, diffuseColor.a );\n'+FL_ADD.replace(/vPxW/g,'vRtW').replace(/vPxN/g,'vRtN'))}
 }};
@@ -2615,18 +2643,42 @@ const grassMat=new THREE.MeshLambertMaterial({map:grassTex,alphaTest:.5,side:THR
 // grass is pressed down by whatever walks, runs or drives through it (trampled frames), and stands back up along the trail behind you
 const GPUSH=[];for(let i=0;i<10;i++)GPUSH.push(THREE.Vector4?new THREE.Vector4(0,0,0,0):{x:0,y:0,z:0,w:0});const grassPush={value:GPUSH},gTrail=[];
 const gWind={value:THREE.Vector4?new THREE.Vector4(1,0,.6,0):{x:1,y:0,z:.6,w:0}};
+const GGUST=[];for(let i=0;i<6;i++)GGUST.push(new THREE.Vector4(0,0,1,0));const gGustU={value:GGUST};
 // the frame for a tuft (all four corners of a quad share it, from the tuft's own centre and angle in aG): trampled when something is on it,
 // otherwise leaning with the wind: gWind = (direction x, direction z, strength 0.6 breeze .. 2.4 storm), plus gusts and flutter
-const GRASS_VS=`attribute vec4 aG;uniform float time;uniform vec4 gPush[10];uniform vec4 gWind;varying float vGF;
+const GRASS_VS=`attribute vec4 aG;uniform float time;uniform vec4 gPush[10];uniform vec4 gWind;uniform vec4 gGust[6];varying float vGF;
 float grassFrame(){vec3 wq=aG.xyz*.5;float tk=0.;for(int i=0;i<10;i++){vec4 P=gPush[i];if(P.w<=0.)continue;float l=length(wq.xz-P.xz);tk=max(tk,clamp(1.-l/P.w,0.,1.)*step(abs(wq.y-P.y),1.6));}
   if(tk>.5)return 8.;if(tk>.12)return 7.;vec2 ax=vec2(cos(aG.w),sin(aG.w));float s=gWind.z,ph=aG.x*.37+aG.z*.29;
   float gust=sin(time*(.7+s*.5)+ph*.6)*.5+.5,flick=sin(time*(3.+s*3.)+ph*3.1);
-  float lean=dot(gWind.xy,ax)*s*(.55+.45*gust)+flick*(.25+.3*s);return clamp(floor(lean+.5),-3.,3.)+3.;}
+  float lean=dot(gWind.xy,ax)*s*(.55+.45*gust)+flick*(.25+.3*s);
+  // inside a passing wind gust (gGust: centre x z, radius, strength) the tuft leans hard the gust's way: the heavy wind frames
+  float gk=0.;for(int i=0;i<6;i++){vec4 G=gGust[i];if(G.w<=0.)continue;gk=max(gk,clamp(1.-length(wq.xz-G.xy)/G.z,0.,1.)*G.w);}
+  if(gk>.05){float d_=dot(gWind.xy,ax);lean=mix(lean,(d_>=0.?1.:-1.)*(2.2+1.4*abs(d_))+flick*.35,clamp(gk*1.6,0.,1.));}
+  return clamp(floor(lean+.5),-3.,3.)+3.;}
 `;
 const GRASS_UV='vec2 gUv=vec2(vUv.x,1.-(vGF+1.)/9.+min(vUv.y,.999)/9.);vec4 texelColor=texture2D(map,gUv);';
-grassMat.onBeforeCompile=sh=>{sh.uniforms.time=grassTime;sh.uniforms.gPush=grassPush;sh.uniforms.gWind=gWind;sh.vertexShader=GRASS_VS+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvGF=grassFrame();');
+grassMat.onBeforeCompile=sh=>{sh.uniforms.time=grassTime;sh.uniforms.gPush=grassPush;sh.uniforms.gWind=gWind;sh.uniforms.gGust=gGustU;sh.vertexShader=GRASS_VS+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvGF=grassFrame();');
   sh.fragmentShader='varying float vGF;\n'+sh.fragmentShader.replace('#include <map_fragment>',GRASS_UV+'texelColor=mapTexelToLinear(texelColor);diffuseColor*=texelColor;')};
-function grassPushTick(dt){if(!running)return;const L=[];
+// ---- wind gusts: up to 6 at a time start upwind of you and travel across the land with the wind, at its speed (about 4 m/s in a breeze,
+// 13 in a storm; more of them the stronger it blows). Each carries a swirl you can see: a pale spiral of wind lines tumbling over and
+// over as it goes. Grass inside a gust shows its heavy wind frames, so a wave of bent grass moves along with the swirl
+const GUSTS=[],GUST_SEG=28;let gustLines=null;
+function gustTick(dt){const W4=gWind.value,str=W4.z,dx=W4.x,dz=W4.y,c=players[0]&&players[0].pos;if(!c)return;
+  if(!gustLines){const pos=new Float32Array(6*GUST_SEG*6),g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setDrawRange(0,0);
+    gustLines=new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0xe8eef2,transparent:true,opacity:.35,depthWrite:false}));gustLines.frustumCulled=false;scene.add(gustLines)}
+  const want=Math.min(6,Math.round(1+str*2)),sp=2+str*4.6,under=underground(c);
+  for(const G of GUSTS){G.x+=dx*sp*dt;G.z+=dz*sp*dt;G.d+=sp*dt;G.a+=dt*(3+str*1.5)}
+  for(let i=GUSTS.length-1;i>=0;i--)if(GUSTS[i].d>GUSTS[i].L||Math.hypot(GUSTS[i].x-c.x,GUSTS[i].z-c.z)>60)GUSTS.splice(i,1);
+  if(!under&&GUSTS.length<want&&Math.random()<dt*1.2){const px=-dz,pz=dx,o=(Math.random()*2-1)*22,back=18+Math.random()*10;
+    GUSTS.push({x:c.x-dx*back+px*o,z:c.z-dz*back+pz*o,d:0,L:40+Math.random()*20,a:Math.random()*6.28,r:2.5+Math.random()*1.5+str*.8})}
+  const P=gustLines.geometry.attributes.position.array;let n=0;
+  for(let gi=0;gi<6;gi++){const G=GUSTS[gi],U=GGUST[gi];if(!G){U.w=0;continue}const fade=Math.min(1,G.d/6,(G.L-G.d)/6);U.set(G.x,G.z,G.r,Math.max(0,fade));
+    if(under)continue;const gy=topWorld(G.x,G.z),px=-dz,pz=dx;let lx=0,ly=0,lz=0;
+    for(let j=0;j<=GUST_SEG;j++){const t=j/GUST_SEG,ang=G.a+t*9.4,rad=(.35+t*.9)*G.r*.45,al=(t-.5)*G.r*1.6,
+        x=G.x+dx*al+px*Math.cos(ang)*rad,y=gy+.9+t*.4+Math.sin(ang)*rad*.8,z=G.z+dz*al+pz*Math.cos(ang)*rad;
+      if(j>0&&fade>.05){const o=n*6;P[o]=lx;P[o+1]=ly;P[o+2]=lz;P[o+3]=x;P[o+4]=y;P[o+5]=z;n++}lx=x;ly=y;lz=z}}
+  gustLines.geometry.setDrawRange(0,n*2);gustLines.geometry.attributes.position.needsUpdate=true;gustLines.material.opacity=.22+.18*Math.min(1,str/2)}
+function grassPushTick(dt){if(!running)return;const L=[];try{gustTick(dt)}catch(e){}
   {// the wind: its direction wanders slowly; a breeze in clear weather, stronger in rain and snow, a harsh wind in storms
    const t=performance.now()/1000,an=Math.sin(t*.011)*2.6+Math.sin(t*.0037+1.3)*1.7,w=WX.amt||0,ty=WX.type;
    const str=.6+(ty==='storm'?1.8:ty==='rain'||ty==='acid'?.8:ty==='snow'?.5:.15)*w;const W4=gWind.value;W4.x=Math.cos(an);W4.y=Math.sin(an);W4.z+=(str-W4.z)*Math.min(1,dt*.5)}
@@ -2640,7 +2692,7 @@ function grassPushTick(dt){if(!running)return;const L=[];
 (grassMat.userData||(grassMat.userData={})).pxNoSnap=1;pxShadows(grassMat);
 // grass casts shadows too: a depth material showing the same frame, so the blades' pixel shadows lean with them
 const grassDepth=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking,map:grassTex,alphaTest:.5,side:THREE.DoubleSide});
-grassDepth.onBeforeCompile=sh=>{sh.uniforms.time=grassTime;sh.uniforms.gPush=grassPush;sh.uniforms.gWind=gWind;sh.vertexShader=GRASS_VS+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvGF=grassFrame();');
+grassDepth.onBeforeCompile=sh=>{sh.uniforms.time=grassTime;sh.uniforms.gPush=grassPush;sh.uniforms.gWind=gWind;sh.uniforms.gGust=gGustU;sh.vertexShader=GRASS_VS+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvGF=grassFrame();');
   sh.fragmentShader='varying float vGF;\n'+sh.fragmentShader.replace('#include <map_fragment>',GRASS_UV+'diffuseColor*=texelColor;')};
 const gmat=new THREE.MeshLambertMaterial({map:atlas,color:0xcfe6ee,transparent:true,opacity:.8,depthWrite:false});gmat.defines={FL_GLASS:1};
 gmat.onBeforeCompile=sh=>{if(typeof FLU==='undefined')return;Object.assign(sh.uniforms,FLU);sh.uniforms.mapL={value:atlasL};
@@ -2683,7 +2735,7 @@ vec4 rainGlass(vec3 P,vec3 N,float s){float amt=max(rgWet,rgRain);if(amt<.01)ret
 // every window: a mirror at grazing angles and clearer head-on (Fresnel), reflecting the sky and the far land in the sky picture along the
 // reflected ray, with a glint of the sun; light through the pane is bent (refracted) toward the sky colour; rain drops tilt the surface
 // so reflections and the light through them wobble around each drop
-function rainGlassInject(sh,P,N,onCode){Object.assign(sh.uniforms,{rgRain:RAINU,rgWet:RTU.wet,rgTime:postMat.uniforms.time,hTex:RTU.hTex,rtOrigin:RTU.rtOrigin,rtSize:RTU.rtSize,
+function rainGlassInject(sh,P,N,onCode,surf){if(surf)return rainSurfInject(sh,P,N,onCode);Object.assign(sh.uniforms,{rgRain:RAINU,rgWet:RTU.wet,rgTime:postMat.uniforms.time,hTex:RTU.hTex,rtOrigin:RTU.rtOrigin,rtSize:RTU.rtSize,
     rgHor:skyMat.uniforms.hor,rgTop:skyMat.uniforms.top,rgFar:skyMat.uniforms.farCube,rgFarOn:skyMat.uniforms.farOn,rgSun:{value:SUN_DIR}});
   sh.fragmentShader='uniform vec3 rgHor,rgTop,rgSun;uniform samplerCube rgFar;uniform float rgFarOn;'+RAIN_GLSL+sh.fragmentShader.replace('#include <tonemapping_fragment>',`{float rgOn=1.;${onCode||''}if(rgOn>.5){vec3 Nn=normalize(${N});vec4 r_=rainGlass(${P},Nn,pxS(${P}));
     vec3 V=normalize(${P}-cameraPosition);if(dot(Nn,V)>0.)Nn=-Nn;vec3 Tg=normalize(vec3(-Nn.z,0.,Nn.x)+vec3(.0001));
@@ -2692,6 +2744,12 @@ function rainGlassInject(sh,P,N,onCode){Object.assign(sh.uniforms,{rgRain:RAINU,
     float rgGl=pow(max(dot(R,rgSun),0.),180.)*step(0.,rgSun.y);vec3 Tr=refract(V,Nr,.67);float tk=clamp(Tr.y*.5+.5,0.,1.);
     gl_FragColor.rgb=mix(gl_FragColor.rgb,env,clamp(fr*.85+.1,0.,.9))+rgGl*vec3(1.,.95,.85)*1.2+rgHor*tk*.06;
     gl_FragColor.rgb+=r_.x*(vec3(.2,.22,.25)+env*.55*tk);gl_FragColor.a=clamp(max(gl_FragColor.a,fr*.85)+r_.y*.5,0.,1.);}}
+#include <tonemapping_fragment>`)}
+// rain on everything out in the open that isn't glass (signs, posts, furniture outdoors): the same drops and running trails as the
+// windows, as darker wet streaks with a bright bead at the head, on upright faces only; sheltered faces stay dry
+function rainSurfInject(sh,P,N,onCode){Object.assign(sh.uniforms,{rgRain:RAINU,rgWet:RTU.wet,rgTime:postMat.uniforms.time,hTex:RTU.hTex,rtOrigin:RTU.rtOrigin,rtSize:RTU.rtSize});
+  sh.fragmentShader=RAIN_GLSL+sh.fragmentShader.replace('#include <tonemapping_fragment>',`{float rgOn=1.;${onCode||''}if(rgOn>.5){vec4 r_=rainGlass(${P},normalize(${N}),pxS(${P}));
+    if(r_.x>.01)gl_FragColor.rgb=mix(gl_FragColor.rgb,gl_FragColor.rgb*.7,.55)+r_.x*vec3(.16,.18,.21);}}
 #include <tonemapping_fragment>`)}
 const chunkMeshes=[],glassMeshes=[],grassMeshes=[];
 function mkGeo(P,N,C,I,UV){const g=new THREE.BufferGeometry();if(UV)g.setAttribute('uv',new THREE.Float32BufferAttribute(UV,2));
@@ -2737,22 +2795,22 @@ function quad(x,y,z,ox,oz,fi,bx,tile,cr,cg,cb,s,vs=0){
 // the underside of a flight of stairs: the empty cell under each step gets a wedge, its top filled on the downhill side, so the bottoms
 // of the steps join into one smooth slope rising toward the top of the flight instead of a staircase of block bottoms. Only the slope
 // and the wedge's open sides are drawn (its other faces sit against the steps). Looks only: walking under the stairs is unchanged
-function wpoly(x,y,z,ox,oz,pts,uvs,n,tile,s){if(mv+4>mCap)mGrow();const tx=tile%ACOLS,ty=(tile/ACOLS)|0;
+function wpoly(x,y,z,ox,oz,pts,uvs,n,tile,s,rc){rc=rc||[1,1,1];if(mv+4>mCap)mGrow();const tx=tile%ACOLS,ty=(tile/ACOLS)|0;
   const e1=[pts[1][0]-pts[0][0],pts[1][1]-pts[0][1],pts[1][2]-pts[0][2]],e2=[pts[2][0]-pts[0][0],pts[2][1]-pts[0][1],pts[2][2]-pts[0][2]];
   const cx_=e1[1]*e2[2]-e1[2]*e2[1],cy_=e1[2]*e2[0]-e1[0]*e2[2],cz_=e1[0]*e2[1]-e1[1]*e2[0];if(cx_*n[0]+cy_*n[1]+cz_*n[2]<0){pts=[pts[0],pts[3],pts[2],pts[1]];uvs=[uvs[0],uvs[3],uvs[2],uvs[1]]}
   const nl=Math.hypot(n[0],n[1],n[2]);
   for(let c=0;c<4;c++){const q=pts[c],o3=(mv+c)*3,o2=(mv+c)*2;mS[mv+c]=9;
     mP[o3]=Math.round((x-ox+1+q[0])*16);mP[o3+1]=Math.round((y+q[1])*16);mP[o3+2]=Math.round((z-oz+1+q[2])*16);
-    mN[o3]=n[0]/nl*127;mN[o3+1]=n[1]/nl*127;mN[o3+2]=n[2]/nl*127;mC[o3]=mC[o3+1]=mC[o3+2]=Math.min(255,s*255);
+    mN[o3]=n[0]/nl*127;mN[o3+1]=n[1]/nl*127;mN[o3+2]=n[2]/nl*127;mC[o3]=Math.min(255,rc[0]*s*255);mC[o3+1]=Math.min(255,rc[1]*s*255);mC[o3+2]=Math.min(255,rc[2]*s*255);
     const u=uvs[c][0],v=uvs[c][1];mU[o2]=((tx*TS+.03+u*(TS-.06))/AW)*65535;mU[o2+1]=(1-(ty*TS+.03+(1-v)*(TS-.06))/AH)*65535;mT[mv+c]=0;for(let j=0;j<4;j++)mB[(mv+c)*4+j]=0}
   mI[mi]=mv;mI[mi+1]=mv+1;mI[mi+2]=mv+2;mI[mi+3]=mv;mI[mi+4]=mv+2;mI[mi+5]=mv+3;mi+=6;mv+=4}
-function stairWedge(x,y,z,ox,oz,b){const ux=b===26?1:b===27?-1:0,uz=b===28?1:b===29?-1:0,alongX=ux!==0,up=ux+uz>0;
-  const tl=TILE_OF[b],tile=tl?tl[3]:0,sh=.88+.12*h3(x,y,z);
+function stairWedge(x,y,z,ox,oz,b,rm){const ux=b===26?1:b===27?-1:0,uz=b===28?1:b===29?-1:0,alongX=ux!==0,up=ux+uz>0;
+  const tl=TILE_OF[b],tile=rm?TILE.wall:tl?tl[3]:0,sh=.88+.12*h3(x,y,z),rc=rm?rm.c:[1,1,1];
   // t: 0 at the downhill edge .. 1 uphill; h: height in the cell; w: across the flight
   const L=(t,h,w)=>{const a=up?t:1-t;return alongX?[a,h,w]:[w,h,a]};
-  wpoly(x,y,z,ox,oz,[L(0,0,0),L(0,0,1),L(1,1,1),L(1,1,0)],[[0,0],[1,0],[1,1],[0,1]],[ux,-1,uz],tile,.62*sh);
+  wpoly(x,y,z,ox,oz,[L(0,0,0),L(0,0,1),L(1,1,1),L(1,1,0)],[[0,0],[1,0],[1,1],[0,1]],[ux,-1,uz],tile,.62*sh,rc);
   for(const w of[0,1]){const nx=alongX?0:(w?1:-1),nz=alongX?(w?1:-1):0;if(get(x+nx,y,z+nz)!==0)continue;
-    wpoly(x,y,z,ox,oz,[L(0,0,w),L(1,1,w),L(0,1,w),L(0,1,w)],[[0,0],[1,1],[0,1],[0,1]],[nx,0,nz],tile,.75*sh)}}
+    wpoly(x,y,z,ox,oz,[L(0,0,w),L(1,1,w),L(0,1,w),L(0,1,w)],[[0,0],[1,1],[0,1],[0,1]],[nx,0,nz],tile,.75*sh,rc)}}
 // chunks are addressed by world chunk coords; each lives in a ring slot of the window
 const slotOf=(cx,cz)=>{let a=cx%NC,b=cz%NC;if(a<0)a+=NC;if(b<0)b+=NC;return b*NC+a};
 const chunkIn=(cx,cz)=>cx*CS>=OX&&cz*CS>=OZ&&cx*CS<OX+W&&cz*CS<OZ+W;
@@ -2868,7 +2926,7 @@ function buildChunk(cx,cz){
     if(b===15){for(let fi=0;fi<6;fi++){const o=nb[fi];if(o===15||isOpq(o))continue;const f=FACES[fi],n=GP.length/3;
       for(const c of f[3]){GP.push(x+c[0],y+c[1],z+c[2]);GN.push(f[0],f[1],f[2]);pushUV(GUV,TILE.glass,fi,c,x,y,z)}GI.push(n,n+1,n+2,n,n+2,n+3)}continue}
     const shp=SH[b],topF=shp?BTOP[b]:1;
-    if(b>=26&&b<=29&&y>0&&vox[i-WW]===0)stairWedge(x,y-1,z,x0,z0,b);
+    if(b>=26&&b<=29&&y>0&&vox[i-WW]===0)stairWedge(x,y-1,z,x0,z0,b,prC?roomAt(prC,x,y,z):null);
     const rcap=b>=23&&b<=25&&get(x,y-1,z)===7;qBT=0;if((b===1||b===2||(b>=23&&b<=25&&!rcap))&&!isOpq(nb[2]))groundBlend(b,x,y,z);
     if((b===1||(b>=23&&b<=25&&!rcap))&&!isOpq(nb[2])&&!SH[nb[2]]&&h3(x,y+11,z)<gd){const ox=x+.5+(h3(x,1,z)-.5)*.5,oz=z+.5+(h3(z,2,x)-.5)*.5,hh=1.5,ww=.5,a=h3(x,5,z)*3,sh=.8+h3(x,6,z)*.3,yb=y+topF;
       // which sprite: mostly grass; flower meadows pick one kind per patch, with scattered singles elsewhere
@@ -2892,12 +2950,14 @@ function buildChunk(cx,cz){
           const parts=bot?[[2/16,0,6/16],[3/16,6/16,7/16]]:[[2/16,12/16,1],[3/16,14/16,1],[1/16,11/16,12/16]];
           for(const[T,ya,yb]of parts){const bx=fi===0?[1,ya,0,1+T,yb,1]:fi===1?[-T,ya,0,0,yb,1]:fi===4?[0,ya,1,1,yb,1+T]:[0,ya,-T,1,yb,0];
             quad(x,y,z,x0,z0,fi,bx,TILE.trim,tc[0],tc[1],tc[2],1);quad(x,y,z,x0,z0,2,bx,TILE.trim,tc[0],tc[1],tc[2],1.08);quad(x,y,z,x0,z0,3,bx,TILE.trim,tc[0],tc[1],tc[2],.7)}}}}
-    else{const bs=BASE_OF[b],pt=pr&&(bs===19||bs===6||bs===11);
+    else{const bs=BASE_OF[b],pt=pr&&(bs===19||bs===6||bs===11),stR=pr&&b>=26&&b<=29?roomAt(pr,x,y,z):null,riser=b===26?1:b===27?0:b===28?5:4;
       for(const bx of shp)for(let fi=0;fi<6;fi++){if(bx[6]&(1<<fi))continue;
         // cull only faces that sit on the voxel boundary against a full opaque neighbour
         const onB=fi===0?bx[3]===1:fi===1?bx[0]===0:fi===2?bx[4]===1:fi===3?bx[1]===0:fi===4?bx[5]===1:bx[2]===0;if(onB&&isOpq(nb[fi]))continue;
         let t=tiles[fi],r=cr,g=cg,bb=cb;
         if(pt&&onB&&(fi<2||fi>3)){const rm=roomAt(pr,x+FACES[fi][0],y,z+FACES[fi][2]);if(rm){t=TILE.wall;r=rm.c[0];g=rm.c[1];bb=rm.c[2]}}
+        // a staircase in a painted room is painted to match it: its sides, back and underside; the treads and step fronts stay bare
+        if(stR&&fi!==2&&fi!==riser){t=TILE.wall;r=stR.c[0];g=stR.c[1];bb=stR.c[2]}
         quad(x,y,z,x0,z0,fi,bx,t,r,g,bb,v*FACES[fi][4],b>=23&&b<=25?1-topF:0)}}
   }}
   const k=slotOf(cx,cz);slotC[k*2]=cx;slotC[k*2+1]=cz;
@@ -3193,6 +3253,7 @@ function breakGlass(x,y,z){noise(new V3((x+.5)*VS,y*VS,(z+.5)*VS),26);
 
 // ---------------- furniture meshes: every piece in a chunk is merged into one vertex-coloured mesh
 const furnMeshes=[],FBUF=new Map(),furnMat=pxShadows(new THREE.MeshLambertMaterial({vertexColors:true}));
+{const prev=furnMat.onBeforeCompile;furnMat.onBeforeCompile=(sh,r)=>{prev.call(furnMat,sh,r);rainSurfInject(sh,'vPxW','vPxN','rgOn=abs(normalize(vPxN).y)<.5?1.:0.;')}}
 // furniture gets a pixel grain (1/32 m texels, same as blocks), hashed in world space so it never stretches
 furnMat.envMap=ENV;furnMat.combine=THREE.MixOperation;furnMat.reflectivity=.3;
 // furniture: per-texel grain, and the metal flag (red channel + 2) decoded so only metal pieces take the blurry sky reflection
@@ -4741,7 +4802,7 @@ function useVehicle(p,v){
     else msg(p,`The ${v.name.toLowerCase()} is wrecked — needs a repair kit (3 scrap + 1 metal plate)`);return}
   if(!v.pedal&&v.fuel<60&&p.inv.fuel>0){p.inv.fuel--;v.fuel=Math.min(100,v.fuel+40);SND.pick();msg(p,`Poured a fuel can in (${Math.round(v.fuel)}%)`);return}
   if(!v.driver)v.driver=p;else if(!v.pass&&!v.pedal)v.pass=p;else{msg(p,v.pedal?'Only one seat on a bike':'No seats left');return}
-  p.vehicle=v;p.body.g.visible=v.two;p.vm.g.visible=false;p.outline.visible=false;p.dig=null;
+  p.vehicle=v;p.tpOn=false;p.body.g.visible=v.two;p.vm.g.visible=false;p.outline.visible=false;p.dig=null;
   msg(p,v.driver===p?(v.pedal?`Pedalling. ${p.i?'I/K':'W/S'} pedal, ${p.i?'J/L':'A/D'} steer, ${p.i?'N':'Space'} brake. No fuel needed, but it makes you hungry`:v.fuel<=0?'Tank is empty — find or craft a fuel can':`Driving. ${p.i?'I/K':'W/S'} gas, ${p.i?'J/L':'A/D'} steer, ${p.i?'N':'Space'} brake, ${p.i?',':'V'} switch view`):`Riding shotgun · ${p.i?',':'V'} switch view`);p.cyaw=p.cpitch=0;
 }
 function exitVehicle(p){{const v=p.vehicle;if(v&&v.driver===p&&!v.two&&dayLight()<.35&&rng()<.3){v.lightsOn=true;msg(p,'(You left the headlights on.)')}}
@@ -4837,7 +4898,7 @@ function updatePlayer(p,dt){
   if(inp.eat)eat(p);if(inp.bandage)heal(p);if(inp.torch){if(!p.torch&&(p.batt??100)<=0&&!(p.inv.batteries>0))msg(p,'Flashlight is dead — find batteries');else{p.torch=!p.torch;p.torchAuto=1}}
   if(inp.matNext&&!p.vehicle&&p.tool===1)startReload(p);
   const night=dayLight()<.35;
-  if(p.vehicle){if(inp.interact){exitVehicle(p);return}if(inp.matNext&&!p.vehicle.pedal&&!p.vehicle.two)toggleRadio(p,p.vehicle);if((inp.throw||inp.drop)&&!p.vehicle.pedal&&!p.vehicle.two)wiperToggle(p,p.vehicle);if(inp.view){p.carView=!p.carView;p.cyaw=p.cpitch=0}
+  if(p.vehicle){if(inp.interact){exitVehicle(p);return}if(inp.matNext&&!p.vehicle.pedal&&!p.vehicle.two)toggleRadio(p,p.vehicle);if((inp.throw||inp.drop)&&!p.vehicle.pedal&&!p.vehicle.two)wiperToggle(p,p.vehicle);if(inp.view){p.carView=!p.carView;p.cyaw=p.cpitch=0;msg(p,p.carView?'Third person':'First person')}
     p.cpitch=clamp(p.cpitch+inp.look*1.5*dt,-1,1);if(p.vehicle.driver!==p)p.cyaw=clamp(p.cyaw-inp.turn*1.8*dt,-2.4,2.4);p.light.intensity=0;return}
   p.aim=!!inp.aim&&p.tool===1;p.pad=!!inp.pad||p.i===1;
   const lk=(p.aim?.55:1)*(p.onTarget&&p.pad?.6:1);p.yaw-=inp.turn*2.4*dt*lk;p.pitch=clamp(p.pitch+inp.look*1.8*dt*lk,-1.5,1.5);
@@ -4893,6 +4954,15 @@ function updatePlayer(p,dt){
     else{E.t+=dt;const o=emotePose(b,E.id,E.t);b.g.position.y+=o.y;b.g.rotation.y+=o.spin;vm.g.visible=false;
       // swing the camera round to watch yourself: slow orbit in front of you
       const a=p.yaw+Math.PI+Math.sin(E.t*.35)*.6,cx=p.pos.x-Math.sin(a)*3.1,cz=p.pos.z-Math.cos(a)*3.1;p.cam.position.set(cx,p.pos.y+1.9,cz);p.cam.lookAt(p.pos.x,p.pos.y+1.05,p.pos.z)}}
+  // V: first person, second person (the camera out in front, looking back at you), third person (behind and above your shoulder). The
+  // camera stops short of any wall between it and you. Aiming, digging and building still work from your eyes
+  if(inp.view){p.pview=((p.pview|0)+1)%3;msg(p,['First person','Second person: facing you','Third person'][p.pview])}
+  const pv=p.pview|0;
+  if(pv&&!p.emote){vm.g.visible=false;if(!p.tpOn){p.tpOn=true;p.body.g.traverse(o=>o.layers.set(0));p.fpBody=null}
+    const ex=p.pos.x,ey=p.eye,ez=p.pos.z,rd=pv===2?dir.clone().negate():dir.clone();if(pv===2)rd.y=Math.max(rd.y,0)+.35;rd.normalize();
+    const hb=rayVoxIf(new V3(ex,ey,ez),rd,3.4,bb=>bb&&isOpq(bb)),dd=hb?Math.max(.35,hb.t-.25):3.2;
+    p.cam.position.set(ex+rd.x*dd,ey+rd.y*dd,ez+rd.z*dd);if(pv===1)p.cam.rotation.set(-p.pitch*.6,p.yaw+Math.PI,0);else p.cam.lookAt(ex+dir.x*5,ey+dir.y*5-1.1,ez+dir.z*5)}
+  else if(p.tpOn){p.tpOn=false;setBodyFP(p,false)}
 }
 
 // ---------------- vehicles
@@ -6458,6 +6528,19 @@ function setBodyFP(p,on){if(p.fpBody===on)return;p.fpBody=on;p.body.g.traverse(o
 function updateClothes(p){const c=p.cl,set=(m,k)=>{m.visible=!!k;if(k)m.material.color.setHex(CLOTHES[k].col)};
   set(c.head,p.wear.head);set(c.body,p.wear.body);c.legs.forEach(m=>set(m,p.wear.legs));if(c.back)set(c.back,p.wear.back);if(c.pack0)c.pack0.visible=!p.wear.back}
 
+// ---- streaks: rain, and the drops that drip off sills and signs, drawn as upright streaks exactly one screen pixel wide (whatever the
+// pixel size setting), each its own length. Every streak is a quad whose two sides are pushed apart by one pixel on the screen
+const STRK_VS=`attribute float aSd;uniform vec2 uRes;void main(){vec4 c=projectionMatrix*modelViewMatrix*vec4(position,1.);c.x+=aSd*c.w/uRes.x;gl_Position=c;}`;
+function makeStreaks(n,col,op){const pos=new Float32Array(n*12).fill(-999),sd=new Float32Array(n*4),idx=new Uint32Array(n*6);
+  for(let i=0;i<n;i++){sd.set([-1,1,1,-1],i*4);idx.set([i*4,i*4+1,i*4+2,i*4,i*4+2,i*4+3],i*6)}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('aSd',new THREE.BufferAttribute(sd,1));g.setIndex(new THREE.BufferAttribute(idx,1));g.setDrawRange(0,0);
+  const U={uRes:{value:new THREE.Vector2(800,600)},uCol:{value:new THREE.Color(col)},uOp:{value:op}};
+  const m=new THREE.ShaderMaterial({uniforms:U,vertexShader:STRK_VS,fragmentShader:'uniform vec3 uCol;uniform float uOp;void main(){gl_FragColor=vec4(uCol,uOp);}',transparent:true,depthWrite:false});
+  const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;const _v=new THREE.Vector2();
+  mesh.onBeforeRender=r=>{const t=r.getRenderTarget();if(t)U.uRes.value.set(t.width,t.height);else{r.getDrawingBufferSize(_v);U.uRes.value.copy(_v)}};
+  // set(i, x, bottom y, top y, z)
+  return{mesh,U,pos,g,n,set(i,x,y0,y1,z){const o=i*12;pos[o]=x;pos[o+1]=y0;pos[o+2]=z;pos[o+3]=x;pos[o+4]=y0;pos[o+5]=z;pos[o+6]=x;pos[o+7]=y1;pos[o+8]=z;pos[o+9]=x;pos[o+10]=y1;pos[o+11]=z},
+    show(k){g.setDrawRange(0,k*6);g.attributes.position.needsUpdate=true}}}
 // ---------------- weather + ambient particles (one set per player, only drawn in that player's view)
 const PRECIP_N=1500,AMB_N=240;
 function topWorld(x,z){const ix=vc(x),iz=vc(z);if(!inWin(ix,iz))return 0;for(let y=H-1;y>=0;y--){const b=vox[vi(ix,y,iz)];if(b&&b!==B.LADDER)return(y+1)*VS}return 0}
@@ -6465,10 +6548,9 @@ function makeFx(i){
   const mk=(n,size,col)=>{const pos=new Float32Array(n*3).fill(-999),g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setDrawRange(0,0);
     const m=pxPoints(new THREE.PointsMaterial({size,color:col,transparent:true,opacity:.85,depthWrite:false}));const pts=new THREE.Points(g,m);pts.frustumCulled=false;pts.layers.set(3+i);scene.add(pts);
     return{g,m,pos,floor:new Float32Array(n),ph:Float32Array.from({length:n},()=>rng()*6.283),n}};
-  // rain: straight up-and-down streaks (two points each), drawn as lines; snow keeps its flakes
-  const lp=new Float32Array(PRECIP_N*6).fill(-999),lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.BufferAttribute(lp,3));lg.setDrawRange(0,0);
-  const lm=new THREE.LineBasicMaterial({color:0x9fb4c8,transparent:true,opacity:.55,depthWrite:false}),ln=new THREE.LineSegments(lg,lm);ln.frustumCulled=false;ln.layers.set(3+i);scene.add(ln);
-  return{pr:mk(PRECIP_N,.1,0xffffff),am:mk(AMB_N,.07,0xffffff),ln:{g:lg,m:lm,pos:lp,o:ln}};
+  // rain: straight up-and-down streaks one pixel wide, each its own length; snow keeps its flakes
+  const st=makeStreaks(PRECIP_N,0xa8bccf,.55);st.mesh.layers.set(3+i);scene.add(st.mesh);st.len=Float32Array.from({length:PRECIP_N},()=>.25+Math.random()*.7);
+  return{pr:mk(PRECIP_N,.1,0xffffff),am:mk(AMB_N,.07,0xffffff),st};
 }
 // the flash flood: one sheet of muddy water around the camera at the flood's height, from just under street level up to about 2 blocks
 // over it; ground higher than that stays dry, hollows and streets fill
@@ -6477,20 +6559,47 @@ let floodMesh=null;
 function floodTick(cam){if(WX.flood<=.01){if(floodMesh)floodMesh.visible=false;return}
   if(!floodMesh){const m=pxShadows(new THREE.MeshLambertMaterial({color:0x5c5338,transparent:true,opacity:.78,depthWrite:false}));floodMesh=new THREE.Mesh(new THREE.PlaneGeometry(1,1,1,1),m);floodMesh.rotation.x=-Math.PI/2;floodMesh.renderOrder=3;floodMesh.receiveShadow=true;scene.add(floodMesh)}
   const S=viewUnits()*2+20;floodMesh.visible=true;floodMesh.scale.set(S,S,1);floodMesh.position.set(Math.round(cam.x),floodY()+Math.sin(performance.now()/700)*.015,Math.round(cam.z))}
+// ---- drips: in the rain, water running down a sign drips off its bottom edge, and water running down a window gathers on the sill and
+// rolls off its front and ends (windows with their sill trim in front of and below the glass, on the side open to the sky). Each drop
+// falls to whatever is beneath it and lands with a small splash and a ring of ripple spreading out. Signs and sills within 28 m
+const DRIP={em:[],emT:0,d:[],rp:[],obj:null};
+// sign plate bottoms in the sign's own frame: [x from, x to, height, depth]
+const DRIP_SIGN={stop:[-3.5*PXS,3.5*PXS,1.44,2*PXS],yield:[-PXS/2,PXS/2,1.44,2*PXS],speed:[-.24,.24,1.72,.05],noparking:[-.22,.22,1.75,.05],oneway:[-.46,.46,1.99,.05]};
+function dripGather(c){const E=[],R2=28*28;
+  for(const f of furnSpecs){const k=f[0]==='stop'?'stop':f[0]==='rsign'&&f[5]?f[5].k:null,S=k&&DRIP_SIGN[k];if(!S)continue;const dx=f[1]-c.x,dz=f[3]-c.z;if(dx*dx+dz*dz>R2)continue;
+    const yaw=f[4]||0,co=Math.cos(yaw),si=Math.sin(yaw),w=(lx,lz)=>[f[1]+lx*co+lz*si,f[3]-lx*si+lz*co],a=w(S[0],S[3]),b=w(S[1],S[3]);
+    if(topWorld(a[0],a[1])>f[2]+S[2])continue;E.push({ax:a[0],az:a[1],bx:b[0],bz:b[1],y:f[2]+S[2],fy:topWorld((a[0]+b[0])/2,(a[1]+b[1])/2),rate:1.4,t:Math.random()})}
+  for(const w_ of winSpecs){if(w_[5])continue;const[x,y,z,ax]=w_;const gx=ax?x+1:x,gz=ax?z:z+1,cx=(gx+.5)*VS,cz=(gz+.5)*VS;if((cx-c.x)**2+(cz-c.z)**2>R2||get(gx,y+2,gz)!==B.GLASS)continue;
+    if(trimOff.has((ax?x+1:x)+','+y+','+(ax?z:z+1)))continue;
+    for(const sd of[1,-1]){const ox=ax?0:sd,oz=ax?sd:0;if(isOpq(get(gx+ox,y+1,gz+oz))||topY(gx+ox,gz+oz)>y+1)continue; // only the side open to the sky
+      const sy=(y+1)*VS,fe=sd>0?1+.25:-.25,fy=topWorld((ax?gx:gx+ox)*VS+(ax?.5*VS:0),(ax?gz+oz:gz)*VS+(ax?0:.5*VS));
+      const P_=(u,dd)=>ax?[(x+u)*VS,(z+dd)*VS]:[(x+dd)*VS,(z+u)*VS];
+      {const a=P_(.5,fe),b=P_(3.5,fe);E.push({ax:a[0],az:a[1],bx:b[0],bz:b[1],y:sy,fy,rate:2.2,t:Math.random()})} // the sill's front edge
+      for(const u of[.5,3.5]){const a=P_(u,sd>0?1:0),b=P_(u,fe);E.push({ax:a[0],az:a[1],bx:b[0],bz:b[1],y:sy,fy,rate:.6,t:Math.random()})}}} // and its ends
+  return E}
+function dripTick(dt,c){const rain=RAINU.value;
+  if((DRIP.emT-=dt)<=0){DRIP.emT=1;DRIP.em=rain>.05&&!underground(c)?dripGather(c):[]}
+  for(const e of DRIP.em){e.t-=dt*rain*e.rate;if(e.t<=0){e.t=.3+Math.random()*1.1;if(DRIP.d.length<160){const k=Math.random();DRIP.d.push({x:e.ax+(e.bx-e.ax)*k,y:e.y,z:e.az+(e.bz-e.az)*k,vy:-.3,fy:e.fy})}}}
+  for(let i=DRIP.d.length-1;i>=0;i--){const d=DRIP.d[i];d.vy-=9.8*dt;d.y+=d.vy*dt;if(d.y<=d.fy){DRIP.d.splice(i,1);if(DRIP.rp.length<60)DRIP.rp.push({x:d.x,y:d.fy+.012,z:d.z,t:0})}}
+  for(let i=DRIP.rp.length-1;i>=0;i--){const r=DRIP.rp[i];r.t+=dt;if(r.t>.7)DRIP.rp.splice(i,1)}
+  if(!DRIP.obj){DRIP.obj=makeStreaks(160,0xc8dcea,.7);scene.add(DRIP.obj.mesh)}
+  let n=0;for(const d of DRIP.d){if(n>=160)break;DRIP.obj.set(n++,d.x,d.y,d.y+Math.min(.22,.04-d.vy*.03),d.z)}DRIP.obj.show(n);
+  // the drops' landings ripple the wet ground's reflection itself (the post shader bends the reflected picture in a spreading ring)
+  for(let i=0;i<12;i++){const r=DRIP.rp[DRIP.rp.length-1-i],U=DRIPU[i];if(r)U.set(r.x,r.z,r.t,1-r.t/.7);else U.w=0}}
 function updFx(p,dt){
   if(!p.fx)p.fx=makeFx(p.i);const c=p.cam.position,under=underground(c),t=performance.now()/1000;
   // precipitation: falls until it reaches the highest block in its column, so it never falls inside under a roof
-  if(p.i===0)floodTick(c);
-  {const F=p.fx.pr,L_=p.fx.ln,snow=WX.type==='snow',want=under||WX.type==='fog'?0:Math.round(F.n*WX.amt);F.g.setDrawRange(0,snow?want:0);L_.g.setDrawRange(0,snow?0:want*2);
-    if(!snow){const acid=WX.type==='acid';L_.m.color.setHex(acid?0xb8d43a:0xa8bccf);L_.m.opacity=(acid?.55:.45)+.3*WX.amt}
+  if(p.i===0){floodTick(c);try{dripTick(dt,c)}catch(e){}}
+  {const F=p.fx.pr,S_=p.fx.st,snow=WX.type==='snow',want=under||WX.type==='fog'?0:Math.round(F.n*WX.amt);F.g.setDrawRange(0,snow?want:0);
+    if(!snow){const acid=WX.type==='acid';S_.U.uCol.value.setHex(acid?0xb8d43a:0xa8bccf);S_.U.uOp.value=(acid?.5:.4)+.3*WX.amt}
     F.m.color.setHex(snow?0xf4f8ff:WX.type==='acid'?0xb8d43a:0x9fb4c8);F.m.size=snow?.11:.06;F.m.opacity=snow?.9:WX.type==='acid'?.65:.5;
     const vy=snow?-1.7:-15-3*WX.amt,vx=snow?WX.wind*.5:0;
     for(let i=0;i<want;i++){const o=i*3;let x=F.pos[o],y=F.pos[o+1],z=F.pos[o+2];
       if(y<F.floor[i]||Math.abs(x-c.x)>21||Math.abs(z-c.z)>21||y>c.y+22){x=c.x+R(-20,20);z=c.z+R(-20,20);F.floor[i]=topWorld(x,z);y=Math.max(F.floor[i],c.y)+R(y<-500?-4:6,18)}
       y+=vy*dt*(snow?.7+(i%10)/15:1);x+=vx*dt+(snow?Math.sin(t*1.3+F.ph[i])*.35*dt:0);z+=snow?Math.cos(t*1.1+F.ph[i])*.3*dt:0;
       F.pos[o]=x;F.pos[o+1]=y;F.pos[o+2]=z;
-      if(!snow){const q=i*6,len=.35+.25*WX.amt+(i%5)*.04;L_.pos[q]=x;L_.pos[q+1]=y;L_.pos[q+2]=z;L_.pos[q+3]=x;L_.pos[q+4]=y+len;L_.pos[q+5]=z}}
-    if(want){if(snow)F.g.attributes.position.needsUpdate=true;else L_.g.attributes.position.needsUpdate=true}}
+      if(!snow)S_.set(i,x,y,y+S_.len[i]*(.7+.5*WX.amt),z)}
+    if(snow){if(want)F.g.attributes.position.needsUpdate=true;S_.show(0)}else S_.show(want)}
   // ambience: ash and dust by day, fireflies on warm nights, falling leaves in autumn, dust motes underground
   {const F=p.fx.am,dl=dayLight(),sn=Math.max(0,curSeason);
     const mode=under?'dust':sn===2&&dl>.2?'leaf':(sn===0||sn===1)&&dl<.2&&WX.amt<.3?'fly':sn===3?'none':'ash';
