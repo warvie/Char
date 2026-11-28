@@ -359,7 +359,7 @@ body #touch .tb[data-b=run] .ti,body #touch .tb[data-b=jump] .ti,body #touch .tb
     <label>Developer mode <select id="devSel"><option value="0">Off</option><option value="1">On</option></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
-    <h4>v20.42 · Nov 28, 2026 — painted stairs, dry undersides, wind gusts, drips</h4><ul><li>Rain runs down signs, posts and everything else out in the open in wet streaks with a bright bead at the head (sheltered things stay dry)</li><li>Rain on every block out in the open, by material: on smooth faces (metal, tile, smooth stone, concrete) drops run down in trails, faster the smoother the face; absorbent ones (brick, wood, dirt, bark) take a dark wet spot where each drop lands, which slowly fades as it soaks in. Tops get the spots too</li><li>V changes your view: first and third person in a vehicle; first, second (out in front, facing you) and third person on foot. The camera stops short of walls</li><li>Rain falls as streaks exactly one screen pixel wide, each its own length</li><li>Drips: water running down a sign drips off its bottom edge, and water on a window gathers on the sill and rolls off its front and ends. Each drop falls (as a little one-pixel streak) to whatever is beneath it, and its landing ripples the wet ground's reflection itself</li><li>Wind gusts: swirls of pale wind lines tumble across the land in the wind's direction and at its speed (slow and gentle in a breeze, fast and many in a storm). Grass under a passing gust switches to its heavy-wind frames, so a wave of bent grass moves along with each swirl</li><li>Staircases inside painted rooms are painted to match the room: their sides, backs and sloped undersides. The treads and step fronts stay bare</li><li>Wet-ground reflections only appear on up-facing surfaces the rain actually falls on. Ceilings and the undersides of things no longer shine as if wet</li></ul><h4>v20.41 · Nov 28, 2026 — smoother travel, grass frames, yield signs, rain levels, flash floods</h4><ul>
+    <h4>v20.43 · Nov 28, 2026 — pixel rain, ledge drips, sills, pixel wind</h4><ul><li>Rain and all drips fall as streaks one block pixel wide (as thick as a pixel on the blocks beside them), each its own length</li><li>Drips from anything with a ledge: signs, traffic lights (under the arm and the light housings), hanging blocks, overhangs and roof eaves, and tree canopies</li><li>On windows you can follow the water: a drop runs down the glass, lands on top of the sill, slides along it to the nearer end, and falls off to the ground</li><li>Wind swirls are drawn the same way: ribbons one block pixel wide with a dappled pixel texture, fading out at their tips</li></ul><h4>v20.42 · Nov 28, 2026 — painted stairs, dry undersides, wind gusts, drips</h4><ul><li>Rain runs down signs, posts and everything else out in the open in wet streaks with a bright bead at the head (sheltered things stay dry)</li><li>Rain on every block out in the open, by material: on smooth faces (metal, tile, smooth stone, concrete) drops run down in trails, faster the smoother the face; absorbent ones (brick, wood, dirt, bark) take a dark wet spot where each drop lands, which slowly fades as it soaks in. Tops get the spots too</li><li>V changes your view: first and third person in a vehicle; first, second (out in front, facing you) and third person on foot. The camera stops short of walls</li><li>Rain falls as streaks exactly one screen pixel wide, each its own length</li><li>Drips: water running down a sign drips off its bottom edge, and water on a window gathers on the sill and rolls off its front and ends. Each drop falls (as a little one-pixel streak) to whatever is beneath it, and its landing ripples the wet ground's reflection itself</li><li>Wind gusts: swirls of pale wind lines tumble across the land in the wind's direction and at its speed (slow and gentle in a breeze, fast and many in a storm). Grass under a passing gust switches to its heavy-wind frames, so a wave of bent grass moves along with each swirl</li><li>Staircases inside painted rooms are painted to match the room: their sides, backs and sloped undersides. The treads and step fronts stay bare</li><li>Wet-ground reflections only appear on up-facing surfaces the rain actually falls on. Ceilings and the undersides of things no longer shine as if wet</li></ul><h4>v20.41 · Nov 28, 2026 — smoother travel, grass frames, yield signs, rain levels, flash floods</h4><ul>
 <li>Driving and running are much smoother: on the same drive, about 36 fps instead of 20, and the long freezes are gone. The far view no longer rebuilds all at once while you travel, regions you leave are packed away a little each frame, chunks rebuild fewer times as they come closer, merging far cars and zombies no longer stalls, and background work shares one time budget per frame</li>
 <li>Grass no longer bends: each tuft swaps between drawn frames instead. It leans with the wind (whatever direction it blows, breezes to harsh storm gusts) and gets pressed half down or flat when something walks or drives through it</li>
 <li>Stop signs say STOP again, in white on the red. Yield signs are now built the same way: a 17-pixel downward triangle with YIELD across the top, a white triangle inside, metal back and edges, and the same holed post</li>
@@ -2664,20 +2664,20 @@ grassMat.onBeforeCompile=sh=>{sh.uniforms.time=grassTime;sh.uniforms.gPush=grass
 // over as it goes. Grass inside a gust shows its heavy wind frames, so a wave of bent grass moves along with the swirl
 const GUSTS=[],GUST_SEG=28;let gustLines=null;
 function gustTick(dt){const W4=gWind.value,str=W4.z,dx=W4.x,dz=W4.y,c=players[0]&&players[0].pos;if(!c)return;
-  if(!gustLines){const pos=new Float32Array(6*GUST_SEG*6),g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setDrawRange(0,0);
-    gustLines=new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0xe8eef2,transparent:true,opacity:.35,depthWrite:false}));gustLines.frustumCulled=false;scene.add(gustLines)}
+  if(!gustLines){gustLines=makeRibbons(6*GUST_SEG,0xe8eef2);scene.add(gustLines.mesh)}
   const want=Math.min(6,Math.round(1+str*2)),sp=2+str*4.6,under=underground(c);
   for(const G of GUSTS){G.x+=dx*sp*dt;G.z+=dz*sp*dt;G.d+=sp*dt;G.a+=dt*(3+str*1.5)}
   for(let i=GUSTS.length-1;i>=0;i--)if(GUSTS[i].d>GUSTS[i].L||Math.hypot(GUSTS[i].x-c.x,GUSTS[i].z-c.z)>60)GUSTS.splice(i,1);
   if(!under&&GUSTS.length<want&&Math.random()<dt*1.2){const px=-dz,pz=dx,o=(Math.random()*2-1)*22,back=18+Math.random()*10;
     GUSTS.push({x:c.x-dx*back+px*o,z:c.z-dz*back+pz*o,d:0,L:40+Math.random()*20,a:Math.random()*6.28,r:2.5+Math.random()*1.5+str*.8})}
-  const P=gustLines.geometry.attributes.position.array;let n=0;
+  let n=0;
   for(let gi=0;gi<6;gi++){const G=GUSTS[gi],U=GGUST[gi];if(!G){U.w=0;continue}const fade=Math.min(1,G.d/6,(G.L-G.d)/6);U.set(G.x,G.z,G.r,Math.max(0,fade));
     if(under)continue;const gy=topWorld(G.x,G.z),px=-dz,pz=dx;let lx=0,ly=0,lz=0;
     for(let j=0;j<=GUST_SEG;j++){const t=j/GUST_SEG,ang=G.a+t*9.4,rad=(.35+t*.9)*G.r*.45,al=(t-.5)*G.r*1.6,
         x=G.x+dx*al+px*Math.cos(ang)*rad,y=gy+.9+t*.4+Math.sin(ang)*rad*.8,z=G.z+dz*al+pz*Math.cos(ang)*rad;
-      if(j>0&&fade>.05){const o=n*6;P[o]=lx;P[o+1]=ly;P[o+2]=lz;P[o+3]=x;P[o+4]=y;P[o+5]=z;n++}lx=x;ly=y;lz=z}}
-  gustLines.geometry.setDrawRange(0,n*2);gustLines.geometry.attributes.position.needsUpdate=true;gustLines.material.opacity=.22+.18*Math.min(1,str/2)}
+      // each segment its own brightness (a dappled pixel texture), fading out towards both tips of the swirl
+      if(j>0&&fade>.05){const tip=Math.min(1,t*4,(1-t)*4),px_=.45+.55*(((gi*31+j*17)*2654435761>>>0)%97)/97;gustLines.set(n++,[lx,ly,lz],[x,y,z],fade*tip*px_)}lx=x;ly=y;lz=z}}
+  gustLines.show(n);gustLines.U.uOp.value=.3+.25*Math.min(1,str/2)}
 function grassPushTick(dt){if(!running)return;const L=[];try{gustTick(dt)}catch(e){}
   {// the wind: its direction wanders slowly; a breeze in clear weather, stronger in rain and snow, a harsh wind in storms
    const t=performance.now()/1000,an=Math.sin(t*.011)*2.6+Math.sin(t*.0037+1.3)*1.7,w=WX.amt||0,ty=WX.type;
@@ -6528,9 +6528,21 @@ function setBodyFP(p,on){if(p.fpBody===on)return;p.fpBody=on;p.body.g.traverse(o
 function updateClothes(p){const c=p.cl,set=(m,k)=>{m.visible=!!k;if(k)m.material.color.setHex(CLOTHES[k].col)};
   set(c.head,p.wear.head);set(c.body,p.wear.body);c.legs.forEach(m=>set(m,p.wear.legs));if(c.back)set(c.back,p.wear.back);if(c.pack0)c.pack0.visible=!p.wear.back}
 
-// ---- streaks: rain, and the drops that drip off sills and signs, drawn as upright streaks exactly one screen pixel wide (whatever the
-// pixel size setting), each its own length. Every streak is a quad whose two sides are pushed apart by one pixel on the screen
-const STRK_VS=`attribute float aSd;uniform vec2 uRes;void main(){vec4 c=projectionMatrix*modelViewMatrix*vec4(position,1.);c.x+=aSd*c.w/uRes.x;gl_Position=c;}`;
+// ---- streaks: rain, and the drops that drip off sills and signs, drawn as upright streaks one block pixel wide (1/32 m, the same as a
+// pixel on the blocks beside them; never thinner than one screen pixel far away), each its own length
+// ribbons: segments in any direction, one block pixel wide, each segment its own brightness (aA), for the wind swirls
+const RIB_VS=`attribute float aSd,aA;attribute vec3 aO;uniform vec2 uRes;varying float vA;void main(){vec4 v=modelViewMatrix*vec4(position,1.),o=modelViewMatrix*vec4(aO,1.);vec4 c=projectionMatrix*v;
+  float hp=c.w/(uRes.x*projectionMatrix[0][0]);vec2 d=o.xy-v.xy;d=length(d)>1e-5?normalize(d):vec2(1.,0.);v.xy+=vec2(-d.y,d.x)*aSd*max(1./64.,hp);vA=aA;gl_Position=projectionMatrix*v;}`;
+function makeRibbons(n,col){const pos=new Float32Array(n*12).fill(-999),oth=new Float32Array(n*12),sd=new Float32Array(n*4),al=new Float32Array(n*4),idx=new Uint32Array(n*6);
+  for(let i=0;i<n;i++){sd.set([-1,1,1,-1],i*4);idx.set([i*4,i*4+1,i*4+2,i*4,i*4+2,i*4+3],i*6)}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('aO',new THREE.BufferAttribute(oth,3));g.setAttribute('aSd',new THREE.BufferAttribute(sd,1));g.setAttribute('aA',new THREE.BufferAttribute(al,1));g.setIndex(new THREE.BufferAttribute(idx,1));g.setDrawRange(0,0);
+  const U={uRes:{value:new THREE.Vector2(800,600)},uCol:{value:new THREE.Color(col)},uOp:{value:1}};
+  const m=new THREE.ShaderMaterial({uniforms:U,vertexShader:RIB_VS,fragmentShader:'uniform vec3 uCol;uniform float uOp;varying float vA;void main(){gl_FragColor=vec4(uCol*(.85+.3*vA),vA*uOp);}',transparent:true,depthWrite:false});
+  const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;const _v=new THREE.Vector2();
+  mesh.onBeforeRender=r=>{const t=r.getRenderTarget();if(t)U.uRes.value.set(t.width,t.height);else{r.getDrawingBufferSize(_v);U.uRes.value.copy(_v)}};
+  return{mesh,U,g,set(i,a,b,al_){const o=i*12;for(let k=0;k<4;k++){const P=k<2?a:b,Q=k<2?b:a;pos[o+k*3]=P[0];pos[o+k*3+1]=P[1];pos[o+k*3+2]=P[2];oth[o+k*3]=Q[0];oth[o+k*3+1]=Q[1];oth[o+k*3+2]=Q[2];al[i*4+k]=al_}},
+    show(k){g.setDrawRange(0,k*6);g.attributes.position.needsUpdate=true;g.attributes.aO.needsUpdate=true;g.attributes.aA.needsUpdate=true}}}
+const STRK_VS=`attribute float aSd;uniform vec2 uRes;void main(){vec4 v=modelViewMatrix*vec4(position,1.);vec4 c=projectionMatrix*v;float hp=c.w/(uRes.x*projectionMatrix[0][0]);v.x+=aSd*max(1./64.,hp);gl_Position=projectionMatrix*v;}`;
 function makeStreaks(n,col,op){const pos=new Float32Array(n*12).fill(-999),sd=new Float32Array(n*4),idx=new Uint32Array(n*6);
   for(let i=0;i<n;i++){sd.set([-1,1,1,-1],i*4);idx.set([i*4,i*4+1,i*4+2,i*4,i*4+2,i*4+3],i*6)}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('aSd',new THREE.BufferAttribute(sd,1));g.setIndex(new THREE.BufferAttribute(idx,1));g.setDrawRange(0,0);
@@ -6562,28 +6574,42 @@ function floodTick(cam){if(WX.flood<=.01){if(floodMesh)floodMesh.visible=false;r
 // ---- drips: in the rain, water running down a sign drips off its bottom edge, and water running down a window gathers on the sill and
 // rolls off its front and ends (windows with their sill trim in front of and below the glass, on the side open to the sky). Each drop
 // falls to whatever is beneath it and lands with a small splash and a ring of ripple spreading out. Signs and sills within 28 m
-const DRIP={em:[],emT:0,d:[],rp:[],obj:null};
+const DRIP={em:[],emT:0,d:[],rp:[],run:[],obj:null};
 // sign plate bottoms in the sign's own frame: [x from, x to, height, depth]
-const DRIP_SIGN={stop:[-3.5*PXS,3.5*PXS,1.44,2*PXS],yield:[-PXS/2,PXS/2,1.44,2*PXS],speed:[-.24,.24,1.72,.05],noparking:[-.22,.22,1.75,.05],oneway:[-.46,.46,1.99,.05]};
+const DRIP_SIGN={stop:[[-3.5*PXS,3.5*PXS,1.44,2*PXS]],yield:[[-PXS/2,PXS/2,1.44,2*PXS]],speed:[[-.24,.24,1.72,.05]],noparking:[[-.22,.22,1.75,.05]],oneway:[[-.46,.46,1.99,.05]],
+  // traffic lights: under the arm, and the bottoms of the two light housings
+  tlight:[[-3.55,-.1,4.69,0],[-2.33,-2.07,3.72,0],[-3.53,-3.27,3.72,0]]};
 function dripGather(c){const E=[],R2=28*28;
-  for(const f of furnSpecs){const k=f[0]==='stop'?'stop':f[0]==='rsign'&&f[5]?f[5].k:null,S=k&&DRIP_SIGN[k];if(!S)continue;const dx=f[1]-c.x,dz=f[3]-c.z;if(dx*dx+dz*dz>R2)continue;
-    const yaw=f[4]||0,co=Math.cos(yaw),si=Math.sin(yaw),w=(lx,lz)=>[f[1]+lx*co+lz*si,f[3]-lx*si+lz*co],a=w(S[0],S[3]),b=w(S[1],S[3]);
-    if(topWorld(a[0],a[1])>f[2]+S[2])continue;E.push({ax:a[0],az:a[1],bx:b[0],bz:b[1],y:f[2]+S[2],fy:topWorld((a[0]+b[0])/2,(a[1]+b[1])/2),rate:1.4,t:Math.random()})}
+  for(const f of furnSpecs){const k=f[0]==='stop'||f[0]==='tlight'?f[0]:f[0]==='rsign'&&f[5]?f[5].k:null,SL=k&&DRIP_SIGN[k];if(!SL)continue;const dx=f[1]-c.x,dz=f[3]-c.z;if(dx*dx+dz*dz>R2)continue;
+    const yaw=f[4]||0,co=Math.cos(yaw),si=Math.sin(yaw),w=(lx,lz)=>[f[1]+lx*co+lz*si,f[3]-lx*si+lz*co];
+    for(const S of SL){const a=w(S[0],S[3]),b=w(S[1],S[3]);if(topWorld(a[0],a[1])>f[2]+S[2]+.05)continue;E.push({ax:a[0],az:a[1],bx:b[0],bz:b[1],y:f[2]+S[2],fy:topWorld((a[0]+b[0])/2,(a[1]+b[1])/2),rate:1.4,t:Math.random()})}}
+  // hanging blocks, overhangs and roof eaves: the top block of a column, out in the rain, with nothing under it drips from its underside
+  {const X=RTW.X,Z=RTW.Z,ox=RTW.ox,oz=RTW.oz,bx0=Math.floor(c.x/VS),bz0=Math.floor(c.z/VS),RB=22,HB=[];
+    for(let z=bz0-RB;z<=bz0+RB;z++)for(let x=bx0-RB;x<=bx0+RB;x++){const lx=x-ox,lz=z-oz;if(lx<0||lz<0||lx>=X||lz>=Z)continue;const top=hData[lx+X*lz]-1;if(top<2)continue;
+      const b_=get(x,top,z);if(!b_||!isOpq(b_)&&woodBase(b_)!==B.LEAF)continue;if(get(x,top-1,z)!==0)continue;const d2=(x-bx0)**2+(z-bz0)**2;HB.push([d2,x,top,z])}
+    HB.sort((a,b)=>a[0]-b[0]);for(const[,x,top,z]of HB.slice(0,140)){const y=top*VS;let fy=y-VS;for(let yy=top-2;yy>0;yy--)if(solid(x,yy,z)){fy=(yy+1)*VS;break}
+      E.push({ax:(x+.15)*VS,az:(z+.15)*VS,bx:(x+.85)*VS,bz:(z+.85)*VS,y,fy,rate:.35,t:Math.random()*3,sq:1})}}
   for(const w_ of winSpecs){if(w_[5])continue;const[x,y,z,ax]=w_;const gx=ax?x+1:x,gz=ax?z:z+1,cx=(gx+.5)*VS,cz=(gz+.5)*VS;if((cx-c.x)**2+(cz-c.z)**2>R2||get(gx,y+2,gz)!==B.GLASS)continue;
     if(trimOff.has((ax?x+1:x)+','+y+','+(ax?z:z+1)))continue;
     for(const sd of[1,-1]){const ox=ax?0:sd,oz=ax?sd:0;if(isOpq(get(gx+ox,y+1,gz+oz))||topY(gx+ox,gz+oz)>y+1)continue; // only the side open to the sky
-      const sy=(y+1)*VS,fe=sd>0?1+.25:-.25,fy=topWorld((ax?gx:gx+ox)*VS+(ax?.5*VS:0),(ax?gz+oz:gz)*VS+(ax?0:.5*VS));
-      const P_=(u,dd)=>ax?[(x+u)*VS,(z+dd)*VS]:[(x+dd)*VS,(z+u)*VS];
-      {const a=P_(.5,fe),b=P_(3.5,fe);E.push({ax:a[0],az:a[1],bx:b[0],bz:b[1],y:sy,fy,rate:2.2,t:Math.random()})} // the sill's front edge
-      for(const u of[.5,3.5]){const a=P_(u,sd>0?1:0),b=P_(u,fe);E.push({ax:a[0],az:a[1],bx:b[0],bz:b[1],y:sy,fy,rate:.6,t:Math.random()})}}} // and its ends
+      // water runs down the glass, onto the top of the sill, along it to the nearer end, and drops off that end to the ground
+      const sy=(y+1)*VS,P_=(u,dd)=>ax?[(x+u)*VS,(z+dd)*VS]:[(x+dd)*VS,(z+u)*VS],fyA=P_(.45,sd>0?1.12:-.12),fyB=P_(3.55,sd>0?1.12:-.12);
+      E.push({sill:1,P_,sd,sy,fy0:topWorld(fyA[0],fyA[1]),fy1:topWorld(fyB[0],fyB[1]),rate:1.6,t:Math.random()})}}
   return E}
 function dripTick(dt,c){const rain=RAINU.value;
   if((DRIP.emT-=dt)<=0){DRIP.emT=1;DRIP.em=rain>.05&&!underground(c)?dripGather(c):[]}
-  for(const e of DRIP.em){e.t-=dt*rain*e.rate;if(e.t<=0){e.t=.3+Math.random()*1.1;if(DRIP.d.length<160){const k=Math.random();DRIP.d.push({x:e.ax+(e.bx-e.ax)*k,y:e.y,z:e.az+(e.bz-e.az)*k,vy:-.3,fy:e.fy})}}}
+  for(const e of DRIP.em){e.t-=dt*rain*e.rate;if(e.t<=0){e.t=.3+Math.random()*1.1;
+      if(e.sill){if(DRIP.run.length<40){const u=1.15+Math.random()*1.7;DRIP.run.push({e,u,y:e.sy+VS*(1+Math.random()*2.6),ph:0})}continue}
+      if(DRIP.d.length<160){const k=Math.random(),k2=e.sq?Math.random():k;DRIP.d.push({x:e.ax+(e.bx-e.ax)*k,y:e.y,z:e.az+(e.bz-e.az)*(e.sq?k2:k),vy:-.3,fy:e.fy})}}}
+  // drops on their way along a window: down the glass (ph 0), along the top of the sill to its nearer end (ph 1), then off and falling
+  for(let i=DRIP.run.length-1;i>=0;i--){const r=DRIP.run[i],e=r.e;
+    if(r.ph===0){r.y-=dt*(.25+Math.random()*.25);if(r.y<=e.sy+.012){r.y=e.sy+.012;r.ph=1;r.to=r.u<2?.45:3.55}}
+    else{const sp=.22*dt*(r.to>r.u?1:-1);r.u+=sp/VS;if((sp>0&&r.u>=r.to)||(sp<0&&r.u<=r.to)){const q=e.P_(r.to,e.sd>0?1.12:-.12);DRIP.d.push({x:q[0],y:e.sy,z:q[1],vy:-.2,fy:r.to<2?e.fy0:e.fy1});DRIP.run.splice(i,1)}}}
   for(let i=DRIP.d.length-1;i>=0;i--){const d=DRIP.d[i];d.vy-=9.8*dt;d.y+=d.vy*dt;if(d.y<=d.fy){DRIP.d.splice(i,1);if(DRIP.rp.length<60)DRIP.rp.push({x:d.x,y:d.fy+.012,z:d.z,t:0})}}
   for(let i=DRIP.rp.length-1;i>=0;i--){const r=DRIP.rp[i];r.t+=dt;if(r.t>.7)DRIP.rp.splice(i,1)}
-  if(!DRIP.obj){DRIP.obj=makeStreaks(160,0xc8dcea,.7);scene.add(DRIP.obj.mesh)}
-  let n=0;for(const d of DRIP.d){if(n>=160)break;DRIP.obj.set(n++,d.x,d.y,d.y+Math.min(.22,.04-d.vy*.03),d.z)}DRIP.obj.show(n);
+  if(!DRIP.obj){DRIP.obj=makeStreaks(200,0xc8dcea,.75);scene.add(DRIP.obj.mesh)}
+  let n=0;for(const d of DRIP.d){if(n>=200)break;DRIP.obj.set(n++,d.x,d.y,d.y+Math.min(.22,.04-d.vy*.03),d.z)}
+  for(const r of DRIP.run){if(n>=200)break;const e=r.e,q=e.P_(r.u,r.ph===0?(e.sd>0?1.02:-.02):(e.sd>0?1.1:-.1));DRIP.obj.set(n++,q[0],r.y,r.y+(r.ph===0?.05:.025),q[1])}DRIP.obj.show(n);
   // the drops' landings ripple the wet ground's reflection itself (the post shader bends the reflected picture in a spreading ring)
   for(let i=0;i<12;i++){const r=DRIP.rp[DRIP.rp.length-1-i],U=DRIPU[i];if(r)U.set(r.x,r.z,r.t,1-r.t/.7);else U.w=0}}
 function updFx(p,dt){
