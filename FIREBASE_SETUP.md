@@ -1,19 +1,19 @@
-# Setting up email sign-in for usernames
+# Setting up email sign-up and log-in
 
-Outside Claude (on GitHub Pages or through the desktop launcher), claiming a username needs a signed-in, email-verified account. Dead Ground uses Firebase Authentication with email links for this: the player types their email, gets a one-time link, and opening it signs them in. Names are stored in Firestore, and the rules below let a name be claimed only by a verified account, and only if it's free or already theirs.
+Outside Claude (on GitHub Pages or through the desktop launcher), players sign up and log in from the **Profile** button at the top right of the main menu, with an email and a password. Dead Ground uses Firebase Authentication for this: signing up emails a verification link, and once the address is verified the player can claim a username. **Forgot password** emails a reset link. Names are stored in Firestore, and the rules below let a name be claimed only by a verified account, and only if it's free or already theirs.
 
-Until the config in step 4 is pasted into the game, the email box is disabled and names can't be claimed outside Claude. Inside Claude, names keep using your Claude account as before.
+Until the config in step 4 is pasted into the game, the email and password boxes are disabled and names can't be claimed outside Claude. Inside Claude, names keep using your Claude account as before.
 
 ## 1. Create the project
 
 1. Go to <https://console.firebase.google.com> and click **Add project** (or **Create a project**).
 2. Name it (for example `dead-ground`). Google Analytics isn't needed, so you can turn it off.
 
-## 2. Turn on email-link sign-in
+## 2. Turn on email and password sign-in
 
 1. In the project, open **Build → Authentication** and click **Get started**.
 2. On the **Sign-in method** tab, choose **Email/Password**.
-3. Turn on **Email/Password**, then also turn on **Email link (passwordless sign-in)**, and click **Save**.
+3. Turn on **Email/Password** and click **Save**. (The **Email link** switch underneath can stay off.)
 4. On the **Settings** tab, open **Authorized domains** and make sure these are listed (add any that are missing):
    - `warvie.github.io`
    - `localhost`
@@ -82,6 +82,6 @@ This config is safe to publish: it only identifies the project. The rules in ste
 
 ## Notes
 
-- Firebase's free plan covers this comfortably (sign-in links and small Firestore reads/writes).
-- Sign-in links have to be opened on the same device and browser the email was typed into. If it's a different one, the game asks for the email address again.
+- Firebase's free plan covers this comfortably (accounts, verification and reset emails, and small Firestore reads/writes).
+- The verification and password reset emails come from Firebase's own address. You can change their wording under **Authentication → Templates**.
 - Names claimed here and names claimed inside Claude are separate lists, because Claude doesn't let games load outside sign-in services.
