@@ -359,7 +359,7 @@ body #touch .tb[data-b=run] .ti,body #touch .tb[data-b=jump] .ti,body #touch .tb
     <label>Developer mode <select id="devSel"><option value="0">Off</option><option value="1">On</option></select></label>
   </div>
   <details class="opts" id="ulog"><summary>Update log</summary><div class="ulog">
-    <h4>v20.45 · Nov 28, 2026 — sill water as texture, exact pixel rain</h4><ul><li>The water running off a window is now part of the sill's own texture, not a separate drop: each trail on the glass carries straight on, in the sill's pixels, across its top and down its front face. Only where it leaves the sill's bottom edge does it become a falling drop</li><li>Rain and all falling drops are exactly one block pixel wide, sit in the block-pixel grid's columns, and are whole pixels long; wind swirls are exactly a block pixel wide too</li></ul><h4>v20.44 · Nov 28, 2026 — rain on windshields, sill trails, no leaks</h4><ul><li>Windshields collect rain you can see from inside the car too: single-pixel drops that roll down (or get pushed up and back when you drive fast), leaving faint wet trails. The wipers scrape it clean, and it dries off slowly once the rain stops</li><li>Window sills: each trail running down the glass carries on, right where and when it reaches the bottom, as a matching wet trail across the top of the sill, over its front edge and down its front face, and then drops off to the ground. Nothing slides off the sides</li><li>Roofs don't leak any more: a block only drips where water can run off an open edge (a side with open air beside it), not into the room underneath or into the gap between two blocks</li><li>Rain and drip streaks are all one block pixel wide, with lengths in whole block pixels</li><li>Loading in is much faster, about 3 seconds from opening the game to playing (it was 8). Only the land you can see is made before you play; the rest, the far view and the land further out fill in over the first seconds of play. Shaders now compile in the background while the world is made, and pressing play while the page is still starting no longer makes the world twice</li><li>In heavy rain, or once they're soaked, absorbent surfaces (brick, wood, dirt) start to run too, with fainter, slower trails than smooth ones</li></ul><h4>v20.43 · Nov 28, 2026 — pixel rain, ledge drips, sills, pixel wind</h4><ul><li>Rain and all drips fall as streaks one block pixel wide (as thick as a pixel on the blocks beside them), each its own length</li><li>Drips from anything with a ledge: signs, traffic lights (under the arm and the light housings), hanging blocks, overhangs and roof eaves, and tree canopies</li><li>On windows you can follow the water: a drop runs down the glass, lands on top of the sill, slides along it to the nearer end, and falls off to the ground</li><li>Wind swirls are drawn the same way: ribbons one block pixel wide with a dappled pixel texture, fading out at their tips</li></ul><h4>v20.42 · Nov 28, 2026 — painted stairs, dry undersides, wind gusts, drips</h4><ul><li>Rain runs down signs, posts and everything else out in the open in wet streaks with a bright bead at the head (sheltered things stay dry)</li><li>Rain on every block out in the open, by material: on smooth faces (metal, tile, smooth stone, concrete) drops run down in trails, faster the smoother the face; absorbent ones (brick, wood, dirt, bark) take a dark wet spot where each drop lands, which slowly fades as it soaks in. Tops get the spots too</li><li>V changes your view: first and third person in a vehicle; first, second (out in front, facing you) and third person on foot. The camera stops short of walls</li><li>Rain falls as streaks exactly one screen pixel wide, each its own length</li><li>Drips: water running down a sign drips off its bottom edge, and water on a window gathers on the sill and rolls off its front and ends. Each drop falls (as a little one-pixel streak) to whatever is beneath it, and its landing ripples the wet ground's reflection itself</li><li>Wind gusts: swirls of pale wind lines tumble across the land in the wind's direction and at its speed (slow and gentle in a breeze, fast and many in a storm). Grass under a passing gust switches to its heavy-wind frames, so a wave of bent grass moves along with each swirl</li><li>Staircases inside painted rooms are painted to match the room: their sides, backs and sloped undersides. The treads and step fronts stay bare</li><li>Wet-ground reflections only appear on up-facing surfaces the rain actually falls on. Ceilings and the undersides of things no longer shine as if wet</li></ul><h4>v20.41 · Nov 28, 2026 — smoother travel, grass frames, yield signs, rain levels, flash floods</h4><ul>
+    <h4>v20.46 · Nov 28, 2026 — wider rain, brighter sill water, dev Face nearest</h4><ul><li>Rain and drops are two block pixels wide</li><li>More trails run down windows in heavy rain (and on across the sills with them)</li><li>Water from a window now crosses all four faces under it: the sill's top, its front, back under its lip, and down the apron, then drips off the apron's bottom edge</li><li>The water running across window sills shows now: two pixels wide, a darker, cool wet streak with a bright bead at its head and a longer wet tail (pale one-pixel water on white trim was invisible)</li><li>Developer menu, Functions tab: Force all rain lanes, Show drip sources, Game speed (1/2, 1/4), Weather now (skips the build-up), Hide HUD, rain animation speed (normal, 1/4, paused), camera zoom (1x, 2x, 4x) and Highlight rain effects (shows exactly where the shaders draw water)</li><li>Developer menu: a Functions tab with Face nearest (window sill, window, stop sign, yield sign, traffic light, car, zombie, tree, brick wall), which moves you to a good spot and looks straight at it. You hover there until you press jump</li></ul><h4>v20.45 · Nov 28, 2026 — sill water as texture, exact pixel rain</h4><ul><li>The water running off a window is now part of the sill's own texture, not a separate drop: each trail on the glass carries straight on, in the sill's pixels, across its top and down its front face. Only where it leaves the sill's bottom edge does it become a falling drop</li><li>Rain and all falling drops are exactly one block pixel wide, sit in the block-pixel grid's columns, and are whole pixels long; wind swirls are exactly a block pixel wide too</li></ul><h4>v20.44 · Nov 28, 2026 — rain on windshields, sill trails, no leaks</h4><ul><li>Windshields collect rain you can see from inside the car too: single-pixel drops that roll down (or get pushed up and back when you drive fast), leaving faint wet trails. The wipers scrape it clean, and it dries off slowly once the rain stops</li><li>Window sills: each trail running down the glass carries on, right where and when it reaches the bottom, as a matching wet trail across the top of the sill, over its front edge and down its front face, and then drops off to the ground. Nothing slides off the sides</li><li>Roofs don't leak any more: a block only drips where water can run off an open edge (a side with open air beside it), not into the room underneath or into the gap between two blocks</li><li>Rain and drip streaks are all one block pixel wide, with lengths in whole block pixels</li><li>Loading in is much faster, about 3 seconds from opening the game to playing (it was 8). Only the land you can see is made before you play; the rest, the far view and the land further out fill in over the first seconds of play. Shaders now compile in the background while the world is made, and pressing play while the page is still starting no longer makes the world twice</li><li>In heavy rain, or once they're soaked, absorbent surfaces (brick, wood, dirt) start to run too, with fainter, slower trails than smooth ones</li></ul><h4>v20.43 · Nov 28, 2026 — pixel rain, ledge drips, sills, pixel wind</h4><ul><li>Rain and all drips fall as streaks one block pixel wide (as thick as a pixel on the blocks beside them), each its own length</li><li>Drips from anything with a ledge: signs, traffic lights (under the arm and the light housings), hanging blocks, overhangs and roof eaves, and tree canopies</li><li>On windows you can follow the water: a drop runs down the glass, lands on top of the sill, slides along it to the nearer end, and falls off to the ground</li><li>Wind swirls are drawn the same way: ribbons one block pixel wide with a dappled pixel texture, fading out at their tips</li></ul><h4>v20.42 · Nov 28, 2026 — painted stairs, dry undersides, wind gusts, drips</h4><ul><li>Rain runs down signs, posts and everything else out in the open in wet streaks with a bright bead at the head (sheltered things stay dry)</li><li>Rain on every block out in the open, by material: on smooth faces (metal, tile, smooth stone, concrete) drops run down in trails, faster the smoother the face; absorbent ones (brick, wood, dirt, bark) take a dark wet spot where each drop lands, which slowly fades as it soaks in. Tops get the spots too</li><li>V changes your view: first and third person in a vehicle; first, second (out in front, facing you) and third person on foot. The camera stops short of walls</li><li>Rain falls as streaks exactly one screen pixel wide, each its own length</li><li>Drips: water running down a sign drips off its bottom edge, and water on a window gathers on the sill and rolls off its front and ends. Each drop falls (as a little one-pixel streak) to whatever is beneath it, and its landing ripples the wet ground's reflection itself</li><li>Wind gusts: swirls of pale wind lines tumble across the land in the wind's direction and at its speed (slow and gentle in a breeze, fast and many in a storm). Grass under a passing gust switches to its heavy-wind frames, so a wave of bent grass moves along with each swirl</li><li>Staircases inside painted rooms are painted to match the room: their sides, backs and sloped undersides. The treads and step fronts stay bare</li><li>Wet-ground reflections only appear on up-facing surfaces the rain actually falls on. Ceilings and the undersides of things no longer shine as if wet</li></ul><h4>v20.41 · Nov 28, 2026 — smoother travel, grass frames, yield signs, rain levels, flash floods</h4><ul>
 <li>Driving and running are much smoother: on the same drive, about 36 fps instead of 20, and the long freezes are gone. The far view no longer rebuilds all at once while you travel, regions you leave are packed away a little each frame, chunks rebuild fewer times as they come closer, merging far cars and zombies no longer stalls, and background work shares one time budget per frame</li>
 <li>Grass no longer bends: each tuft swaps between drawn frames instead. It leans with the wind (whatever direction it blows, breezes to harsh storm gusts) and gets pressed half down or flat when something walks or drives through it</li>
 <li>Stop signs say STOP again, in white on the red. Yield signs are now built the same way: a 17-pixel downward triangle with YIELD across the top, a white triangle inside, metal back and edges, and the same holed post</li>
@@ -501,6 +501,19 @@ body #touch .tb[data-b=run] .ti,body #touch .tb[data-b=jump] .ti,body #touch .tb
 <div id="gateBox" class="hidden" style="position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:40;padding:6px 14px;background:var(--panel);border:2px solid var(--line);font-family:VT323,monospace;font-size:22px;color:var(--olive);pointer-events:none;min-width:300px;text-align:center"><div id="gateTxt">Loading the ground around you…</div><div style="margin-top:4px;height:10px;background:#24221e;border:2px solid var(--line)"><div id="gateFill" style="height:100%;width:0;background:var(--olive)"></div></div></div>
 <div id="devPanel" class="hidden" style="position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)"><div class="kit" style="max-width:560px;max-height:90vh;overflow:auto">
   <h3 style="margin-top:0">Developer menu <span class="note">(\ to close)</span></h3>
+  <div class="row" style="margin:0 0 10px"><button id="dpTabSetB">Settings</button><button id="dpTabFnB">Functions</button></div>
+  <div id="dpTabFn" class="hidden"><label class="dpRow">Face nearest <span><select id="dpFaceK"><option value="sill">window sill</option><option value="window">window</option><option value="stop">stop sign</option><option value="yield">yield sign</option><option value="tlight">traffic light</option><option value="car">car</option><option value="zombie">zombie</option><option value="tree">tree</option><option value="brick">brick wall</option></select> <button id="dpFace">Face</button></span></label>
+  <p class="note" style="margin:2px 0 12px">Moves you to a good spot in front of the nearest one and turns you to look straight at it. You hover there until you press jump.</p>
+  <div class="row" style="margin:0 0 6px"><button id="dpWxNow">Weather now</button><button id="dpHud">Hide HUD</button></div>
+  <p class="note" style="margin:2px 0 12px">Weather now jumps straight to the weather picked in Settings (and its wetness) instead of letting it build up. Hide HUD clears the screen for screenshots (press it again to bring it back).</p>
+  <label class="dpRow">Rain animation speed <select id="dpFxs"><option value="1">Normal</option><option value=".25">1/4 speed</option><option value="0">Paused</option></select></label>
+  <label class="dpRow">Camera zoom <select id="dpZoom"><option value="1">1x</option><option value="2">2x</option><option value="4">4x</option></select></label>
+  <label class="dpRow">Force all rain lanes <select id="dpRbAll"><option value="0">Off</option><option value="1">On (every trail runs, on glass and sills)</option></select></label>
+  <label class="dpRow">Show drip sources <select id="dpDripMk"><option value="0">Off</option><option value="1">On (magenta markers)</option></select></label>
+  <label class="dpRow">Game speed <select id="dpGs"><option value="1">Normal</option><option value=".5">1/2</option><option value=".25">1/4</option></select></label>
+  <label class="dpRow">Highlight rain effects <select id="dpRbDbg"><option value="0">Off</option><option value="1">On (magenta: water on sills, yellow: sill faces it can run on, cyan: trails on blocks)</option></select></label>
+  <p class="note" style="margin:2px 0 12px">For checking the rain: slow or stop its animations, zoom in on small details, and see exactly where the shaders draw the water.</p></div>
+  <div id="dpTabSet">
   <label class="dpRow">Freeze everything <select id="dpFreeze"><option value="0">Off</option><option value="1">On</option></select></label>
   <p class="note" style="margin:2px 0 12px">Stops the world: people, zombies, animals, cars, weather and time. You can still move to look around.</p>
   <label class="dpRow">Weather <select id="dpWx"><option value="">Natural (changes on its own)</option><option value="clear">Clear</option><option value="rain1">Rain 1: drizzle</option><option value="rain2">Rain 2: light</option><option value="rain3">Rain 3: steady</option><option value="rain4">Rain 4: heavy</option><option value="rain5">Rain 5: downpour (flash flood)</option><option value="storm">Thunderstorm</option><option value="snow">Snowing</option><option value="fog">Fog</option><option value="acid">Acid rain</option></select></label>
@@ -519,7 +532,9 @@ body #touch .tb[data-b=run] .ti,body #touch .tb[data-b=jump] .ti,body #touch .tb
   <label class="dpRow">Merged chunks read <select id="dpHalf"><option value="1">A share of their blocks (faster)</option><option value="0">Every block</option></select></label>
   <label class="dpRow">Motion blur <select id="dpBlur"><option value="0">Off</option><option value="1">On (Medium graphics and up)</option></select></label>
   <label class="dpRow">Show shading levels <select id="dpTint"><option value="0">Off</option><option value="1">On (green = full detail, red = coarsest)</option></select></label>
-  <div class="row" style="margin-top:14px"><button id="dpReset">Reset rendering to defaults</button><button id="dpClose">Close</button></div>
+  <div class="row" style="margin-top:14px"><button id="dpReset">Reset rendering to defaults</button></div>
+  </div>
+  <div class="row" style="margin-top:14px"><button id="dpClose">Close</button></div>
 </div></div>
 <div id="pause" class="screen hidden" style="background:rgba(0,0,0,.6)"><div class="kit" style="max-width:420px;text-align:center">
   <h2 style="font-size:40px;color:var(--rust)">Paused</h2><p class="sub" style="margin:8px auto 16px">Click to take back the mouse and keep surviving.</p>
@@ -1620,7 +1635,7 @@ const sky=new THREE.Mesh(new THREE.SphereGeometry(1,24,14),skyMat);sky.frustumCu
 // motion blur: off unless switched on in the developer menu (remembered)
 let MBLUR=false;try{MBLUR=localStorage.getItem('deadground-mblur')==='1'}catch(e){}
 // clock for screen effects (rain ripples, glints, fog drift): it stops while the world is frozen
-let FX_T=0,FX_L=performance.now();function fxT(){const n=performance.now();if(!(typeof WFZ!=='undefined'&&WFZ))FX_T+=(n-FX_L)/1000;FX_L=n;return FX_T}
+let FX_T=0,FX_L=performance.now();function fxT(){const n=performance.now();if(!(typeof WFZ!=='undefined'&&WFZ))FX_T+=(n-FX_L)/1000*(typeof DEVX!=='undefined'&&DEVX.fxs!=null?DEVX.fxs:1);FX_L=n;return FX_T}
 const prevCamP=[];
 const DRIPU=[];for(let i=0;i<12;i++)DRIPU.push(new THREE.Vector4(0,0,0,0));
 const postMat=new THREE.ShaderMaterial({defines:{RAYS:24,MB:1,SSR:22,AO:1},depthTest:false,depthWrite:false,
@@ -2177,24 +2192,36 @@ vec3 pxReflF(){vec3 n=normalize(vPxN);
 #endif
 `;
 // how much each atlas tile soaks up rain (0 smooth, sheds it in fast trails .. 1 absorbent, only darkens where drops land)
-const RBABS=new Array(64).fill(.6);let RAINB_APPLY=null;function rbInit(){if(RAINB_APPLY)return;const T=TILE,set=(k,v)=>{if(T[k]!=null)RBABS[T[k]]=v};
+const RBABS=new Array(64).fill(.6),RBDBG={value:0},RBALL={value:0};let RAINB_APPLY=null;function rbInit(){if(RAINB_APPLY)return;const T=TILE,set=(k,v)=>{if(T[k]!=null)RBABS[T[k]]=v};
   for(const[k,v]of[['grassTop',.9],['grassSide',.9],['dirt',1],['dirtTop',1],['stone',.45],['coal',.45],['iron',.45],['conc',.55],['asph',.6],['asphTop',.6],['plank',.85],['bark',.9],['logTop',.9],['leaf',.7],['brick',.9],['metal',0],['bed',.4],['frame',.8],['sludge',.95],['wall',.75],['tilef',.1],['roofTop',.7],['roofSide',.7],['trim',.5],['curbTop',.55],['curbSide',.55],
     ['bBark',.9],['bTop',.9],['bPlank',.85],['bLeaf',.7],['pBark',.9],['pTop',.9],['pPlank',.85],['pLeaf',.7],['mBark',.9],['mTop',.9],['mPlank',.85],['mLeaf',.7]])set(k,v);
-  RAINB_APPLY=`{vec2 tt_=vec2(floor(vUv.x*${ACOLS}.),floor((1.-vUv.y)*${AROWS}.));int ti_=int(tt_.y*${ACOLS}.+tt_.x+.5);if(ti_>=0&&ti_<64&&ti_!=${TILE.glass}&&ti_!=${TILE.water}){vec2 rb_=rainBlock(vRtW,normalize(vRtN),pxS(vRtW),rbAbs[ti_]);if(ti_==${TILE.trim}){float st_=sillTrail(vRtW,normalize(vRtN));rb_=max(rb_,vec2(.18*st_,st_));}diffuseColor.rgb=diffuseColor.rgb*(1.-rb_.x)+rb_.y*.14;}}`}
+  RAINB_APPLY=`{vec2 tt_=vec2(floor(vUv.x*${ACOLS}.),floor((1.-vUv.y)*${AROWS}.));int ti_=int(tt_.y*${ACOLS}.+tt_.x+.5);if(ti_>=0&&ti_<64&&ti_!=${TILE.glass}&&ti_!=${TILE.water}){vec2 rb_=rainBlock(vRtW,normalize(vRtN),pxS(vRtW),rbAbs[ti_]);float st_=ti_==${TILE.trim}?sillTrail(vRtW,normalize(vRtN)):0.;diffuseColor.rgb=diffuseColor.rgb*(1.-rb_.x)+rb_.y*.14;if(st_>0.){vec3 wc_=st_>.95?vec3(.9,.95,1.05):vec3(.42,.52,.64)*(.75+.25*st_);diffuseColor.rgb=mix(diffuseColor.rgb,wc_,clamp(.35+st_*.6,0.,1.));}if(rbDbg>.5){if(st_>0.)diffuseColor.rgb=vec3(1.,0.,1.)*(.4+.6*st_);else if(ti_==${TILE.trim})diffuseColor.rgb=vec3(1.,1.,0.)*(.3+.7*sillZone(vRtW,normalize(vRtN)));else if(rb_.y>.01)diffuseColor.rgb=vec3(0.,1.,1.);}}}`}
 const RAINB_GLSL=`float rbH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 // the glass's running trails, the same lanes and timing as the window shader (rainGlass), looked up at a height Y on the glass's
 // timeline; the lane's column is fixed where the trail left the bottom of the glass (ybw)
-float glassTrailAt(float uvx,float Y,float ybw){float c=1./16.,o=0.;for(int k=0;k<2;k++){float fk=float(k),lane=floor(uvx/(c*3.))+fk*57.,hc2=fract(lane*.6180339887+.31);if(hc2<.35*rbRain){
+float glassTrailAt(float uvx,float Y,float ybw){float c=1./16.,o=0.;for(int k=0;k<2;k++){float fk=float(k),lane=floor(uvx/(c*3.))+fk*57.,hc2=fract(lane*.6180339887+.31);if(hc2<.6*rbRain||rbAll>.5){
     float sp=.3+.6*fract(lane*.7548776662+.17),span=1.3+fract(lane*.5698402910+.53),yy=mod(Y+fk*.7,span),head=span-mod(rbTime*sp+hc2*37.,span),yb=mod(ybw+fk*.7,span);
     float lx=(floor(uvx/(c*3.))*3.+1.)*c+floor(sin(yb*7.+lane)*1.3+sin(yb*13.1+lane*2.)*.6)*c;
-    if(abs(floor(uvx/c)-floor(lx/c))<.5){float dy=floor(yy/c)-floor(head/c);if(dy>=0.&&dy<12.)o=max(o,dy<.5?1.:.85-dy/15.);}}}return o;}
+    // on the sill the trail is two pixels wide and leaves a longer wet tail (24 pixels) behind its head
+    float dc=floor(uvx/c)-floor(lx/c);if(dc>-.5&&dc<1.5){float dy=floor(yy/c)-floor(head/c);if(dy>=0.&&dy<24.)o=max(o,dy<.5?1.:.85-dy/30.);}}}return o;}
 // water from a window carried on across its sill, as part of the sill's own texture: on the top face it runs from the glass to the
 // front edge, on the front face down to the bottom edge, continuing each glass trail where and when it reached the bottom of the glass
-float sillTrail(vec3 P,vec3 N){if(rbRain<.01)return 0.;{vec3 Q=P+N*.3;vec2 hc=(Q.xz/.5-rtOrigin.xz)/rtSize.xz;if(!(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)&&P.y/.5+.02<texture2D(hTex,hc).r*255.-1.05)return 0.;}vec3 a=abs(N);float uvx,Y,ybw;
-  if(a.y>.5){if(N.y<0.)return 0.;float fx=abs(P.x-floor(P.x/.5+.5)*.5),fz=abs(P.z-floor(P.z/.5+.5)*.5);bool ax=fz<fx;float d=ax?fz:fx;if(d>.13)return 0.;
-    uvx=ax?-P.x:P.z;ybw=P.y;Y=P.y-d;}
-  else{vec3 Nc=(N.x<-.5||N.z<-.5)?-N:N;uvx=dot(P,normalize(vec3(-Nc.z,0.,Nc.x)));ybw=(floor(P.y/.5+.001)+1.)*.5;Y=ybw-.125-(ybw-P.y);}
+float sillTrail(vec3 P,vec3 N){if(rbRain<.01)return 0.;{vec3 Q=P+N*.3;vec2 hc=(Q.xz/.5-rtOrigin.xz)/rtSize.xz;if(!(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)&&P.y/.5+.02<texture2D(hTex,hc).r*255.-1.05)return 0.;}
+  // the water's path over the trim under a window, measured back up the glass's timeline (Y): across the sill's top (from the wall out
+  // 0.125 m), down its front (0.125 m), back under its lip to the apron (0.0625 m), and down the apron's front (0.125 m); it drops off
+  // the apron's bottom edge. Each face is told apart by which way it faces, how far it stands from the wall and its height in the block
+  const float T1=.125,T2=.0625;vec3 a=abs(N);float ybw=(floor(P.y/.5-.001)+1.)*.5,f=(P.y-(ybw-.5))/.5;
+  bool ax=a.y>.5?abs(P.z-floor(P.z/.5+.5)*.5)<abs(P.x-floor(P.x/.5+.5)*.5):a.z>a.x; // the wall runs along x (faces z) or along z
+  float d=ax?abs(P.z-floor(P.z/.5+.5)*.5):abs(P.x-floor(P.x/.5+.5)*.5),uvx=ax?-P.x:P.z,Y;
+  if(N.y>.5){if(d>T1+.01)return 0.;Y=ybw-d;}                                                        // sill top
+  else if(N.y<-.5){if(f<.7||f>.8||d<T2-.01||d>T1+.01)return 0.;Y=ybw-T1-.125-(T1-d);}        // under the sill's lip (its underside is at 3/4 of the block)
+  else if(f>=.74&&abs(d-T1)<.02)Y=ybw-T1-(ybw-P.y);                                                  // sill front
+  else if(f>=.49&&f<.76&&abs(d-T2)<.02)Y=ybw-T1-.125-(T1-T2)-((ybw-.125)-P.y);                       // apron front
+  else return 0.;
   return glassTrailAt(uvx,Y,ybw);}
+// (debug) 1 where a sill trail could be drawn: out in the rain, and on a sill's top (within its depth of the wall) or front
+float sillZone(vec3 P,vec3 N){if(rbRain<.01)return 0.;vec3 Q=P+N*.3;vec2 hc=(Q.xz/.5-rtOrigin.xz)/rtSize.xz;if(!(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)&&P.y/.5+.02<texture2D(hTex,hc).r*255.-1.05)return .2;
+  if(abs(N.y)>.5){if(N.y<0.)return .4;float fx=abs(P.x-floor(P.x/.5+.5)*.5),fz=abs(P.z-floor(P.z/.5+.5)*.5);return min(fx,fz)>.13?.6:1.;}return 1.;}
 vec2 rainBlock(vec3 P,vec3 N,float s,float ab){float amt=rbRain;if(amt<.01)return vec2(0.);
   vec3 Q=P+N*.3;vec2 hc=(Q.xz/.5-rtOrigin.xz)/rtSize.xz;if(!(hc.x<0.||hc.y<0.||hc.x>1.||hc.y>1.)&&P.y/.5+.02<texture2D(hTex,hc).r*255.-1.05)return vec2(0.);
   float c=s/16.;vec3 a=abs(N);vec2 uv;if(a.y>.5)uv=P.xz;else{vec3 Nc=(N.x<-.5||N.z<-.5)?-N:N;vec3 T=normalize(vec3(-Nc.z,0.,Nc.x));uv=vec2(dot(P,T),P.y);}
@@ -2285,8 +2312,8 @@ float getShadowMask(){float s=1.;vec3 n=normalize(vRtN),P=pxWorld();
   // rain on every block face out in the open, by material (RBABS: how much each texture soaks up, 0 smooth .. 1 absorbent): on smooth
   // upright faces drops run down in trails, faster the smoother; absorbent ones (brick, wood, dirt) just take a dark wet spot where
   // each drop hits, which slowly fades as it soaks in. Tops only get the spots
-  rbInit();Object.assign(sh.uniforms,{rbRain:RAINU,rbTime:postMat.uniforms.time,rbAbs:{value:RBABS}});
-  sh.fragmentShader=sh.fragmentShader.replace('void main() {','uniform float rbRain,rbTime;uniform float rbAbs[64];\n'+RAINB_GLSL+'void main() {').replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n'+RAINB_APPLY);
+  rbInit();Object.assign(sh.uniforms,{rbRain:RAINU,rbTime:postMat.uniforms.time,rbAbs:{value:RBABS},rbDbg:RBDBG,rbAll:RBALL});
+  sh.fragmentShader=sh.fragmentShader.replace('void main() {','uniform float rbRain,rbTime,rbDbg,rbAll;uniform float rbAbs[64];\n'+RAINB_GLSL+'void main() {').replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n'+RAINB_APPLY);
   // the flashlight beam lands on blocks too
   if(typeof FLU!=='undefined'){Object.assign(sh.uniforms,FLU);sh.fragmentShader=FL_GLSL+vrInject(sh.fragmentShader,'vRtW').replace('gl_FragColor = vec4( outgoingLight, diffuseColor.a );','gl_FragColor = vec4( outgoingLight, diffuseColor.a );\n'+FL_ADD.replace(/vPxW/g,'vRtW').replace(/vPxN/g,'vRtN'))}
 }};
@@ -2730,7 +2757,7 @@ gmat.onBeforeCompile=sh=>{if(typeof FLU==='undefined')return;Object.assign(sh.un
 // on its outside gets wet (from the height map, sampled just outside the glass), so a window's outside face is wet and its inside
 // face dry, and glass under a roof stays dry. The drops are a brighter version of the glass's own lit colour, so they follow the light
 const RAINU={value:0};
-const RAIN_GLSL=`uniform float rgRain,rgWet,rgTime;uniform sampler2D hTex;uniform vec3 rtOrigin,rtSize;
+const RAIN_GLSL=`uniform float rgRain,rgWet,rgTime,rgAll;uniform sampler2D hTex;uniform vec3 rtOrigin,rtSize;
 float rgH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 // rain on glass, in the glass's own pixels: beads sitting on it, fresh drops landing (a bright bead that settles), and on upright panes
 // drops running down, wandering side to side as they go, a bright head with a fading tail. Returns brightness, extra cover, and the
@@ -2745,7 +2772,7 @@ vec4 rainGlass(vec3 P,vec3 N,float s){float amt=max(rgWet,rgRain);if(amt<.01)ret
   vec2 cell=floor(uv/c+.001);float o=0.;vec2 tl=vec2(0.);
   if(rgH(cell)<.08*amt){o=.6+.4*rgH(cell+7.);tl=vec2(rgH(cell+3.)-.5,rgH(cell+5.)-.5);}
   if(rgRain>.01){float ph=rgTime*5.+rgH(cell+11.)*9.,tk=floor(ph);if(rgH(cell+vec2(tk*.37,tk*.71))<.04*rgRain){o=max(o,1.-fract(ph)*.55);tl+=vec2(.35,-.35);}}
-  if(a.y<.5&&rgRain>.01){for(int k=0;k<2;k++){float fk=float(k),lane=floor(uv.x/(c*3.))+fk*57.,hc2=fract(lane*.6180339887+.31);if(hc2<.35*rgRain){
+  if(a.y<.5&&rgRain>.01){for(int k=0;k<2;k++){float fk=float(k),lane=floor(uv.x/(c*3.))+fk*57.,hc2=fract(lane*.6180339887+.31);if(hc2<.6*rgRain||rgAll>.5){
       float sp=.3+.6*fract(lane*.7548776662+.17),span=1.3+fract(lane*.5698402910+.53),yy=mod(uv.y+fk*.7,span),head=span-mod(rgTime*sp+hc2*37.,span);
       float lx=(floor(uv.x/(c*3.))*3.+1.)*c+floor(sin(yy*7.+lane)*1.3+sin(yy*13.1+lane*2.)*.6)*c;
       if(abs(floor(uv.x/c)-floor(lx/c))<.5){float dy=floor(yy/c)-floor(head/c);if(dy>=0.&&dy<12.){float v=dy<.5?1.:.85-dy/15.;if(v>o){o=v;tl=vec2(.5,-.25);}}}}}}
@@ -2754,7 +2781,7 @@ vec4 rainGlass(vec3 P,vec3 N,float s){float amt=max(rgWet,rgRain);if(amt<.01)ret
 // every window: a mirror at grazing angles and clearer head-on (Fresnel), reflecting the sky and the far land in the sky picture along the
 // reflected ray, with a glint of the sun; light through the pane is bent (refracted) toward the sky colour; rain drops tilt the surface
 // so reflections and the light through them wobble around each drop
-function rainGlassInject(sh,P,N,onCode,surf){if(surf)return rainSurfInject(sh,P,N,onCode);Object.assign(sh.uniforms,{rgRain:RAINU,rgWet:RTU.wet,rgTime:postMat.uniforms.time,hTex:RTU.hTex,rtOrigin:RTU.rtOrigin,rtSize:RTU.rtSize,
+function rainGlassInject(sh,P,N,onCode,surf){if(surf)return rainSurfInject(sh,P,N,onCode);Object.assign(sh.uniforms,{rgAll:RBALL,rgRain:RAINU,rgWet:RTU.wet,rgTime:postMat.uniforms.time,hTex:RTU.hTex,rtOrigin:RTU.rtOrigin,rtSize:RTU.rtSize,
     rgHor:skyMat.uniforms.hor,rgTop:skyMat.uniforms.top,rgFar:skyMat.uniforms.farCube,rgFarOn:skyMat.uniforms.farOn,rgSun:{value:SUN_DIR}});
   sh.fragmentShader='uniform vec3 rgHor,rgTop,rgSun;uniform samplerCube rgFar;uniform float rgFarOn;'+RAIN_GLSL+sh.fragmentShader.replace('#include <tonemapping_fragment>',`{float rgOn=1.;${onCode||''}if(rgOn>.5){vec3 Nn=normalize(${N});vec4 r_=rainGlass(${P},Nn,pxS(${P}));
     vec3 V=normalize(${P}-cameraPosition);if(dot(Nn,V)>0.)Nn=-Nn;vec3 Tg=normalize(vec3(-Nn.z,0.,Nn.x)+vec3(.0001));
@@ -2766,7 +2793,7 @@ function rainGlassInject(sh,P,N,onCode,surf){if(surf)return rainSurfInject(sh,P,
 #include <tonemapping_fragment>`)}
 // rain on everything out in the open that isn't glass (signs, posts, furniture outdoors): the same drops and running trails as the
 // windows, as darker wet streaks with a bright bead at the head, on upright faces only; sheltered faces stay dry
-function rainSurfInject(sh,P,N,onCode){Object.assign(sh.uniforms,{rgRain:RAINU,rgWet:RTU.wet,rgTime:postMat.uniforms.time,hTex:RTU.hTex,rtOrigin:RTU.rtOrigin,rtSize:RTU.rtSize});
+function rainSurfInject(sh,P,N,onCode){Object.assign(sh.uniforms,{rgAll:RBALL,rgRain:RAINU,rgWet:RTU.wet,rgTime:postMat.uniforms.time,hTex:RTU.hTex,rtOrigin:RTU.rtOrigin,rtSize:RTU.rtSize});
   sh.fragmentShader=RAIN_GLSL+sh.fragmentShader.replace('#include <tonemapping_fragment>',`{float rgOn=1.;${onCode||''}if(rgOn>.5){vec4 r_=rainGlass(${P},normalize(${N}),pxS(${P}));
     if(r_.x>.01)gl_FragColor.rgb=mix(gl_FragColor.rgb,gl_FragColor.rgb*.7,.55)+r_.x*vec3(.16,.18,.21);}}
 #include <tonemapping_fragment>`)}
@@ -4942,7 +4969,7 @@ function updatePlayer(p,dt){
   const PH=p.crawl?.45:p.crouch?1.05:1.75;p.body.g.scale.y=p.crouch&&!p.crawl?.62:1;
   const sp=(p.crawl?1.3:sprint&&!p.crouch?7.2:p.crouch?2.2:4.4)*(p.aim?.5:1)*(1-.45*lg)*(p.wade?.6:1)*(WX.type==='snow'&&WX.amt>.3&&!underground(p.pos)?.8:1);p.vel.x=mx*sp;p.vel.z=mz*sp;p.vel.y=Math.max(-18,p.vel.y-24*dt);
   if(p.creative&&inp.jump&&!p.jumpHeld){const t=performance.now();if(t-(p.lastJump||0)<300){p.fly=!p.fly;msg(p,p.fly?'Flying — jump to rise, crouch to sink, double-tap jump to land':'Landed')}p.lastJump=t}p.jumpHeld=!!inp.jump;
-  if(!p.creative)p.fly=false;
+  if(p.devFly&&inp.jump){p.devFly=false;p.fly=false}if(!p.creative&&!p.devFly)p.fly=false;
   if(p.fly){const fs=sprint?18:9;p.vel.x=mx*fs;p.vel.z=mz*fs;p.vel.y=(inp.jump?1:0)*8-(inp.crouch?1:0)*8;p.crouch=false}
   else if(p.swim){p.vel.x*=.55;p.vel.z*=.55;p.vel.y=inp.jump?3:Math.max(p.vel.y,-1.6)}
   else if(inp.jump&&p.grounded){p.vel.y=8.2;p.grounded=false;p.airSprint=sprint}
@@ -4959,7 +4986,7 @@ function updatePlayer(p,dt){
     const s=p.dig&&p.dig.t?1-p.dig.t*.15:1;p.outline.scale.setScalar(s*VS)}else p.outline.visible=false;
   if(inp.primary)primary(p,eye,dir,vh&&vh.t<5.5?vh:null,dt);else p.dig=null;
   if(inp.place&&p.tool!==1&&vh&&vh.t<5.5)placeBlock(p,vh);
-  p.adsK+=((p.aim?1:0)-p.adsK)*Math.min(1,dt*14);p.cam.fov=72-26*p.adsK;
+  p.adsK+=((p.aim?1:0)-p.adsK)*Math.min(1,dt*14);p.cam.fov=(72-26*p.adsK)/(DEVX.zoom||1);
   const at=assistTarget(eye,dir,45,(p.pad?5:3.5)*Math.PI/180,false);p.onTarget=!!at;
   if(inp.interact)interact(p);
   // flashlight
@@ -6566,8 +6593,8 @@ function setBodyFP(p,on){if(p.fpBody===on)return;p.fpBody=on;p.body.g.traverse(o
 function updateClothes(p){const c=p.cl,set=(m,k)=>{m.visible=!!k;if(k)m.material.color.setHex(CLOTHES[k].col)};
   set(c.head,p.wear.head);set(c.body,p.wear.body);c.legs.forEach(m=>set(m,p.wear.legs));if(c.back)set(c.back,p.wear.back);if(c.pack0)c.pack0.visible=!p.wear.back}
 
-// ---- streaks: rain, and the drops that drip off sills and signs, drawn as upright streaks exactly one block pixel wide (1/32 m, the
-// same as a pixel on the blocks beside them), each on the block-pixel grid and a whole number of pixels long
+// ---- streaks: rain, and the drops that drip off sills and signs, drawn as upright streaks exactly two block pixels wide (1/16 m),
+// each on that grid and a whole number of grid steps long
 // ribbons: segments in any direction, one block pixel wide, each segment its own brightness (aA), for the wind swirls
 const RIB_VS=`attribute float aSd,aA;attribute vec3 aO;uniform vec2 uRes;varying float vA;void main(){vec4 v=modelViewMatrix*vec4(position,1.),o=modelViewMatrix*vec4(aO,1.);vec4 c=projectionMatrix*v;
   vec2 d=o.xy-v.xy;d=length(d)>1e-5?normalize(d):vec2(1.,0.);v.xy+=vec2(-d.y,d.x)*aSd/64.;vA=aA;gl_Position=projectionMatrix*v;}`;
@@ -6580,7 +6607,7 @@ function makeRibbons(n,col){const pos=new Float32Array(n*12).fill(-999),oth=new 
   mesh.onBeforeRender=r=>{const t=r.getRenderTarget();if(t)U.uRes.value.set(t.width,t.height);else{r.getDrawingBufferSize(_v);U.uRes.value.copy(_v)}};
   return{mesh,U,g,set(i,a,b,al_){const o=i*12;for(let k=0;k<4;k++){const P=k<2?a:b,Q=k<2?b:a;pos[o+k*3]=P[0];pos[o+k*3+1]=P[1];pos[o+k*3+2]=P[2];oth[o+k*3]=Q[0];oth[o+k*3+1]=Q[1];oth[o+k*3+2]=Q[2];al[i*4+k]=al_}},
     show(k){g.setDrawRange(0,k*6);g.attributes.position.needsUpdate=true;g.attributes.aO.needsUpdate=true;g.attributes.aA.needsUpdate=true}}}
-const STRK_VS=`attribute float aSd;uniform vec2 uRes;void main(){vec4 v=modelViewMatrix*vec4(position,1.);v.x+=aSd/64.;gl_Position=projectionMatrix*v;}`;
+const STRK_VS=`attribute float aSd;uniform vec2 uRes;void main(){vec4 v=modelViewMatrix*vec4(position,1.);v.x+=aSd/32.;gl_Position=projectionMatrix*v;}`;
 function makeStreaks(n,col,op){const pos=new Float32Array(n*12).fill(-999),sd=new Float32Array(n*4),idx=new Uint32Array(n*6);
   for(let i=0;i<n;i++){sd.set([-1,1,1,-1],i*4);idx.set([i*4,i*4+1,i*4+2,i*4,i*4+2,i*4+3],i*6)}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('aSd',new THREE.BufferAttribute(sd,1));g.setIndex(new THREE.BufferAttribute(idx,1));g.setDrawRange(0,0);
@@ -6590,7 +6617,7 @@ function makeStreaks(n,col,op){const pos=new Float32Array(n*12).fill(-999),sd=ne
   mesh.onBeforeRender=r=>{const t=r.getRenderTarget();if(t)U.uRes.value.set(t.width,t.height);else{r.getDrawingBufferSize(_v);U.uRes.value.copy(_v)}};
   // set(i, x, bottom y, top y, z)
   // every streak sits on the block-pixel grid: centred in a 1/32 m column, its ends on whole pixels
-  return{mesh,U,pos,g,n,set(i,x,y0,y1,z){const o=i*12,G=32;x=(Math.floor(x*G)+.5)/G;z=(Math.floor(z*G)+.5)/G;const h=Math.max(1,Math.round((y1-y0)*G));y0=Math.floor(y0*G)/G;y1=y0+h/G;pos[o]=x;pos[o+1]=y0;pos[o+2]=z;pos[o+3]=x;pos[o+4]=y0;pos[o+5]=z;pos[o+6]=x;pos[o+7]=y1;pos[o+8]=z;pos[o+9]=x;pos[o+10]=y1;pos[o+11]=z},
+  return{mesh,U,pos,g,n,set(i,x,y0,y1,z){const o=i*12,G=16;x=(Math.floor(x*G)+.5)/G;z=(Math.floor(z*G)+.5)/G;const h=Math.max(1,Math.round((y1-y0)*G));y0=Math.floor(y0*G)/G;y1=y0+h/G;pos[o]=x;pos[o+1]=y0;pos[o+2]=z;pos[o+3]=x;pos[o+4]=y0;pos[o+5]=z;pos[o+6]=x;pos[o+7]=y1;pos[o+8]=z;pos[o+9]=x;pos[o+10]=y1;pos[o+11]=z},
     show(k){g.setDrawRange(0,k*6);g.attributes.position.needsUpdate=true}}}
 // ---------------- weather + ambient particles (one set per player, only drawn in that player's view)
 const PRECIP_N=1500,AMB_N=240;
@@ -6618,11 +6645,11 @@ const DRIP={em:[],emT:0,d:[],rp:[],run:[],obj:null};
 // each trail head is at a given moment. A sill picks a trail up exactly where and when it reaches the bottom of the glass
 const fr_=v=>v-Math.floor(v),md_=(a,b)=>((a%b)+b)%b;
 function sillLanes(e,t,rain){const PXg=1/16,LW=PXg*3,yb=e.sy;
-  for(let k=0;k<2;k++)for(let li=0;li<e.lanes.length;li++){const base=e.lanes[li],lane=base+k*57,hc2=fr_(lane*.6180339887+.31);if(hc2>=.35*rain)continue;
-    const sp=.3+.6*fr_(lane*.7548776662+.17),span=1.3+fr_(lane*.5698402910+.53),head=span-md_(t*sp+hc2*37,span),g=md_(yb-.25+k*.7-head,span),key=k*1000+li,pg=e.lg[key];e.lg[key]=g;
-    if(pg==null||g>=pg||pg-g<span*.5||DRIP.d.length>=160)continue; // the trail just reached the bottom of the sill's front (glass bottom - its 0.125 m top - 0.125 m front)
+  for(let k=0;k<2;k++)for(let li=0;li<e.lanes.length;li++){const base=e.lanes[li],lane=base+k*57,hc2=fr_(lane*.6180339887+.31);if(hc2>=.6*rain&&!RBALL.value)continue;
+    const sp=.3+.6*fr_(lane*.7548776662+.17),span=1.3+fr_(lane*.5698402910+.53),head=span-md_(t*sp+hc2*37,span),g=md_(yb-.4375+k*.7-head,span),key=k*1000+li,pg=e.lg[key];e.lg[key]=g;
+    if(pg==null||g>=pg||pg-g<span*.5||DRIP.d.length>=160)continue; // the trail just reached the apron's bottom edge (sill top, front, underside, apron front: 0.4375 m of path)
     const yy=md_(yb+k*.7,span),wob=Math.floor(Math.sin(yy*7+lane)*1.3+Math.sin(yy*13.1+lane*2)*.6),uvx=(base*3+1)*PXg+wob*PXg,w=e.ax?-uvx:uvx,u=w/VS-(e.ax?e.wx:e.wz);
-    if(u<1.05||u>2.95)continue;const q=e.P_(u,e.sd>0?1.27:-.27);DRIP.d.push({x:q[0],y:e.sy-.125,z:q[1],vy:-sp,fy:e.fyF})}}
+    if(u<1.05||u>2.95)continue;const q=e.P_(u,e.sd>0?1.14:-.14);DRIP.d.push({x:q[0],y:e.sy-.25,z:q[1],vy:-sp,fy:e.fyF})}}
 // sign plate bottoms in the sign's own frame: [x from, x to, height, depth]
 const DRIP_SIGN={stop:[[-3.5*PXS,3.5*PXS,1.44,2*PXS]],yield:[[-PXS/2,PXS/2,1.44,2*PXS]],speed:[[-.24,.24,1.72,.05]],noparking:[[-.22,.22,1.75,.05]],oneway:[[-.46,.46,1.99,.05]],
   // traffic lights: under the arm, and the bottoms of the two light housings
@@ -6668,6 +6695,8 @@ function dripTick(dt,c){const rain=RAINU.value;
   if(!DRIP.obj){DRIP.obj=makeStreaks(200,0xc8dcea,.75);scene.add(DRIP.obj.mesh)}
   let n=0;for(const d of DRIP.d){if(n>=200)break;DRIP.obj.set(n++,d.x,d.y,d.y+Math.max(1,Math.round(Math.min(.22,.04-d.vy*.03)*32))/32,d.z)}
   DRIP.obj.show(n);
+  // (developer) every drip source marked with a tall magenta streak
+  if(DEVX.dripMk){if(!DRIP.mk){DRIP.mk=makeStreaks(400,0xff00ff,.9);scene.add(DRIP.mk.mesh)}let k=0;for(const e of DRIP.em){if(k>=400)break;if(e.sill){const q=e.P_(2,e.sd>0?1.12:-.12);DRIP.mk.set(k++,q[0],e.sy,e.sy+.6,q[1])}else DRIP.mk.set(k++,(e.ax+e.bx)/2,e.y-.4,e.y,(e.az+e.bz)/2)}DRIP.mk.show(k)}else if(DRIP.mk)DRIP.mk.show(0);
 
   // the drops' landings ripple the wet ground's reflection itself (the post shader bends the reflected picture in a spreading ring)
   for(let i=0;i<12;i++){const r=DRIP.rp[DRIP.rp.length-1-i],U=DRIPU[i];if(r)U.set(r.x,r.z,r.t,1-r.t/.7);else U.w=0}}
@@ -7445,6 +7474,36 @@ $('#dpBlur').addEventListener('change',e=>{MBLUR=e.target.value==='1';try{localS
 $('#dpTint').addEventListener('change',e=>{FLU.shDbg.value=e.target.value==='1'?1:0});
 $('#dpReset').addEventListener('click',()=>{LVI=LVI0;LVS=LVS0;LVLOCK=true;LVMAX=3;CO_HALF=true;COARSE=true;lvApply();cullT=0;dpSync()});
 $('#dpClose').addEventListener('click',()=>devPanel(false));
+// tabs: settings / functions
+{const sh=fn=>{$('#dpTabSet').classList.toggle('hidden',fn);$('#dpTabFn').classList.toggle('hidden',!fn)};$('#dpTabSetB').addEventListener('click',()=>sh(false));$('#dpTabFnB').addEventListener('click',()=>sh(true))}
+// face nearest: stand (hovering) at a good spot and look straight at the nearest thing of a kind
+function devLook(p,ex,ey,ez,tx,ty,tz){{let fb=Math.floor((ey-1.6)/VS),k=0;while(k<40&&solid(vc(ex),fb,vc(ez))){fb++;k++}if(k)ey=fb*VS+1.62} // never with your feet in the ground: stand on it and aim from there
+  p.fly=true;p.devFly=true;p.pos.set(ex,ey-1.6,ez);p.vel.set(0,0,0);p.eye=ey;const dx=tx-ex,dy=ty-ey,dz=tz-ez;p.yaw=Math.atan2(-dx,-dz);p.pitch=Math.atan2(dy,Math.hypot(dx,dz));p.pview=0}
+function devFace(k){const p=players[0];if(!p)return 'No player';const c=p.pos,near=(L,f)=>{let b=null,bd=1e9;for(const o of L){const q=f(o);if(!q)continue;const d=(q[0]-c.x)**2+(q[2]-c.z)**2;if(d<bd){bd=d;b=[o,q]}}return b};
+  if(k==='sill'||k==='window'){const r=near(winSpecs,w=>{if(w[5])return null;const[x,y,z,ax]=w,gx=ax?x+1:x,gz=ax?z:z+1;if(get(gx,y+2,gz)!==B.GLASS)return null;
+      for(const sd of[1,-1]){const ox=ax?0:sd,oz=ax?sd:0;if(isOpq(get(gx+ox,y+1,gz+oz))||topY(gx+ox,gz+oz)>y+1)continue;return[(gx+.5)*VS,(y+1)*VS,(gz+.5)*VS,ax,sd,x,y,z]}return null});
+    if(!r)return 'No window open to the sky nearby';const[,q]=r,[,,,ax,sd,x,y,z]=q,mid=(u,dd)=>ax?[(x+u)*VS,(z+dd)*VS]:[(x+dd)*VS,(z+u)*VS];
+    if(k==='sill'){const t=mid(2,sd>0?1.12:-.12),e=mid(2,sd>0?1+3.2:-3.2);devLook(p,e[0],(y+1)*VS+.9,e[1],t[0],(y+1)*VS,t[1])}
+    else{const t=mid(2,sd>0?1:0),e=mid(2,sd>0?1+4.5:-4.5);devLook(p,e[0],(y+2.5)*VS,e[1],t[0],(y+2.5)*VS,t[1])}return k==='sill'?'Facing a window sill':'Facing a window'}
+  if(k==='stop'||k==='yield'||k==='tlight'){const r=near(furnSpecs,f=>(k==='stop'&&f[0]==='stop')||(k==='tlight'&&f[0]==='tlight')||(k==='yield'&&f[0]==='rsign'&&f[5]&&f[5].k==='yield')?[f[1],f[2],f[3]]:null);if(!r)return 'None nearby';
+    const f=r[0],a=f[4]||0,h=k==='tlight'?4.2:1.95,dist=k==='tlight'?6:2.8,fx=Math.sin(a),fz=Math.cos(a),ox=k==='tlight'?-2.8:0,cx=f[1]+ox*Math.cos(a),cz=f[3]-ox*Math.sin(a);
+    devLook(p,cx+fx*dist,f[2]+h,cz+fz*dist,cx,f[2]+h,cz);return 'Facing a '+({stop:'stop sign',yield:'yield sign',tlight:'traffic light'})[k]}
+  if(k==='car'){const r=near(vehicles,v=>v.driver?null:[v.pos.x,v.pos.y,v.pos.z]);if(!r)return 'No car nearby';const v=r[0],a=v.yaw+Math.PI/2;devLook(p,v.pos.x+Math.sin(a)*5,v.pos.y+1.8,v.pos.z+Math.cos(a)*5,v.pos.x,v.pos.y+.7,v.pos.z);return 'Facing a '+v.name.toLowerCase()}
+  if(k==='zombie'){const r=near(zombies,z=>z.dead?null:[z.pos.x,z.pos.y,z.pos.z]);if(!r)return 'No zombie nearby';const z=r[0];devLook(p,z.pos.x+3,z.pos.y+1.7,z.pos.z+3,z.pos.x,z.pos.y+1,z.pos.z);return 'Facing a zombie'}
+  if(k==='tree'||k==='brick'){const bx=Math.floor(c.x/VS),bz=Math.floor(c.z/VS);for(let r=1;r<60;r++)for(let dx=-r;dx<=r;dx++)for(const dz of[-r,r])for(const[ddx,ddz]of[[dx,dz],[dz,dx]]){const x=bx+ddx,z=bz+ddz,top=topY(x,z);if(top<1)continue;
+      if(k==='tree'){const b=get(x,top,z);if(woodBase(b)!==B.LEAF)continue;devLook(p,(x+6)*VS,(top-2)*VS,(z+6)*VS,(x+.5)*VS,(top-3)*VS,(z+.5)*VS);return 'Facing a tree'}
+      for(let y=top;y>top-8&&y>0;y--)if(get(x,y,z)===B.BRICK)for(const[ox,oz]of[[1,0],[-1,0],[0,1],[0,-1]])if(get(x+ox,y,z+oz)===0&&get(x+ox*4,y,z+oz*4)===0){devLook(p,(x+.5+ox*4)*VS,(y+.5)*VS,(z+.5+oz*4)*VS,(x+.5+ox*.5)*VS,(y+.5)*VS,(z+.5+oz*.5)*VS);return 'Facing a brick wall'}}
+    return 'None nearby'}
+  return '?'}
+$('#dpWxNow').addEventListener('click',()=>{WX.amt=WX.target;if(WX.type==='rain'||WX.type==='storm'||WX.type==='acid'){WX.wet=Math.max(WX.wet,WX.target)}if(players[0])msg(players[0],'[dev] Weather set now')});
+{let hid=null;$('#dpHud').addEventListener('click',()=>{if(hid){for(const e of hid)e.style.visibility='';hid=null;$('#dpHud').textContent='Hide HUD'}else{hid=[...document.body.children].filter(e=>e.id!=='devPanel'&&e.tagName!=='CANVAS'&&e.tagName!=='SCRIPT'&&e.style.visibility!=='hidden');for(const e of hid)e.style.visibility='hidden';$('#dpHud').textContent='Show HUD'}})}
+$('#dpFxs').addEventListener('change',e=>{DEVX.fxs=+e.target.value});
+$('#dpZoom').addEventListener('change',e=>{DEVX.zoom=+e.target.value});
+$('#dpRbDbg').addEventListener('change',e=>{RBDBG.value=+e.target.value});
+$('#dpRbAll').addEventListener('change',e=>{RBALL.value=+e.target.value});
+$('#dpDripMk').addEventListener('change',e=>{DEVX.dripMk=e.target.value==='1'});
+$('#dpGs').addEventListener('change',e=>{DEVX.gs=+e.target.value});
+$('#dpFace').addEventListener('click',()=>{const m=devFace($('#dpFaceK').value);devPanel(false);if(players[0])msg(players[0],'[dev] '+m)});
 for(const id of['dpLvI','dpLvS'])$('#'+id).addEventListener('keydown',e=>{if(e.code!=='Backslash'&&e.code!=='Escape')e.stopPropagation()});
 // developer: \ freezes the whole world as it is (simulation, time, weather, lights, the flashlight, shadows, ray tracing, chunk loading,
 // what's culled, which pixel level everything is at) while you keep moving and looking around it; \ again lets it all carry on
@@ -7465,7 +7524,7 @@ function devExtra(p){const n=npcs.filter(n=>!n.dead),st={};for(const q of n){con
   if(DEVX.perf){const I=renderer.info;s+=`\nquality step ${qLvl+1}/${QL.length}  render scale ${Math.round(dynScale*100)}%  ${frameMs.toFixed(1)} ms`;s+=`\nauto-tune: pre-pass ${PREPASS?'on':'off'}, hiding behind walls ${OCC.on?'on':'off'}${TUNE.res.length===4?'  (frame ms '+TUNE.res.map(v=>v.toFixed(1)).join(' / ')+')':''}`;s+=`\nhidden behind things: ${OCC.stat.chunks} chunks, ${OCC.stat.things} creatures/cars  (${OCC.stat.tested} boxes tested)${OCC.gl?'':'  occlusion off: needs WebGL2'}`;s+=`\nlights on screen ${FLU.dlN.value}/12  light maps ${dlCache.size}  sun shadow redraws skipped ${shadowSkips}`;s+=`\ndraw calls ${I.render.calls}  tris ${(I.render.triangles/1000).toFixed(0)}k  geoms ${I.memory.geometries}  tex ${I.memory.textures}  load queue ${winQ.length}  regions ${regions.size} (${(cacheBytes()/1048576).toFixed(1)} MB cached)`}
   return s+(WFZ?'\nWORLD FROZEN (\\ menu to carry on)':'')+'\nF2 heal · F3 +3h · F4 weather · F6 zombie · F7 clear · F8 teleport · F9 god · F10 freeze time · \\ developer menu'}
 function frame(){
-  const now=performance.now(),dt=Math.min(.05,(now-clockT)/1000);clockT=now;
+  const now=performance.now(),dt=Math.min(.05,(now-clockT)/1000)*(DEVX.gs||1);clockT=now;
   if(WFZ&&!running)worldFreeze(false);
   if(genBusy){requestAnimationFrame(frame);return}
   if(WFZ){if(!paused&&!menuP)for(const p of players)updatePlayer(p,dt);pressed.clear();T.pressed.clear();try{devTick()}catch(e){}renderer.shadowMap.needsUpdate=false;render();GT.cpu+=((performance.now()-now)-GT.cpu)*.15;GT.work=Math.max(GT.cpu,GT.ms+2);requestAnimationFrame(frame);return}
